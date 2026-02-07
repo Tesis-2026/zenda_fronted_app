@@ -24,7 +24,7 @@ class _SplashDeciderState extends State<SplashDecider> {
     
     if (mounted) {
       if (isCompleted) {
-        context.go('/login');
+        context.go('/auth/login');
       } else {
         context.go('/onboarding');
       }

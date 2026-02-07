@@ -4,7 +4,12 @@ import 'onboarding_page.dart';
 import 'onboarding_prefs.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  final bool redirectToRegister;
+  
+  const OnboardingScreen({
+    Key? key, 
+    this.redirectToRegister = false,
+  }) : super(key: key);
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -62,7 +67,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     await OnboardingPrefs.setOnboardingCompleted();
     if (mounted) {
-      context.go('/login');
+      if (widget.redirectToRegister) {
+        context.go('/auth/register');
+      } else {
+        context.go('/auth/login');
+      }
     }
   }
 
@@ -196,7 +205,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
                         child: Text(
-                          _currentPage == _pages.length - 1 ? 'Empezar' : 'Siguiente',
+                          _currentPage == _pages.length - 1 
+                              ? (widget.redirectToRegister ? 'Registrarme' : 'Empezar') 
+                              : 'Siguiente',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -209,8 +220,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     const SizedBox(height: 16),
 
                     // "Already have account" link
+                    // Solo mostramos esto si NO estamos en el flujo de "redirectToRegister"
+                    // porque si venimos de Crear Cuenta, ya sabemos que no tenemos cuenta (o queremos crear una).
+                    // Aunque por consistencia, si redirige a Register, el botón "Ya tengo cuenta" debería ir a Login.
                     TextButton(
-                      onPressed: _completeOnboarding,
+                      onPressed: () {
+                         context.go('/auth/login');
+                      },
                       child: Text(
                         'Ya tengo cuenta',
                         style: TextStyle(
