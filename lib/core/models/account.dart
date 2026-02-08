@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 enum AccountType { cash, debit, credit }
@@ -40,12 +39,47 @@ class Account {
     this.iconName,
   });
 
+  Account copyWith({
+    String? id,
+    String? name,
+    AccountType? type,
+    String? currency,
+    double? balance,
+    double? creditAvailable,
+    double? creditLimit,
+    int? colorValue,
+    String? iconName,
+  }) {
+    return Account(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      currency: currency ?? this.currency,
+      balance: balance ?? this.balance,
+      creditAvailable: creditAvailable ?? this.creditAvailable,
+      creditLimit: creditLimit ?? this.creditLimit,
+      colorValue: colorValue ?? this.colorValue,
+      iconName: iconName ?? this.iconName,
+    );
+  }
+
+  Account applyBalanceDelta(double delta) {
+    return copyWith(balance: balance + delta);
+  }
+
+  Account applyCreditDebtDelta(double deltaDebt) {
+    if (type != AccountType.credit) return this;
+    final nextDebt = (creditDebt + deltaDebt).clamp(0.0, creditLimit);
+    final nextAvailable = (creditLimit - nextDebt).clamp(0.0, creditLimit);
+    return copyWith(creditAvailable: nextAvailable);
+  }
+
   factory Account.fromJson(Map<String, dynamic> json) {
     return Account(
       id: json['id'],
       name: json['name'],
       type: AccountType.values.firstWhere(
-            (e) => e.toString() == json['type'],
+        (e) => e.toString() == json['type'],
         orElse: () => AccountType.cash,
       ),
       currency: json['currency'] ?? 'PEN',
