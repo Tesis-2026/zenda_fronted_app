@@ -146,6 +146,9 @@ class _InicioSection extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
 
+    final onSurface = isDark ? Colors.white : Colors.black87;
+    final onSurfaceMuted = isDark ? Colors.grey[400] : Colors.grey[600];
+
     final accountsAsync = ref.watch(accountsProvider);
 
     // Expense values
@@ -209,15 +212,15 @@ class _InicioSection extends ConsumerWidget {
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : Colors.black87,
+                            color: onSurface,
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Vamos a mejorar tus finanzas hoy.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: onSurfaceMuted),
                     ),
                   ],
                 ),
@@ -231,24 +234,16 @@ class _InicioSection extends ConsumerWidget {
 
             SizedBox(height: isNarrow ? 16 : 24),
 
-            Row(
-              children: [
-                const Text(
-                  'Tu Racha',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const Spacer(),
-                StreakCard(streakDays: streak),
-              ],
-            ),
+            Center(child: StreakCard(streakDays: streak)),
 
             SizedBox(height: isNarrow ? 16 : 24),
 
             Text(
               'Mis Cuentas',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: onSurface,
+              ),
             ),
             SizedBox(height: isNarrow ? 12 : 16),
             SizedBox(
@@ -291,16 +286,17 @@ class _InicioSection extends ConsumerWidget {
 
             Text(
               'Tu Presupuesto 50/30/20',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: onSurface,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               'Basado en tus gastos de los últimos 30 días',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: isDark ? Colors.grey[400] : Colors.grey,
+              ),
             ),
             SizedBox(height: isNarrow ? 16 : 24),
 
@@ -340,6 +336,8 @@ class _MovsSection extends ConsumerWidget {
     final isNarrow = MediaQuery.of(context).size.width < 600;
     final txAsync = ref.watch(transactionsProvider);
 
+    final onSurface = isDark ? Colors.white : Colors.black87;
+
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(transactionsProvider);
@@ -355,13 +353,20 @@ class _MovsSection extends ConsumerWidget {
                 isNarrow ? 16 : 20,
                 120,
               ),
-              children: const [
+              children: [
                 Text(
                   'Movimientos',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: onSurface,
+                  ),
                 ),
-                SizedBox(height: 12),
-                Text('Aún no tienes movimientos.'),
+                const SizedBox(height: 12),
+                Text(
+                  'Aún no tienes movimientos.',
+                  style: TextStyle(color: onSurface.withOpacity(0.75)),
+                ),
               ],
             );
           }
@@ -378,9 +383,13 @@ class _MovsSection extends ConsumerWidget {
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               if (index == 0) {
-                return const Text(
+                return Text(
                   'Movimientos',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: onSurface,
+                  ),
                 );
               }
               final tx = txs[index - 1];
@@ -463,12 +472,19 @@ class _MovsSection extends ConsumerWidget {
             120,
           ),
           children: [
-            const Text(
+            Text(
               'Movimientos',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: onSurface,
+              ),
             ),
             const SizedBox(height: 12),
-            Text('Error al cargar movimientos: $err'),
+            Text(
+              'Error al cargar movimientos: $err',
+              style: TextStyle(color: onSurface.withOpacity(0.75)),
+            ),
           ],
         ),
       ),
@@ -481,9 +497,12 @@ class _PresupuestoSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
     final breakdown = ref.watch(budgetBreakdownProvider);
     final advice = ref.watch(aiAdviceProvider);
+
+    final onSurface = isDark ? Colors.white : Colors.black87;
 
     final legendColumn = Column(
       children: [
@@ -518,23 +537,28 @@ class _PresupuestoSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Presupuesto',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: onSurface,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tu Presupuesto 50/30/20',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: onSurface,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'Basado en tus gastos de los últimos 30 días',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: isDark ? Colors.grey[400] : Colors.grey,
+            ),
           ),
           const SizedBox(height: 16),
           if (isNarrow) ...[
@@ -569,6 +593,8 @@ class _PerfilSection extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
 
+    final onSurface = isDark ? Colors.white : Colors.black87;
+
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
@@ -578,9 +604,13 @@ class _PerfilSection extends ConsumerWidget {
         120,
       ),
       children: [
-        const Text(
+        Text(
           'Perfil',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: onSurface,
+          ),
         ),
         const SizedBox(height: 16),
         Container(
