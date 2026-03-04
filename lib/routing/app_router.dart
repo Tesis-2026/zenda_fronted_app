@@ -1,22 +1,44 @@
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
+import '../features/onboarding/splash_decider.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/auth/login_screen.dart';
+import '../features/auth/register_screen.dart';
+import '../features/auth/auth_gate.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/transactions/add_transaction_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
-    initialLocation: '/onboarding',
+    initialLocation: '/',
     routes: [
       GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        path: '/',
+        builder: (context, state) => const SplashDecider(),
       ),
       GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
+        path: '/onboarding',
+        builder: (context, state) {
+          final redirectToRegister = state.uri.queryParameters['flow'] == 'register';
+          return OnboardingScreen(redirectToRegister: redirectToRegister);
+        },
       ),
+      
+      // Auth routes
+      GoRoute(
+        path: '/auth/login',
+        builder: (context, state) => const AuthGate(child: LoginScreen()),
+      ),
+      GoRoute(
+        path: '/auth/register',
+        builder: (context, state) => const AuthGate(child: RegisterScreen()),
+      ),
+      
+      // Legacy login route (redirect to /auth/login)
+      GoRoute(
+        path: '/login',
+        redirect: (context, state) => '/auth/login',
+      ),
+      
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),

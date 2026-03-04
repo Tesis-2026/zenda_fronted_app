@@ -1,45 +1,247 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'onboarding_page.dart';
+import 'onboarding_prefs.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+class OnboardingScreen extends StatefulWidget {
+  final bool redirectToRegister;
+  
+  const OnboardingScreen({
+    Key? key, 
+    this.redirectToRegister = false,
+  }) : super(key: key);
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<Map<String, dynamic>> _pages = [
+    {
+      'icon': Icons.receipt_long_rounded,
+      'gradientColors': [
+        const Color(0xFF34D399),
+        const Color(0xFF10B981),
+      ],
+      'title': 'Registra tus gastos en segundos',
+      'subtitle': 'Anota con un toque o escanea una boleta (demo).',
+      'microcopy': 'Menos fricción, más control.',
+    },
+    {
+      'icon': Icons.pie_chart_rounded,
+      'gradientColors': [
+        const Color(0xFF60A5FA),
+        const Color(0xFF3B82F6),
+      ],
+      'title': 'Entiende tu dinero con 50/30/20',
+      'subtitle': 'Zenda te muestra si vas equilibrado: necesidades, deseos y ahorro.',
+      'microcopy': 'Aprende sin complicarte.',
+    },
+    {
+      'icon': Icons.local_fire_department_rounded,
+      'gradientColors': [
+        const Color(0xFFFCD34D),
+        const Color(0xFFF59E0B),
+      ],
+      'title': 'Mantén tu racha y mejora cada día 🔥',
+      'subtitle': 'Gana constancia registrando a diario y viendo tu progreso.',
+      'microcopy': 'Lo importante es volver mañana.',
+    },
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onPageChanged(int page) {
+    setState(() {
+      _currentPage = page;
+    });
+  }
+
+  Future<void> _completeOnboarding() async {
+    await OnboardingPrefs.setOnboardingCompleted();
+    if (mounted) {
+      if (widget.redirectToRegister) {
+        context.go('/auth/register');
+      } else {
+        context.go('/auth/login');
+      }
+    }
+  }
+
+  void _skipOnboarding() {
+    _completeOnboarding();
+  }
+
+  void _nextPage() {
+    if (_currentPage < _pages.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _completeOnboarding();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              const Text('Bienvenido a Zenda', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              const Text('Registra tus gastos fácilmente.'),
-              const SizedBox(height: 8),
-              const Text('Entiende tus hábitos con la regla 50/30/20.'),
-              const SizedBox(height: 8),
-              const Text('Mantén una racha aprendiendo sobre tu dinero.'),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () => context.go('/login'),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 24.0),
-                  child: Text('Empezar'),
+        child: Stack(
+          children: [
+            // PageView
+            PageView.builder(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              itemCount: _pages.length,
+              itemBuilder: (context, index) {
+                final page = _pages[index];
+                return OnboardingPage(
+                  icon: page['icon'],
+                  gradientColors: page['gradientColors'],
+                  title: page['title'],
+                  subtitle: page['subtitle'],
+                  microcopy: page['microcopy'],
+                );
+              },
+            ),
+
+            // Skip button (top right)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: TextButton(
+                onPressed: _skipOnboarding,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  backgroundColor: isDark 
+                      ? const Color(0xFF1E293B).withOpacity(0.6)
+                      : Colors.white.withOpacity(0.9),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Text(
+                  'Saltar',
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFF34D399) : const Color(0xFF1F2937),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => context.go('/login'),
-                child: const Text('Ya tengo una cuenta'),
+            ),
+
+            // Bottom controls
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: isDark
+                        ? [
+                            const Color(0xFF0F172A).withOpacity(0),
+                            const Color(0xFF0F172A),
+                          ]
+                        : [
+                            const Color(0xFFF9FAFB).withOpacity(0),
+                            const Color(0xFFF9FAFB),
+                          ],
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Page indicators
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _pages.length,
+                        (index) => AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: _currentPage == index ? 32 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _currentPage == index
+                                ? const Color(0xFF34D399)
+                                : (isDark 
+                                    ? const Color(0xFF6B7280) 
+                                    : const Color(0xFFD1D5DB)),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Primary button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _nextPage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF34D399),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shadowColor: const Color(0xFF34D399).withOpacity(0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          _currentPage == _pages.length - 1 
+                              ? (widget.redirectToRegister ? 'Registrarme' : 'Empezar') 
+                              : 'Siguiente',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // "Already have account" link
+                    // Solo mostramos esto si NO estamos en el flujo de "redirectToRegister"
+                    // porque si venimos de Crear Cuenta, ya sabemos que no tenemos cuenta (o queremos crear una).
+                    // Aunque por consistencia, si redirige a Register, el botón "Ya tengo cuenta" debería ir a Login.
+                    TextButton(
+                      onPressed: () {
+                         context.go('/auth/login');
+                      },
+                      child: Text(
+                        'Ya tengo cuenta',
+                        style: TextStyle(
+                          color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF60A5FA),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
