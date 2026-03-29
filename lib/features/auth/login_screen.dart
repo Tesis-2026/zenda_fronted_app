@@ -43,21 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showForgotPasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Recuperar contraseña'),
-        content: const Text(
-          'Esta función no está disponible en el MVP.\n\nEn la versión completa podrás recuperar tu contraseña por email.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Entendido'),
-          ),
-        ],
-      ),
-    );
+    context.go('/auth/forgot-password');
   }
 
   @override
@@ -260,8 +246,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Ingresa tu contraseña';
                     }
-                    if (value.length < 6) {
-                      return 'Mínimo 6 caracteres';
+                    if (value.length < 8) {
+                      return 'Mínimo 8 caracteres';
                     }
                     return null;
                   },

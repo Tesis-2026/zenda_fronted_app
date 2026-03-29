@@ -197,7 +197,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
                     labelText: 'Contraseña',
-                    hintText: 'Mínimo 6 caracteres',
+                    hintText: 'Mínimo 8 caracteres',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -221,8 +221,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Ingresa una contraseña';
                     }
-                    if (value.length < 6) {
-                      return 'Mínimo 6 caracteres';
+                    if (value.length < 8) {
+                      return 'Mínimo 8 caracteres';
                     }
                     return null;
                   },
