@@ -3,6 +3,8 @@ import '../features/onboarding/splash_decider.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
+import '../features/auth/forgot_password_screen.dart';
+import '../features/auth/reset_password_screen.dart';
 import '../features/auth/auth_gate.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/transactions/add_transaction_screen.dart';
@@ -22,7 +24,7 @@ class AppRouter {
           return OnboardingScreen(redirectToRegister: redirectToRegister);
         },
       ),
-      
+
       // Auth routes
       GoRoute(
         path: '/auth/login',
@@ -32,13 +34,21 @@ class AppRouter {
         path: '/auth/register',
         builder: (context, state) => const AuthGate(child: RegisterScreen()),
       ),
-      
+      GoRoute(
+        path: '/auth/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/auth/reset-password',
+        builder: (context, state) => const ResetPasswordScreen(),
+      ),
+
       // Legacy login route (redirect to /auth/login)
       GoRoute(
         path: '/login',
         redirect: (context, state) => '/auth/login',
       ),
-      
+
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),
