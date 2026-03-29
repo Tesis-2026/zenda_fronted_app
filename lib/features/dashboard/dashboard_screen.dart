@@ -8,6 +8,7 @@ import 'widgets/streak_card.dart';
 import 'widgets/account_card.dart';
 import 'widgets/budget_pie_chart.dart';
 import 'widgets/zenda_ai_card.dart';
+import '../../l10n/l10n_extension.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -45,6 +46,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: isDark
@@ -84,7 +86,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Expanded(
                 child: _BottomOption(
                   icon: Icons.home_rounded,
-                  label: 'Inicio',
+                  label: l10n.dashboardNavHome,
                   isActive: _index == 0,
                   onTap: () => _goTo(0),
                 ),
@@ -92,7 +94,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Expanded(
                 child: _BottomOption(
                   icon: Icons.receipt_long_rounded,
-                  label: 'Movs',
+                  label: l10n.dashboardNavTransactions,
                   isActive: _index == 1,
                   onTap: () => _goTo(1),
                 ),
@@ -100,7 +102,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Expanded(
                 child: _BottomOption(
                   icon: Icons.pie_chart_rounded,
-                  label: 'Presupuesto',
+                  label: l10n.dashboardNavBudget,
                   isActive: _index == 2,
                   onTap: () => _goTo(2),
                 ),
@@ -108,7 +110,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Expanded(
                 child: _BottomOption(
                   icon: Icons.person_rounded,
-                  label: 'Perfil',
+                  label: l10n.dashboardNavProfile,
                   isActive: _index == 3,
                   onTap: () => _goTo(3),
                 ),
@@ -127,9 +129,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               foregroundColor: Colors.white,
               elevation: 4,
               icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Registrar',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              label: Text(
+                l10n.dashboardRecord,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
     );
@@ -145,6 +147,7 @@ class _InicioSection extends ConsumerWidget {
     final user = authState.user;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
+    final l10n = context.l10n;
 
     final onSurface = isDark ? Colors.white : Colors.black87;
     final onSurfaceMuted = isDark ? Colors.grey[400] : Colors.grey[600];
@@ -168,19 +171,19 @@ class _InicioSection extends ConsumerWidget {
       children: [
         _LegendItem(
           color: const Color(0xFF34D399),
-          label: 'Necesidades',
+          label: l10n.dashboardNeeds,
           value: breakdown.totalNecesidades,
         ),
         const SizedBox(height: 12),
         _LegendItem(
           color: const Color(0xFFC084FC),
-          label: 'Deseos',
+          label: l10n.dashboardWants,
           value: breakdown.totalDeseos,
         ),
         const SizedBox(height: 12),
         _LegendItem(
           color: const Color(0xFFFCD34D),
-          label: 'Ahorro',
+          label: l10n.dashboardSavings,
           value: breakdown.totalAhorro,
         ),
       ],
@@ -208,7 +211,7 @@ class _InicioSection extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hola, ${user?.name.split(' ').first ?? 'Usuario'} 👋',
+                      l10n.dashboardGreeting(user?.name.split(' ').first ?? l10n.dashboardUserFallback),
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             fontWeight: FontWeight.bold,
@@ -217,7 +220,7 @@ class _InicioSection extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Vamos a mejorar tus finanzas hoy.',
+                      l10n.dashboardMotivation,
                       style: Theme.of(
                         context,
                       ).textTheme.bodyMedium?.copyWith(color: onSurfaceMuted),
@@ -239,7 +242,7 @@ class _InicioSection extends ConsumerWidget {
             SizedBox(height: isNarrow ? 16 : 24),
 
             Text(
-              'Mis Cuentas',
+              l10n.dashboardMyAccounts,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: onSurface,
@@ -278,14 +281,14 @@ class _InicioSection extends ConsumerWidget {
                   },
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Text('Error al cargar cuentas: $err'),
+                error: (err, stack) => Text(l10n.dashboardErrorAccounts(err.toString())),
               ),
             ),
 
             SizedBox(height: isNarrow ? 24 : 32),
 
             Text(
-              'Tu Presupuesto 50/30/20',
+              l10n.dashboardBudgetTitle,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: onSurface,
@@ -293,7 +296,7 @@ class _InicioSection extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Basado en tus gastos de los últimos 30 días',
+              l10n.dashboardBudgetSubtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: isDark ? Colors.grey[400] : Colors.grey,
               ),
@@ -335,6 +338,7 @@ class _MovsSection extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
     final txAsync = ref.watch(transactionsProvider);
+    final l10n = context.l10n;
 
     final onSurface = isDark ? Colors.white : Colors.black87;
 
@@ -355,7 +359,7 @@ class _MovsSection extends ConsumerWidget {
               ),
               children: [
                 Text(
-                  'Movimientos',
+                  l10n.dashboardTransactions,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -364,7 +368,7 @@ class _MovsSection extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Aún no tienes movimientos.',
+                  l10n.dashboardNoTransactions,
                   style: TextStyle(color: onSurface.withOpacity(0.75)),
                 ),
               ],
@@ -384,7 +388,7 @@ class _MovsSection extends ConsumerWidget {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Text(
-                  'Movimientos',
+                  l10n.dashboardTransactions,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -473,7 +477,7 @@ class _MovsSection extends ConsumerWidget {
           ),
           children: [
             Text(
-              'Movimientos',
+              l10n.dashboardTransactions,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -482,7 +486,7 @@ class _MovsSection extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Error al cargar movimientos: $err',
+              l10n.dashboardErrorTransactions(err.toString()),
               style: TextStyle(color: onSurface.withOpacity(0.75)),
             ),
           ],
@@ -501,6 +505,7 @@ class _PresupuestoSection extends ConsumerWidget {
     final isNarrow = MediaQuery.of(context).size.width < 600;
     final breakdown = ref.watch(budgetBreakdownProvider);
     final advice = ref.watch(aiAdviceProvider);
+    final l10n = context.l10n;
 
     final onSurface = isDark ? Colors.white : Colors.black87;
 
@@ -508,19 +513,19 @@ class _PresupuestoSection extends ConsumerWidget {
       children: [
         _LegendItem(
           color: const Color(0xFF34D399),
-          label: 'Necesidades',
+          label: l10n.dashboardNeeds,
           value: breakdown.totalNecesidades,
         ),
         const SizedBox(height: 12),
         _LegendItem(
           color: const Color(0xFFC084FC),
-          label: 'Deseos',
+          label: l10n.dashboardWants,
           value: breakdown.totalDeseos,
         ),
         const SizedBox(height: 12),
         _LegendItem(
           color: const Color(0xFFFCD34D),
-          label: 'Ahorro',
+          label: l10n.dashboardSavings,
           value: breakdown.totalAhorro,
         ),
       ],
@@ -538,7 +543,7 @@ class _PresupuestoSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Presupuesto',
+            l10n.dashboardNavBudget,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -547,7 +552,7 @@ class _PresupuestoSection extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Tu Presupuesto 50/30/20',
+            l10n.dashboardBudgetTitle,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: onSurface,
@@ -555,7 +560,7 @@ class _PresupuestoSection extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Basado en tus gastos de los últimos 30 días',
+            l10n.dashboardBudgetSubtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: isDark ? Colors.grey[400] : Colors.grey,
             ),
@@ -592,6 +597,7 @@ class _PerfilSection extends ConsumerWidget {
     final user = authState.user;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
+    final l10n = context.l10n;
 
     final onSurface = isDark ? Colors.white : Colors.black87;
 
@@ -605,7 +611,7 @@ class _PerfilSection extends ConsumerWidget {
       ),
       children: [
         Text(
-          'Perfil',
+          l10n.dashboardNavProfile,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -648,7 +654,7 @@ class _PerfilSection extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.name ?? 'Usuario',
+                      user?.name ?? l10n.dashboardUserFallback,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: isDark ? Colors.white : Colors.black87,
@@ -672,7 +678,7 @@ class _PerfilSection extends ConsumerWidget {
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 4),
           leading: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444)),
-          title: const Text('Cerrar sesión'),
+          title: Text(l10n.commonSignOut),
           onTap: () {
             ref.read(authNotifierProvider.notifier).logout();
             context.go('/auth/login');

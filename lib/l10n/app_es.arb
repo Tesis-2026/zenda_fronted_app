@@ -1,0 +1,176 @@
+{
+  "@@locale": "es",
+
+  "appTitle": "Zenda",
+
+  "commonCancel": "Cancelar",
+  "commonSave": "Guardar",
+  "commonRetry": "Reintentar",
+  "commonOr": "o",
+  "commonNotSet": "No definido",
+  "commonUnknownError": "Error desconocido",
+  "commonSignOut": "Cerrar sesión",
+
+  "validationEnterEmail": "Ingresa tu correo",
+  "validationInvalidEmail": "Correo inválido",
+  "validationEnterPassword": "Ingresa tu contraseña",
+  "validationMinPassword": "Al menos 8 caracteres",
+  "validationEnterName": "Ingresa tu nombre",
+  "validationEnterCode": "Ingresa el código",
+  "validationEnterNewPassword": "Ingresa tu nueva contraseña",
+
+  "authLoginTitle": "Bienvenido a Zenda",
+  "authLoginSubtitle": "Inicia sesión para continuar",
+  "authEmailLabel": "Correo",
+  "authEmailHint": "tu@correo.com",
+  "authPasswordLabel": "Contraseña",
+  "authPasswordHint": "Al menos 8 caracteres",
+  "authForgotPassword": "¿Olvidaste tu contraseña?",
+  "authSignIn": "Iniciar sesión",
+  "authNoAccount": "¿No tienes cuenta?",
+  "authSignUp": "Crear cuenta",
+  "authPrivacyNote": "Zenda no se conecta a bancos. Tus datos son privados.",
+  "authAccountNotFound": "Cuenta no encontrada",
+  "authAccountNotFoundMessage": "No existe cuenta con este correo. ¿Te gustaría crear una nueva?",
+  "authContinueGoogle": "Continuar con Google (Demo)",
+  "authRegisterTitle": "Crear cuenta",
+  "authRegisterSubtitle": "Únete a Zenda y toma el control de tus finanzas",
+  "authFullNameLabel": "Nombre completo",
+  "authFullNameHint": "Juan Pérez",
+  "authHaveAccount": "¿Ya tienes cuenta?",
+  "authDataSecure": "Tus datos están seguros",
+  "authDataSecureRegister": "Zenda no se conecta a bancos. Toda tu información se almacena localmente en tu dispositivo.",
+  "authForgotTitle": "Recuperar contraseña",
+  "authForgotSubtitle": "Ingresa tu correo y te enviaremos un código de recuperación.",
+  "authSendCode": "Enviar código",
+  "authHaveCode": "Ya tengo un código",
+  "authCheckEmail": "Revisa tu correo",
+  "authCheckEmailMessage": "Si tu correo está registrado, recibirás un código de recuperación en minutos.\n\nIngresa el código en la siguiente pantalla.",
+  "authEnterCode": "Ingresar código",
+  "authResetTitle": "Nueva contraseña",
+  "authResetSubtitle": "Ingresa el código que recibiste por correo y tu nueva contraseña.",
+  "authResetCodeLabel": "Código de recuperación",
+  "authResetCodeHint": "Pega el código del correo",
+  "authNewPasswordLabel": "Nueva contraseña",
+  "authResetButton": "Restablecer contraseña",
+  "authPasswordUpdated": "Contraseña actualizada. Inicia sesión.",
+  "authOnboardingReset": "Para reiniciar el onboarding, reinstala la app o borra los datos.",
+
+  "onboardingPage1Title": "Registra tus gastos en segundos",
+  "onboardingPage1Subtitle": "Registra con un toque o escanea un recibo (demo).",
+  "onboardingPage1Micro": "Menos fricción, más control.",
+  "onboardingPage2Title": "Entiende tu dinero con 50/30/20",
+  "onboardingPage2Subtitle": "Zenda te muestra si estás equilibrado: necesidades, deseos y ahorros.",
+  "onboardingPage2Micro": "Aprende sin complicarte.",
+  "onboardingPage3Title": "Mantén tu racha y mejora cada día 🔥",
+  "onboardingPage3Subtitle": "Construye consistencia registrando diariamente y siguiendo tu progreso.",
+  "onboardingPage3Micro": "Lo importante es volver mañana.",
+  "onboardingSkip": "Omitir",
+  "onboardingNext": "Siguiente",
+  "onboardingRegister": "Registrarse",
+  "onboardingStart": "Comenzar",
+  "onboardingHaveAccount": "Ya tengo una cuenta",
+
+  "dashboardGreeting": "Hola, {name} 👋",
+  "@dashboardGreeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "dashboardMotivation": "Mejoremos tus finanzas hoy.",
+  "dashboardNavHome": "Inicio",
+  "dashboardNavTransactions": "Movs.",
+  "dashboardNavBudget": "Presupuesto",
+  "dashboardNavProfile": "Perfil",
+  "dashboardRecord": "Registrar",
+  "dashboardMyAccounts": "Mis Cuentas",
+  "dashboardBudgetTitle": "Tu Presupuesto 50/30/20",
+  "dashboardBudgetSubtitle": "Basado en tus gastos de los últimos 30 días",
+  "dashboardTransactions": "Transacciones",
+  "dashboardNoTransactions": "Aún no hay transacciones.",
+  "dashboardNeeds": "Necesidades",
+  "dashboardWants": "Deseos",
+  "dashboardSavings": "Ahorros",
+  "dashboardUserFallback": "Usuario",
+  "dashboardSignOutConfirm": "¿Seguro que quieres cerrar sesión?",
+  "dashboardErrorAccounts": "Error al cargar cuentas: {error}",
+  "@dashboardErrorAccounts": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "dashboardErrorTransactions": "Error al cargar transacciones: {error}",
+  "@dashboardErrorTransactions": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "summaryTodayLabel": "Gasto de Hoy",
+  "summaryWeekLabel": "Esta Semana",
+
+  "streakLabel": "{count, plural, =1{racha de 1 día} other{racha de {count} días}}",
+  "@streakLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "budgetNoExpenses": "Sin gastos registrados",
+
+  "aiCardTitle": "Consejo Zenda",
+
+  "txNewTitle": "Nueva transacción",
+  "txScanReceipt": "Escanear recibo (demo)",
+  "txExpense": "Gasto",
+  "txIncome": "Ingreso",
+  "txTransfer": "Transferencia",
+  "txAccountLabel": "Cuenta",
+  "txSourceLabel": "Origen",
+  "txDestLabel": "Destino",
+  "txAmountLabel": "Monto (PEN)",
+  "txAmountHint": "0.00",
+  "txCategoryLabel": "Categoría",
+  "txNoteLabel": "Nota (opcional)",
+  "txNoteHint": "ej. Cafetería",
+  "txDateLabel": "Fecha",
+  "txSaveButton": "Guardar transacción",
+  "txSaved": "Guardado ✅",
+  "txErrorPrefix": "Error: {error}",
+  "@txErrorPrefix": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "txNeed": "Necesidad",
+  "txWant": "Deseo",
+  "txSavingBucket": "Ahorro",
+  "txCategoryFood": "Comida",
+  "txCategoryTransport": "Transporte",
+  "txCategoryHousing": "Vivienda",
+  "txCategoryUtilities": "Servicios",
+  "txCategoryHealth": "Salud",
+  "txCategoryEntertainment": "Entretenimiento",
+  "txCategoryShopping": "Compras",
+  "txCategorySubscriptions": "Suscripciones",
+  "txCategoryCravings": "Antojos",
+  "txCategorySavings": "Ahorros",
+  "txCategoryOther": "Otro",
+
+  "profileTitle": "Perfil",
+  "profileSignOutTooltip": "Cerrar sesión",
+  "profileSignOutDialogTitle": "Cerrar sesión",
+  "profileSignOutDialogContent": "¿Seguro que quieres cerrar sesión?",
+  "profileErrorLoad": "No se pudo cargar el perfil",
+  "profileErrorSave": "No se pudieron guardar los cambios. Revisa tu conexión.",
+  "profileAge": "Edad",
+  "profileUniversity": "Universidad",
+  "profileCurrency": "Moneda",
+  "profileIncomeType": "Tipo de ingreso",
+  "profileMonthlyIncome": "Ingreso mensual",
+  "profileFinancialLiteracy": "Educación financiera",
+  "profileEditButton": "Editar perfil",
+  "profileFullNameLabel": "Nombre completo",
+  "profileAgeLabel": "Edad",
+  "profileUniversityLabel": "Universidad"
+}

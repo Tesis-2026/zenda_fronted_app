@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
+import '../../l10n/l10n_extension.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -49,6 +50,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.watch(authNotifierProvider);
+    final l10n = context.l10n;
 
     // Show error if exists
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
@@ -113,7 +115,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Title
                 Text(
-                  'Crear cuenta',
+                  l10n.authRegisterTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
@@ -124,7 +126,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Únete a Zenda y toma control de tus finanzas',
+                  l10n.authRegisterSubtitle,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
                       ),
@@ -139,8 +141,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   textCapitalization: TextCapitalization.words,
                   style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
-                    labelText: 'Nombre completo',
-                    hintText: 'Juan Pérez',
+                    labelText: l10n.authFullNameLabel,
+                    hintText: l10n.authFullNameHint,
                     prefixIcon: const Icon(Icons.person_outline),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -152,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Ingresa tu nombre';
+                      return l10n.validationEnterName;
                     }
                     return null;
                   },
@@ -166,8 +168,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   keyboardType: TextInputType.emailAddress,
                   style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'tu@email.com',
+                    labelText: l10n.authEmailLabel,
+                    hintText: l10n.authEmailHint,
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -179,10 +181,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Ingresa tu email';
+                      return l10n.validationEnterEmail;
                     }
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Email inválido';
+                      return l10n.validationInvalidEmail;
                     }
                     return null;
                   },
@@ -196,8 +198,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   obscureText: _obscurePassword,
                   style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    hintText: 'Mínimo 8 caracteres',
+                    labelText: l10n.authPasswordLabel,
+                    hintText: l10n.authPasswordHint,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -219,10 +221,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Ingresa una contraseña';
+                      return l10n.validationEnterPassword;
                     }
                     if (value.length < 8) {
-                      return 'Mínimo 8 caracteres';
+                      return l10n.validationMinPassword;
                     }
                     return null;
                   },
@@ -253,9 +255,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Crear cuenta',
-                            style: TextStyle(
+                        : Text(
+                            l10n.authRegisterTitle,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -271,16 +273,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '¿Ya tienes cuenta? ',
+                      l10n.authHaveAccount,
                       style: TextStyle(
                         color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
                       ),
                     ),
                     TextButton(
                       onPressed: () => context.go('/auth/login'),
-                      child: const Text(
-                        'Iniciar sesión',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.authSignIn,
+                        style: const TextStyle(
                           color: Color(0xFF34D399),
                           fontWeight: FontWeight.bold,
                         ),
@@ -313,7 +315,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Tus datos están seguros',
+                            l10n.authDataSecure,
                             style: TextStyle(
                               color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
                               fontWeight: FontWeight.bold,
@@ -324,7 +326,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Zenda no conecta con bancos. Toda tu información se guarda localmente en tu dispositivo.',
+                        l10n.authDataSecureRegister,
                         style: TextStyle(
                           color: isDark ? const Color(0xFF34D399).withOpacity(0.9) : const Color(0xFF059669),
                           fontSize: 12,

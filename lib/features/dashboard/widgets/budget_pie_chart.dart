@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../core/models/breakdown_503020.dart';
+import '../../../l10n/l10n_extension.dart';
 
 class BudgetPieChart extends StatelessWidget {
   final BudgetBreakdown503020 breakdown;
@@ -9,14 +10,16 @@ class BudgetPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     // Si no hay gasto, mostrar algo vacío o placeholder
     if (breakdown.total == 0) {
       return SizedBox(
         height: 200,
         child: Center(
           child: Text(
-            'Sin gastos registrados',
-            style: TextStyle(color: Colors.grey),
+            l10n.budgetNoExpenses,
+            style: const TextStyle(color: Colors.grey),
           ),
         ),
       );
