@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
+import '../../l10n/l10n_extension.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -50,6 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.watch(authNotifierProvider);
+    final l10n = context.l10n;
 
     // Show error if exists
     // Show error if exists
@@ -60,15 +62,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             context: context,
             builder: (context) => AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text('Cuenta no encontrada'),
-              content: const Text(
-                'No existe una cuenta con este correo electrónico. ¿Te gustaría crear una nueva cuenta ahora?',
-              ),
+              title: Text(l10n.authAccountNotFound),
+              content: Text(l10n.authAccountNotFoundMessage),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'Cancelar',
+                    l10n.commonCancel,
                     style: TextStyle(
                       color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
@@ -83,7 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     backgroundColor: const Color(0xFF34D399),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text('Crear cuenta'),
+                  child: Text(l10n.authSignUp),
                 ),
               ],
             ),
@@ -133,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     final authNotifier = ref.read(authNotifierProvider.notifier);
                     // I need access to prefs.
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Para resetear onboarding, reinstala la app o borra datos.')),
+                      SnackBar(content: Text(l10n.authOnboardingReset)),
                     );
                   },
                   child: Container(
@@ -166,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Title
                 Text(
-                  'Bienvenido a Zenda',
+                  l10n.authLoginTitle,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
@@ -177,7 +177,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Inicia sesión para continuar',
+                  l10n.authLoginSubtitle,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
                       ),
@@ -192,8 +192,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'tu@email.com',
+                    labelText: l10n.authEmailLabel,
+                    hintText: l10n.authEmailHint,
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -205,10 +205,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Ingresa tu email';
+                      return l10n.validationEnterEmail;
                     }
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Email inválido';
+                      return l10n.validationInvalidEmail;
                     }
                     return null;
                   },
@@ -222,7 +222,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    labelText: 'Contraseña',
+                    labelText: l10n.authPasswordLabel,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -244,10 +244,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Ingresa tu contraseña';
+                      return l10n.validationEnterPassword;
                     }
                     if (value.length < 8) {
-                      return 'Mínimo 8 caracteres';
+                      return l10n.validationMinPassword;
                     }
                     return null;
                   },
@@ -261,7 +261,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: TextButton(
                     onPressed: _showForgotPasswordDialog,
                     child: Text(
-                      '¿Olvidaste tu contraseña?',
+                      l10n.authForgotPassword,
                       style: TextStyle(
                         color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF60A5FA),
                         fontWeight: FontWeight.w600,
@@ -295,9 +295,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Iniciar sesión',
-                            style: TextStyle(
+                        : Text(
+                            l10n.authSignIn,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -315,7 +315,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'o',
+                        l10n.commonOr,
                         style: TextStyle(
                           color: isDark ? const Color(0xFF6B7280) : const Color(0xFF6B7280),
                         ),
@@ -333,7 +333,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: OutlinedButton.icon(
                     onPressed: null, // Disabled
                     icon: const Icon(Icons.g_mobiledata, size: 28),
-                    label: const Text('Continuar con Google (Demo)'),
+                    label: Text(l10n.authContinueGoogle),
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -352,16 +352,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '¿No tienes cuenta? ',
+                      l10n.authNoAccount,
                       style: TextStyle(
                         color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
                       ),
                     ),
                     TextButton(
                       onPressed: () => context.go('/onboarding?flow=register'),
-                      child: const Text(
-                        'Crear cuenta',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.authSignUp,
+                        style: const TextStyle(
                           color: Color(0xFF34D399),
                           fontWeight: FontWeight.bold,
                         ),
@@ -392,7 +392,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Zenda no conecta con bancos. Tus datos son privados.',
+                          l10n.authPrivacyNote,
                           style: TextStyle(
                             color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
                             fontSize: 13,

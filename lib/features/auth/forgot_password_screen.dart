@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
+import '../../l10n/l10n_extension.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -36,16 +37,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     // Always show success to prevent email enumeration
     if (mounted) {
+      final l10n = context.l10n;
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Revisa tu correo'),
-          content: const Text(
-            'Si tu email está registrado, recibirás un código de recuperación en los próximos minutos.\n\nIngresa el código en la siguiente pantalla.',
-          ),
+          title: Text(l10n.authCheckEmail),
+          content: Text(l10n.authCheckEmailMessage),
           actions: [
             FilledButton(
               onPressed: () {
@@ -57,7 +57,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Ingresar código'),
+              child: Text(l10n.authEnterCode),
             ),
           ],
         ),
@@ -68,6 +68,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
@@ -108,7 +109,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Recuperar contraseña',
+                  l10n.authForgotTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark
@@ -121,7 +122,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Ingresa tu email y te enviaremos un código de recuperación.',
+                  l10n.authForgotSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isDark
                             ? const Color(0xFFF1F5F9).withOpacity(0.7)
@@ -139,8 +140,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       ? const TextStyle(color: Colors.white)
                       : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'tu@email.com',
+                    labelText: l10n.authEmailLabel,
+                    hintText: l10n.authEmailHint,
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16)),
@@ -152,11 +153,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Ingresa tu email';
+                      return l10n.validationEnterEmail;
                     }
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                         .hasMatch(value)) {
-                      return 'Email inválido';
+                      return l10n.validationInvalidEmail;
                     }
                     return null;
                   },
@@ -187,9 +188,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                   AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Enviar código',
-                            style: TextStyle(
+                        : Text(
+                            l10n.authSendCode,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
@@ -199,9 +200,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
                 TextButton(
                   onPressed: () => context.go('/auth/reset-password'),
-                  child: const Text(
-                    'Ya tengo un código',
-                    style: TextStyle(color: Color(0xFF34D399)),
+                  child: Text(
+                    l10n.authHaveCode,
+                    style: const TextStyle(color: Color(0xFF34D399)),
                   ),
                 ),
               ],

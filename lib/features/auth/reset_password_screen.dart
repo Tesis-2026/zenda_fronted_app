@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
+import '../../l10n/l10n_extension.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({Key? key}) : super(key: key);
@@ -40,10 +41,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
+    final l10n = context.l10n;
     if (result.isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Contraseña actualizada. Inicia sesión.'),
+          content: Text(l10n.authPasswordUpdated),
           backgroundColor: const Color(0xFF34D399),
           behavior: SnackBarBehavior.floating,
           shape:
@@ -59,7 +61,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             children: [
               const Icon(Icons.error_outline, color: Colors.white),
               const SizedBox(width: 8),
-              Expanded(child: Text(result.error ?? 'Error desconocido')),
+              Expanded(child: Text(result.error ?? l10n.commonUnknownError)),
             ],
           ),
           backgroundColor: const Color(0xFFFB7185),
@@ -75,6 +77,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
@@ -115,7 +118,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Nueva contraseña',
+                  l10n.authResetTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark
@@ -128,7 +131,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 const SizedBox(height: 8),
 
                 Text(
-                  'Ingresa el código que recibiste por email y tu nueva contraseña.',
+                  l10n.authResetSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isDark
                             ? const Color(0xFFF1F5F9).withOpacity(0.7)
@@ -145,8 +148,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                       ? const TextStyle(color: Colors.white)
                       : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
-                    labelText: 'Código de recuperación',
-                    hintText: 'Pega el código del email',
+                    labelText: l10n.authResetCodeLabel,
+                    hintText: l10n.authResetCodeHint,
                     prefixIcon: const Icon(Icons.tag_rounded),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16)),
@@ -158,7 +161,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Ingresa el código';
+                      return l10n.validationEnterCode;
                     }
                     return null;
                   },
@@ -173,8 +176,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                       ? const TextStyle(color: Colors.white)
                       : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
-                    labelText: 'Nueva contraseña',
-                    hintText: 'Mínimo 8 caracteres',
+                    labelText: l10n.authNewPasswordLabel,
+                    hintText: l10n.authPasswordHint,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword
@@ -193,10 +196,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Ingresa tu nueva contraseña';
+                      return l10n.validationEnterNewPassword;
                     }
                     if (value.length < 8) {
-                      return 'Mínimo 8 caracteres';
+                      return l10n.validationMinPassword;
                     }
                     return null;
                   },
@@ -227,9 +230,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                   AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Restablecer contraseña',
-                            style: TextStyle(
+                        : Text(
+                            l10n.authResetButton,
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),

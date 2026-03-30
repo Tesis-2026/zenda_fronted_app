@@ -233,6 +233,20 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       );
       await txRepo.addTransaction(tx);
 
+      // Also sync to backend (fire-and-forget; local save is the source of truth)
+      try {
+        final apiService = ref.read(transactionApiServiceProvider);
+        await apiService.create(
+          kind: kind,
+          amount: amount,
+          category: category,
+          occurredAt: state.date,
+          description: state.note.isEmpty ? null : state.note,
+        );
+      } catch (_) {
+        // Backend sync failure is non-blocking — local save succeeded
+      }
+
       // Update streak only on save.
       await streakRepo.updateOnTransaction(state.date);
 

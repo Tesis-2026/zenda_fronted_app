@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import '../../../l10n/l10n_extension.dart';
 
 class SummaryCard extends StatelessWidget {
   final double todayExpense;
@@ -16,6 +17,7 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -37,7 +39,7 @@ class SummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Gasto Hoy',
+                  l10n.summaryTodayLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
@@ -64,7 +66,7 @@ class SummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Esta Semana',
+                  l10n.summaryWeekLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import '../../../l10n/l10n_extension.dart';
 
 class ZendaAiCard extends StatelessWidget {
   final String advice;
@@ -9,6 +10,7 @@ class ZendaAiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -37,7 +39,7 @@ class ZendaAiCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Consejo de Zenda',
+                  l10n.aiCardTitle,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: const Color(0xFF34D399),
                         fontWeight: FontWeight.bold,

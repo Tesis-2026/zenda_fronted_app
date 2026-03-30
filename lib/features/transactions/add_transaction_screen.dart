@@ -6,6 +6,7 @@ import '../dashboard/dashboard_providers.dart';
 import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
 import 'controllers/new_transaction_controller.dart';
+import '../../l10n/l10n_extension.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   const AddTransactionScreen({super.key});
@@ -33,6 +34,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final controller = ref.read(newTransactionControllerProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final onSurface = isDark ? Colors.white : Colors.black87;
+    final l10n = context.l10n;
 
     ref.listen<NewTransactionState>(newTransactionControllerProvider, (
       prev,
@@ -43,7 +45,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         if (context.mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Guardado ✅')));
+          ).showSnackBar(SnackBar(content: Text(l10n.txSaved)));
           Navigator.of(context).pop();
         }
       }
@@ -70,7 +72,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nuevo movimiento'),
+        title: Text(l10n.txNewTitle),
         actions: [
           TextButton.icon(
             onPressed: state.isSaving
@@ -79,7 +81,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     controller.fillFromOcrDemo();
                   },
             icon: const Icon(Icons.document_scanner_rounded),
-            label: const Text('Escanear boleta (demo)'),
+            label: Text(l10n.txScanReceipt),
           ),
           const SizedBox(width: 8),
         ],
@@ -87,7 +89,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       body: SafeArea(
         child: accountsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Center(child: Text('Error: $e')),
+          error: (e, st) => Center(child: Text(l10n.txErrorPrefix(e.toString()))),
           data: (accounts) {
             final from = _findAccount(accounts, state.fromAccountId);
             final to = _findAccount(accounts, state.toAccountId);
@@ -101,21 +103,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SegmentedButton<TransactionKind>(
-                          segments: const [
+                          segments: [
                             ButtonSegment(
                               value: TransactionKind.expense,
-                              label: Text('Gasto'),
-                              icon: Icon(Icons.arrow_upward_rounded),
+                              label: Text(l10n.txExpense),
+                              icon: const Icon(Icons.arrow_upward_rounded),
                             ),
                             ButtonSegment(
                               value: TransactionKind.income,
-                              label: Text('Ingreso'),
-                              icon: Icon(Icons.arrow_downward_rounded),
+                              label: Text(l10n.txIncome),
+                              icon: const Icon(Icons.arrow_downward_rounded),
                             ),
                             ButtonSegment(
                               value: TransactionKind.transfer,
-                              label: Text('Transferencia'),
-                              icon: Icon(Icons.swap_horiz_rounded),
+                              label: Text(l10n.txTransfer),
+                              icon: const Icon(Icons.swap_horiz_rounded),
                             ),
                           ],
                           selected: {state.kind},
@@ -126,7 +128,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         const SizedBox(height: 16),
 
                         Text(
-                          'Cuenta',
+                          l10n.txAccountLabel,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: onSurface,
@@ -134,7 +136,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         ),
                         const SizedBox(height: 10),
                         _AccountPicker(
-                          label: 'Origen',
+                          label: l10n.txSourceLabel,
                           accounts: accounts,
                           selected: from,
                           onChanged: (id) => controller.setFromAccount(id),
@@ -142,7 +144,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         if (state.kind == TransactionKind.transfer) ...[
                           const SizedBox(height: 12),
                           _AccountPicker(
-                            label: 'Destino',
+                            label: l10n.txDestLabel,
                             accounts: accounts,
                             selected: to,
                             onChanged: (id) => controller.setToAccount(id),
@@ -151,7 +153,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                         const SizedBox(height: 18),
                         Text(
-                          'Monto (PEN)',
+                          l10n.txAmountLabel,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: onSurface,
@@ -171,7 +173,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           ),
                           decoration: InputDecoration(
                             prefixText: 'S/ ',
-                            hintText: '0.00',
+                            hintText: l10n.txAmountHint,
                             filled: true,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -186,7 +188,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Categoría',
+                                l10n.txCategoryLabel,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   color: onSurface,
@@ -205,7 +207,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                         const SizedBox(height: 18),
                         Text(
-                          'Nota (opcional)',
+                          l10n.txNoteLabel,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: onSurface,
@@ -216,7 +218,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           controller: _noteController,
                           textInputAction: TextInputAction.done,
                           decoration: InputDecoration(
-                            hintText: 'Ej: Cafetería',
+                            hintText: l10n.txNoteHint,
                             filled: true,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -228,7 +230,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                         const SizedBox(height: 18),
                         Text(
-                          'Fecha',
+                          l10n.txDateLabel,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: onSurface,
@@ -303,9 +305,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text(
-                                'Guardar movimiento',
-                                style: TextStyle(
+                            : Text(
+                                l10n.txSaveButton,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,
                                 ),
@@ -433,10 +435,11 @@ class _BucketChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final (label, color) = switch (bucket) {
-      Bucket503020.necesidad => ('Necesidad', const Color(0xFF34D399)),
-      Bucket503020.deseo => ('Deseo', const Color(0xFFC084FC)),
-      Bucket503020.ahorro => ('Ahorro', const Color(0xFFFCD34D)),
+      Bucket503020.necesidad => (l10n.txNeed, const Color(0xFF34D399)),
+      Bucket503020.deseo => (l10n.txWant, const Color(0xFFC084FC)),
+      Bucket503020.ahorro => (l10n.txSavingBucket, const Color(0xFFFCD34D)),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -466,6 +469,7 @@ class _CategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
     final items = TransactionCategory.values;
     return GridView.builder(
       shrinkWrap: true,
@@ -481,7 +485,7 @@ class _CategoryGrid extends StatelessWidget {
         final c = items[index];
         final isSelected = c == selected;
         final icon = _categoryIcon(c);
-        final label = _categoryLabel(c);
+        final label = _categoryLabel(c, l10n);
         return InkWell(
           onTap: () => onSelected(c),
           borderRadius: BorderRadius.circular(16),
@@ -537,19 +541,19 @@ class _CategoryGrid extends StatelessWidget {
     };
   }
 
-  String _categoryLabel(TransactionCategory c) {
+  String _categoryLabel(TransactionCategory c, dynamic l10n) {
     return switch (c) {
-      TransactionCategory.comida => 'Comida',
-      TransactionCategory.transporte => 'Transporte',
-      TransactionCategory.vivienda => 'Vivienda',
-      TransactionCategory.servicios => 'Servicios',
-      TransactionCategory.salud => 'Salud',
-      TransactionCategory.ocio => 'Ocio',
-      TransactionCategory.compras => 'Compras',
-      TransactionCategory.suscripciones => 'Suscripciones',
-      TransactionCategory.antojos => 'Antojos',
-      TransactionCategory.ahorro => 'Ahorro',
-      TransactionCategory.otros => 'Otros',
+      TransactionCategory.comida => l10n.txCategoryFood,
+      TransactionCategory.transporte => l10n.txCategoryTransport,
+      TransactionCategory.vivienda => l10n.txCategoryHousing,
+      TransactionCategory.servicios => l10n.txCategoryUtilities,
+      TransactionCategory.salud => l10n.txCategoryHealth,
+      TransactionCategory.ocio => l10n.txCategoryEntertainment,
+      TransactionCategory.compras => l10n.txCategoryShopping,
+      TransactionCategory.suscripciones => l10n.txCategorySubscriptions,
+      TransactionCategory.antojos => l10n.txCategoryCravings,
+      TransactionCategory.ahorro => l10n.txCategorySavings,
+      TransactionCategory.otros => l10n.txCategoryOther,
     };
   }
 }

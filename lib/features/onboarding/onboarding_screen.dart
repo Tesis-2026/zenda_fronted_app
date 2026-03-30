@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'onboarding_page.dart';
 import 'onboarding_prefs.dart';
+import '../../l10n/l10n_extension.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final bool redirectToRegister;
-  
+
   const OnboardingScreen({
-    Key? key, 
+    Key? key,
     this.redirectToRegister = false,
   }) : super(key: key);
 
@@ -18,39 +19,6 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-
-  final List<Map<String, dynamic>> _pages = [
-    {
-      'icon': Icons.receipt_long_rounded,
-      'gradientColors': [
-        const Color(0xFF34D399),
-        const Color(0xFF10B981),
-      ],
-      'title': 'Registra tus gastos en segundos',
-      'subtitle': 'Anota con un toque o escanea una boleta (demo).',
-      'microcopy': 'Menos fricción, más control.',
-    },
-    {
-      'icon': Icons.pie_chart_rounded,
-      'gradientColors': [
-        const Color(0xFF60A5FA),
-        const Color(0xFF3B82F6),
-      ],
-      'title': 'Entiende tu dinero con 50/30/20',
-      'subtitle': 'Zenda te muestra si vas equilibrado: necesidades, deseos y ahorro.',
-      'microcopy': 'Aprende sin complicarte.',
-    },
-    {
-      'icon': Icons.local_fire_department_rounded,
-      'gradientColors': [
-        const Color(0xFFFCD34D),
-        const Color(0xFFF59E0B),
-      ],
-      'title': 'Mantén tu racha y mejora cada día 🔥',
-      'subtitle': 'Gana constancia registrando a diario y viendo tu progreso.',
-      'microcopy': 'Lo importante es volver mañana.',
-    },
-  ];
 
   @override
   void dispose() {
@@ -79,8 +47,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _completeOnboarding();
   }
 
-  void _nextPage() {
-    if (_currentPage < _pages.length - 1) {
+  void _nextPage(int pageCount) {
+    if (_currentPage < pageCount - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -93,7 +61,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final l10n = context.l10n;
+
+    final pages = [
+      {
+        'icon': Icons.receipt_long_rounded,
+        'gradientColors': [
+          const Color(0xFF34D399),
+          const Color(0xFF10B981),
+        ],
+        'title': l10n.onboardingPage1Title,
+        'subtitle': l10n.onboardingPage1Subtitle,
+        'microcopy': l10n.onboardingPage1Micro,
+      },
+      {
+        'icon': Icons.pie_chart_rounded,
+        'gradientColors': [
+          const Color(0xFF60A5FA),
+          const Color(0xFF3B82F6),
+        ],
+        'title': l10n.onboardingPage2Title,
+        'subtitle': l10n.onboardingPage2Subtitle,
+        'microcopy': l10n.onboardingPage2Micro,
+      },
+      {
+        'icon': Icons.local_fire_department_rounded,
+        'gradientColors': [
+          const Color(0xFFFCD34D),
+          const Color(0xFFF59E0B),
+        ],
+        'title': l10n.onboardingPage3Title,
+        'subtitle': l10n.onboardingPage3Subtitle,
+        'microcopy': l10n.onboardingPage3Micro,
+      },
+    ];
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -102,15 +104,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             PageView.builder(
               controller: _pageController,
               onPageChanged: _onPageChanged,
-              itemCount: _pages.length,
+              itemCount: pages.length,
               itemBuilder: (context, index) {
-                final page = _pages[index];
+                final page = pages[index];
                 return OnboardingPage(
-                  icon: page['icon'],
-                  gradientColors: page['gradientColors'],
-                  title: page['title'],
-                  subtitle: page['subtitle'],
-                  microcopy: page['microcopy'],
+                  icon: page['icon'] as IconData,
+                  gradientColors: page['gradientColors'] as List<Color>,
+                  title: page['title'] as String,
+                  subtitle: page['subtitle'] as String,
+                  microcopy: page['microcopy'] as String,
                 );
               },
             ),
@@ -123,7 +125,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 onPressed: _skipOnboarding,
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  backgroundColor: isDark 
+                  backgroundColor: isDark
                       ? const Color(0xFF1E293B).withOpacity(0.6)
                       : Colors.white.withOpacity(0.9),
                   shape: RoundedRectangleBorder(
@@ -131,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 child: Text(
-                  'Saltar',
+                  l10n.onboardingSkip,
                   style: TextStyle(
                     color: isDark ? const Color(0xFF34D399) : const Color(0xFF1F2937),
                     fontWeight: FontWeight.w600,
@@ -169,7 +171,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
-                        _pages.length,
+                        pages.length,
                         (index) => AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -178,8 +180,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           decoration: BoxDecoration(
                             color: _currentPage == index
                                 ? const Color(0xFF34D399)
-                                : (isDark 
-                                    ? const Color(0xFF6B7280) 
+                                : (isDark
+                                    ? const Color(0xFF6B7280)
                                     : const Color(0xFFD1D5DB)),
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -194,7 +196,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: _nextPage,
+                        onPressed: () => _nextPage(pages.length),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF34D399),
                           foregroundColor: Colors.white,
@@ -205,9 +207,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
                         child: Text(
-                          _currentPage == _pages.length - 1 
-                              ? (widget.redirectToRegister ? 'Registrarme' : 'Empezar') 
-                              : 'Siguiente',
+                          _currentPage == pages.length - 1
+                              ? (widget.redirectToRegister ? l10n.onboardingRegister : l10n.onboardingStart)
+                              : l10n.onboardingNext,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -228,7 +230,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                          context.go('/auth/login');
                       },
                       child: Text(
-                        'Ya tengo cuenta',
+                        l10n.onboardingHaveAccount,
                         style: TextStyle(
                           color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF60A5FA),
                           fontWeight: FontWeight.w600,

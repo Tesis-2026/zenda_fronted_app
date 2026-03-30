@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
 import '../auth/auth_controller.dart';
+import '../../l10n/l10n_extension.dart';
 
 final _profileProvider = FutureProvider<User>((ref) async {
   return UserApiService().getProfile();
@@ -60,7 +61,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not save changes. Check your connection.')),
+          SnackBar(content: Text(context.l10n.profileErrorSave)),
         );
       }
     } finally {
@@ -69,20 +70,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _confirmLogout() async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(l10n.profileSignOutDialogTitle),
+        content: Text(l10n.profileSignOutDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Sign out'),
+            child: Text(l10n.commonSignOut),
           ),
         ],
       ),
@@ -96,16 +98,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(_profileProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(l10n.profileTitle),
         actions: [
           if (!_isEditing)
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: _confirmLogout,
-              tooltip: 'Sign out',
+              tooltip: l10n.profileSignOutTooltip,
             ),
         ],
       ),
@@ -115,11 +118,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Could not load profile'),
+              Text(l10n.profileErrorLoad),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.invalidate(_profileProvider),
-                child: const Text('Retry'),
+                child: Text(l10n.commonRetry),
               ),
             ],
           ),
@@ -130,6 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildReadView(User user) {
+    final l10n = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -151,17 +155,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Text(user.email, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
         ),
         const SizedBox(height: 32),
-        _infoTile('Age', user.age?.toString() ?? 'Not set'),
-        _infoTile('University', user.university ?? 'Not set'),
-        _infoTile('Currency', user.currency),
-        _infoTile('Income type', user.incomeType?.name ?? 'Not set'),
-        _infoTile('Monthly income', user.averageMonthlyIncome != null ? 'S/ ${user.averageMonthlyIncome!.toStringAsFixed(2)}' : 'Not set'),
-        _infoTile('Financial literacy', user.financialLiteracyLevel?.name ?? 'Not set'),
+        _infoTile(l10n.profileAge, user.age?.toString() ?? l10n.commonNotSet),
+        _infoTile(l10n.profileUniversity, user.university ?? l10n.commonNotSet),
+        _infoTile(l10n.profileCurrency, user.currency),
+        _infoTile(l10n.profileIncomeType, user.incomeType?.name ?? l10n.commonNotSet),
+        _infoTile(l10n.profileMonthlyIncome, user.averageMonthlyIncome != null ? 'S/ ${user.averageMonthlyIncome!.toStringAsFixed(2)}' : l10n.commonNotSet),
+        _infoTile(l10n.profileFinancialLiteracy, user.financialLiteracyLevel?.name ?? l10n.commonNotSet),
         const SizedBox(height: 32),
         FilledButton.icon(
           onPressed: () => _startEdit(user),
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Edit profile'),
+          label: Text(l10n.profileEditButton),
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF34D399),
             minimumSize: const Size(double.infinity, 52),
@@ -185,13 +189,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildEditView(User user) {
+    final l10n = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         TextField(
           controller: _nameController,
           decoration: InputDecoration(
-            labelText: 'Full name',
+            labelText: l10n.profileFullNameLabel,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -200,7 +205,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           controller: _ageController,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: 'Age',
+            labelText: l10n.profileAgeLabel,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -208,7 +213,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         TextField(
           controller: _universityController,
           decoration: InputDecoration(
-            labelText: 'University',
+            labelText: l10n.profileUniversityLabel,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -219,7 +224,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: OutlinedButton(
                 onPressed: _isSaving ? null : () => setState(() => _isEditing = false),
                 style: OutlinedButton.styleFrom(minimumSize: const Size(0, 52)),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
             ),
             const SizedBox(width: 16),
@@ -232,7 +237,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 child: _isSaving
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Save'),
+                    : Text(l10n.commonSave),
               ),
             ),
           ],
