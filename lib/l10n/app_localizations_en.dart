@@ -398,6 +398,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txCategoryOther => 'Other';
 
   @override
+  String get txListTitle => 'Transactions';
+
+  @override
+  String get txListEmpty => 'No transactions yet';
+
+  @override
+  String get txListFilterAll => 'All';
+
+  @override
+  String get txListFilterExpenses => 'Expenses';
+
+  @override
+  String get txListFilterIncome => 'Income';
+
+  @override
+  String get txListFilterThisWeek => 'This week';
+
+  @override
+  String get txListFilterThisMonth => 'This month';
+
+  @override
+  String get txListFilterAllTime => 'All time';
+
+  @override
+  String get txDeleteConfirmTitle => 'Delete transaction';
+
+  @override
+  String get txDeleteConfirmMessage => 'This action cannot be undone.';
+
+  @override
+  String get txDeleteAction => 'Delete';
+
+  @override
+  String get txEditTitle => 'Edit transaction';
+
+  @override
+  String get txUpdateButton => 'Save changes';
+
+  @override
   String get profileTitle => 'Profile';
 
   @override

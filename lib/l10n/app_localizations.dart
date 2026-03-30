@@ -818,6 +818,84 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get txCategoryOther;
 
+  /// No description provided for @txListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get txListTitle;
+
+  /// No description provided for @txListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get txListEmpty;
+
+  /// No description provided for @txListFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get txListFilterAll;
+
+  /// No description provided for @txListFilterExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get txListFilterExpenses;
+
+  /// No description provided for @txListFilterIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get txListFilterIncome;
+
+  /// No description provided for @txListFilterThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get txListFilterThisWeek;
+
+  /// No description provided for @txListFilterThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get txListFilterThisMonth;
+
+  /// No description provided for @txListFilterAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get txListFilterAllTime;
+
+  /// No description provided for @txDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete transaction'**
+  String get txDeleteConfirmTitle;
+
+  /// No description provided for @txDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get txDeleteConfirmMessage;
+
+  /// No description provided for @txDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get txDeleteAction;
+
+  /// No description provided for @txEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit transaction'**
+  String get txEditTitle;
+
+  /// No description provided for @txUpdateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get txUpdateButton;
+
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:

@@ -103,4 +103,28 @@ class ApiClient {
     _throwIfError(response);
     return _parseBody(response);
   }
+
+  static Future<List<dynamic>> getList(String path) async {
+    final headers = await _authHeaders();
+    final response = await http.get(
+      Uri.parse('$_kBaseUrl$path'),
+      headers: headers,
+    );
+    _throwIfError(response);
+    if (response.body.isEmpty) return [];
+    try {
+      return jsonDecode(response.body) as List<dynamic>;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<void> delete(String path) async {
+    final headers = await _authHeaders();
+    final response = await http.delete(
+      Uri.parse('$_kBaseUrl$path'),
+      headers: headers,
+    );
+    _throwIfError(response);
+  }
 }
