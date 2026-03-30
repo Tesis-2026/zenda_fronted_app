@@ -991,6 +991,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'University'**
   String get profileUniversityLabel;
+
+  /// No description provided for @profileManageCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage categories'**
+  String get profileManageCategories;
+
+  /// No description provided for @catMgmtTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Categories'**
+  String get catMgmtTitle;
+
+  /// No description provided for @catMgmtSystemSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Default categories'**
+  String get catMgmtSystemSection;
+
+  /// No description provided for @catMgmtCustomSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom categories'**
+  String get catMgmtCustomSection;
+
+  /// No description provided for @catMgmtEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom categories yet'**
+  String get catMgmtEmpty;
+
+  /// No description provided for @catMgmtAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get catMgmtAddTitle;
+
+  /// No description provided for @catMgmtAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get catMgmtAddHint;
+
+  /// No description provided for @catMgmtRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename category'**
+  String get catMgmtRenameTitle;
+
+  /// No description provided for @catMgmtDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this category? Transactions using it will keep their data.'**
+  String get catMgmtDeleteConfirm;
+
+  /// No description provided for @catMgmtDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get catMgmtDeleteAction;
+
+  /// No description provided for @catMgmtErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load categories'**
+  String get catMgmtErrorLoad;
+
+  /// No description provided for @catMgmtErrorSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Try again.'**
+  String get catMgmtErrorSave;
 }
 
 class _AppLocalizationsDelegate

@@ -186,5 +186,18 @@
   "profileEditButton": "Editar perfil",
   "profileFullNameLabel": "Nombre completo",
   "profileAgeLabel": "Edad",
-  "profileUniversityLabel": "Universidad"
+  "profileUniversityLabel": "Universidad",
+  "profileManageCategories": "Gestionar categorías",
+
+  "catMgmtTitle": "Mis Categorías",
+  "catMgmtSystemSection": "Categorías por defecto",
+  "catMgmtCustomSection": "Categorías personalizadas",
+  "catMgmtEmpty": "Aún no tienes categorías personalizadas",
+  "catMgmtAddTitle": "Nueva categoría",
+  "catMgmtAddHint": "Nombre de la categoría",
+  "catMgmtRenameTitle": "Renombrar categoría",
+  "catMgmtDeleteConfirm": "¿Eliminar esta categoría? Las transacciones que la usen conservarán sus datos.",
+  "catMgmtDeleteAction": "Eliminar",
+  "catMgmtErrorLoad": "No se pudieron cargar las categorías",
+  "catMgmtErrorSave": "No se pudo guardar. Intenta de nuevo."
 }

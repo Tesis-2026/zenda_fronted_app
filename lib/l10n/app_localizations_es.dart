@@ -484,4 +484,41 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileUniversityLabel => 'Universidad';
+
+  @override
+  String get profileManageCategories => 'Gestionar categorías';
+
+  @override
+  String get catMgmtTitle => 'Mis Categorías';
+
+  @override
+  String get catMgmtSystemSection => 'Categorías por defecto';
+
+  @override
+  String get catMgmtCustomSection => 'Categorías personalizadas';
+
+  @override
+  String get catMgmtEmpty => 'Aún no tienes categorías personalizadas';
+
+  @override
+  String get catMgmtAddTitle => 'Nueva categoría';
+
+  @override
+  String get catMgmtAddHint => 'Nombre de la categoría';
+
+  @override
+  String get catMgmtRenameTitle => 'Renombrar categoría';
+
+  @override
+  String get catMgmtDeleteConfirm =>
+      '¿Eliminar esta categoría? Las transacciones que la usen conservarán sus datos.';
+
+  @override
+  String get catMgmtDeleteAction => 'Eliminar';
+
+  @override
+  String get catMgmtErrorLoad => 'No se pudieron cargar las categorías';
+
+  @override
+  String get catMgmtErrorSave => 'No se pudo guardar. Intenta de nuevo.';
 }
