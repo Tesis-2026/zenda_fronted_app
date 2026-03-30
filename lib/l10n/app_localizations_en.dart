@@ -431,6 +431,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txDeleteAction => 'Delete';
 
   @override
+  String get txDeleteError => 'Could not delete transaction. Please try again.';
+
+  @override
   String get txEditTitle => 'Edit transaction';
 
   @override
@@ -678,4 +681,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsDeleteConfirm => 'Delete this goal?';
+
+  @override
+  String get errorAuthInvalidCredentials => 'Incorrect email or password.';
+
+  @override
+  String get errorAuthEmailTaken => 'This email is already registered.';
+
+  @override
+  String get errorAuthTokenExpired => 'Reset link is invalid or has expired.';
+
+  @override
+  String get errorAuthBadRequest => 'Check your details and try again.';
+
+  @override
+  String get errorServerError => 'Unexpected error. Please try again.';
+
+  @override
+  String get errorNoConnection => 'Could not connect to the server.';
+
+  @override
+  String get errorTxNoSourceAccount => 'Select a source account.';
+
+  @override
+  String get errorTxInvalidAmount => 'Enter an amount greater than 0.';
+
+  @override
+  String get errorTxNoCategory => 'Select a category.';
+
+  @override
+  String get errorTxNoDestAccount => 'Select a destination account.';
+
+  @override
+  String get errorTxSameAccount => 'Destination must be a different account.';
+
+  @override
+  String get errorTxInvalidSourceAccount => 'Source account not found.';
+
+  @override
+  String get errorTxInvalidDestAccount => 'Destination account not found.';
+
+  @override
+  String get errorTxCreditTransferNotSupported =>
+      'Transfers from a credit card are not available.';
+
+  @override
+  String get errorTxSaveFailed =>
+      'Could not save the transaction. Please try again.';
 }

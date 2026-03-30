@@ -255,7 +255,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         if (state.error != null) ...[
                           const SizedBox(height: 14),
                           Text(
-                            state.error!,
+                            context.l10n.resolveError(state.error!),
                             style: const TextStyle(
                               color: Color(0xFFEF4444),
                               fontWeight: FontWeight.w600,

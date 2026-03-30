@@ -335,10 +335,19 @@ class _TransactionTile extends ConsumerWidget {
       onDismissed: (_) async {
         try {
           await ApiClient.delete('/transactions/$id');
+          onDeleted();
         } catch (_) {
-          // Deletion failed — list refresh will restore it
+          // Deletion failed — restore the item by refreshing the list.
+          onDeleted();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.txDeleteError),
+                backgroundColor: const Color(0xFFEF4444),
+              ),
+            );
+          }
         }
-        onDeleted();
       },
       child: Container(
         padding: const EdgeInsets.all(14),

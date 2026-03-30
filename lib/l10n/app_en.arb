@@ -168,6 +168,7 @@
   "txDeleteConfirmTitle": "Delete transaction",
   "txDeleteConfirmMessage": "This action cannot be undone.",
   "txDeleteAction": "Delete",
+  "txDeleteError": "Could not delete transaction. Please try again.",
   "txEditTitle": "Edit transaction",
   "txUpdateButton": "Save changes",
 
@@ -285,5 +286,22 @@
     }
   },
   "goalsErrorLoad": "Could not load goals",
-  "goalsDeleteConfirm": "Delete this goal?"
+  "goalsDeleteConfirm": "Delete this goal?",
+
+  "errorAuthInvalidCredentials": "Incorrect email or password.",
+  "errorAuthEmailTaken": "This email is already registered.",
+  "errorAuthTokenExpired": "Reset link is invalid or has expired.",
+  "errorAuthBadRequest": "Check your details and try again.",
+  "errorServerError": "Unexpected error. Please try again.",
+  "errorNoConnection": "Could not connect to the server.",
+
+  "errorTxNoSourceAccount": "Select a source account.",
+  "errorTxInvalidAmount": "Enter an amount greater than 0.",
+  "errorTxNoCategory": "Select a category.",
+  "errorTxNoDestAccount": "Select a destination account.",
+  "errorTxSameAccount": "Destination must be a different account.",
+  "errorTxInvalidSourceAccount": "Source account not found.",
+  "errorTxInvalidDestAccount": "Destination account not found.",
+  "errorTxCreditTransferNotSupported": "Transfers from a credit card are not available.",
+  "errorTxSaveFailed": "Could not save the transaction. Please try again."
 }

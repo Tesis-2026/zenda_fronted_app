@@ -168,6 +168,7 @@
   "txDeleteConfirmTitle": "Eliminar transacción",
   "txDeleteConfirmMessage": "Esta acción no se puede deshacer.",
   "txDeleteAction": "Eliminar",
+  "txDeleteError": "No se pudo eliminar la transacción. Inténtalo de nuevo.",
   "txEditTitle": "Editar transacción",
   "txUpdateButton": "Guardar cambios",
 
@@ -285,5 +286,22 @@
     }
   },
   "goalsErrorLoad": "No se pudieron cargar las metas",
-  "goalsDeleteConfirm": "¿Eliminar esta meta?"
+  "goalsDeleteConfirm": "¿Eliminar esta meta?",
+
+  "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
+  "errorAuthEmailTaken": "Este correo ya está registrado.",
+  "errorAuthTokenExpired": "El enlace es inválido o ha expirado.",
+  "errorAuthBadRequest": "Revisa tus datos e inténtalo de nuevo.",
+  "errorServerError": "Error inesperado. Inténtalo de nuevo.",
+  "errorNoConnection": "No se pudo conectar con el servidor.",
+
+  "errorTxNoSourceAccount": "Selecciona una cuenta de origen.",
+  "errorTxInvalidAmount": "Ingresa un monto mayor a 0.",
+  "errorTxNoCategory": "Selecciona una categoría.",
+  "errorTxNoDestAccount": "Selecciona una cuenta destino.",
+  "errorTxSameAccount": "La cuenta destino debe ser distinta.",
+  "errorTxInvalidSourceAccount": "Cuenta origen inválida.",
+  "errorTxInvalidDestAccount": "Cuenta destino inválida.",
+  "errorTxCreditTransferNotSupported": "Transferir desde tarjeta de crédito no está disponible.",
+  "errorTxSaveFailed": "No se pudo guardar la transacción. Inténtalo de nuevo."
 }

@@ -12,8 +12,10 @@ class AuthNotifier extends Notifier<AuthState> {
 
   @override
   AuthState build() {
-    // Check status asynchronously after initialization
-    Future.microtask(() => _checkAuthStatus());
+    // Kick off the async status check without microtask indirection.
+    // The provider returns AuthState.initial() (isLoading: true) immediately,
+    // then transitions once _checkAuthStatus() completes.
+    _checkAuthStatus();
     return const AuthState.initial();
   }
 

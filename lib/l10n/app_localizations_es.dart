@@ -430,6 +430,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get txDeleteAction => 'Eliminar';
 
   @override
+  String get txDeleteError =>
+      'No se pudo eliminar la transacción. Inténtalo de nuevo.';
+
+  @override
   String get txEditTitle => 'Editar transacción';
 
   @override
@@ -677,4 +681,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get goalsDeleteConfirm => '¿Eliminar esta meta?';
+
+  @override
+  String get errorAuthInvalidCredentials => 'Correo o contraseña incorrectos.';
+
+  @override
+  String get errorAuthEmailTaken => 'Este correo ya está registrado.';
+
+  @override
+  String get errorAuthTokenExpired => 'El enlace es inválido o ha expirado.';
+
+  @override
+  String get errorAuthBadRequest => 'Revisa tus datos e inténtalo de nuevo.';
+
+  @override
+  String get errorServerError => 'Error inesperado. Inténtalo de nuevo.';
+
+  @override
+  String get errorNoConnection => 'No se pudo conectar con el servidor.';
+
+  @override
+  String get errorTxNoSourceAccount => 'Selecciona una cuenta de origen.';
+
+  @override
+  String get errorTxInvalidAmount => 'Ingresa un monto mayor a 0.';
+
+  @override
+  String get errorTxNoCategory => 'Selecciona una categoría.';
+
+  @override
+  String get errorTxNoDestAccount => 'Selecciona una cuenta destino.';
+
+  @override
+  String get errorTxSameAccount => 'La cuenta destino debe ser distinta.';
+
+  @override
+  String get errorTxInvalidSourceAccount => 'Cuenta origen inválida.';
+
+  @override
+  String get errorTxInvalidDestAccount => 'Cuenta destino inválida.';
+
+  @override
+  String get errorTxCreditTransferNotSupported =>
+      'Transferir desde tarjeta de crédito no está disponible.';
+
+  @override
+  String get errorTxSaveFailed =>
+      'No se pudo guardar la transacción. Inténtalo de nuevo.';
 }

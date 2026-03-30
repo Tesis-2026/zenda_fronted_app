@@ -884,6 +884,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get txDeleteAction;
 
+  /// No description provided for @txDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete transaction. Please try again.'**
+  String get txDeleteError;
+
   /// No description provided for @txEditTitle.
   ///
   /// In en, this message translates to:
@@ -1345,6 +1351,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete this goal?'**
   String get goalsDeleteConfirm;
+
+  /// No description provided for @errorAuthInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get errorAuthInvalidCredentials;
+
+  /// No description provided for @errorAuthEmailTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered.'**
+  String get errorAuthEmailTaken;
+
+  /// No description provided for @errorAuthTokenExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset link is invalid or has expired.'**
+  String get errorAuthTokenExpired;
+
+  /// No description provided for @errorAuthBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your details and try again.'**
+  String get errorAuthBadRequest;
+
+  /// No description provided for @errorServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected error. Please try again.'**
+  String get errorServerError;
+
+  /// No description provided for @errorNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the server.'**
+  String get errorNoConnection;
+
+  /// No description provided for @errorTxNoSourceAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a source account.'**
+  String get errorTxNoSourceAccount;
+
+  /// No description provided for @errorTxInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than 0.'**
+  String get errorTxInvalidAmount;
+
+  /// No description provided for @errorTxNoCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category.'**
+  String get errorTxNoCategory;
+
+  /// No description provided for @errorTxNoDestAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a destination account.'**
+  String get errorTxNoDestAccount;
+
+  /// No description provided for @errorTxSameAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination must be a different account.'**
+  String get errorTxSameAccount;
+
+  /// No description provided for @errorTxInvalidSourceAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Source account not found.'**
+  String get errorTxInvalidSourceAccount;
+
+  /// No description provided for @errorTxInvalidDestAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination account not found.'**
+  String get errorTxInvalidDestAccount;
+
+  /// No description provided for @errorTxCreditTransferNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers from a credit card are not available.'**
+  String get errorTxCreditTransferNotSupported;
+
+  /// No description provided for @errorTxSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the transaction. Please try again.'**
+  String get errorTxSaveFailed;
 }
 
 class _AppLocalizationsDelegate

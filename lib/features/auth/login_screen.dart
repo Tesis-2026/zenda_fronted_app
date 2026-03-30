@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/errors/error_codes.dart';
 import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -57,7 +58,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Show error if exists
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.error != null) {
-        if (next.error == 'Usuario no existe') {
+        // Wrong credentials → suggest creating an account instead of a generic snackbar.
+        if (next.error == AuthErrorCode.invalidCredentials) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -93,9 +95,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             SnackBar(
               content: Row(
                 children: [
-                   const Icon(Icons.error_outline, color: Colors.white),
-                   const SizedBox(width: 8),
-                   Expanded(child: Text(next.error!)),
+                  const Icon(Icons.error_outline, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(l10n.resolveError(next.error!))),
                 ],
               ),
               backgroundColor: const Color(0xFFFB7185),
