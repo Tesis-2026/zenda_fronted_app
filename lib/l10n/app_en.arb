@@ -186,5 +186,18 @@
   "profileEditButton": "Edit profile",
   "profileFullNameLabel": "Full name",
   "profileAgeLabel": "Age",
-  "profileUniversityLabel": "University"
+  "profileUniversityLabel": "University",
+  "profileManageCategories": "Manage categories",
+
+  "catMgmtTitle": "My Categories",
+  "catMgmtSystemSection": "Default categories",
+  "catMgmtCustomSection": "Custom categories",
+  "catMgmtEmpty": "No custom categories yet",
+  "catMgmtAddTitle": "New category",
+  "catMgmtAddHint": "Category name",
+  "catMgmtRenameTitle": "Rename category",
+  "catMgmtDeleteConfirm": "Delete this category? Transactions using it will keep their data.",
+  "catMgmtDeleteAction": "Delete",
+  "catMgmtErrorLoad": "Could not load categories",
+  "catMgmtErrorSave": "Could not save. Try again."
 }

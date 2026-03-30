@@ -171,6 +171,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             minimumSize: const Size(double.infinity, 52),
           ),
         ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => context.push('/categories'),
+          icon: const Icon(Icons.label_outlined),
+          label: Text(l10n.profileManageCategories),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 52),
+          ),
+        ),
       ],
     );
   }
