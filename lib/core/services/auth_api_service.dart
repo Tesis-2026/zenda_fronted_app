@@ -29,8 +29,10 @@ class AuthApiService {
         'password': password,
       });
 
-      final accessToken = tokenBody['accessToken'] as String;
-      await ApiClient.saveToken(accessToken);
+      await ApiClient.saveTokens(
+        accessToken: tokenBody['accessToken'] as String,
+        refreshToken: tokenBody['refreshToken'] as String,
+      );
 
       final profileBody = await ApiClient.get('/users/me');
       return AuthResult.success(User.fromJson(profileBody));
@@ -51,8 +53,10 @@ class AuthApiService {
         'password': password,
       });
 
-      final accessToken = tokenBody['accessToken'] as String;
-      await ApiClient.saveToken(accessToken);
+      await ApiClient.saveTokens(
+        accessToken: tokenBody['accessToken'] as String,
+        refreshToken: tokenBody['refreshToken'] as String,
+      );
 
       final profileBody = await ApiClient.get('/users/me');
       return AuthResult.success(User.fromJson(profileBody));
@@ -79,7 +83,15 @@ class AuthApiService {
     return user != null;
   }
 
-  Future<void> logout() => ApiClient.deleteToken();
+  Future<void> logout() async {
+    try {
+      // Revoke all refresh tokens on the server before clearing local storage
+      await ApiClient.post('/auth/logout', {}, authenticated: true);
+    } catch (_) {
+      // Best-effort — always clear local tokens even if the server call fails
+    }
+    await ApiClient.deleteTokens();
+  }
 
   Future<AuthResult> forgotPassword(String email) async {
     try {
