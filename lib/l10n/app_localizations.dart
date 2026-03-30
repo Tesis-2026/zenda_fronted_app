@@ -1177,6 +1177,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not generate PDF'**
   String get reportsExportPdfError;
+
+  /// No description provided for @profileBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get profileBudgets;
+
+  /// No description provided for @profileGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Goals'**
+  String get profileGoals;
+
+  /// No description provided for @budgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budgetTitle;
+
+  /// No description provided for @budgetEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No budgets yet'**
+  String get budgetEmptyTitle;
+
+  /// No description provided for @budgetEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a budget to track your spending by category'**
+  String get budgetEmptySubtitle;
+
+  /// No description provided for @budgetAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Budget'**
+  String get budgetAddTitle;
+
+  /// No description provided for @budgetCategoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get budgetCategoryAll;
+
+  /// No description provided for @budgetAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending limit (S/)'**
+  String get budgetAmountLabel;
+
+  /// No description provided for @budgetMonthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get budgetMonthLabel;
+
+  /// No description provided for @budgetYearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get budgetYearLabel;
+
+  /// No description provided for @budgetSpentOf.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ {spent} of S/ {limit}'**
+  String budgetSpentOf(String spent, String limit);
+
+  /// No description provided for @budgetPercentUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% used'**
+  String budgetPercentUsed(String percent);
+
+  /// No description provided for @budgetErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load budgets'**
+  String get budgetErrorLoad;
+
+  /// No description provided for @budgetDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this budget?'**
+  String get budgetDeleteConfirm;
+
+  /// No description provided for @budgetDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'A budget for this category and period already exists'**
+  String get budgetDuplicate;
+
+  /// No description provided for @budgetEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Budget'**
+  String get budgetEditTitle;
+
+  /// No description provided for @goalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Goals'**
+  String get goalsTitle;
+
+  /// No description provided for @goalsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals yet'**
+  String get goalsEmptyTitle;
+
+  /// No description provided for @goalsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a savings goal to track your progress'**
+  String get goalsEmptySubtitle;
+
+  /// No description provided for @goalsAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Goal'**
+  String get goalsAddTitle;
+
+  /// No description provided for @goalsNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal name'**
+  String get goalsNameLabel;
+
+  /// No description provided for @goalsNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Emergency fund'**
+  String get goalsNameHint;
+
+  /// No description provided for @goalsTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target amount (S/)'**
+  String get goalsTargetLabel;
+
+  /// No description provided for @goalsContributeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contribution'**
+  String get goalsContributeTitle;
+
+  /// No description provided for @goalsContributeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (S/)'**
+  String get goalsContributeLabel;
+
+  /// No description provided for @goalsProgressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ {current} of S/ {target}'**
+  String goalsProgressLabel(String current, String target);
+
+  /// No description provided for @goalsErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load goals'**
+  String get goalsErrorLoad;
+
+  /// No description provided for @goalsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this goal?'**
+  String get goalsDeleteConfirm;
 }
 
 class _AppLocalizationsDelegate

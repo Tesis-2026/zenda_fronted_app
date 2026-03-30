@@ -237,5 +237,53 @@
   },
 
   "reportsExportPdf": "Export PDF",
-  "reportsExportPdfError": "Could not generate PDF"
+  "reportsExportPdfError": "Could not generate PDF",
+
+  "profileBudgets": "Budgets",
+  "profileGoals": "Savings Goals",
+
+  "budgetTitle": "Budgets",
+  "budgetEmptyTitle": "No budgets yet",
+  "budgetEmptySubtitle": "Create a budget to track your spending by category",
+  "budgetAddTitle": "New Budget",
+  "budgetCategoryAll": "All categories",
+  "budgetAmountLabel": "Spending limit (S/)",
+  "budgetMonthLabel": "Month",
+  "budgetYearLabel": "Year",
+  "budgetSpentOf": "S/ {spent} of S/ {limit}",
+  "@budgetSpentOf": {
+    "placeholders": {
+      "spent": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "budgetPercentUsed": "{percent}% used",
+  "@budgetPercentUsed": {
+    "placeholders": {
+      "percent": { "type": "String" }
+    }
+  },
+  "budgetErrorLoad": "Could not load budgets",
+  "budgetDeleteConfirm": "Delete this budget?",
+  "budgetDuplicate": "A budget for this category and period already exists",
+  "budgetEditTitle": "Edit Budget",
+
+  "goalsTitle": "Savings Goals",
+  "goalsEmptyTitle": "No goals yet",
+  "goalsEmptySubtitle": "Create a savings goal to track your progress",
+  "goalsAddTitle": "New Goal",
+  "goalsNameLabel": "Goal name",
+  "goalsNameHint": "e.g. Emergency fund",
+  "goalsTargetLabel": "Target amount (S/)",
+  "goalsContributeTitle": "Add contribution",
+  "goalsContributeLabel": "Amount (S/)",
+  "goalsProgressLabel": "S/ {current} of S/ {target}",
+  "@goalsProgressLabel": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "target": { "type": "String" }
+    }
+  },
+  "goalsErrorLoad": "Could not load goals",
+  "goalsDeleteConfirm": "Delete this goal?"
 }

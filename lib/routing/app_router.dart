@@ -8,7 +8,9 @@ import '../features/auth/reset_password_screen.dart';
 import '../features/auth/auth_gate.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/transactions/add_transaction_screen.dart';
+import '../features/budget/budget_screen.dart';
 import '../features/categories/category_management_screen.dart';
+import '../features/goals/goals_screen.dart';
 import '../features/reports/reports_screen.dart';
 
 class AppRouter {
@@ -66,6 +68,14 @@ class AppRouter {
       GoRoute(
         path: '/reports',
         builder: (context, state) => const ReportsScreen(),
+      ),
+      GoRoute(
+        path: '/budgets',
+        builder: (context, state) => const BudgetScreen(),
+      ),
+      GoRoute(
+        path: '/goals',
+        builder: (context, state) => const GoalsScreen(),
       ),
     ],
   );

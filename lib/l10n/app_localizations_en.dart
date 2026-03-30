@@ -585,4 +585,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsExportPdfError => 'Could not generate PDF';
+
+  @override
+  String get profileBudgets => 'Budgets';
+
+  @override
+  String get profileGoals => 'Savings Goals';
+
+  @override
+  String get budgetTitle => 'Budgets';
+
+  @override
+  String get budgetEmptyTitle => 'No budgets yet';
+
+  @override
+  String get budgetEmptySubtitle =>
+      'Create a budget to track your spending by category';
+
+  @override
+  String get budgetAddTitle => 'New Budget';
+
+  @override
+  String get budgetCategoryAll => 'All categories';
+
+  @override
+  String get budgetAmountLabel => 'Spending limit (S/)';
+
+  @override
+  String get budgetMonthLabel => 'Month';
+
+  @override
+  String get budgetYearLabel => 'Year';
+
+  @override
+  String budgetSpentOf(String spent, String limit) {
+    return 'S/ $spent of S/ $limit';
+  }
+
+  @override
+  String budgetPercentUsed(String percent) {
+    return '$percent% used';
+  }
+
+  @override
+  String get budgetErrorLoad => 'Could not load budgets';
+
+  @override
+  String get budgetDeleteConfirm => 'Delete this budget?';
+
+  @override
+  String get budgetDuplicate =>
+      'A budget for this category and period already exists';
+
+  @override
+  String get budgetEditTitle => 'Edit Budget';
+
+  @override
+  String get goalsTitle => 'Savings Goals';
+
+  @override
+  String get goalsEmptyTitle => 'No goals yet';
+
+  @override
+  String get goalsEmptySubtitle =>
+      'Create a savings goal to track your progress';
+
+  @override
+  String get goalsAddTitle => 'New Goal';
+
+  @override
+  String get goalsNameLabel => 'Goal name';
+
+  @override
+  String get goalsNameHint => 'e.g. Emergency fund';
+
+  @override
+  String get goalsTargetLabel => 'Target amount (S/)';
+
+  @override
+  String get goalsContributeTitle => 'Add contribution';
+
+  @override
+  String get goalsContributeLabel => 'Amount (S/)';
+
+  @override
+  String goalsProgressLabel(String current, String target) {
+    return 'S/ $current of S/ $target';
+  }
+
+  @override
+  String get goalsErrorLoad => 'Could not load goals';
+
+  @override
+  String get goalsDeleteConfirm => 'Delete this goal?';
 }

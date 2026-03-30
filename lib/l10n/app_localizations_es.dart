@@ -584,4 +584,97 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reportsExportPdfError => 'No se pudo generar el PDF';
+
+  @override
+  String get profileBudgets => 'Presupuestos';
+
+  @override
+  String get profileGoals => 'Metas de ahorro';
+
+  @override
+  String get budgetTitle => 'Presupuestos';
+
+  @override
+  String get budgetEmptyTitle => 'Sin presupuestos';
+
+  @override
+  String get budgetEmptySubtitle =>
+      'Crea un presupuesto para controlar tus gastos por categoría';
+
+  @override
+  String get budgetAddTitle => 'Nuevo presupuesto';
+
+  @override
+  String get budgetCategoryAll => 'Todas las categorías';
+
+  @override
+  String get budgetAmountLabel => 'Límite de gasto (S/)';
+
+  @override
+  String get budgetMonthLabel => 'Mes';
+
+  @override
+  String get budgetYearLabel => 'Año';
+
+  @override
+  String budgetSpentOf(String spent, String limit) {
+    return 'S/ $spent de S/ $limit';
+  }
+
+  @override
+  String budgetPercentUsed(String percent) {
+    return '$percent% usado';
+  }
+
+  @override
+  String get budgetErrorLoad => 'No se pudieron cargar los presupuestos';
+
+  @override
+  String get budgetDeleteConfirm => '¿Eliminar este presupuesto?';
+
+  @override
+  String get budgetDuplicate =>
+      'Ya existe un presupuesto para esta categoría y período';
+
+  @override
+  String get budgetEditTitle => 'Editar presupuesto';
+
+  @override
+  String get goalsTitle => 'Metas de ahorro';
+
+  @override
+  String get goalsEmptyTitle => 'Sin metas';
+
+  @override
+  String get goalsEmptySubtitle =>
+      'Crea una meta de ahorro para seguir tu progreso';
+
+  @override
+  String get goalsAddTitle => 'Nueva meta';
+
+  @override
+  String get goalsNameLabel => 'Nombre de la meta';
+
+  @override
+  String get goalsNameHint => 'ej. Fondo de emergencia';
+
+  @override
+  String get goalsTargetLabel => 'Monto objetivo (S/)';
+
+  @override
+  String get goalsContributeTitle => 'Agregar aporte';
+
+  @override
+  String get goalsContributeLabel => 'Monto (S/)';
+
+  @override
+  String goalsProgressLabel(String current, String target) {
+    return 'S/ $current de S/ $target';
+  }
+
+  @override
+  String get goalsErrorLoad => 'No se pudieron cargar las metas';
+
+  @override
+  String get goalsDeleteConfirm => '¿Eliminar esta meta?';
 }
