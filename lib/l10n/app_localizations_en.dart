@@ -683,6 +683,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalsDeleteConfirm => 'Delete this goal?';
 
   @override
+  String get goalsDeleteLabel => 'Delete';
+
+  @override
+  String get goalsDetailTitle => 'Goal Detail';
+
+  @override
+  String get goalsDetailContributionHistory => 'Contribution history';
+
+  @override
+  String get goalsDetailNoContributions => 'No contributions yet';
+
+  @override
+  String goalsDetailProjection(String date) {
+    return 'At this pace you\'ll complete your goal on $date';
+  }
+
+  @override
+  String goalsDetailAlert(String date) {
+    return 'At this pace you won\'t meet your deadline of $date';
+  }
+
+  @override
+  String get goalsDetailProgressChart => 'Cumulative progress';
+
+  @override
   String get errorAuthInvalidCredentials => 'Incorrect email or password.';
 
   @override

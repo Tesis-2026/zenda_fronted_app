@@ -1,6 +1,29 @@
 import 'api_client.dart';
 import '../models/savings_goal.dart';
 
+class GoalContribution {
+  final String id;
+  final String goalId;
+  final double amount;
+  final DateTime createdAt;
+
+  const GoalContribution({
+    required this.id,
+    required this.goalId,
+    required this.amount,
+    required this.createdAt,
+  });
+
+  factory GoalContribution.fromJson(Map<String, dynamic> json) {
+    return GoalContribution(
+      id: json['id'] as String,
+      goalId: json['goalId'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+}
+
 class GoalsApiService {
   Future<List<SavingsGoal>> getAll() async {
     final list = await ApiClient.getList('/goals');
@@ -31,6 +54,14 @@ class GoalsApiService {
       authenticated: true,
     );
     return SavingsGoal.fromJson(json);
+  }
+
+  Future<List<GoalContribution>> getContributions(String id) async {
+    final list = await ApiClient.getList('/goals/$id/contributions');
+    return list
+        .cast<Map<String, dynamic>>()
+        .map(GoalContribution.fromJson)
+        .toList();
   }
 
   Future<void> delete(String id) => ApiClient.delete('/goals/$id');

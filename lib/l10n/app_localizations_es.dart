@@ -683,6 +683,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get goalsDeleteConfirm => '¿Eliminar esta meta?';
 
   @override
+  String get goalsDeleteLabel => 'Eliminar';
+
+  @override
+  String get goalsDetailTitle => 'Detalle de meta';
+
+  @override
+  String get goalsDetailContributionHistory => 'Historial de aportes';
+
+  @override
+  String get goalsDetailNoContributions => 'Sin aportes todavía';
+
+  @override
+  String goalsDetailProjection(String date) {
+    return 'A este ritmo completarás tu meta el $date';
+  }
+
+  @override
+  String goalsDetailAlert(String date) {
+    return 'A este ritmo no alcanzarás tu meta antes del $date';
+  }
+
+  @override
+  String get goalsDetailProgressChart => 'Progreso acumulado';
+
+  @override
   String get errorAuthInvalidCredentials => 'Correo o contraseña incorrectos.';
 
   @override

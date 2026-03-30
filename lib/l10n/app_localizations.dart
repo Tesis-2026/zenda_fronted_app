@@ -1352,6 +1352,48 @@ abstract class AppLocalizations {
   /// **'Delete this goal?'**
   String get goalsDeleteConfirm;
 
+  /// No description provided for @goalsDeleteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get goalsDeleteLabel;
+
+  /// No description provided for @goalsDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Detail'**
+  String get goalsDetailTitle;
+
+  /// No description provided for @goalsDetailContributionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution history'**
+  String get goalsDetailContributionHistory;
+
+  /// No description provided for @goalsDetailNoContributions.
+  ///
+  /// In en, this message translates to:
+  /// **'No contributions yet'**
+  String get goalsDetailNoContributions;
+
+  /// No description provided for @goalsDetailProjection.
+  ///
+  /// In en, this message translates to:
+  /// **'At this pace you\'ll complete your goal on {date}'**
+  String goalsDetailProjection(String date);
+
+  /// No description provided for @goalsDetailAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'At this pace you won\'t meet your deadline of {date}'**
+  String goalsDetailAlert(String date);
+
+  /// No description provided for @goalsDetailProgressChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative progress'**
+  String get goalsDetailProgressChart;
+
   /// No description provided for @errorAuthInvalidCredentials.
   ///
   /// In en, this message translates to:

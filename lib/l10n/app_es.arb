@@ -287,6 +287,23 @@
   },
   "goalsErrorLoad": "No se pudieron cargar las metas",
   "goalsDeleteConfirm": "¿Eliminar esta meta?",
+  "goalsDeleteLabel": "Eliminar",
+  "goalsDetailTitle": "Detalle de meta",
+  "goalsDetailContributionHistory": "Historial de aportes",
+  "goalsDetailNoContributions": "Sin aportes todavía",
+  "goalsDetailProjection": "A este ritmo completarás tu meta el {date}",
+  "@goalsDetailProjection": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailAlert": "A este ritmo no alcanzarás tu meta antes del {date}",
+  "@goalsDetailAlert": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailProgressChart": "Progreso acumulado",
 
   "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
   "errorAuthEmailTaken": "Este correo ya está registrado.",

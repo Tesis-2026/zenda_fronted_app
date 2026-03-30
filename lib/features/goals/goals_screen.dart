@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
@@ -48,6 +49,10 @@ class GoalsScreen extends ConsumerWidget {
                 itemCount: goals.length,
                 itemBuilder: (context, index) => _GoalCard(
                   goal: goals[index],
+                  onTap: () => context.go(
+                    '/goals/${goals[index].id}',
+                    extra: goals[index],
+                  ),
                   onContribute: () =>
                       _showContributeDialog(context, ref, goals[index]),
                   onDelete: () => _deleteGoal(context, ref, goals[index].id),
@@ -231,11 +236,13 @@ class _EmptyState extends StatelessWidget {
 
 class _GoalCard extends StatelessWidget {
   final SavingsGoal goal;
+  final VoidCallback onTap;
   final VoidCallback onContribute;
   final VoidCallback onDelete;
 
   const _GoalCard({
     required this.goal,
+    required this.onTap,
     required this.onContribute,
     required this.onDelete,
   });
@@ -252,7 +259,10 @@ class _GoalCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,6 +334,7 @@ class _GoalCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
       ),
     );
   }

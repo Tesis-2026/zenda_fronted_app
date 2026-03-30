@@ -14,6 +14,8 @@ import '../features/transactions/add_transaction_screen.dart';
 import '../features/budget/budget_screen.dart';
 import '../features/categories/category_management_screen.dart';
 import '../features/goals/goals_screen.dart';
+import '../features/goals/goal_detail_screen.dart';
+import '../core/models/savings_goal.dart';
 import '../features/reports/reports_screen.dart';
 
 // Routes that do not require authentication.
@@ -141,6 +143,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/goals',
         builder: (context, state) => const GoalsScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) {
+              final goal = state.extra as SavingsGoal;
+              return GoalDetailScreen(goal: goal);
+            },
+          ),
+        ],
       ),
     ],
   );
