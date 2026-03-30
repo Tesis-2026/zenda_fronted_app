@@ -190,8 +190,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage2Micro => 'Learn without overcomplicating it.';
 
   @override
-  String get onboardingPage3Title =>
-      'Keep your streak and improve every day 🔥';
+  String get onboardingPage3Title => 'Keep your streak and improve every day';
 
   @override
   String get onboardingPage3Subtitle =>
@@ -218,7 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dashboardGreeting(String name) {
-    return 'Hi, $name 👋';
+    return 'Hi, $name';
   }
 
   @override
@@ -349,7 +348,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txSaveButton => 'Save transaction';
 
   @override
-  String get txSaved => 'Saved ✅';
+  String get txSaved => 'Saved';
 
   @override
   String txErrorPrefix(String error) {

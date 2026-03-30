@@ -62,7 +62,7 @@
   "onboardingPage2Title": "Entiende tu dinero con 50/30/20",
   "onboardingPage2Subtitle": "Zenda te muestra si estás equilibrado: necesidades, deseos y ahorros.",
   "onboardingPage2Micro": "Aprende sin complicarte.",
-  "onboardingPage3Title": "Mantén tu racha y mejora cada día 🔥",
+  "onboardingPage3Title": "Mantén tu racha y mejora cada día",
   "onboardingPage3Subtitle": "Construye consistencia registrando diariamente y siguiendo tu progreso.",
   "onboardingPage3Micro": "Lo importante es volver mañana.",
   "onboardingSkip": "Omitir",
@@ -71,7 +71,7 @@
   "onboardingStart": "Comenzar",
   "onboardingHaveAccount": "Ya tengo una cuenta",
 
-  "dashboardGreeting": "Hola, {name} 👋",
+  "dashboardGreeting": "Hola, {name}",
   "@dashboardGreeting": {
     "placeholders": {
       "name": { "type": "String" }
@@ -135,7 +135,7 @@
   "txNoteHint": "ej. Cafetería",
   "txDateLabel": "Fecha",
   "txSaveButton": "Guardar transacción",
-  "txSaved": "Guardado ✅",
+  "txSaved": "Guardado",
   "txErrorPrefix": "Error: {error}",
   "@txErrorPrefix": {
     "placeholders": {

@@ -443,7 +443,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPage3Title.
   ///
   /// In en, this message translates to:
-  /// **'Keep your streak and improve every day 🔥'**
+  /// **'Keep your streak and improve every day'**
   String get onboardingPage3Title;
 
   /// No description provided for @onboardingPage3Subtitle.
@@ -491,7 +491,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardGreeting.
   ///
   /// In en, this message translates to:
-  /// **'Hi, {name} 👋'**
+  /// **'Hi, {name}'**
   String dashboardGreeting(String name);
 
   /// No description provided for @dashboardMotivation.
@@ -725,7 +725,7 @@ abstract class AppLocalizations {
   /// No description provided for @txSaved.
   ///
   /// In en, this message translates to:
-  /// **'Saved ✅'**
+  /// **'Saved'**
   String get txSaved;
 
   /// No description provided for @txErrorPrefix.
