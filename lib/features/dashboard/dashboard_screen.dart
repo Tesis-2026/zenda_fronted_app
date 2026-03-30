@@ -521,6 +521,20 @@ class _PerfilSection extends ConsumerWidget {
         const SizedBox(height: 16),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+          leading: const Icon(Icons.bar_chart_rounded, color: Color(0xFF818CF8)),
+          title: Text(l10n.reportsTitle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/reports'),
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+          leading: const Icon(Icons.category_rounded, color: Color(0xFF34D399)),
+          title: Text(l10n.profileManageCategories),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/categories'),
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
           leading: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444)),
           title: Text(l10n.commonSignOut),
           onTap: () {

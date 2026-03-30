@@ -127,4 +127,14 @@ class ApiClient {
     );
     _throwIfError(response);
   }
+
+  static Future<List<int>> getBytes(String path) async {
+    final headers = await _authHeaders();
+    final response = await http.get(
+      Uri.parse('$_kBaseUrl$path'),
+      headers: headers,
+    );
+    _throwIfError(response);
+    return response.bodyBytes;
+  }
 }
