@@ -528,6 +528,21 @@ class _PerfilSection extends ConsumerWidget {
         ),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+          leading: const Icon(Icons.account_balance_wallet_rounded,
+              color: Color(0xFF60A5FA)),
+          title: Text(l10n.profileBudgets),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/budgets'),
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+          leading: const Icon(Icons.savings_rounded, color: Color(0xFFF59E0B)),
+          title: Text(l10n.profileGoals),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/goals'),
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
           leading: const Icon(Icons.category_rounded, color: Color(0xFF34D399)),
           title: Text(l10n.profileManageCategories),
           trailing: const Icon(Icons.chevron_right),

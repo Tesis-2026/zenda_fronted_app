@@ -430,6 +430,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get txDeleteAction => 'Eliminar';
 
   @override
+  String get txDeleteError =>
+      'No se pudo eliminar la transacción. Inténtalo de nuevo.';
+
+  @override
   String get txEditTitle => 'Editar transacción';
 
   @override
@@ -584,4 +588,169 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reportsExportPdfError => 'No se pudo generar el PDF';
+
+  @override
+  String get profileBudgets => 'Presupuestos';
+
+  @override
+  String get profileGoals => 'Metas de ahorro';
+
+  @override
+  String get budgetTitle => 'Presupuestos';
+
+  @override
+  String get budgetEmptyTitle => 'Sin presupuestos';
+
+  @override
+  String get budgetEmptySubtitle =>
+      'Crea un presupuesto para controlar tus gastos por categoría';
+
+  @override
+  String get budgetAddTitle => 'Nuevo presupuesto';
+
+  @override
+  String get budgetCategoryAll => 'Todas las categorías';
+
+  @override
+  String get budgetAmountLabel => 'Límite de gasto (S/)';
+
+  @override
+  String get budgetMonthLabel => 'Mes';
+
+  @override
+  String get budgetYearLabel => 'Año';
+
+  @override
+  String budgetSpentOf(String spent, String limit) {
+    return 'S/ $spent de S/ $limit';
+  }
+
+  @override
+  String budgetPercentUsed(String percent) {
+    return '$percent% usado';
+  }
+
+  @override
+  String get budgetErrorLoad => 'No se pudieron cargar los presupuestos';
+
+  @override
+  String get budgetDeleteConfirm => '¿Eliminar este presupuesto?';
+
+  @override
+  String get budgetDuplicate =>
+      'Ya existe un presupuesto para esta categoría y período';
+
+  @override
+  String get budgetEditTitle => 'Editar presupuesto';
+
+  @override
+  String get goalsTitle => 'Metas de ahorro';
+
+  @override
+  String get goalsEmptyTitle => 'Sin metas';
+
+  @override
+  String get goalsEmptySubtitle =>
+      'Crea una meta de ahorro para seguir tu progreso';
+
+  @override
+  String get goalsAddTitle => 'Nueva meta';
+
+  @override
+  String get goalsNameLabel => 'Nombre de la meta';
+
+  @override
+  String get goalsNameHint => 'ej. Fondo de emergencia';
+
+  @override
+  String get goalsTargetLabel => 'Monto objetivo (S/)';
+
+  @override
+  String get goalsContributeTitle => 'Agregar aporte';
+
+  @override
+  String get goalsContributeLabel => 'Monto (S/)';
+
+  @override
+  String goalsProgressLabel(String current, String target) {
+    return 'S/ $current de S/ $target';
+  }
+
+  @override
+  String get goalsErrorLoad => 'No se pudieron cargar las metas';
+
+  @override
+  String get goalsDeleteConfirm => '¿Eliminar esta meta?';
+
+  @override
+  String get goalsDeleteLabel => 'Eliminar';
+
+  @override
+  String get goalsDetailTitle => 'Detalle de meta';
+
+  @override
+  String get goalsDetailContributionHistory => 'Historial de aportes';
+
+  @override
+  String get goalsDetailNoContributions => 'Sin aportes todavía';
+
+  @override
+  String goalsDetailProjection(String date) {
+    return 'A este ritmo completarás tu meta el $date';
+  }
+
+  @override
+  String goalsDetailAlert(String date) {
+    return 'A este ritmo no alcanzarás tu meta antes del $date';
+  }
+
+  @override
+  String get goalsDetailProgressChart => 'Progreso acumulado';
+
+  @override
+  String get errorAuthInvalidCredentials => 'Correo o contraseña incorrectos.';
+
+  @override
+  String get errorAuthEmailTaken => 'Este correo ya está registrado.';
+
+  @override
+  String get errorAuthTokenExpired => 'El enlace es inválido o ha expirado.';
+
+  @override
+  String get errorAuthBadRequest => 'Revisa tus datos e inténtalo de nuevo.';
+
+  @override
+  String get errorServerError => 'Error inesperado. Inténtalo de nuevo.';
+
+  @override
+  String get errorNoConnection => 'No se pudo conectar con el servidor.';
+
+  @override
+  String get errorTxNoSourceAccount => 'Selecciona una cuenta de origen.';
+
+  @override
+  String get errorTxInvalidAmount => 'Ingresa un monto mayor a 0.';
+
+  @override
+  String get errorTxNoCategory => 'Selecciona una categoría.';
+
+  @override
+  String get errorTxNoDestAccount => 'Selecciona una cuenta destino.';
+
+  @override
+  String get errorTxSameAccount => 'La cuenta destino debe ser distinta.';
+
+  @override
+  String get errorTxInvalidSourceAccount => 'Cuenta origen inválida.';
+
+  @override
+  String get errorTxInvalidDestAccount => 'Cuenta destino inválida.';
+
+  @override
+  String get errorTxCreditTransferNotSupported =>
+      'Transferir desde tarjeta de crédito no está disponible.';
+
+  @override
+  String get errorTxSaveFailed =>
+      'No se pudo guardar la transacción. Inténtalo de nuevo.';
 }

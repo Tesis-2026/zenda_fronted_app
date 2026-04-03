@@ -884,6 +884,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get txDeleteAction;
 
+  /// No description provided for @txDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete transaction. Please try again.'**
+  String get txDeleteError;
+
   /// No description provided for @txEditTitle.
   ///
   /// In en, this message translates to:
@@ -1177,6 +1183,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not generate PDF'**
   String get reportsExportPdfError;
+
+  /// No description provided for @profileBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get profileBudgets;
+
+  /// No description provided for @profileGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Goals'**
+  String get profileGoals;
+
+  /// No description provided for @budgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budgetTitle;
+
+  /// No description provided for @budgetEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No budgets yet'**
+  String get budgetEmptyTitle;
+
+  /// No description provided for @budgetEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a budget to track your spending by category'**
+  String get budgetEmptySubtitle;
+
+  /// No description provided for @budgetAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Budget'**
+  String get budgetAddTitle;
+
+  /// No description provided for @budgetCategoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get budgetCategoryAll;
+
+  /// No description provided for @budgetAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending limit (S/)'**
+  String get budgetAmountLabel;
+
+  /// No description provided for @budgetMonthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get budgetMonthLabel;
+
+  /// No description provided for @budgetYearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get budgetYearLabel;
+
+  /// No description provided for @budgetSpentOf.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ {spent} of S/ {limit}'**
+  String budgetSpentOf(String spent, String limit);
+
+  /// No description provided for @budgetPercentUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% used'**
+  String budgetPercentUsed(String percent);
+
+  /// No description provided for @budgetErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load budgets'**
+  String get budgetErrorLoad;
+
+  /// No description provided for @budgetDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this budget?'**
+  String get budgetDeleteConfirm;
+
+  /// No description provided for @budgetDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'A budget for this category and period already exists'**
+  String get budgetDuplicate;
+
+  /// No description provided for @budgetEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Budget'**
+  String get budgetEditTitle;
+
+  /// No description provided for @goalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Goals'**
+  String get goalsTitle;
+
+  /// No description provided for @goalsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals yet'**
+  String get goalsEmptyTitle;
+
+  /// No description provided for @goalsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a savings goal to track your progress'**
+  String get goalsEmptySubtitle;
+
+  /// No description provided for @goalsAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Goal'**
+  String get goalsAddTitle;
+
+  /// No description provided for @goalsNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal name'**
+  String get goalsNameLabel;
+
+  /// No description provided for @goalsNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Emergency fund'**
+  String get goalsNameHint;
+
+  /// No description provided for @goalsTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target amount (S/)'**
+  String get goalsTargetLabel;
+
+  /// No description provided for @goalsContributeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contribution'**
+  String get goalsContributeTitle;
+
+  /// No description provided for @goalsContributeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (S/)'**
+  String get goalsContributeLabel;
+
+  /// No description provided for @goalsProgressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ {current} of S/ {target}'**
+  String goalsProgressLabel(String current, String target);
+
+  /// No description provided for @goalsErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load goals'**
+  String get goalsErrorLoad;
+
+  /// No description provided for @goalsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this goal?'**
+  String get goalsDeleteConfirm;
+
+  /// No description provided for @goalsDeleteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get goalsDeleteLabel;
+
+  /// No description provided for @goalsDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Detail'**
+  String get goalsDetailTitle;
+
+  /// No description provided for @goalsDetailContributionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution history'**
+  String get goalsDetailContributionHistory;
+
+  /// No description provided for @goalsDetailNoContributions.
+  ///
+  /// In en, this message translates to:
+  /// **'No contributions yet'**
+  String get goalsDetailNoContributions;
+
+  /// No description provided for @goalsDetailProjection.
+  ///
+  /// In en, this message translates to:
+  /// **'At this pace you\'ll complete your goal on {date}'**
+  String goalsDetailProjection(String date);
+
+  /// No description provided for @goalsDetailAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'At this pace you won\'t meet your deadline of {date}'**
+  String goalsDetailAlert(String date);
+
+  /// No description provided for @goalsDetailProgressChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative progress'**
+  String get goalsDetailProgressChart;
+
+  /// No description provided for @errorAuthInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get errorAuthInvalidCredentials;
+
+  /// No description provided for @errorAuthEmailTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered.'**
+  String get errorAuthEmailTaken;
+
+  /// No description provided for @errorAuthTokenExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset link is invalid or has expired.'**
+  String get errorAuthTokenExpired;
+
+  /// No description provided for @errorAuthBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your details and try again.'**
+  String get errorAuthBadRequest;
+
+  /// No description provided for @errorServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected error. Please try again.'**
+  String get errorServerError;
+
+  /// No description provided for @errorNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the server.'**
+  String get errorNoConnection;
+
+  /// No description provided for @errorTxNoSourceAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a source account.'**
+  String get errorTxNoSourceAccount;
+
+  /// No description provided for @errorTxInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than 0.'**
+  String get errorTxInvalidAmount;
+
+  /// No description provided for @errorTxNoCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category.'**
+  String get errorTxNoCategory;
+
+  /// No description provided for @errorTxNoDestAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a destination account.'**
+  String get errorTxNoDestAccount;
+
+  /// No description provided for @errorTxSameAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination must be a different account.'**
+  String get errorTxSameAccount;
+
+  /// No description provided for @errorTxInvalidSourceAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Source account not found.'**
+  String get errorTxInvalidSourceAccount;
+
+  /// No description provided for @errorTxInvalidDestAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination account not found.'**
+  String get errorTxInvalidDestAccount;
+
+  /// No description provided for @errorTxCreditTransferNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers from a credit card are not available.'**
+  String get errorTxCreditTransferNotSupported;
+
+  /// No description provided for @errorTxSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the transaction. Please try again.'**
+  String get errorTxSaveFailed;
 }
 
 class _AppLocalizationsDelegate

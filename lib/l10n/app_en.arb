@@ -168,6 +168,7 @@
   "txDeleteConfirmTitle": "Delete transaction",
   "txDeleteConfirmMessage": "This action cannot be undone.",
   "txDeleteAction": "Delete",
+  "txDeleteError": "Could not delete transaction. Please try again.",
   "txEditTitle": "Edit transaction",
   "txUpdateButton": "Save changes",
 
@@ -237,5 +238,87 @@
   },
 
   "reportsExportPdf": "Export PDF",
-  "reportsExportPdfError": "Could not generate PDF"
+  "reportsExportPdfError": "Could not generate PDF",
+
+  "profileBudgets": "Budgets",
+  "profileGoals": "Savings Goals",
+
+  "budgetTitle": "Budgets",
+  "budgetEmptyTitle": "No budgets yet",
+  "budgetEmptySubtitle": "Create a budget to track your spending by category",
+  "budgetAddTitle": "New Budget",
+  "budgetCategoryAll": "All categories",
+  "budgetAmountLabel": "Spending limit (S/)",
+  "budgetMonthLabel": "Month",
+  "budgetYearLabel": "Year",
+  "budgetSpentOf": "S/ {spent} of S/ {limit}",
+  "@budgetSpentOf": {
+    "placeholders": {
+      "spent": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "budgetPercentUsed": "{percent}% used",
+  "@budgetPercentUsed": {
+    "placeholders": {
+      "percent": { "type": "String" }
+    }
+  },
+  "budgetErrorLoad": "Could not load budgets",
+  "budgetDeleteConfirm": "Delete this budget?",
+  "budgetDuplicate": "A budget for this category and period already exists",
+  "budgetEditTitle": "Edit Budget",
+
+  "goalsTitle": "Savings Goals",
+  "goalsEmptyTitle": "No goals yet",
+  "goalsEmptySubtitle": "Create a savings goal to track your progress",
+  "goalsAddTitle": "New Goal",
+  "goalsNameLabel": "Goal name",
+  "goalsNameHint": "e.g. Emergency fund",
+  "goalsTargetLabel": "Target amount (S/)",
+  "goalsContributeTitle": "Add contribution",
+  "goalsContributeLabel": "Amount (S/)",
+  "goalsProgressLabel": "S/ {current} of S/ {target}",
+  "@goalsProgressLabel": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "target": { "type": "String" }
+    }
+  },
+  "goalsErrorLoad": "Could not load goals",
+  "goalsDeleteConfirm": "Delete this goal?",
+  "goalsDeleteLabel": "Delete",
+  "goalsDetailTitle": "Goal Detail",
+  "goalsDetailContributionHistory": "Contribution history",
+  "goalsDetailNoContributions": "No contributions yet",
+  "goalsDetailProjection": "At this pace you'll complete your goal on {date}",
+  "@goalsDetailProjection": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailAlert": "At this pace you won't meet your deadline of {date}",
+  "@goalsDetailAlert": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailProgressChart": "Cumulative progress",
+
+  "errorAuthInvalidCredentials": "Incorrect email or password.",
+  "errorAuthEmailTaken": "This email is already registered.",
+  "errorAuthTokenExpired": "Reset link is invalid or has expired.",
+  "errorAuthBadRequest": "Check your details and try again.",
+  "errorServerError": "Unexpected error. Please try again.",
+  "errorNoConnection": "Could not connect to the server.",
+
+  "errorTxNoSourceAccount": "Select a source account.",
+  "errorTxInvalidAmount": "Enter an amount greater than 0.",
+  "errorTxNoCategory": "Select a category.",
+  "errorTxNoDestAccount": "Select a destination account.",
+  "errorTxSameAccount": "Destination must be a different account.",
+  "errorTxInvalidSourceAccount": "Source account not found.",
+  "errorTxInvalidDestAccount": "Destination account not found.",
+  "errorTxCreditTransferNotSupported": "Transfers from a credit card are not available.",
+  "errorTxSaveFailed": "Could not save the transaction. Please try again."
 }

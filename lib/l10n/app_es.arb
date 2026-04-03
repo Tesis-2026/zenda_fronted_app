@@ -168,6 +168,7 @@
   "txDeleteConfirmTitle": "Eliminar transacción",
   "txDeleteConfirmMessage": "Esta acción no se puede deshacer.",
   "txDeleteAction": "Eliminar",
+  "txDeleteError": "No se pudo eliminar la transacción. Inténtalo de nuevo.",
   "txEditTitle": "Editar transacción",
   "txUpdateButton": "Guardar cambios",
 
@@ -237,5 +238,87 @@
   },
 
   "reportsExportPdf": "Exportar PDF",
-  "reportsExportPdfError": "No se pudo generar el PDF"
+  "reportsExportPdfError": "No se pudo generar el PDF",
+
+  "profileBudgets": "Presupuestos",
+  "profileGoals": "Metas de ahorro",
+
+  "budgetTitle": "Presupuestos",
+  "budgetEmptyTitle": "Sin presupuestos",
+  "budgetEmptySubtitle": "Crea un presupuesto para controlar tus gastos por categoría",
+  "budgetAddTitle": "Nuevo presupuesto",
+  "budgetCategoryAll": "Todas las categorías",
+  "budgetAmountLabel": "Límite de gasto (S/)",
+  "budgetMonthLabel": "Mes",
+  "budgetYearLabel": "Año",
+  "budgetSpentOf": "S/ {spent} de S/ {limit}",
+  "@budgetSpentOf": {
+    "placeholders": {
+      "spent": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "budgetPercentUsed": "{percent}% usado",
+  "@budgetPercentUsed": {
+    "placeholders": {
+      "percent": { "type": "String" }
+    }
+  },
+  "budgetErrorLoad": "No se pudieron cargar los presupuestos",
+  "budgetDeleteConfirm": "¿Eliminar este presupuesto?",
+  "budgetDuplicate": "Ya existe un presupuesto para esta categoría y período",
+  "budgetEditTitle": "Editar presupuesto",
+
+  "goalsTitle": "Metas de ahorro",
+  "goalsEmptyTitle": "Sin metas",
+  "goalsEmptySubtitle": "Crea una meta de ahorro para seguir tu progreso",
+  "goalsAddTitle": "Nueva meta",
+  "goalsNameLabel": "Nombre de la meta",
+  "goalsNameHint": "ej. Fondo de emergencia",
+  "goalsTargetLabel": "Monto objetivo (S/)",
+  "goalsContributeTitle": "Agregar aporte",
+  "goalsContributeLabel": "Monto (S/)",
+  "goalsProgressLabel": "S/ {current} de S/ {target}",
+  "@goalsProgressLabel": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "target": { "type": "String" }
+    }
+  },
+  "goalsErrorLoad": "No se pudieron cargar las metas",
+  "goalsDeleteConfirm": "¿Eliminar esta meta?",
+  "goalsDeleteLabel": "Eliminar",
+  "goalsDetailTitle": "Detalle de meta",
+  "goalsDetailContributionHistory": "Historial de aportes",
+  "goalsDetailNoContributions": "Sin aportes todavía",
+  "goalsDetailProjection": "A este ritmo completarás tu meta el {date}",
+  "@goalsDetailProjection": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailAlert": "A este ritmo no alcanzarás tu meta antes del {date}",
+  "@goalsDetailAlert": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailProgressChart": "Progreso acumulado",
+
+  "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
+  "errorAuthEmailTaken": "Este correo ya está registrado.",
+  "errorAuthTokenExpired": "El enlace es inválido o ha expirado.",
+  "errorAuthBadRequest": "Revisa tus datos e inténtalo de nuevo.",
+  "errorServerError": "Error inesperado. Inténtalo de nuevo.",
+  "errorNoConnection": "No se pudo conectar con el servidor.",
+
+  "errorTxNoSourceAccount": "Selecciona una cuenta de origen.",
+  "errorTxInvalidAmount": "Ingresa un monto mayor a 0.",
+  "errorTxNoCategory": "Selecciona una categoría.",
+  "errorTxNoDestAccount": "Selecciona una cuenta destino.",
+  "errorTxSameAccount": "La cuenta destino debe ser distinta.",
+  "errorTxInvalidSourceAccount": "Cuenta origen inválida.",
+  "errorTxInvalidDestAccount": "Cuenta destino inválida.",
+  "errorTxCreditTransferNotSupported": "Transferir desde tarjeta de crédito no está disponible.",
+  "errorTxSaveFailed": "No se pudo guardar la transacción. Inténtalo de nuevo."
 }

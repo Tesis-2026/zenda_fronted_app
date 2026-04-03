@@ -431,6 +431,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txDeleteAction => 'Delete';
 
   @override
+  String get txDeleteError => 'Could not delete transaction. Please try again.';
+
+  @override
   String get txEditTitle => 'Edit transaction';
 
   @override
@@ -585,4 +588,169 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsExportPdfError => 'Could not generate PDF';
+
+  @override
+  String get profileBudgets => 'Budgets';
+
+  @override
+  String get profileGoals => 'Savings Goals';
+
+  @override
+  String get budgetTitle => 'Budgets';
+
+  @override
+  String get budgetEmptyTitle => 'No budgets yet';
+
+  @override
+  String get budgetEmptySubtitle =>
+      'Create a budget to track your spending by category';
+
+  @override
+  String get budgetAddTitle => 'New Budget';
+
+  @override
+  String get budgetCategoryAll => 'All categories';
+
+  @override
+  String get budgetAmountLabel => 'Spending limit (S/)';
+
+  @override
+  String get budgetMonthLabel => 'Month';
+
+  @override
+  String get budgetYearLabel => 'Year';
+
+  @override
+  String budgetSpentOf(String spent, String limit) {
+    return 'S/ $spent of S/ $limit';
+  }
+
+  @override
+  String budgetPercentUsed(String percent) {
+    return '$percent% used';
+  }
+
+  @override
+  String get budgetErrorLoad => 'Could not load budgets';
+
+  @override
+  String get budgetDeleteConfirm => 'Delete this budget?';
+
+  @override
+  String get budgetDuplicate =>
+      'A budget for this category and period already exists';
+
+  @override
+  String get budgetEditTitle => 'Edit Budget';
+
+  @override
+  String get goalsTitle => 'Savings Goals';
+
+  @override
+  String get goalsEmptyTitle => 'No goals yet';
+
+  @override
+  String get goalsEmptySubtitle =>
+      'Create a savings goal to track your progress';
+
+  @override
+  String get goalsAddTitle => 'New Goal';
+
+  @override
+  String get goalsNameLabel => 'Goal name';
+
+  @override
+  String get goalsNameHint => 'e.g. Emergency fund';
+
+  @override
+  String get goalsTargetLabel => 'Target amount (S/)';
+
+  @override
+  String get goalsContributeTitle => 'Add contribution';
+
+  @override
+  String get goalsContributeLabel => 'Amount (S/)';
+
+  @override
+  String goalsProgressLabel(String current, String target) {
+    return 'S/ $current of S/ $target';
+  }
+
+  @override
+  String get goalsErrorLoad => 'Could not load goals';
+
+  @override
+  String get goalsDeleteConfirm => 'Delete this goal?';
+
+  @override
+  String get goalsDeleteLabel => 'Delete';
+
+  @override
+  String get goalsDetailTitle => 'Goal Detail';
+
+  @override
+  String get goalsDetailContributionHistory => 'Contribution history';
+
+  @override
+  String get goalsDetailNoContributions => 'No contributions yet';
+
+  @override
+  String goalsDetailProjection(String date) {
+    return 'At this pace you\'ll complete your goal on $date';
+  }
+
+  @override
+  String goalsDetailAlert(String date) {
+    return 'At this pace you won\'t meet your deadline of $date';
+  }
+
+  @override
+  String get goalsDetailProgressChart => 'Cumulative progress';
+
+  @override
+  String get errorAuthInvalidCredentials => 'Incorrect email or password.';
+
+  @override
+  String get errorAuthEmailTaken => 'This email is already registered.';
+
+  @override
+  String get errorAuthTokenExpired => 'Reset link is invalid or has expired.';
+
+  @override
+  String get errorAuthBadRequest => 'Check your details and try again.';
+
+  @override
+  String get errorServerError => 'Unexpected error. Please try again.';
+
+  @override
+  String get errorNoConnection => 'Could not connect to the server.';
+
+  @override
+  String get errorTxNoSourceAccount => 'Select a source account.';
+
+  @override
+  String get errorTxInvalidAmount => 'Enter an amount greater than 0.';
+
+  @override
+  String get errorTxNoCategory => 'Select a category.';
+
+  @override
+  String get errorTxNoDestAccount => 'Select a destination account.';
+
+  @override
+  String get errorTxSameAccount => 'Destination must be a different account.';
+
+  @override
+  String get errorTxInvalidSourceAccount => 'Source account not found.';
+
+  @override
+  String get errorTxInvalidDestAccount => 'Destination account not found.';
+
+  @override
+  String get errorTxCreditTransferNotSupported =>
+      'Transfers from a credit card are not available.';
+
+  @override
+  String get errorTxSaveFailed =>
+      'Could not save the transaction. Please try again.';
 }

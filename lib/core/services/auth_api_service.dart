@@ -1,3 +1,4 @@
+import '../errors/error_codes.dart';
 import '../models/user.dart';
 import 'api_client.dart';
 
@@ -28,15 +29,17 @@ class AuthApiService {
         'password': password,
       });
 
-      final accessToken = tokenBody['accessToken'] as String;
-      await ApiClient.saveToken(accessToken);
+      await ApiClient.saveTokens(
+        accessToken: tokenBody['accessToken'] as String,
+        refreshToken: tokenBody['refreshToken'] as String,
+      );
 
       final profileBody = await ApiClient.get('/users/me');
       return AuthResult.success(User.fromJson(profileBody));
     } on ApiException catch (e) {
       return AuthResult.error(_mapError(e));
     } catch (_) {
-      return AuthResult.error('No se pudo conectar con el servidor');
+      return AuthResult.error(AuthErrorCode.noConnection);
     }
   }
 
@@ -50,15 +53,17 @@ class AuthApiService {
         'password': password,
       });
 
-      final accessToken = tokenBody['accessToken'] as String;
-      await ApiClient.saveToken(accessToken);
+      await ApiClient.saveTokens(
+        accessToken: tokenBody['accessToken'] as String,
+        refreshToken: tokenBody['refreshToken'] as String,
+      );
 
       final profileBody = await ApiClient.get('/users/me');
       return AuthResult.success(User.fromJson(profileBody));
     } on ApiException catch (e) {
       return AuthResult.error(_mapError(e));
     } catch (_) {
-      return AuthResult.error('No se pudo conectar con el servidor');
+      return AuthResult.error(AuthErrorCode.noConnection);
     }
   }
 
@@ -78,7 +83,15 @@ class AuthApiService {
     return user != null;
   }
 
-  Future<void> logout() => ApiClient.deleteToken();
+  Future<void> logout() async {
+    try {
+      // Revoke all refresh tokens on the server before clearing local storage
+      await ApiClient.post('/auth/logout', {}, authenticated: true);
+    } catch (_) {
+      // Best-effort — always clear local tokens even if the server call fails
+    }
+    await ApiClient.deleteTokens();
+  }
 
   Future<AuthResult> forgotPassword(String email) async {
     try {
@@ -89,7 +102,7 @@ class AuthApiService {
     } on ApiException catch (e) {
       return AuthResult.error(_mapError(e));
     } catch (_) {
-      return AuthResult.error('No se pudo conectar con el servidor');
+      return AuthResult.error(AuthErrorCode.noConnection);
     }
   }
 
@@ -106,22 +119,21 @@ class AuthApiService {
     } on ApiException catch (e) {
       return AuthResult.error(_mapError(e));
     } catch (_) {
-      return AuthResult.error('No se pudo conectar con el servidor');
+      return AuthResult.error(AuthErrorCode.noConnection);
     }
   }
 
+  /// Maps an [ApiException] to a locale-agnostic error code.
+  /// Screens resolve codes to localized strings via [AppLocalizations.resolveError].
   String _mapError(ApiException e) {
-    switch (e.statusCode) {
-      case 401:
-        return 'Email o contraseña incorrectos';
-      case 409:
-        return 'Este email ya está registrado';
-      case 404:
-        return 'Token inválido o expirado';
-      case 400:
-        return e.message;
-      default:
-        return 'Error inesperado. Inténtalo de nuevo';
-    }
+    return switch (e.statusCode) {
+      401 => AuthErrorCode.invalidCredentials,
+      409 => AuthErrorCode.emailTaken,
+      404 => AuthErrorCode.tokenExpired,
+      // 400: pass the backend's validation message as payload after '|'
+      // so the UI can display it directly without a translation key.
+      400 => '${AuthErrorCode.badRequest}|${e.message}',
+      _ => AuthErrorCode.serverError,
+    };
   }
 }
