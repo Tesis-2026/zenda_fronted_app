@@ -199,5 +199,43 @@
   "catMgmtDeleteConfirm": "¿Eliminar esta categoría? Las transacciones que la usen conservarán sus datos.",
   "catMgmtDeleteAction": "Eliminar",
   "catMgmtErrorLoad": "No se pudieron cargar las categorías",
-  "catMgmtErrorSave": "No se pudo guardar. Intenta de nuevo."
+  "catMgmtErrorSave": "No se pudo guardar. Intenta de nuevo.",
+
+  "reportsTitle": "Reportes",
+  "reportsTabMonth": "Mes",
+  "reportsTabWeek": "Semana",
+  "reportsTabCompare": "Comparar",
+  "reportsTopCategories": "Principales categorías",
+  "reportsNoCategoryData": "Sin datos de gasto para este período",
+  "reportsIncome": "Ingresos",
+  "reportsExpense": "Gastos",
+  "reportsBalance": "Balance",
+  "reportsCompareMonths": "Últimos {count} meses",
+  "@reportsCompareMonths": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reportsNoComparisonData": "Sin datos disponibles",
+  "reportsErrorLoad": "No se pudo cargar el reporte",
+  "reportsTotalIncome": "Total de ingresos",
+  "reportsTotalExpense": "Total de gastos",
+  "reportsNetBalance": "Balance neto",
+  "reportsWeekLabel": "Semana {week}, {year}",
+  "@reportsWeekLabel": {
+    "placeholders": {
+      "week": { "type": "int" },
+      "year": { "type": "int" }
+    }
+  },
+  "reportsMonthLabel": "{month} {year}",
+  "@reportsMonthLabel": {
+    "placeholders": {
+      "month": { "type": "String" },
+      "year": { "type": "int" }
+    }
+  },
+
+  "reportsExportPdf": "Exportar PDF",
+  "reportsExportPdfError": "No se pudo generar el PDF"
 }

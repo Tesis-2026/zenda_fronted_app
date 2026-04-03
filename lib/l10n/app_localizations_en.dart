@@ -522,4 +522,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get catMgmtErrorSave => 'Could not save. Try again.';
+
+  @override
+  String get reportsTitle => 'Reports';
+
+  @override
+  String get reportsTabMonth => 'Month';
+
+  @override
+  String get reportsTabWeek => 'Week';
+
+  @override
+  String get reportsTabCompare => 'Compare';
+
+  @override
+  String get reportsTopCategories => 'Top Categories';
+
+  @override
+  String get reportsNoCategoryData => 'No expense data for this period';
+
+  @override
+  String get reportsIncome => 'Income';
+
+  @override
+  String get reportsExpense => 'Expense';
+
+  @override
+  String get reportsBalance => 'Balance';
+
+  @override
+  String reportsCompareMonths(int count) {
+    return 'Last $count months';
+  }
+
+  @override
+  String get reportsNoComparisonData => 'No data available';
+
+  @override
+  String get reportsErrorLoad => 'Could not load report data';
+
+  @override
+  String get reportsTotalIncome => 'Total Income';
+
+  @override
+  String get reportsTotalExpense => 'Total Expense';
+
+  @override
+  String get reportsNetBalance => 'Net Balance';
+
+  @override
+  String reportsWeekLabel(int week, int year) {
+    return 'Week $week, $year';
+  }
+
+  @override
+  String reportsMonthLabel(String month, int year) {
+    return '$month $year';
+  }
+
+  @override
+  String get reportsExportPdf => 'Export PDF';
+
+  @override
+  String get reportsExportPdfError => 'Could not generate PDF';
 }

@@ -1063,6 +1063,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save. Try again.'**
   String get catMgmtErrorSave;
+
+  /// No description provided for @reportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reportsTitle;
+
+  /// No description provided for @reportsTabMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get reportsTabMonth;
+
+  /// No description provided for @reportsTabWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get reportsTabWeek;
+
+  /// No description provided for @reportsTabCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get reportsTabCompare;
+
+  /// No description provided for @reportsTopCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Categories'**
+  String get reportsTopCategories;
+
+  /// No description provided for @reportsNoCategoryData.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense data for this period'**
+  String get reportsNoCategoryData;
+
+  /// No description provided for @reportsIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportsIncome;
+
+  /// No description provided for @reportsExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get reportsExpense;
+
+  /// No description provided for @reportsBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get reportsBalance;
+
+  /// No description provided for @reportsCompareMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {count} months'**
+  String reportsCompareMonths(int count);
+
+  /// No description provided for @reportsNoComparisonData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get reportsNoComparisonData;
+
+  /// No description provided for @reportsErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load report data'**
+  String get reportsErrorLoad;
+
+  /// No description provided for @reportsTotalIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Income'**
+  String get reportsTotalIncome;
+
+  /// No description provided for @reportsTotalExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Expense'**
+  String get reportsTotalExpense;
+
+  /// No description provided for @reportsNetBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Balance'**
+  String get reportsNetBalance;
+
+  /// No description provided for @reportsWeekLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Week {week}, {year}'**
+  String reportsWeekLabel(int week, int year);
+
+  /// No description provided for @reportsMonthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} {year}'**
+  String reportsMonthLabel(String month, int year);
+
+  /// No description provided for @reportsExportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Export PDF'**
+  String get reportsExportPdf;
+
+  /// No description provided for @reportsExportPdfError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not generate PDF'**
+  String get reportsExportPdfError;
 }
 
 class _AppLocalizationsDelegate

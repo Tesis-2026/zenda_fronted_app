@@ -9,6 +9,7 @@ import '../features/auth/auth_gate.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/transactions/add_transaction_screen.dart';
 import '../features/categories/category_management_screen.dart';
+import '../features/reports/reports_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -61,6 +62,10 @@ class AppRouter {
       GoRoute(
         path: '/categories',
         builder: (context, state) => const CategoryManagementScreen(),
+      ),
+      GoRoute(
+        path: '/reports',
+        builder: (context, state) => const ReportsScreen(),
       ),
     ],
   );

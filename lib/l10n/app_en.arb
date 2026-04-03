@@ -199,5 +199,43 @@
   "catMgmtDeleteConfirm": "Delete this category? Transactions using it will keep their data.",
   "catMgmtDeleteAction": "Delete",
   "catMgmtErrorLoad": "Could not load categories",
-  "catMgmtErrorSave": "Could not save. Try again."
+  "catMgmtErrorSave": "Could not save. Try again.",
+
+  "reportsTitle": "Reports",
+  "reportsTabMonth": "Month",
+  "reportsTabWeek": "Week",
+  "reportsTabCompare": "Compare",
+  "reportsTopCategories": "Top Categories",
+  "reportsNoCategoryData": "No expense data for this period",
+  "reportsIncome": "Income",
+  "reportsExpense": "Expense",
+  "reportsBalance": "Balance",
+  "reportsCompareMonths": "Last {count} months",
+  "@reportsCompareMonths": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reportsNoComparisonData": "No data available",
+  "reportsErrorLoad": "Could not load report data",
+  "reportsTotalIncome": "Total Income",
+  "reportsTotalExpense": "Total Expense",
+  "reportsNetBalance": "Net Balance",
+  "reportsWeekLabel": "Week {week}, {year}",
+  "@reportsWeekLabel": {
+    "placeholders": {
+      "week": { "type": "int" },
+      "year": { "type": "int" }
+    }
+  },
+  "reportsMonthLabel": "{month} {year}",
+  "@reportsMonthLabel": {
+    "placeholders": {
+      "month": { "type": "String" },
+      "year": { "type": "int" }
+    }
+  },
+
+  "reportsExportPdf": "Export PDF",
+  "reportsExportPdfError": "Could not generate PDF"
 }
