@@ -6,6 +6,8 @@ import '../dashboard/dashboard_providers.dart';
 import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
 import 'controllers/new_transaction_controller.dart';
+import 'domain/entities/category.dart' as api;
+import 'presentation/providers/transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
@@ -22,7 +24,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   @override
   void dispose() {
-    ref.invalidate(newTransactionControllerProvider);
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
@@ -52,6 +53,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     });
 
     final accountsAsync = ref.watch(accountsProvider);
+    final txNotifierState = ref.watch(transactionNotifierProvider);
 
     // Keep text controllers in sync with OCR demo/autofill.
     if (state.amount != null) {
@@ -203,6 +205,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         _CategoryGrid(
                           selected: state.category,
                           onSelected: controller.setCategory,
+                          apiCategories: txNotifierState.categories,
                         ),
 
                         const SizedBox(height: 18),
@@ -359,12 +362,10 @@ class _AccountPicker extends StatelessWidget {
                 children: [
                   Icon(a.iconData, size: 18),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      a.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  Text(
+                    a.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(width: 10),
                   Text(
@@ -463,14 +464,33 @@ class _BucketChip extends StatelessWidget {
 class _CategoryGrid extends StatelessWidget {
   final TransactionCategory? selected;
   final ValueChanged<TransactionCategory> onSelected;
+  final List<api.Category> apiCategories;
 
-  const _CategoryGrid({required this.selected, required this.onSelected});
+  const _CategoryGrid({
+    required this.selected, 
+    required this.onSelected,
+    required this.apiCategories,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
-    final items = TransactionCategory.values;
+    
+    List<TransactionCategory> availableItems = [];
+    if (apiCategories.isNotEmpty) {
+      for (var cat in apiCategories) {
+        final lowerName = cat.name.toLowerCase();
+        for (var enumCat in TransactionCategory.values) {
+          if (enumCat.name.toLowerCase() == lowerName ||
+              _categoryLabel(enumCat, l10n).toLowerCase() == lowerName) {
+            if (!availableItems.contains(enumCat)) availableItems.add(enumCat);
+          }
+        }
+      }
+    }
+    
+    final items = availableItems.isNotEmpty ? availableItems : TransactionCategory.values;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

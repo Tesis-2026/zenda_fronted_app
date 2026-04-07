@@ -65,11 +65,12 @@ dependencies:
   http: ^1.2.2
 
   # Secure token storage
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^10.0.0
 
   # PDF sharing (export report)
   share_plus: ^10.1.3
   path_provider: ^2.1.4
+  dio: ^5.9.2
 
 dev_dependencies:
   flutter_test:

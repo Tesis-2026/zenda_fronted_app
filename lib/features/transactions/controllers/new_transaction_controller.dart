@@ -7,6 +7,7 @@ import '../../../core/models/transaction.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../providers/repositories_providers.dart';
 import '../../dashboard/dashboard_providers.dart';
+import '../presentation/providers/transaction_controller.dart';
 
 @immutable
 class NewTransactionState {
@@ -145,20 +146,24 @@ class NewTransactionController extends Notifier<NewTransactionState> {
   }
 
   Future<void> save() async {
+    print('✅ [NewTransactionController] BOTON GUARDAR PRESIONADO');
     final fromId = state.fromAccountId;
     if (fromId == null || fromId.isEmpty) {
+      print('❌ [NewTransactionController] Falla inicial: fromId es nulo o vacío');
       state = state.copyWith(error: TxErrorCode.noSourceAccount);
       return;
     }
 
     final amount = state.amount;
     if (amount == null || amount <= 0) {
+      print('❌ [NewTransactionController] Falla inicial: amount nulo o <= 0');
       state = state.copyWith(error: TxErrorCode.invalidAmount);
       return;
     }
 
     final category = state.category;
     if (category == null) {
+      print('❌ [NewTransactionController] Falla inicial: category es nula');
       state = state.copyWith(error: TxErrorCode.noCategory);
       return;
     }
@@ -234,18 +239,39 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       );
       await txRepo.addTransaction(tx);
 
-      // Also sync to backend (fire-and-forget; local save is the source of truth)
+      // Also sync to backend 
       try {
-        final apiService = ref.read(transactionApiServiceProvider);
-        await apiService.create(
-          kind: kind,
-          amount: amount,
-          category: category,
-          occurredAt: state.date,
-          description: state.note.isEmpty ? null : state.note,
-        );
-      } catch (_) {
-        // Backend sync failure is non-blocking — local save succeeded
+        print('🚀 [NewTransactionController] Iniciando flujo remoto al backend...');
+        final txNotifier = ref.read(transactionNotifierProvider.notifier);
+        final txState = ref.read(transactionNotifierProvider);
+        
+        final categoryStr = category.name; // Ej: "comida"
+        String? catId;
+        
+        final existingCats = txState.categories;
+        final found = existingCats.where((c) => c.name.toLowerCase() == categoryStr.toLowerCase()).toList();
+        
+        if (found.isNotEmpty) {
+          catId = found.first.id;
+        } else {
+          print('🚀 [NewTransactionController] Categoría $categoryStr no existe, solicitando crearla al Backend...');
+          final newCat = await txNotifier.createCategory(categoryStr);
+          catId = newCat?.id;
+        }
+
+        if (catId != null) {
+          print('🚀 [NewTransactionController] Enviando POST /transactions con Category ID: $catId');
+          await txNotifier.createTransaction(
+            categoryId: catId,
+            amount: amount,
+            description: state.note.isNotEmpty ? state.note : 'Movimiento de $categoryStr',
+            type: kind == TransactionKind.income ? 'income' : 'expense',
+            occurredAt: state.date,
+          );
+          print('✅ [NewTransactionController] Éxito enviando a backend');
+        }
+      } catch (e) {
+        print('❌ [NewTransactionController] Falla en Backend sync: $e');
       }
 
       // Update streak only on save.

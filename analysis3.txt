@@ -1,0 +1,93 @@
+Analyzing zenda_fronted...                                      
+
+   info - Parameter 'key' could be a super parameter - lib\app.dart:8:9 - use_super_parameters
+warning - Unused import: 'package:flutter_secure_storage/flutter_secure_storage.dart' - lib\core\network\api_client.dart:5:8 - unused_import
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\dark_theme.dart:10:7 - deprecated_member_use
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\light_theme.dart:14:99 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:13:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:14:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:28:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:31:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:38:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:39:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:49:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:52:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\auth_remote_datasource.dart:55:7 - avoid_print
+   info - Parameter 'key' could be a super parameter - lib\features\auth\presentation\pages\auth_gate.dart:10:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\features\auth\presentation\pages\login_page.dart:7:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:167:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:198:65 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:303:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:373:65 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:395:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:398:54 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\auth\presentation\pages\register_page.dart:7:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\register_page.dart:101:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\register_page.dart:131:65 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\register_page.dart:247:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\register_page.dart:278:65 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\register_page.dart:300:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\register_page.dart:303:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\register_page.dart:331:67 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\dashboard\dashboard_screen.dart:13:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\dashboard_screen.dart:76:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\dashboard_screen.dart:368:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\dashboard_screen.dart:403:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\dashboard_screen.dart:415:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\dashboard_screen.dart:486:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\dashboard_screen.dart:623:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\dashboard_screen.dart:633:58 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\dashboard\widgets\account_card.dart:7:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\widgets\account_card.dart:23:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\widgets\account_card.dart:37:32 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\dashboard\widgets\streak_card.dart:6:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\widgets\streak_card.dart:23:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\widgets\streak_card.dart:53:39 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\dashboard\widgets\summary_card.dart:9:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\widgets\summary_card.dart:27:33 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\dashboard\widgets\zenda_ai_card.dart:7:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\widgets\zenda_ai_card.dart:19:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\dashboard\widgets\zenda_ai_card.dart:24:44 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\onboarding\onboarding_page.dart:10:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_page.dart:45:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_page.dart:65:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_page.dart:71:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_page.dart:72:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_page.dart:98:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_page.dart:109:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_page.dart:112:50 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\onboarding\onboarding_screen.dart:9:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_screen.dart:127:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_screen.dart:128:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_screen.dart:156:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_screen.dart:160:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\onboarding_screen.dart:202:64 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\features\onboarding\splash_decider.dart:6:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\splash_decider.dart:60:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\transactions\add_transaction_screen.dart:342:47 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\transactions\add_transaction_screen.dart:419:7 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\transactions\add_transaction_screen.dart:494:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\transactions\add_transaction_screen.dart:591:22 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\transactions\add_transaction_screen.dart:593:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\transactions\add_transaction_screen.dart:638:45 - deprecated_member_use
+warning - Unused import: 'dart:convert' - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:5:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:14:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:16:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:29:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:36:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:57:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:66:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\transactions\data\datasources\transaction_remote_datasource.dart:76:7 - avoid_print
+warning - Unused import: 'category.dart' - lib\features\transactions\domain\entities\transaction.dart:1:8 - unused_import
+  error - Target of URI doesn't exist: 'category.dart' - lib\features\transactions\domain\repositories\transaction_repository.dart:1:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'transaction.dart' - lib\features\transactions\domain\repositories\transaction_repository.dart:2:8 - uri_does_not_exist
+  error - The name 'Category' isn't a type, so it can't be used as a type argument - lib\features\transactions\domain\repositories\transaction_repository.dart:5:15 - non_type_as_type_argument
+  error - The name 'Category' isn't a type, so it can't be used as a type argument - lib\features\transactions\domain\repositories\transaction_repository.dart:6:10 - non_type_as_type_argument
+  error - The name 'Transaction' isn't a type, so it can't be used as a type argument - lib\features\transactions\domain\repositories\transaction_repository.dart:7:10 - non_type_as_type_argument
+warning - Unused import: '../../../../core/network/api_client.dart' - lib\features\transactions\presentation\providers\transaction_controller.dart:2:8 - unused_import
+warning - Unused import: '../../domain/entities/transaction.dart' - lib\features\transactions\presentation\providers\transaction_controller.dart:5:8 - unused_import
+warning - The value of the local variable 'tx' isn't used - lib\features\transactions\presentation\providers\transaction_controller.dart:117:13 - unused_local_variable
+
