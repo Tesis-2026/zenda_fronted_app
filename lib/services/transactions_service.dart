@@ -14,6 +14,8 @@ class TransactionsService extends ChangeNotifier {
     final tx = TransactionModel(
       id: _generateId(),
       userId: userId,
+      accountId: 'unknown',
+      kind: TransactionKind.expense,
       amount: amount,
       category: category,
       bucket: bucket,
@@ -30,11 +32,17 @@ class TransactionsService extends ChangeNotifier {
       case TransactionCategory.comida:
       case TransactionCategory.transporte:
       case TransactionCategory.vivienda:
+      case TransactionCategory.servicios:
       case TransactionCategory.salud:
         return Bucket503020.necesidad;
       case TransactionCategory.ocio:
+      case TransactionCategory.compras:
+      case TransactionCategory.suscripciones:
+      case TransactionCategory.antojos:
       case TransactionCategory.otros:
         return Bucket503020.deseo;
+      case TransactionCategory.ahorro:
+        return Bucket503020.ahorro;
     }
   }
 

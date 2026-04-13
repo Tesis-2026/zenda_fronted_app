@@ -1,0 +1,324 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Zenda",
+
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonRetry": "Retry",
+  "commonOr": "or",
+  "commonNotSet": "Not set",
+  "commonUnknownError": "Unknown error",
+  "commonSignOut": "Sign out",
+
+  "validationEnterEmail": "Enter your email",
+  "validationInvalidEmail": "Invalid email",
+  "validationEnterPassword": "Enter your password",
+  "validationMinPassword": "At least 8 characters",
+  "validationEnterName": "Enter your name",
+  "validationEnterCode": "Enter the code",
+  "validationEnterNewPassword": "Enter your new password",
+
+  "authLoginTitle": "Welcome to Zenda",
+  "authLoginSubtitle": "Sign in to continue",
+  "authEmailLabel": "Email",
+  "authEmailHint": "you@email.com",
+  "authPasswordLabel": "Password",
+  "authPasswordHint": "At least 8 characters",
+  "authForgotPassword": "Forgot your password?",
+  "authSignIn": "Sign in",
+  "authNoAccount": "Don't have an account?",
+  "authSignUp": "Create account",
+  "authPrivacyNote": "Zenda does not connect to banks. Your data is private.",
+  "authAccountNotFound": "Account not found",
+  "authAccountNotFoundMessage": "No account exists with this email. Would you like to create a new account?",
+  "authContinueGoogle": "Continue with Google (Demo)",
+  "authRegisterTitle": "Create account",
+  "authRegisterSubtitle": "Join Zenda and take control of your finances",
+  "authFullNameLabel": "Full name",
+  "authFullNameHint": "John Doe",
+  "authHaveAccount": "Already have an account?",
+  "authDataSecure": "Your data is secure",
+  "authDataSecureRegister": "Zenda does not connect to banks. All your information is stored locally on your device.",
+  "authForgotTitle": "Recover password",
+  "authForgotSubtitle": "Enter your email and we will send you a recovery code.",
+  "authSendCode": "Send code",
+  "authHaveCode": "I already have a code",
+  "authCheckEmail": "Check your email",
+  "authCheckEmailMessage": "If your email is registered, you will receive a recovery code within minutes.\n\nEnter the code on the next screen.",
+  "authEnterCode": "Enter code",
+  "authResetTitle": "New password",
+  "authResetSubtitle": "Enter the code you received by email and your new password.",
+  "authResetCodeLabel": "Recovery code",
+  "authResetCodeHint": "Paste the code from the email",
+  "authNewPasswordLabel": "New password",
+  "authResetButton": "Reset password",
+  "authPasswordUpdated": "Password updated. Sign in.",
+  "authOnboardingReset": "To reset onboarding, reinstall the app or clear data.",
+
+  "onboardingPage1Title": "Record your expenses in seconds",
+  "onboardingPage1Subtitle": "Log with a tap or scan a receipt (demo).",
+  "onboardingPage1Micro": "Less friction, more control.",
+  "onboardingPage2Title": "Understand your money with 50/30/20",
+  "onboardingPage2Subtitle": "Zenda shows you if you are balanced: needs, wants and savings.",
+  "onboardingPage2Micro": "Learn without overcomplicating it.",
+  "onboardingPage3Title": "Keep your streak and improve every day",
+  "onboardingPage3Subtitle": "Build consistency by logging daily and tracking your progress.",
+  "onboardingPage3Micro": "The important thing is coming back tomorrow.",
+  "onboardingSkip": "Skip",
+  "onboardingNext": "Next",
+  "onboardingRegister": "Sign up",
+  "onboardingStart": "Get started",
+  "onboardingHaveAccount": "I already have an account",
+
+  "dashboardGreeting": "Hi, {name}",
+  "@dashboardGreeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "dashboardMotivation": "Let's improve your finances today.",
+  "dashboardNavHome": "Home",
+  "dashboardNavTransactions": "Txns",
+  "dashboardNavBudget": "Budget",
+  "dashboardNavProfile": "Profile",
+  "dashboardRecord": "Record",
+  "dashboardMyAccounts": "My Accounts",
+  "dashboardBudgetTitle": "Your 50/30/20 Budget",
+  "dashboardBudgetSubtitle": "Based on your spending in the last 30 days",
+  "dashboardTransactions": "Transactions",
+  "dashboardNoTransactions": "No transactions yet.",
+  "dashboardNeeds": "Needs",
+  "dashboardWants": "Wants",
+  "dashboardSavings": "Savings",
+  "dashboardUserFallback": "User",
+  "dashboardSignOutConfirm": "Are you sure you want to sign out?",
+  "dashboardErrorAccounts": "Error loading accounts: {error}",
+  "@dashboardErrorAccounts": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "dashboardErrorTransactions": "Error loading transactions: {error}",
+  "@dashboardErrorTransactions": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "summaryTodayLabel": "Today's Spend",
+  "summaryWeekLabel": "This Week",
+
+  "streakLabel": "{count, plural, =1{1-day streak} other{{count}-day streak}}",
+  "@streakLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "budgetNoExpenses": "No expenses recorded",
+
+  "aiCardTitle": "Zenda Tip",
+
+  "txNewTitle": "New transaction",
+  "txScanReceipt": "Scan receipt (demo)",
+  "txExpense": "Expense",
+  "txIncome": "Income",
+  "txTransfer": "Transfer",
+  "txAccountLabel": "Account",
+  "txSourceLabel": "Source",
+  "txDestLabel": "Destination",
+  "txAmountLabel": "Amount (PEN)",
+  "txAmountHint": "0.00",
+  "txCategoryLabel": "Category",
+  "txNoteLabel": "Note (optional)",
+  "txNoteHint": "e.g. Coffee shop",
+  "txDateLabel": "Date",
+  "txSaveButton": "Save transaction",
+  "txSaved": "Saved",
+  "txErrorPrefix": "Error: {error}",
+  "@txErrorPrefix": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "txNeed": "Need",
+  "txWant": "Want",
+  "txSavingBucket": "Saving",
+  "txCategoryFood": "Food",
+  "txCategoryTransport": "Transport",
+  "txCategoryHousing": "Housing",
+  "txCategoryUtilities": "Utilities",
+  "txCategoryHealth": "Health",
+  "txCategoryEntertainment": "Entertainment",
+  "txCategoryShopping": "Shopping",
+  "txCategorySubscriptions": "Subscriptions",
+  "txCategoryCravings": "Cravings",
+  "txCategorySavings": "Savings",
+  "txCategoryOther": "Other",
+
+  "txListTitle": "Transactions",
+  "txListEmpty": "No transactions yet",
+  "txListFilterAll": "All",
+  "txListFilterExpenses": "Expenses",
+  "txListFilterIncome": "Income",
+  "txListFilterThisWeek": "This week",
+  "txListFilterThisMonth": "This month",
+  "txListFilterAllTime": "All time",
+  "txDeleteConfirmTitle": "Delete transaction",
+  "txDeleteConfirmMessage": "This action cannot be undone.",
+  "txDeleteAction": "Delete",
+  "txDeleteError": "Could not delete transaction. Please try again.",
+  "txEditTitle": "Edit transaction",
+  "txUpdateButton": "Save changes",
+
+  "profileTitle": "Profile",
+  "profileSignOutTooltip": "Sign out",
+  "profileSignOutDialogTitle": "Sign out",
+  "profileSignOutDialogContent": "Are you sure you want to sign out?",
+  "profileErrorLoad": "Could not load profile",
+  "profileErrorSave": "Could not save changes. Check your connection.",
+  "profileAge": "Age",
+  "profileUniversity": "University",
+  "profileCurrency": "Currency",
+  "profileIncomeType": "Income type",
+  "profileMonthlyIncome": "Monthly income",
+  "profileFinancialLiteracy": "Financial literacy",
+  "profileEditButton": "Edit profile",
+  "profileFullNameLabel": "Full name",
+  "profileAgeLabel": "Age",
+  "profileUniversityLabel": "University",
+  "profileManageCategories": "Manage categories",
+
+  "catMgmtTitle": "My Categories",
+  "catMgmtSystemSection": "Default categories",
+  "catMgmtCustomSection": "Custom categories",
+  "catMgmtEmpty": "No custom categories yet",
+  "catMgmtAddTitle": "New category",
+  "catMgmtAddHint": "Category name",
+  "catMgmtRenameTitle": "Rename category",
+  "catMgmtDeleteConfirm": "Delete this category? Transactions using it will keep their data.",
+  "catMgmtDeleteAction": "Delete",
+  "catMgmtErrorLoad": "Could not load categories",
+  "catMgmtErrorSave": "Could not save. Try again.",
+
+  "reportsTitle": "Reports",
+  "reportsTabMonth": "Month",
+  "reportsTabWeek": "Week",
+  "reportsTabCompare": "Compare",
+  "reportsTopCategories": "Top Categories",
+  "reportsNoCategoryData": "No expense data for this period",
+  "reportsIncome": "Income",
+  "reportsExpense": "Expense",
+  "reportsBalance": "Balance",
+  "reportsCompareMonths": "Last {count} months",
+  "@reportsCompareMonths": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reportsNoComparisonData": "No data available",
+  "reportsErrorLoad": "Could not load report data",
+  "reportsTotalIncome": "Total Income",
+  "reportsTotalExpense": "Total Expense",
+  "reportsNetBalance": "Net Balance",
+  "reportsWeekLabel": "Week {week}, {year}",
+  "@reportsWeekLabel": {
+    "placeholders": {
+      "week": { "type": "int" },
+      "year": { "type": "int" }
+    }
+  },
+  "reportsMonthLabel": "{month} {year}",
+  "@reportsMonthLabel": {
+    "placeholders": {
+      "month": { "type": "String" },
+      "year": { "type": "int" }
+    }
+  },
+
+  "reportsExportPdf": "Export PDF",
+  "reportsExportPdfError": "Could not generate PDF",
+
+  "profileBudgets": "Budgets",
+  "profileGoals": "Savings Goals",
+
+  "budgetTitle": "Budgets",
+  "budgetEmptyTitle": "No budgets yet",
+  "budgetEmptySubtitle": "Create a budget to track your spending by category",
+  "budgetAddTitle": "New Budget",
+  "budgetCategoryAll": "All categories",
+  "budgetAmountLabel": "Spending limit (S/)",
+  "budgetMonthLabel": "Month",
+  "budgetYearLabel": "Year",
+  "budgetSpentOf": "S/ {spent} of S/ {limit}",
+  "@budgetSpentOf": {
+    "placeholders": {
+      "spent": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "budgetPercentUsed": "{percent}% used",
+  "@budgetPercentUsed": {
+    "placeholders": {
+      "percent": { "type": "String" }
+    }
+  },
+  "budgetErrorLoad": "Could not load budgets",
+  "budgetDeleteConfirm": "Delete this budget?",
+  "budgetDuplicate": "A budget for this category and period already exists",
+  "budgetEditTitle": "Edit Budget",
+
+  "goalsTitle": "Savings Goals",
+  "goalsEmptyTitle": "No goals yet",
+  "goalsEmptySubtitle": "Create a savings goal to track your progress",
+  "goalsAddTitle": "New Goal",
+  "goalsNameLabel": "Goal name",
+  "goalsNameHint": "e.g. Emergency fund",
+  "goalsTargetLabel": "Target amount (S/)",
+  "goalsContributeTitle": "Add contribution",
+  "goalsContributeLabel": "Amount (S/)",
+  "goalsProgressLabel": "S/ {current} of S/ {target}",
+  "@goalsProgressLabel": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "target": { "type": "String" }
+    }
+  },
+  "goalsErrorLoad": "Could not load goals",
+  "goalsDeleteConfirm": "Delete this goal?",
+  "goalsDeleteLabel": "Delete",
+  "goalsDetailTitle": "Goal Detail",
+  "goalsDetailContributionHistory": "Contribution history",
+  "goalsDetailNoContributions": "No contributions yet",
+  "goalsDetailProjection": "At this pace you'll complete your goal on {date}",
+  "@goalsDetailProjection": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailAlert": "At this pace you won't meet your deadline of {date}",
+  "@goalsDetailAlert": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDetailProgressChart": "Cumulative progress",
+
+  "errorAuthInvalidCredentials": "Incorrect email or password.",
+  "errorAuthEmailTaken": "This email is already registered.",
+  "errorAuthTokenExpired": "Reset link is invalid or has expired.",
+  "errorAuthBadRequest": "Check your details and try again.",
+  "errorServerError": "Unexpected error. Please try again.",
+  "errorNoConnection": "Could not connect to the server.",
+
+  "errorTxNoSourceAccount": "Select a source account.",
+  "errorTxInvalidAmount": "Enter an amount greater than 0.",
+  "errorTxNoCategory": "Select a category.",
+  "errorTxNoDestAccount": "Select a destination account.",
+  "errorTxSameAccount": "Destination must be a different account.",
+  "errorTxInvalidSourceAccount": "Source account not found.",
+  "errorTxInvalidDestAccount": "Destination account not found.",
+  "errorTxCreditTransferNotSupported": "Transfers from a credit card are not available.",
+  "errorTxSaveFailed": "Could not save the transaction. Please try again."
+}

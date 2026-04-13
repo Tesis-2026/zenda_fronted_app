@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/l10n_extension.dart';
 
 class StreakCard extends StatelessWidget {
   final int streakDays;
@@ -7,7 +8,7 @@ class StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dayLabel = streakDays == 1 ? 'día' : 'días';
+    final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -46,7 +47,7 @@ class StreakCard extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '$dayLabel de racha',
+                l10n.streakLabel(streakDays),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,

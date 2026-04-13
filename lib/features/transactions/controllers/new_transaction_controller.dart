@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/error_codes.dart';
 import '../../../core/models/account.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/services/streak_repository.dart';
@@ -146,19 +147,19 @@ class NewTransactionController extends Notifier<NewTransactionState> {
   Future<void> save() async {
     final fromId = state.fromAccountId;
     if (fromId == null || fromId.isEmpty) {
-      state = state.copyWith(error: 'Selecciona una cuenta de origen.');
+      state = state.copyWith(error: TxErrorCode.noSourceAccount);
       return;
     }
 
     final amount = state.amount;
     if (amount == null || amount <= 0) {
-      state = state.copyWith(error: 'Ingresa un monto mayor a 0.');
+      state = state.copyWith(error: TxErrorCode.invalidAmount);
       return;
     }
 
     final category = state.category;
     if (category == null) {
-      state = state.copyWith(error: 'Selecciona una categoría.');
+      state = state.copyWith(error: TxErrorCode.noCategory);
       return;
     }
 
@@ -166,11 +167,11 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     final toId = state.toAccountId;
     if (kind == TransactionKind.transfer) {
       if (toId == null || toId.isEmpty) {
-        state = state.copyWith(error: 'Selecciona una cuenta destino.');
+        state = state.copyWith(error: TxErrorCode.noDestAccount);
         return;
       }
       if (toId == fromId) {
-        state = state.copyWith(error: 'La cuenta destino debe ser distinta.');
+        state = state.copyWith(error: TxErrorCode.sameAccount);
         return;
       }
     }
@@ -186,7 +187,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       if (from == null) {
         state = state.copyWith(
           isSaving: false,
-          error: 'Cuenta origen inválida.',
+          error: TxErrorCode.invalidSourceAccount,
         );
         return;
       }
@@ -197,7 +198,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         if (to == null) {
           state = state.copyWith(
             isSaving: false,
-            error: 'Cuenta destino inválida.',
+            error: TxErrorCode.invalidDestAccount,
           );
           return;
         }
@@ -233,6 +234,20 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       );
       await txRepo.addTransaction(tx);
 
+      // Also sync to backend (fire-and-forget; local save is the source of truth)
+      try {
+        final apiService = ref.read(transactionApiServiceProvider);
+        await apiService.create(
+          kind: kind,
+          amount: amount,
+          category: category,
+          occurredAt: state.date,
+          description: state.note.isEmpty ? null : state.note,
+        );
+      } catch (_) {
+        // Backend sync failure is non-blocking — local save succeeded
+      }
+
       // Update streak only on save.
       await streakRepo.updateOnTransaction(state.date);
 
@@ -242,8 +257,8 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       ref.invalidate(streakStateProvider);
 
       state = state.copyWith(isSaving: false, saveTick: state.saveTick + 1);
-    } catch (e) {
-      state = state.copyWith(isSaving: false, error: 'No se pudo guardar: $e');
+    } catch (_) {
+      state = state.copyWith(isSaving: false, error: TxErrorCode.saveFailed);
     }
   }
 
@@ -264,8 +279,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     if (kind == TransactionKind.transfer && from.type == AccountType.credit) {
       return const _AccountUpdates(
         updatedAccounts: <Account>[],
-        errorMessage:
-            'En demo no disponible: transferir desde tarjeta de crédito.',
+        errorMessage: TxErrorCode.creditTransferNotSupported,
       );
     }
 
@@ -294,7 +308,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     if (to == null) {
       return const _AccountUpdates(
         updatedAccounts: <Account>[],
-        errorMessage: 'Cuenta destino requerida.',
+        errorMessage: TxErrorCode.noDestAccount,
       );
     }
 

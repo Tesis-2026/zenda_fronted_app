@@ -1,19 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/user.dart';
-import 'local_auth_service.dart';
+import '../../core/services/auth_api_service.dart';
 
 // Auth service provider
-final authServiceProvider = Provider<LocalAuthService>((ref) {
-  return LocalAuthService();
+final authServiceProvider = Provider<AuthApiService>((ref) {
+  return AuthApiService();
 });
 
 // Auth state notifier
 class AuthNotifier extends Notifier<AuthState> {
-  
+
   @override
   AuthState build() {
-    // Check status asynchronously after initialization
-    Future.microtask(() => _checkAuthStatus());
+    // Kick off the async status check without microtask indirection.
+    // The provider returns AuthState.initial() (isLoading: true) immediately,
+    // then transitions once _checkAuthStatus() completes.
+    _checkAuthStatus();
     return const AuthState.initial();
   }
 
@@ -41,7 +43,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } else {
       state = state.copyWith(
         isLoading: false,
-        error: result.error ?? 'Error desconocido',
+        error: result.error ?? 'Unknown error',
       );
     }
   }
@@ -61,7 +63,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } else {
       state = state.copyWith(
         isLoading: false,
-        error: result.error ?? 'Error desconocido',
+        error: result.error ?? 'Unknown error',
       );
     }
   }

@@ -6,17 +6,17 @@ import '../../core/services/streak_repository.dart';
 import '../../providers/repositories_providers.dart';
 
 final accountsProvider = FutureProvider<List<Account>>((ref) async {
-  return ref.read(accountsRepositoryProvider).getAccounts();
+  return ref.watch(accountsRepositoryProvider).getAccounts();
 });
 
 final transactionsProvider = FutureProvider<List<TransactionModel>>((
   ref,
 ) async {
-  return ref.read(transactionsRepositoryProvider).getTransactions();
+  return ref.watch(transactionsRepositoryProvider).getTransactions();
 });
 
 final streakStateProvider = FutureProvider<StreakState>((ref) async {
-  return ref.read(streakRepositoryProvider).getStreak();
+  return ref.watch(streakRepositoryProvider).getStreak();
 });
 
 final todayExpenseProvider = Provider<double>((ref) {
