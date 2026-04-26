@@ -396,5 +396,14 @@
   "feedbackSubmitButton": "Enviar comentario",
   "feedbackThanks": "¡Gracias por tus comentarios!",
   "feedbackMessageRequired": "Por favor ingresa un mensaje",
-  "feedbackSubmitError": "No se pudo enviar el comentario. Inténtalo de nuevo."
+  "feedbackSubmitError": "No se pudo enviar el comentario. Inténtalo de nuevo.",
+
+  "notificationsTitle": "Preferencias de notificaciones",
+  "notificationsErrorLoad": "No se pudieron cargar las preferencias",
+  "notificationTypeBudgetAlert": "Alertas de presupuesto",
+  "notificationTypeAnomalyAlert": "Alertas de gasto inusual",
+  "notificationTypePredictionReady": "Predicción lista",
+  "notificationTypeChallengeReminder": "Recordatorios de desafíos",
+  "notificationTypeDailyReminder": "Recordatorio diario",
+  "notificationTypeBadgeEarned": "Insignia obtenida"
 }

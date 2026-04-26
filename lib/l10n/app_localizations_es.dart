@@ -918,4 +918,28 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get feedbackSubmitError =>
       'No se pudo enviar el comentario. Inténtalo de nuevo.';
+
+  @override
+  String get notificationsTitle => 'Preferencias de notificaciones';
+
+  @override
+  String get notificationsErrorLoad => 'No se pudieron cargar las preferencias';
+
+  @override
+  String get notificationTypeBudgetAlert => 'Alertas de presupuesto';
+
+  @override
+  String get notificationTypeAnomalyAlert => 'Alertas de gasto inusual';
+
+  @override
+  String get notificationTypePredictionReady => 'Predicción lista';
+
+  @override
+  String get notificationTypeChallengeReminder => 'Recordatorios de desafíos';
+
+  @override
+  String get notificationTypeDailyReminder => 'Recordatorio diario';
+
+  @override
+  String get notificationTypeBadgeEarned => 'Insignia obtenida';
 }

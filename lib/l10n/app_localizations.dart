@@ -1789,6 +1789,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not send feedback. Please try again.'**
   String get feedbackSubmitError;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Preferences'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load preferences'**
+  String get notificationsErrorLoad;
+
+  /// No description provided for @notificationTypeBudgetAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget alerts'**
+  String get notificationTypeBudgetAlert;
+
+  /// No description provided for @notificationTypeAnomalyAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Unusual spending alerts'**
+  String get notificationTypeAnomalyAlert;
+
+  /// No description provided for @notificationTypePredictionReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction ready'**
+  String get notificationTypePredictionReady;
+
+  /// No description provided for @notificationTypeChallengeReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge reminders'**
+  String get notificationTypeChallengeReminder;
+
+  /// No description provided for @notificationTypeDailyReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily log reminder'**
+  String get notificationTypeDailyReminder;
+
+  /// No description provided for @notificationTypeBadgeEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge earned'**
+  String get notificationTypeBadgeEarned;
 }
 
 class _AppLocalizationsDelegate

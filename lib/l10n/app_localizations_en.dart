@@ -915,4 +915,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get feedbackSubmitError =>
       'Could not send feedback. Please try again.';
+
+  @override
+  String get notificationsTitle => 'Notification Preferences';
+
+  @override
+  String get notificationsErrorLoad => 'Could not load preferences';
+
+  @override
+  String get notificationTypeBudgetAlert => 'Budget alerts';
+
+  @override
+  String get notificationTypeAnomalyAlert => 'Unusual spending alerts';
+
+  @override
+  String get notificationTypePredictionReady => 'Prediction ready';
+
+  @override
+  String get notificationTypeChallengeReminder => 'Challenge reminders';
+
+  @override
+  String get notificationTypeDailyReminder => 'Daily log reminder';
+
+  @override
+  String get notificationTypeBadgeEarned => 'Badge earned';
 }

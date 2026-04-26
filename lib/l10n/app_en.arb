@@ -396,5 +396,14 @@
   "feedbackSubmitButton": "Send feedback",
   "feedbackThanks": "Thank you for your feedback!",
   "feedbackMessageRequired": "Please enter a message",
-  "feedbackSubmitError": "Could not send feedback. Please try again."
+  "feedbackSubmitError": "Could not send feedback. Please try again.",
+
+  "notificationsTitle": "Notification Preferences",
+  "notificationsErrorLoad": "Could not load preferences",
+  "notificationTypeBudgetAlert": "Budget alerts",
+  "notificationTypeAnomalyAlert": "Unusual spending alerts",
+  "notificationTypePredictionReady": "Prediction ready",
+  "notificationTypeChallengeReminder": "Challenge reminders",
+  "notificationTypeDailyReminder": "Daily log reminder",
+  "notificationTypeBadgeEarned": "Badge earned"
 }
