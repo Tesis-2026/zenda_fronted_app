@@ -1196,6 +1196,36 @@ abstract class AppLocalizations {
   /// **'Savings Goals'**
   String get profileGoals;
 
+  /// No description provided for @profileSectionFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get profileSectionFinance;
+
+  /// No description provided for @profileSectionLearnGrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn & Grow'**
+  String get profileSectionLearnGrow;
+
+  /// No description provided for @profileSectionSurveys.
+  ///
+  /// In en, this message translates to:
+  /// **'Surveys'**
+  String get profileSectionSurveys;
+
+  /// No description provided for @profileSectionSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get profileSectionSupport;
+
+  /// No description provided for @profileSendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get profileSendFeedback;
+
   /// No description provided for @budgetTitle.
   ///
   /// In en, this message translates to:

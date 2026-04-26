@@ -596,6 +596,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileGoals => 'Savings Goals';
 
   @override
+  String get profileSectionFinance => 'Finance';
+
+  @override
+  String get profileSectionLearnGrow => 'Learn & Grow';
+
+  @override
+  String get profileSectionSurveys => 'Surveys';
+
+  @override
+  String get profileSectionSupport => 'Support';
+
+  @override
+  String get profileSendFeedback => 'Send feedback';
+
+  @override
   String get budgetTitle => 'Budgets';
 
   @override
