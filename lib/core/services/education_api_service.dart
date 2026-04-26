@@ -1,0 +1,51 @@
+import 'api_client.dart';
+
+class EducationTopic {
+  final String id;
+  final String title;
+  final String content;
+  final String difficulty;
+  final int order;
+  final bool isCompleted;
+  final DateTime? completedAt;
+
+  const EducationTopic({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.difficulty,
+    required this.order,
+    required this.isCompleted,
+    this.completedAt,
+  });
+
+  factory EducationTopic.fromJson(Map<String, dynamic> json) {
+    return EducationTopic(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      content: json['content'] as String,
+      difficulty: json['difficulty'] as String,
+      order: json['order'] as int,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      completedAt: json['completedAt'] != null
+          ? DateTime.tryParse(json['completedAt'] as String)
+          : null,
+    );
+  }
+}
+
+class EducationApiService {
+  Future<List<EducationTopic>> listTopics() async {
+    final list = await ApiClient.getList('/education/topics');
+    return list.cast<Map<String, dynamic>>().map(EducationTopic.fromJson).toList();
+  }
+
+  Future<EducationTopic> getTopic(String id) async {
+    final data = await ApiClient.get('/education/topics/$id');
+    return EducationTopic.fromJson(data as Map<String, dynamic>);
+  }
+
+  Future<void> completeTopic(String id) async {
+    await ApiClient.patch('/education/topics/$id/complete', {});
+  }
+}
