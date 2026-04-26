@@ -753,4 +753,169 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get errorTxSaveFailed =>
       'No se pudo guardar la transacción. Inténtalo de nuevo.';
+
+  @override
+  String get predictionsTitle => 'Predicciones IA';
+
+  @override
+  String get predictionsExpenseTitle => 'Gastos del próximo mes';
+
+  @override
+  String get predictionsIncomeTitle => 'Ingresos del próximo mes';
+
+  @override
+  String get predictionsConfidence => 'Confianza';
+
+  @override
+  String get predictionsErrorLoad => 'No se pudieron cargar las predicciones';
+
+  @override
+  String get predictionsDisclaimer =>
+      'Las predicciones son estimaciones basadas en tu historial. Los resultados reales pueden variar.';
+
+  @override
+  String get recommendationsTitle => 'Recomendaciones';
+
+  @override
+  String get recommendationsEmpty =>
+      'Aún no hay recomendaciones. Agrega más transacciones para obtener consejos personalizados.';
+
+  @override
+  String get recommendationsErrorLoad =>
+      'No se pudieron cargar las recomendaciones';
+
+  @override
+  String get recommendationsAccept => 'Útil';
+
+  @override
+  String get recommendationsReject => 'No útil';
+
+  @override
+  String get educationTitle => 'Educación financiera';
+
+  @override
+  String get educationErrorLoad => 'No se pudieron cargar los temas';
+
+  @override
+  String educationProgressLabel(int completed, int total) {
+    return '$completed de $total temas completados';
+  }
+
+  @override
+  String get educationTopicDetailTitle => 'Tema';
+
+  @override
+  String get educationMarkComplete => 'Marcar como completado';
+
+  @override
+  String get educationTopicCompleted => '¡Tema completado!';
+
+  @override
+  String get challengesTitle => 'Desafíos';
+
+  @override
+  String get challengesEmpty => 'No hay desafíos disponibles por ahora.';
+
+  @override
+  String get challengesErrorLoad => 'No se pudieron cargar los desafíos';
+
+  @override
+  String get challengesAcceptButton => 'Aceptar desafío';
+
+  @override
+  String get challengesAccepted => '¡Desafío aceptado!';
+
+  @override
+  String get badgesTitle => 'Insignias';
+
+  @override
+  String get badgesErrorLoad => 'No se pudieron cargar las insignias';
+
+  @override
+  String badgesEarnedCount(int earned, int total) {
+    return '$earned de $total insignias obtenidas';
+  }
+
+  @override
+  String get progressTitle => 'Progreso financiero';
+
+  @override
+  String get progressErrorLoad => 'No se pudo cargar el progreso';
+
+  @override
+  String get progressCurrentMonth => 'Mes actual';
+
+  @override
+  String get progressPreviousMonth => 'Mes anterior';
+
+  @override
+  String get progressChangesTitle => 'Cambios mes a mes';
+
+  @override
+  String get progressExpensesChange => 'Gastos';
+
+  @override
+  String get progressSavingsChange => 'Ahorros';
+
+  @override
+  String get progressBalanceChange => 'Balance';
+
+  @override
+  String get progressNoData => 'Sin datos';
+
+  @override
+  String get surveyPreTitle => 'Encuesta inicial';
+
+  @override
+  String get surveyPostTitle => 'Encuesta final';
+
+  @override
+  String get surveyErrorLoad => 'No se pudo cargar la encuesta';
+
+  @override
+  String get surveyAnswerAll =>
+      'Por favor responde todas las preguntas antes de enviar';
+
+  @override
+  String get surveySubmitButton => 'Enviar respuestas';
+
+  @override
+  String get surveySubmitError =>
+      'No se pudo enviar la encuesta. Inténtalo de nuevo.';
+
+  @override
+  String get surveyResultTitle => 'Tus resultados';
+
+  @override
+  String surveyImprovement(String points) {
+    return '¡Tu conocimiento financiero mejoró $points puntos respecto a la encuesta inicial!';
+  }
+
+  @override
+  String get feedbackTitle => 'Enviar comentarios';
+
+  @override
+  String get feedbackTypeLabel => 'Tipo';
+
+  @override
+  String get feedbackRatingLabel => 'Calificación';
+
+  @override
+  String get feedbackMessageLabel => 'Mensaje';
+
+  @override
+  String get feedbackMessageHint => 'Cuéntanos qué piensas...';
+
+  @override
+  String get feedbackSubmitButton => 'Enviar comentario';
+
+  @override
+  String get feedbackThanks => '¡Gracias por tus comentarios!';
+
+  @override
+  String get feedbackMessageRequired => 'Por favor ingresa un mensaje';
+
+  @override
+  String get feedbackSubmitError =>
+      'No se pudo enviar el comentario. Inténtalo de nuevo.';
 }

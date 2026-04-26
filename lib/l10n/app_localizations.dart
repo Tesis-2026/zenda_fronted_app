@@ -1483,6 +1483,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save the transaction. Please try again.'**
   String get errorTxSaveFailed;
+
+  /// No description provided for @predictionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Predictions'**
+  String get predictionsTitle;
+
+  /// No description provided for @predictionsExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month expenses'**
+  String get predictionsExpenseTitle;
+
+  /// No description provided for @predictionsIncomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month income'**
+  String get predictionsIncomeTitle;
+
+  /// No description provided for @predictionsConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence'**
+  String get predictionsConfidence;
+
+  /// No description provided for @predictionsErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load predictions'**
+  String get predictionsErrorLoad;
+
+  /// No description provided for @predictionsDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictions are estimates based on your spending history. Actual results may vary.'**
+  String get predictionsDisclaimer;
+
+  /// No description provided for @recommendationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations'**
+  String get recommendationsTitle;
+
+  /// No description provided for @recommendationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recommendations available yet. Add more transactions to get personalized tips.'**
+  String get recommendationsEmpty;
+
+  /// No description provided for @recommendationsErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load recommendations'**
+  String get recommendationsErrorLoad;
+
+  /// No description provided for @recommendationsAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Helpful'**
+  String get recommendationsAccept;
+
+  /// No description provided for @recommendationsReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Not helpful'**
+  String get recommendationsReject;
+
+  /// No description provided for @educationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Education'**
+  String get educationTitle;
+
+  /// No description provided for @educationErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load topics'**
+  String get educationErrorLoad;
+
+  /// No description provided for @educationProgressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} topics completed'**
+  String educationProgressLabel(int completed, int total);
+
+  /// No description provided for @educationTopicDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic'**
+  String get educationTopicDetailTitle;
+
+  /// No description provided for @educationMarkComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as completed'**
+  String get educationMarkComplete;
+
+  /// No description provided for @educationTopicCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic completed!'**
+  String get educationTopicCompleted;
+
+  /// No description provided for @challengesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenges'**
+  String get challengesTitle;
+
+  /// No description provided for @challengesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No challenges available right now.'**
+  String get challengesEmpty;
+
+  /// No description provided for @challengesErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load challenges'**
+  String get challengesErrorLoad;
+
+  /// No description provided for @challengesAcceptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept challenge'**
+  String get challengesAcceptButton;
+
+  /// No description provided for @challengesAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge accepted!'**
+  String get challengesAccepted;
+
+  /// No description provided for @badgesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges'**
+  String get badgesTitle;
+
+  /// No description provided for @badgesErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load badges'**
+  String get badgesErrorLoad;
+
+  /// No description provided for @badgesEarnedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{earned} of {total} badges earned'**
+  String badgesEarnedCount(int earned, int total);
+
+  /// No description provided for @progressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Progress'**
+  String get progressTitle;
+
+  /// No description provided for @progressErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load progress data'**
+  String get progressErrorLoad;
+
+  /// No description provided for @progressCurrentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Current month'**
+  String get progressCurrentMonth;
+
+  /// No description provided for @progressPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get progressPreviousMonth;
+
+  /// No description provided for @progressChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Month-over-month changes'**
+  String get progressChangesTitle;
+
+  /// No description provided for @progressExpensesChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get progressExpensesChange;
+
+  /// No description provided for @progressSavingsChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get progressSavingsChange;
+
+  /// No description provided for @progressBalanceChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get progressBalanceChange;
+
+  /// No description provided for @progressNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get progressNoData;
+
+  /// No description provided for @surveyPreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Usage Survey'**
+  String get surveyPreTitle;
+
+  /// No description provided for @surveyPostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-Usage Survey'**
+  String get surveyPostTitle;
+
+  /// No description provided for @surveyErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load survey'**
+  String get surveyErrorLoad;
+
+  /// No description provided for @surveyAnswerAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Please answer all questions before submitting'**
+  String get surveyAnswerAll;
+
+  /// No description provided for @surveySubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit answers'**
+  String get surveySubmitButton;
+
+  /// No description provided for @surveySubmitError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit survey. Please try again.'**
+  String get surveySubmitError;
+
+  /// No description provided for @surveyResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your results'**
+  String get surveyResultTitle;
+
+  /// No description provided for @surveyImprovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Your financial knowledge improved by {points} points since the pre-survey!'**
+  String surveyImprovement(String points);
+
+  /// No description provided for @feedbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get feedbackTitle;
+
+  /// No description provided for @feedbackTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get feedbackTypeLabel;
+
+  /// No description provided for @feedbackRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get feedbackRatingLabel;
+
+  /// No description provided for @feedbackMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get feedbackMessageLabel;
+
+  /// No description provided for @feedbackMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what you think...'**
+  String get feedbackMessageHint;
+
+  /// No description provided for @feedbackSubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get feedbackSubmitButton;
+
+  /// No description provided for @feedbackThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your feedback!'**
+  String get feedbackThanks;
+
+  /// No description provided for @feedbackMessageRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a message'**
+  String get feedbackMessageRequired;
+
+  /// No description provided for @feedbackSubmitError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send feedback. Please try again.'**
+  String get feedbackSubmitError;
 }
 
 class _AppLocalizationsDelegate

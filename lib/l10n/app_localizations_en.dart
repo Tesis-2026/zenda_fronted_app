@@ -753,4 +753,166 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorTxSaveFailed =>
       'Could not save the transaction. Please try again.';
+
+  @override
+  String get predictionsTitle => 'AI Predictions';
+
+  @override
+  String get predictionsExpenseTitle => 'Next month expenses';
+
+  @override
+  String get predictionsIncomeTitle => 'Next month income';
+
+  @override
+  String get predictionsConfidence => 'Confidence';
+
+  @override
+  String get predictionsErrorLoad => 'Could not load predictions';
+
+  @override
+  String get predictionsDisclaimer =>
+      'Predictions are estimates based on your spending history. Actual results may vary.';
+
+  @override
+  String get recommendationsTitle => 'Recommendations';
+
+  @override
+  String get recommendationsEmpty =>
+      'No recommendations available yet. Add more transactions to get personalized tips.';
+
+  @override
+  String get recommendationsErrorLoad => 'Could not load recommendations';
+
+  @override
+  String get recommendationsAccept => 'Helpful';
+
+  @override
+  String get recommendationsReject => 'Not helpful';
+
+  @override
+  String get educationTitle => 'Financial Education';
+
+  @override
+  String get educationErrorLoad => 'Could not load topics';
+
+  @override
+  String educationProgressLabel(int completed, int total) {
+    return '$completed of $total topics completed';
+  }
+
+  @override
+  String get educationTopicDetailTitle => 'Topic';
+
+  @override
+  String get educationMarkComplete => 'Mark as completed';
+
+  @override
+  String get educationTopicCompleted => 'Topic completed!';
+
+  @override
+  String get challengesTitle => 'Challenges';
+
+  @override
+  String get challengesEmpty => 'No challenges available right now.';
+
+  @override
+  String get challengesErrorLoad => 'Could not load challenges';
+
+  @override
+  String get challengesAcceptButton => 'Accept challenge';
+
+  @override
+  String get challengesAccepted => 'Challenge accepted!';
+
+  @override
+  String get badgesTitle => 'Badges';
+
+  @override
+  String get badgesErrorLoad => 'Could not load badges';
+
+  @override
+  String badgesEarnedCount(int earned, int total) {
+    return '$earned of $total badges earned';
+  }
+
+  @override
+  String get progressTitle => 'Financial Progress';
+
+  @override
+  String get progressErrorLoad => 'Could not load progress data';
+
+  @override
+  String get progressCurrentMonth => 'Current month';
+
+  @override
+  String get progressPreviousMonth => 'Previous month';
+
+  @override
+  String get progressChangesTitle => 'Month-over-month changes';
+
+  @override
+  String get progressExpensesChange => 'Expenses';
+
+  @override
+  String get progressSavingsChange => 'Savings';
+
+  @override
+  String get progressBalanceChange => 'Balance';
+
+  @override
+  String get progressNoData => 'No data';
+
+  @override
+  String get surveyPreTitle => 'Pre-Usage Survey';
+
+  @override
+  String get surveyPostTitle => 'Post-Usage Survey';
+
+  @override
+  String get surveyErrorLoad => 'Could not load survey';
+
+  @override
+  String get surveyAnswerAll => 'Please answer all questions before submitting';
+
+  @override
+  String get surveySubmitButton => 'Submit answers';
+
+  @override
+  String get surveySubmitError => 'Could not submit survey. Please try again.';
+
+  @override
+  String get surveyResultTitle => 'Your results';
+
+  @override
+  String surveyImprovement(String points) {
+    return 'Your financial knowledge improved by $points points since the pre-survey!';
+  }
+
+  @override
+  String get feedbackTitle => 'Send feedback';
+
+  @override
+  String get feedbackTypeLabel => 'Type';
+
+  @override
+  String get feedbackRatingLabel => 'Rating';
+
+  @override
+  String get feedbackMessageLabel => 'Message';
+
+  @override
+  String get feedbackMessageHint => 'Tell us what you think...';
+
+  @override
+  String get feedbackSubmitButton => 'Send feedback';
+
+  @override
+  String get feedbackThanks => 'Thank you for your feedback!';
+
+  @override
+  String get feedbackMessageRequired => 'Please enter a message';
+
+  @override
+  String get feedbackSubmitError =>
+      'Could not send feedback. Please try again.';
 }

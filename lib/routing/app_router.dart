@@ -17,6 +17,14 @@ import '../features/goals/goals_screen.dart';
 import '../features/goals/goal_detail_screen.dart';
 import '../core/models/savings_goal.dart';
 import '../features/reports/reports_screen.dart';
+import '../features/predictions/predictions_screen.dart';
+import '../features/recommendations/recommendations_screen.dart';
+import '../features/education/education_screen.dart';
+import '../features/education/topic_detail_screen.dart';
+import '../features/challenges/challenges_screen.dart';
+import '../features/badges/badges_screen.dart';
+import '../features/progress/progress_screen.dart';
+import '../features/surveys/survey_screen.dart';
 
 // Routes that do not require authentication.
 const _publicRoutes = {
@@ -152,6 +160,46 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
           ),
         ],
+      ),
+      GoRoute(
+        path: '/predictions',
+        builder: (context, state) => const PredictionsScreen(),
+      ),
+      GoRoute(
+        path: '/recommendations',
+        builder: (context, state) => const RecommendationsScreen(),
+      ),
+      GoRoute(
+        path: '/education',
+        builder: (context, state) => const EducationScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) => TopicDetailScreen(
+              topicId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/challenges',
+        builder: (context, state) => const ChallengesScreen(),
+      ),
+      GoRoute(
+        path: '/badges',
+        builder: (context, state) => const BadgesScreen(),
+      ),
+      GoRoute(
+        path: '/progress',
+        builder: (context, state) => const ProgressScreen(),
+      ),
+      GoRoute(
+        path: '/surveys/pre',
+        builder: (context, state) => const SurveyScreen(isPre: true),
+      ),
+      GoRoute(
+        path: '/surveys/post',
+        builder: (context, state) => const SurveyScreen(isPre: false),
       ),
     ],
   );

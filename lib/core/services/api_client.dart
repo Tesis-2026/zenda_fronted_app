@@ -195,6 +195,31 @@ class ApiClient {
     return _parseBody(response);
   }
 
+  static Future<Map<String, dynamic>> patch(
+    String path,
+    Map<String, dynamic> body,
+  ) async {
+    var response = await http.patch(
+      Uri.parse('$_kBaseUrl$path'),
+      headers: await _authHeaders(),
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401) {
+      final refreshed = await _tryRefresh();
+      if (refreshed) {
+        response = await http.patch(
+          Uri.parse('$_kBaseUrl$path'),
+          headers: await _authHeaders(),
+          body: jsonEncode(body),
+        );
+      }
+    }
+
+    _throwIfError(response);
+    return _parseBody(response);
+  }
+
   static Future<List<dynamic>> getList(String path) async {
     var response = await http.get(
       Uri.parse('$_kBaseUrl$path'),

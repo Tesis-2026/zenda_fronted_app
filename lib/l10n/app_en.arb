@@ -320,5 +320,81 @@
   "errorTxInvalidSourceAccount": "Source account not found.",
   "errorTxInvalidDestAccount": "Destination account not found.",
   "errorTxCreditTransferNotSupported": "Transfers from a credit card are not available.",
-  "errorTxSaveFailed": "Could not save the transaction. Please try again."
+  "errorTxSaveFailed": "Could not save the transaction. Please try again.",
+
+  "predictionsTitle": "AI Predictions",
+  "predictionsExpenseTitle": "Next month expenses",
+  "predictionsIncomeTitle": "Next month income",
+  "predictionsConfidence": "Confidence",
+  "predictionsErrorLoad": "Could not load predictions",
+  "predictionsDisclaimer": "Predictions are estimates based on your spending history. Actual results may vary.",
+
+  "recommendationsTitle": "Recommendations",
+  "recommendationsEmpty": "No recommendations available yet. Add more transactions to get personalized tips.",
+  "recommendationsErrorLoad": "Could not load recommendations",
+  "recommendationsAccept": "Helpful",
+  "recommendationsReject": "Not helpful",
+
+  "educationTitle": "Financial Education",
+  "educationErrorLoad": "Could not load topics",
+  "educationProgressLabel": "{completed} of {total} topics completed",
+  "@educationProgressLabel": {
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "educationTopicDetailTitle": "Topic",
+  "educationMarkComplete": "Mark as completed",
+  "educationTopicCompleted": "Topic completed!",
+
+  "challengesTitle": "Challenges",
+  "challengesEmpty": "No challenges available right now.",
+  "challengesErrorLoad": "Could not load challenges",
+  "challengesAcceptButton": "Accept challenge",
+  "challengesAccepted": "Challenge accepted!",
+
+  "badgesTitle": "Badges",
+  "badgesErrorLoad": "Could not load badges",
+  "badgesEarnedCount": "{earned} of {total} badges earned",
+  "@badgesEarnedCount": {
+    "placeholders": {
+      "earned": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "progressTitle": "Financial Progress",
+  "progressErrorLoad": "Could not load progress data",
+  "progressCurrentMonth": "Current month",
+  "progressPreviousMonth": "Previous month",
+  "progressChangesTitle": "Month-over-month changes",
+  "progressExpensesChange": "Expenses",
+  "progressSavingsChange": "Savings",
+  "progressBalanceChange": "Balance",
+  "progressNoData": "No data",
+
+  "surveyPreTitle": "Pre-Usage Survey",
+  "surveyPostTitle": "Post-Usage Survey",
+  "surveyErrorLoad": "Could not load survey",
+  "surveyAnswerAll": "Please answer all questions before submitting",
+  "surveySubmitButton": "Submit answers",
+  "surveySubmitError": "Could not submit survey. Please try again.",
+  "surveyResultTitle": "Your results",
+  "surveyImprovement": "Your financial knowledge improved by {points} points since the pre-survey!",
+  "@surveyImprovement": {
+    "placeholders": {
+      "points": { "type": "String" }
+    }
+  },
+
+  "feedbackTitle": "Send feedback",
+  "feedbackTypeLabel": "Type",
+  "feedbackRatingLabel": "Rating",
+  "feedbackMessageLabel": "Message",
+  "feedbackMessageHint": "Tell us what you think...",
+  "feedbackSubmitButton": "Send feedback",
+  "feedbackThanks": "Thank you for your feedback!",
+  "feedbackMessageRequired": "Please enter a message",
+  "feedbackSubmitError": "Could not send feedback. Please try again."
 }
