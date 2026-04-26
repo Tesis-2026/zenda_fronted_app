@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
 import '../auth/auth_controller.dart';
+import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
 
 final _profileProvider = FutureProvider<User>((ref) async {
@@ -180,7 +181,105 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             minimumSize: const Size(double.infinity, 52),
           ),
         ),
+        const SizedBox(height: 24),
+        _sectionHeader(l10n.profileSectionFinance),
+        _navTile(
+          icon: Icons.pie_chart_outline,
+          title: l10n.profileBudgets,
+          onTap: () => context.push('/budgets'),
+        ),
+        _navTile(
+          icon: Icons.savings_outlined,
+          title: l10n.profileGoals,
+          onTap: () => context.push('/goals'),
+        ),
+        _navTile(
+          icon: Icons.analytics_outlined,
+          title: l10n.predictionsTitle,
+          onTap: () => context.push('/predictions'),
+        ),
+        _navTile(
+          icon: Icons.lightbulb_outline,
+          title: l10n.recommendationsTitle,
+          onTap: () => context.push('/recommendations'),
+        ),
+        _navTile(
+          icon: Icons.trending_up_outlined,
+          title: l10n.progressTitle,
+          onTap: () => context.push('/progress'),
+        ),
+        const SizedBox(height: 8),
+        _sectionHeader(l10n.profileSectionLearnGrow),
+        _navTile(
+          icon: Icons.school_outlined,
+          title: l10n.educationTitle,
+          onTap: () => context.push('/education'),
+        ),
+        _navTile(
+          icon: Icons.flag_outlined,
+          title: l10n.challengesTitle,
+          onTap: () => context.push('/challenges'),
+        ),
+        _navTile(
+          icon: Icons.military_tech_outlined,
+          title: l10n.badgesTitle,
+          onTap: () => context.push('/badges'),
+        ),
+        const SizedBox(height: 8),
+        _sectionHeader(l10n.profileSectionSurveys),
+        _navTile(
+          icon: Icons.assignment_outlined,
+          title: l10n.surveyPreTitle,
+          onTap: () => context.push('/surveys/pre'),
+        ),
+        _navTile(
+          icon: Icons.assignment_turned_in_outlined,
+          title: l10n.surveyPostTitle,
+          onTap: () => context.push('/surveys/post'),
+        ),
+        const SizedBox(height: 8),
+        _sectionHeader(l10n.profileSectionSupport),
+        _navTile(
+          icon: Icons.notifications_outlined,
+          title: l10n.notificationsTitle,
+          onTap: () => context.push('/notifications'),
+        ),
+        _navTile(
+          icon: Icons.feedback_outlined,
+          title: l10n.profileSendFeedback,
+          onTap: () => FeedbackModal.show(context, screenName: 'profile'),
+        ),
+        const SizedBox(height: 16),
       ],
+    );
+  }
+
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey,
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+
+  Widget _navTile({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, size: 22),
+      title: Text(title),
+      trailing: const Icon(Icons.chevron_right, size: 20),
+      onTap: onTap,
     );
   }
 

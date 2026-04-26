@@ -242,6 +242,11 @@
 
   "profileBudgets": "Budgets",
   "profileGoals": "Savings Goals",
+  "profileSectionFinance": "Finance",
+  "profileSectionLearnGrow": "Learn & Grow",
+  "profileSectionSurveys": "Surveys",
+  "profileSectionSupport": "Support",
+  "profileSendFeedback": "Send feedback",
 
   "budgetTitle": "Budgets",
   "budgetEmptyTitle": "No budgets yet",

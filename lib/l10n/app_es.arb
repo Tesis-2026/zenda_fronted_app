@@ -242,6 +242,11 @@
 
   "profileBudgets": "Presupuestos",
   "profileGoals": "Metas de ahorro",
+  "profileSectionFinance": "Finanzas",
+  "profileSectionLearnGrow": "Aprende y Crece",
+  "profileSectionSurveys": "Encuestas",
+  "profileSectionSupport": "Soporte",
+  "profileSendFeedback": "Enviar comentarios",
 
   "budgetTitle": "Presupuestos",
   "budgetEmptyTitle": "Sin presupuestos",
