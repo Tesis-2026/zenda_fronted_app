@@ -32,8 +32,4 @@ class PredictionsApiService {
     return PredictionResult.fromJson(data as Map<String, dynamic>);
   }
 
-  Future<PredictionResult> getIncomePrediction() async {
-    final data = await ApiClient.get('/predictions/income');
-    return PredictionResult.fromJson(data as Map<String, dynamic>);
-  }
 }

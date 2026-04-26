@@ -1526,12 +1526,6 @@ abstract class AppLocalizations {
   /// **'Next month expenses'**
   String get predictionsExpenseTitle;
 
-  /// No description provided for @predictionsIncomeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Next month income'**
-  String get predictionsIncomeTitle;
-
   /// No description provided for @predictionsConfidence.
   ///
   /// In en, this message translates to:

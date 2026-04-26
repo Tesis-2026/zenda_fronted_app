@@ -776,9 +776,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get predictionsExpenseTitle => 'Gastos del próximo mes';
 
   @override
-  String get predictionsIncomeTitle => 'Ingresos del próximo mes';
-
-  @override
   String get predictionsConfidence => 'Confianza';
 
   @override

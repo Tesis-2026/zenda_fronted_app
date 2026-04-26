@@ -13,11 +13,6 @@ final _expensePredictionProvider =
   return ref.read(_predictionsServiceProvider).getExpensePrediction();
 });
 
-final _incomePredictionProvider =
-    FutureProvider.autoDispose<PredictionResult>((ref) {
-  return ref.read(_predictionsServiceProvider).getIncomePrediction();
-});
-
 class PredictionsScreen extends ConsumerWidget {
   const PredictionsScreen({super.key});
 
@@ -25,14 +20,12 @@ class PredictionsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final expenseAsync = ref.watch(_expensePredictionProvider);
-    final incomeAsync = ref.watch(_incomePredictionProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.predictionsTitle)),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(_expensePredictionProvider);
-          ref.invalidate(_incomePredictionProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -49,21 +42,6 @@ class PredictionsScreen extends ConsumerWidget {
                 result: p,
                 color: const Color(0xFFE53935),
                 icon: Icons.trending_up,
-              ),
-            ),
-            const SizedBox(height: 24),
-            _SectionHeader(title: l10n.predictionsIncomeTitle),
-            const SizedBox(height: 8),
-            incomeAsync.when(
-              loading: () => const _PredictionCardSkeleton(),
-              error: (e, _) => _ErrorCard(
-                message: l10n.predictionsErrorLoad,
-                onRetry: () => ref.invalidate(_incomePredictionProvider),
-              ),
-              data: (p) => _PredictionCard(
-                result: p,
-                color: const Color(0xFF43A047),
-                icon: Icons.savings,
               ),
             ),
             const SizedBox(height: 24),

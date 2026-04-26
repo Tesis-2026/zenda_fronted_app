@@ -329,7 +329,6 @@
 
   "predictionsTitle": "AI Predictions",
   "predictionsExpenseTitle": "Next month expenses",
-  "predictionsIncomeTitle": "Next month income",
   "predictionsConfidence": "Confidence",
   "predictionsErrorLoad": "Could not load predictions",
   "predictionsDisclaimer": "Predictions are estimates based on your spending history. Actual results may vary.",

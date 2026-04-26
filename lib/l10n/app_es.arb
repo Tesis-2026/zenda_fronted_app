@@ -329,7 +329,6 @@
 
   "predictionsTitle": "Predicciones IA",
   "predictionsExpenseTitle": "Gastos del próximo mes",
-  "predictionsIncomeTitle": "Ingresos del próximo mes",
   "predictionsConfidence": "Confianza",
   "predictionsErrorLoad": "No se pudieron cargar las predicciones",
   "predictionsDisclaimer": "Las predicciones son estimaciones basadas en tu historial. Los resultados reales pueden variar.",
