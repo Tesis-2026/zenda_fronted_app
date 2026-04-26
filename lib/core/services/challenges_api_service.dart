@@ -1,0 +1,38 @@
+import 'api_client.dart';
+
+class Challenge {
+  final String id;
+  final String title;
+  final String description;
+  final int pointsReward;
+  final String status; // AVAILABLE | ACTIVE | COMPLETED
+
+  const Challenge({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.pointsReward,
+    required this.status,
+  });
+
+  factory Challenge.fromJson(Map<String, dynamic> json) {
+    return Challenge(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      pointsReward: json['pointsReward'] as int? ?? 0,
+      status: json['status'] as String? ?? 'AVAILABLE',
+    );
+  }
+}
+
+class ChallengesApiService {
+  Future<List<Challenge>> getAll() async {
+    final list = await ApiClient.getList('/challenges');
+    return list.cast<Map<String, dynamic>>().map(Challenge.fromJson).toList();
+  }
+
+  Future<void> accept(String id) async {
+    await ApiClient.post('/challenges/$id/accept', {});
+  }
+}
