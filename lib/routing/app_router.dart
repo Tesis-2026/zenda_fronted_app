@@ -25,6 +25,7 @@ import '../features/challenges/challenges_screen.dart';
 import '../features/badges/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/surveys/survey_screen.dart';
+import '../features/transactions/edit_transaction_screen.dart';
 
 // Routes that do not require authentication.
 const _publicRoutes = {
@@ -200,6 +201,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/surveys/post',
         builder: (context, state) => const SurveyScreen(isPre: false),
+      ),
+      GoRoute(
+        path: '/edit-transaction',
+        builder: (context, state) {
+          final tx = state.extra as Map<String, dynamic>;
+          return EditTransactionScreen(transaction: tx);
+        },
       ),
     ],
   );
