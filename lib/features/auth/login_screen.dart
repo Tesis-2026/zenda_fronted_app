@@ -37,10 +37,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _passwordController.text,
     );
 
-    // Check if login was successful
+    // Check if login was successful — route to profile setup if not completed
     final authState = ref.read(authNotifierProvider);
     if (authState.isAuthenticated && mounted) {
-      context.go('/dashboard');
+      final profileCompleted = authState.user?.profileCompleted ?? true;
+      context.go(profileCompleted ? '/dashboard' : '/profile-setup');
     }
   }
 

@@ -61,7 +61,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             _InicioSection(),
             _MovsSection(),
             _PresupuestoSection(),
-            _PerfilSection(),
           ],
         ),
       ),
@@ -112,17 +111,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 child: _BottomOption(
                   icon: Icons.person_rounded,
                   label: l10n.dashboardNavProfile,
-                  isActive: _index == 3,
-                  onTap: () => _goTo(3),
+                  isActive: false,
+                  onTap: () => context.push('/profile'),
                 ),
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: _index == 3
-          ? null
-          : FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton.extended(
               onPressed: () {
                 context.push('/add-transaction');
               },

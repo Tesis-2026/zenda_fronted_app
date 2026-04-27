@@ -954,4 +954,103 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notificationTypeBadgeEarned => 'Insignia obtenida';
+
+  @override
+  String get consentTitle => 'Tus datos, tu control';
+  @override
+  String get consentSubtitle => 'Antes de empezar, revisa cómo Zenda maneja tu información.';
+  @override
+  String get consentBodyTitle => '¿Qué datos recopilamos?';
+  @override
+  String get consentBodyText => 'Zenda recopila tus registros de ingresos y gastos, perfil financiero (edad, universidad, tipo de ingreso) y datos de uso de la app para generar predicciones y recomendaciones personalizadas. Tus datos nunca se comparten con terceros y se almacenan de forma segura.';
+  @override
+  String get consentLawNote => 'En cumplimiento con la Ley 29733 — Ley de Protección de Datos Personales del Perú';
+  @override
+  String get consentCheckbox => 'Acepto que mis datos financieros sean procesados para generar reportes y predicciones personalizadas';
+  @override
+  String get consentAcceptButton => 'Aceptar y continuar';
+  @override
+  String get consentMustAccept => 'Debes aceptar para continuar';
+
+  @override
+  String get emailSentTitle => '¡Cuenta creada!';
+  @override
+  String emailSentSubtitle(String name) => 'Bienvenido a Zenda, $name';
+  @override
+  String emailSentBody(String email) => 'Se envió un correo de bienvenida a $email. Ahora configuremos tu perfil financiero.';
+  @override
+  String get emailSentContinue => 'Configurar mi perfil';
+  @override
+  String get emailSentSkip => 'Saltar por ahora';
+
+  @override
+  String get profileSetupTitle => 'Cuéntanos sobre ti';
+  @override
+  String get profileSetupSubtitle => 'Ayuda a Zenda a personalizar tu experiencia. Puedes editar esto en cualquier momento.';
+  @override
+  String get profileSetupAge => '¿Cuántos años tienes?';
+  @override
+  String get profileSetupAgeHint => 'ej. 21';
+  @override
+  String get profileSetupUniversity => '¿Dónde estudias?';
+  @override
+  String get profileSetupUniversityHint => 'ej. PUCP, UNMSM';
+  @override
+  String get profileSetupIncomeType => '¿Cómo obtienes ingresos principalmente?';
+  @override
+  String get profileSetupMonthlyIncome => 'Ingreso mensual promedio (S/)';
+  @override
+  String get profileSetupMonthlyIncomeHint => 'ej. 1500';
+  @override
+  String get profileSetupNext => 'Siguiente';
+  @override
+  String get profileSetupSave => 'Terminar';
+  @override
+  String get profileSetupSkip => 'Omitir';
+  @override
+  String get profileSetupCompleteTitle => '¡Listo!';
+  @override
+  String get profileSetupCompleteBody => 'Tu perfil está configurado. Tomemos el control de tus finanzas.';
+  @override
+  String get profileSetupGoToDashboard => 'Ir al inicio';
+  @override
+  String get incomeTypeNone => 'Sin ingresos';
+  @override
+  String get incomeTypePartTime => 'Trabajo a tiempo parcial';
+  @override
+  String get incomeTypeFullTime => 'Trabajo a tiempo completo';
+  @override
+  String get incomeTypeFreelance => 'Freelance';
+  @override
+  String get incomeTypeAllowance => 'Apoyo familiar / Beca';
+
+  @override
+  String get aiChatTitle => 'Zenda IA';
+  @override
+  String get aiChatInputHint => 'Pregunta lo que quieras sobre tus finanzas...';
+  @override
+  String get aiChatSend => 'Enviar';
+  @override
+  String get aiChatWelcome => '¡Hola! Soy Zenda, tu asistente financiero. Pregúntame sobre presupuestos, ahorros o gastos.';
+  @override
+  String get aiChatError => 'No pude obtener una respuesta. Inténtalo de nuevo.';
+  @override
+  String get aiChatNavLabel => 'Zenda IA';
+
+  @override
+  String get quizTitle => 'Quiz';
+  @override
+  String get quizEmpty => 'Aún no hay quiz disponible para este tema.';
+  @override
+  String get quizSubmit => 'Enviar';
+  @override
+  String get quizCorrect => '¡Correcto!';
+  @override
+  String get quizIncorrect => 'Incorrecto';
+  @override
+  String quizResult(int score) => 'Obtuviste $score%';
+  @override
+  String get quizFinish => 'Ver resultados';
+  @override
+  String get quizNext => 'Siguiente pregunta';
 }

@@ -409,5 +409,72 @@
   "notificationTypePredictionReady": "Predicción lista",
   "notificationTypeChallengeReminder": "Recordatorios de desafíos",
   "notificationTypeDailyReminder": "Recordatorio diario",
-  "notificationTypeBadgeEarned": "Insignia obtenida"
+  "notificationTypeBadgeEarned": "Insignia obtenida",
+
+  "consentTitle": "Tus datos, tu control",
+  "consentSubtitle": "Antes de empezar, revisa cómo Zenda maneja tu información.",
+  "consentBodyTitle": "¿Qué datos recopilamos?",
+  "consentBodyText": "Zenda recopila tus registros de ingresos y gastos, perfil financiero (edad, universidad, tipo de ingreso) y datos de uso de la app para generar predicciones y recomendaciones personalizadas. Tus datos nunca se comparten con terceros y se almacenan de forma segura.",
+  "consentLawNote": "En cumplimiento con la Ley 29733 — Ley de Protección de Datos Personales del Perú",
+  "consentCheckbox": "Acepto que mis datos financieros sean procesados para generar reportes y predicciones personalizadas",
+  "consentAcceptButton": "Aceptar y continuar",
+  "consentMustAccept": "Debes aceptar para continuar",
+
+  "emailSentTitle": "¡Cuenta creada!",
+  "emailSentSubtitle": "Bienvenido a Zenda, {name}",
+  "@emailSentSubtitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "emailSentBody": "Se envió un correo de bienvenida a {email}. Ahora configuremos tu perfil financiero.",
+  "@emailSentBody": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "emailSentContinue": "Configurar mi perfil",
+  "emailSentSkip": "Saltar por ahora",
+
+  "profileSetupTitle": "Cuéntanos sobre ti",
+  "profileSetupSubtitle": "Ayuda a Zenda a personalizar tu experiencia. Puedes editar esto en cualquier momento.",
+  "profileSetupAge": "¿Cuántos años tienes?",
+  "profileSetupAgeHint": "ej. 21",
+  "profileSetupUniversity": "¿Dónde estudias?",
+  "profileSetupUniversityHint": "ej. PUCP, UNMSM",
+  "profileSetupIncomeType": "¿Cómo obtienes ingresos principalmente?",
+  "profileSetupMonthlyIncome": "Ingreso mensual promedio (S/)",
+  "profileSetupMonthlyIncomeHint": "ej. 1500",
+  "profileSetupNext": "Siguiente",
+  "profileSetupSave": "Terminar",
+  "profileSetupSkip": "Omitir",
+  "profileSetupCompleteTitle": "¡Listo!",
+  "profileSetupCompleteBody": "Tu perfil está configurado. Tomemos el control de tus finanzas.",
+  "profileSetupGoToDashboard": "Ir al inicio",
+  "incomeTypeNone": "Sin ingresos",
+  "incomeTypePartTime": "Trabajo a tiempo parcial",
+  "incomeTypeFullTime": "Trabajo a tiempo completo",
+  "incomeTypeFreelance": "Freelance",
+  "incomeTypeAllowance": "Apoyo familiar / Beca",
+
+  "aiChatTitle": "Zenda IA",
+  "aiChatInputHint": "Pregunta lo que quieras sobre tus finanzas...",
+  "aiChatSend": "Enviar",
+  "aiChatWelcome": "¡Hola! Soy Zenda, tu asistente financiero. Pregúntame sobre presupuestos, ahorros o gastos.",
+  "aiChatError": "No pude obtener una respuesta. Inténtalo de nuevo.",
+  "aiChatNavLabel": "Zenda IA",
+
+  "quizTitle": "Quiz",
+  "quizEmpty": "Aún no hay quiz disponible para este tema.",
+  "quizSubmit": "Enviar",
+  "quizCorrect": "¡Correcto!",
+  "quizIncorrect": "Incorrecto",
+  "quizResult": "Obtuviste {score}%",
+  "@quizResult": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "quizFinish": "Ver resultados",
+  "quizNext": "Siguiente pregunta"
 }

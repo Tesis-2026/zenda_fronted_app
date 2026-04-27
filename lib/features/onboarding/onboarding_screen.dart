@@ -35,10 +35,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     await OnboardingPrefs.setOnboardingCompleted();
     if (mounted) {
+      // Always show consent before registration; login users skip onboarding entirely.
       if (widget.redirectToRegister) {
-        context.go('/auth/register');
+        context.go('/consent');
       } else {
-        context.go('/auth/login');
+        context.go('/consent');
       }
     }
   }
@@ -227,7 +228,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     // Aunque por consistencia, si redirige a Register, el botón "Ya tengo cuenta" debería ir a Login.
                     TextButton(
                       onPressed: () {
-                         context.go('/auth/login');
+                        context.go('/auth/login');
                       },
                       child: Text(
                         l10n.onboardingHaveAccount,

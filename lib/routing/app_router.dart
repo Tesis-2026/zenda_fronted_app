@@ -5,11 +5,15 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/auth_controller.dart';
 import '../features/onboarding/splash_decider.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../features/onboarding/profile_setup_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/reset_password_screen.dart';
+import '../features/auth/email_sent_screen.dart';
+import '../features/consent/consent_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/profile/profile_screen.dart';
 import '../features/transactions/add_transaction_screen.dart';
 import '../features/budget/budget_screen.dart';
 import '../features/categories/category_management_screen.dart';
@@ -21,27 +25,32 @@ import '../features/predictions/predictions_screen.dart';
 import '../features/recommendations/recommendations_screen.dart';
 import '../features/education/education_screen.dart';
 import '../features/education/topic_detail_screen.dart';
+import '../features/education/quiz_screen.dart';
 import '../features/challenges/challenges_screen.dart';
 import '../features/badges/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/surveys/survey_screen.dart';
 import '../features/transactions/edit_transaction_screen.dart';
 import '../features/notifications/notification_preferences_screen.dart';
+import '../features/ai_chat/ai_chat_screen.dart';
 
 // Routes that do not require authentication.
 const _publicRoutes = {
   '/',
   '/onboarding',
+  '/consent',
   '/auth/forgot-password',
   '/auth/reset-password',
+  '/auth/email-sent',
   '/login',
 };
 
 // Routes that authenticated users should be redirected away from.
 const _authOnlyRoutes = {'/auth/login', '/auth/register'};
 
-/// ChangeNotifier that forwards auth-state changes to GoRouter so the
-/// router re-evaluates its redirect whenever the user logs in or out.
+// Routes exempt from the profile-setup redirect.
+const _profileSetupExempt = {'/profile-setup', '/auth/email-sent', '/dashboard'};
+
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
     _sub = ref.listen<AuthState>(authNotifierProvider, (_, next) {
@@ -58,9 +67,6 @@ class _RouterRefreshNotifier extends ChangeNotifier {
   }
 }
 
-/// Provides a GoRouter instance whose [redirect] is driven by [authNotifierProvider].
-/// Using a Riverpod provider ensures the router is created once and refreshed
-/// whenever auth state changes — no widget-level imperative navigation needed.
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = _RouterRefreshNotifier(ref);
   ref.onDispose(notifier.dispose);
@@ -72,7 +78,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       final container = ProviderScope.containerOf(context, listen: false);
       final auth = container.read(authNotifierProvider);
 
-      // While auth is initialising, let the splash/loading UI handle the frame.
       if (auth.isLoading) return null;
 
       final loc = state.matchedLocation;
@@ -84,9 +89,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/auth/login';
       }
 
-      // Authenticated user trying to reach a login/register screen → dashboard.
+      // Authenticated user trying to reach login/register → dashboard.
       if (auth.isAuthenticated && _authOnlyRoutes.contains(loc)) {
         return '/dashboard';
+      }
+
+      // Authenticated user with incomplete profile → profile setup.
+      if (auth.isAuthenticated &&
+          !(auth.user?.profileCompleted ?? true) &&
+          !_profileSetupExempt.contains(loc) &&
+          !_publicRoutes.contains(loc)) {
+        return '/profile-setup';
       }
 
       return null;
@@ -104,8 +117,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           return OnboardingScreen(redirectToRegister: redirectToRegister);
         },
       ),
+      GoRoute(
+        path: '/consent',
+        builder: (context, state) => const ConsentScreen(),
+      ),
 
-      // Auth routes — no AuthGate wrapper needed; GoRouter redirect handles it.
+      // Auth routes
       GoRoute(
         path: '/auth/login',
         builder: (context, state) => const LoginScreen(),
@@ -122,17 +139,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/reset-password',
         builder: (context, state) => const ResetPasswordScreen(),
       ),
+      GoRoute(
+        path: '/auth/email-sent',
+        builder: (context, state) => const EmailSentScreen(),
+      ),
 
-      // Legacy login route (redirect to /auth/login)
+      // Legacy login route
       GoRoute(
         path: '/login',
         redirect: (context, state) => '/auth/login',
+      ),
+
+      // Profile setup (shown after registration when profileCompleted == false)
+      GoRoute(
+        path: '/profile-setup',
+        builder: (context, state) => const ProfileSetupScreen(),
       ),
 
       // Protected routes
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         path: '/add-transaction',
@@ -180,6 +211,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => TopicDetailScreen(
               topicId: state.pathParameters['id']!,
             ),
+            routes: [
+              GoRoute(
+                path: 'quiz',
+                builder: (context, state) => QuizScreen(
+                  topicId: state.pathParameters['id']!,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -212,8 +251,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/notifications',
-        builder: (context, state) =>
-            const NotificationPreferencesScreen(),
+        builder: (context, state) => const NotificationPreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/ai-chat',
+        builder: (context, state) => const AiChatScreen(),
       ),
     ],
   );

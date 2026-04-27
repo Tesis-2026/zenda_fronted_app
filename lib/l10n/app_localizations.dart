@@ -1861,6 +1861,58 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Badge earned'**
   String get notificationTypeBadgeEarned;
+
+  String get consentTitle;
+  String get consentSubtitle;
+  String get consentBodyTitle;
+  String get consentBodyText;
+  String get consentLawNote;
+  String get consentCheckbox;
+  String get consentAcceptButton;
+  String get consentMustAccept;
+
+  String get emailSentTitle;
+  String emailSentSubtitle(String name);
+  String emailSentBody(String email);
+  String get emailSentContinue;
+  String get emailSentSkip;
+
+  String get profileSetupTitle;
+  String get profileSetupSubtitle;
+  String get profileSetupAge;
+  String get profileSetupAgeHint;
+  String get profileSetupUniversity;
+  String get profileSetupUniversityHint;
+  String get profileSetupIncomeType;
+  String get profileSetupMonthlyIncome;
+  String get profileSetupMonthlyIncomeHint;
+  String get profileSetupNext;
+  String get profileSetupSave;
+  String get profileSetupSkip;
+  String get profileSetupCompleteTitle;
+  String get profileSetupCompleteBody;
+  String get profileSetupGoToDashboard;
+  String get incomeTypeNone;
+  String get incomeTypePartTime;
+  String get incomeTypeFullTime;
+  String get incomeTypeFreelance;
+  String get incomeTypeAllowance;
+
+  String get aiChatTitle;
+  String get aiChatInputHint;
+  String get aiChatSend;
+  String get aiChatWelcome;
+  String get aiChatError;
+  String get aiChatNavLabel;
+
+  String get quizTitle;
+  String get quizEmpty;
+  String get quizSubmit;
+  String get quizCorrect;
+  String get quizIncorrect;
+  String quizResult(int score);
+  String get quizFinish;
+  String get quizNext;
 }
 
 class _AppLocalizationsDelegate

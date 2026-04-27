@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
 import '../../l10n/l10n_extension.dart';
@@ -79,10 +80,7 @@ class _TopicContent extends StatelessWidget {
           if (topic.isCompleted)
             Row(
               children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   l10n.educationTopicCompleted,
@@ -102,6 +100,15 @@ class _TopicContent extends StatelessWidget {
                 onPressed: onComplete,
               ),
             ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.quiz_outlined),
+              label: Text(l10n.quizTitle),
+              onPressed: () => context.push('/education/${topic.id}/quiz'),
+            ),
+          ),
           const SizedBox(height: 32),
         ],
       ),

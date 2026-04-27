@@ -238,6 +238,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           onTap: () => context.push('/surveys/post'),
         ),
         const SizedBox(height: 8),
+        _navTile(
+          icon: Icons.psychology_rounded,
+          title: l10n.aiChatTitle,
+          onTap: () => context.push('/ai-chat'),
+        ),
+        const SizedBox(height: 8),
         _sectionHeader(l10n.profileSectionSupport),
         _navTile(
           icon: Icons.notifications_outlined,

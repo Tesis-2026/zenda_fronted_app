@@ -951,4 +951,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationTypeBadgeEarned => 'Badge earned';
+
+  @override
+  String get consentTitle => 'Your data, your control';
+  @override
+  String get consentSubtitle => 'Before you start, please review how Zenda handles your information.';
+  @override
+  String get consentBodyTitle => 'What data do we collect?';
+  @override
+  String get consentBodyText => 'Zenda collects your income and expense records, financial profile (age, university, income type), and app usage data to generate personalized predictions and recommendations. Your data is never shared with third parties and is stored securely.';
+  @override
+  String get consentLawNote => 'In compliance with Law 29733 — Peruvian Personal Data Protection Law';
+  @override
+  String get consentCheckbox => 'I agree that my financial data will be processed to generate personalized reports and predictions';
+  @override
+  String get consentAcceptButton => 'Accept and continue';
+  @override
+  String get consentMustAccept => 'You must accept to continue';
+
+  @override
+  String get emailSentTitle => 'Account created!';
+  @override
+  String emailSentSubtitle(String name) => 'Welcome to Zenda, $name';
+  @override
+  String emailSentBody(String email) => 'A welcome email was sent to $email. Now let\'s set up your financial profile.';
+  @override
+  String get emailSentContinue => 'Set up my profile';
+  @override
+  String get emailSentSkip => 'Skip for now';
+
+  @override
+  String get profileSetupTitle => 'Tell us about yourself';
+  @override
+  String get profileSetupSubtitle => 'Help Zenda personalize your experience. You can edit this anytime.';
+  @override
+  String get profileSetupAge => 'How old are you?';
+  @override
+  String get profileSetupAgeHint => 'e.g. 21';
+  @override
+  String get profileSetupUniversity => 'Where do you study?';
+  @override
+  String get profileSetupUniversityHint => 'e.g. PUCP, UNMSM';
+  @override
+  String get profileSetupIncomeType => 'How do you mainly get income?';
+  @override
+  String get profileSetupMonthlyIncome => 'Average monthly income (S/)';
+  @override
+  String get profileSetupMonthlyIncomeHint => 'e.g. 1500';
+  @override
+  String get profileSetupNext => 'Next';
+  @override
+  String get profileSetupSave => 'Finish';
+  @override
+  String get profileSetupSkip => 'Skip';
+  @override
+  String get profileSetupCompleteTitle => 'All set!';
+  @override
+  String get profileSetupCompleteBody => 'Your profile is ready. Let\'s take control of your finances.';
+  @override
+  String get profileSetupGoToDashboard => 'Go to dashboard';
+  @override
+  String get incomeTypeNone => 'No income';
+  @override
+  String get incomeTypePartTime => 'Part-time job';
+  @override
+  String get incomeTypeFullTime => 'Full-time job';
+  @override
+  String get incomeTypeFreelance => 'Freelance';
+  @override
+  String get incomeTypeAllowance => 'Family allowance / Scholarship';
+
+  @override
+  String get aiChatTitle => 'Zenda AI';
+  @override
+  String get aiChatInputHint => 'Ask anything about your finances...';
+  @override
+  String get aiChatSend => 'Send';
+  @override
+  String get aiChatWelcome => 'Hi! I\'m Zenda, your financial assistant. Ask me anything about budgets, savings, or expenses.';
+  @override
+  String get aiChatError => 'Could not get a response. Please try again.';
+  @override
+  String get aiChatNavLabel => 'Zenda AI';
+
+  @override
+  String get quizTitle => 'Quiz';
+  @override
+  String get quizEmpty => 'No quiz available for this topic yet.';
+  @override
+  String get quizSubmit => 'Submit';
+  @override
+  String get quizCorrect => 'Correct!';
+  @override
+  String get quizIncorrect => 'Incorrect';
+  @override
+  String quizResult(int score) => 'You scored $score%';
+  @override
+  String get quizFinish => 'See results';
+  @override
+  String get quizNext => 'Next question';
 }
