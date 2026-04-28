@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/services/api_client.dart';
 import '../../l10n/l10n_extension.dart';
@@ -349,7 +350,16 @@ class _TransactionTile extends ConsumerWidget {
           }
         }
       },
-      child: Container(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () async {
+          final refreshed = await context.push<bool>(
+            '/edit-transaction',
+            extra: tx,
+          );
+          if (refreshed == true) onDeleted();
+        },
+        child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
@@ -412,6 +422,7 @@ class _TransactionTile extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

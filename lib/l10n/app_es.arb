@@ -242,6 +242,11 @@
 
   "profileBudgets": "Presupuestos",
   "profileGoals": "Metas de ahorro",
+  "profileSectionFinance": "Finanzas",
+  "profileSectionLearnGrow": "Aprende y Crece",
+  "profileSectionSurveys": "Encuestas",
+  "profileSectionSupport": "Soporte",
+  "profileSendFeedback": "Enviar comentarios",
 
   "budgetTitle": "Presupuestos",
   "budgetEmptyTitle": "Sin presupuestos",
@@ -320,5 +325,156 @@
   "errorTxInvalidSourceAccount": "Cuenta origen inválida.",
   "errorTxInvalidDestAccount": "Cuenta destino inválida.",
   "errorTxCreditTransferNotSupported": "Transferir desde tarjeta de crédito no está disponible.",
-  "errorTxSaveFailed": "No se pudo guardar la transacción. Inténtalo de nuevo."
+  "errorTxSaveFailed": "No se pudo guardar la transacción. Inténtalo de nuevo.",
+
+  "predictionsTitle": "Predicciones IA",
+  "predictionsExpenseTitle": "Gastos del próximo mes",
+  "predictionsConfidence": "Confianza",
+  "predictionsErrorLoad": "No se pudieron cargar las predicciones",
+  "predictionsDisclaimer": "Las predicciones son estimaciones basadas en tu historial. Los resultados reales pueden variar.",
+
+  "recommendationsTitle": "Recomendaciones",
+  "recommendationsEmpty": "Aún no hay recomendaciones. Agrega más transacciones para obtener consejos personalizados.",
+  "recommendationsErrorLoad": "No se pudieron cargar las recomendaciones",
+  "recommendationsAccept": "Útil",
+  "recommendationsReject": "No útil",
+
+  "educationTitle": "Educación financiera",
+  "educationErrorLoad": "No se pudieron cargar los temas",
+  "educationProgressLabel": "{completed} de {total} temas completados",
+  "@educationProgressLabel": {
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "educationTopicDetailTitle": "Tema",
+  "educationMarkComplete": "Marcar como completado",
+  "educationTopicCompleted": "¡Tema completado!",
+
+  "challengesTitle": "Desafíos",
+  "challengesEmpty": "No hay desafíos disponibles por ahora.",
+  "challengesErrorLoad": "No se pudieron cargar los desafíos",
+  "challengesAcceptButton": "Aceptar desafío",
+  "challengesAccepted": "¡Desafío aceptado!",
+
+  "badgesTitle": "Insignias",
+  "badgesErrorLoad": "No se pudieron cargar las insignias",
+  "badgesEarnedCount": "{earned} de {total} insignias obtenidas",
+  "@badgesEarnedCount": {
+    "placeholders": {
+      "earned": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "progressTitle": "Progreso financiero",
+  "progressErrorLoad": "No se pudo cargar el progreso",
+  "progressCurrentMonth": "Mes actual",
+  "progressPreviousMonth": "Mes anterior",
+  "progressChangesTitle": "Cambios mes a mes",
+  "progressExpensesChange": "Gastos",
+  "progressSavingsChange": "Ahorros",
+  "progressBalanceChange": "Balance",
+  "progressNoData": "Sin datos",
+
+  "surveyPreTitle": "Encuesta inicial",
+  "surveyPostTitle": "Encuesta final",
+  "surveyErrorLoad": "No se pudo cargar la encuesta",
+  "surveyAnswerAll": "Por favor responde todas las preguntas antes de enviar",
+  "surveySubmitButton": "Enviar respuestas",
+  "surveySubmitError": "No se pudo enviar la encuesta. Inténtalo de nuevo.",
+  "surveyResultTitle": "Tus resultados",
+  "surveyImprovement": "¡Tu conocimiento financiero mejoró {points} puntos respecto a la encuesta inicial!",
+  "@surveyImprovement": {
+    "placeholders": {
+      "points": { "type": "String" }
+    }
+  },
+
+  "feedbackTitle": "Enviar comentarios",
+  "feedbackTypeLabel": "Tipo",
+  "feedbackRatingLabel": "Calificación",
+  "feedbackMessageLabel": "Mensaje",
+  "feedbackMessageHint": "Cuéntanos qué piensas...",
+  "feedbackSubmitButton": "Enviar comentario",
+  "feedbackThanks": "¡Gracias por tus comentarios!",
+  "feedbackMessageRequired": "Por favor ingresa un mensaje",
+  "feedbackSubmitError": "No se pudo enviar el comentario. Inténtalo de nuevo.",
+
+  "notificationsTitle": "Preferencias de notificaciones",
+  "notificationsErrorLoad": "No se pudieron cargar las preferencias",
+  "notificationTypeBudgetAlert": "Alertas de presupuesto",
+  "notificationTypeAnomalyAlert": "Alertas de gasto inusual",
+  "notificationTypePredictionReady": "Predicción lista",
+  "notificationTypeChallengeReminder": "Recordatorios de desafíos",
+  "notificationTypeDailyReminder": "Recordatorio diario",
+  "notificationTypeBadgeEarned": "Insignia obtenida",
+
+  "consentTitle": "Tus datos, tu control",
+  "consentSubtitle": "Antes de empezar, revisa cómo Zenda maneja tu información.",
+  "consentBodyTitle": "¿Qué datos recopilamos?",
+  "consentBodyText": "Zenda recopila tus registros de ingresos y gastos, perfil financiero (edad, universidad, tipo de ingreso) y datos de uso de la app para generar predicciones y recomendaciones personalizadas. Tus datos nunca se comparten con terceros y se almacenan de forma segura.",
+  "consentLawNote": "En cumplimiento con la Ley 29733 — Ley de Protección de Datos Personales del Perú",
+  "consentCheckbox": "Acepto que mis datos financieros sean procesados para generar reportes y predicciones personalizadas",
+  "consentAcceptButton": "Aceptar y continuar",
+  "consentMustAccept": "Debes aceptar para continuar",
+
+  "emailSentTitle": "¡Cuenta creada!",
+  "emailSentSubtitle": "Bienvenido a Zenda, {name}",
+  "@emailSentSubtitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "emailSentBody": "Se envió un correo de bienvenida a {email}. Ahora configuremos tu perfil financiero.",
+  "@emailSentBody": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "emailSentContinue": "Configurar mi perfil",
+  "emailSentSkip": "Saltar por ahora",
+
+  "profileSetupTitle": "Cuéntanos sobre ti",
+  "profileSetupSubtitle": "Ayuda a Zenda a personalizar tu experiencia. Puedes editar esto en cualquier momento.",
+  "profileSetupAge": "¿Cuántos años tienes?",
+  "profileSetupAgeHint": "ej. 21",
+  "profileSetupUniversity": "¿Dónde estudias?",
+  "profileSetupUniversityHint": "ej. PUCP, UNMSM",
+  "profileSetupIncomeType": "¿Cómo obtienes ingresos principalmente?",
+  "profileSetupMonthlyIncome": "Ingreso mensual promedio (S/)",
+  "profileSetupMonthlyIncomeHint": "ej. 1500",
+  "profileSetupNext": "Siguiente",
+  "profileSetupSave": "Terminar",
+  "profileSetupSkip": "Omitir",
+  "profileSetupCompleteTitle": "¡Listo!",
+  "profileSetupCompleteBody": "Tu perfil está configurado. Tomemos el control de tus finanzas.",
+  "profileSetupGoToDashboard": "Ir al inicio",
+  "incomeTypeNone": "Sin ingresos",
+  "incomeTypePartTime": "Trabajo a tiempo parcial",
+  "incomeTypeFullTime": "Trabajo a tiempo completo",
+  "incomeTypeFreelance": "Freelance",
+  "incomeTypeAllowance": "Apoyo familiar / Beca",
+
+  "aiChatTitle": "Zenda IA",
+  "aiChatInputHint": "Pregunta lo que quieras sobre tus finanzas...",
+  "aiChatSend": "Enviar",
+  "aiChatWelcome": "¡Hola! Soy Zenda, tu asistente financiero. Pregúntame sobre presupuestos, ahorros o gastos.",
+  "aiChatError": "No pude obtener una respuesta. Inténtalo de nuevo.",
+  "aiChatNavLabel": "Zenda IA",
+
+  "quizTitle": "Quiz",
+  "quizEmpty": "Aún no hay quiz disponible para este tema.",
+  "quizSubmit": "Enviar",
+  "quizCorrect": "¡Correcto!",
+  "quizIncorrect": "Incorrecto",
+  "quizResult": "Obtuviste {score}%",
+  "@quizResult": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "quizFinish": "Ver resultados",
+  "quizNext": "Siguiente pregunta"
 }

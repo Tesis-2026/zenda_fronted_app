@@ -39,10 +39,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _passwordController.text,
     );
 
-    // Check if registration was successful
+    // Check if registration was successful — route to email-sent screen
     final authState = ref.read(authNotifierProvider);
     if (authState.isAuthenticated && mounted) {
-      context.go('/dashboard');
+      context.go('/auth/email-sent');
     }
   }
 

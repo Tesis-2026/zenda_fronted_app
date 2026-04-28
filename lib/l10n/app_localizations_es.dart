@@ -596,6 +596,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileGoals => 'Metas de ahorro';
 
   @override
+  String get profileSectionFinance => 'Finanzas';
+
+  @override
+  String get profileSectionLearnGrow => 'Aprende y Crece';
+
+  @override
+  String get profileSectionSurveys => 'Encuestas';
+
+  @override
+  String get profileSectionSupport => 'Soporte';
+
+  @override
+  String get profileSendFeedback => 'Enviar comentarios';
+
+  @override
   String get budgetTitle => 'Presupuestos';
 
   @override
@@ -753,4 +768,289 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get errorTxSaveFailed =>
       'No se pudo guardar la transacción. Inténtalo de nuevo.';
+
+  @override
+  String get predictionsTitle => 'Predicciones IA';
+
+  @override
+  String get predictionsExpenseTitle => 'Gastos del próximo mes';
+
+  @override
+  String get predictionsConfidence => 'Confianza';
+
+  @override
+  String get predictionsErrorLoad => 'No se pudieron cargar las predicciones';
+
+  @override
+  String get predictionsDisclaimer =>
+      'Las predicciones son estimaciones basadas en tu historial. Los resultados reales pueden variar.';
+
+  @override
+  String get recommendationsTitle => 'Recomendaciones';
+
+  @override
+  String get recommendationsEmpty =>
+      'Aún no hay recomendaciones. Agrega más transacciones para obtener consejos personalizados.';
+
+  @override
+  String get recommendationsErrorLoad =>
+      'No se pudieron cargar las recomendaciones';
+
+  @override
+  String get recommendationsAccept => 'Útil';
+
+  @override
+  String get recommendationsReject => 'No útil';
+
+  @override
+  String get educationTitle => 'Educación financiera';
+
+  @override
+  String get educationErrorLoad => 'No se pudieron cargar los temas';
+
+  @override
+  String educationProgressLabel(int completed, int total) {
+    return '$completed de $total temas completados';
+  }
+
+  @override
+  String get educationTopicDetailTitle => 'Tema';
+
+  @override
+  String get educationMarkComplete => 'Marcar como completado';
+
+  @override
+  String get educationTopicCompleted => '¡Tema completado!';
+
+  @override
+  String get challengesTitle => 'Desafíos';
+
+  @override
+  String get challengesEmpty => 'No hay desafíos disponibles por ahora.';
+
+  @override
+  String get challengesErrorLoad => 'No se pudieron cargar los desafíos';
+
+  @override
+  String get challengesAcceptButton => 'Aceptar desafío';
+
+  @override
+  String get challengesAccepted => '¡Desafío aceptado!';
+
+  @override
+  String get badgesTitle => 'Insignias';
+
+  @override
+  String get badgesErrorLoad => 'No se pudieron cargar las insignias';
+
+  @override
+  String badgesEarnedCount(int earned, int total) {
+    return '$earned de $total insignias obtenidas';
+  }
+
+  @override
+  String get progressTitle => 'Progreso financiero';
+
+  @override
+  String get progressErrorLoad => 'No se pudo cargar el progreso';
+
+  @override
+  String get progressCurrentMonth => 'Mes actual';
+
+  @override
+  String get progressPreviousMonth => 'Mes anterior';
+
+  @override
+  String get progressChangesTitle => 'Cambios mes a mes';
+
+  @override
+  String get progressExpensesChange => 'Gastos';
+
+  @override
+  String get progressSavingsChange => 'Ahorros';
+
+  @override
+  String get progressBalanceChange => 'Balance';
+
+  @override
+  String get progressNoData => 'Sin datos';
+
+  @override
+  String get surveyPreTitle => 'Encuesta inicial';
+
+  @override
+  String get surveyPostTitle => 'Encuesta final';
+
+  @override
+  String get surveyErrorLoad => 'No se pudo cargar la encuesta';
+
+  @override
+  String get surveyAnswerAll =>
+      'Por favor responde todas las preguntas antes de enviar';
+
+  @override
+  String get surveySubmitButton => 'Enviar respuestas';
+
+  @override
+  String get surveySubmitError =>
+      'No se pudo enviar la encuesta. Inténtalo de nuevo.';
+
+  @override
+  String get surveyResultTitle => 'Tus resultados';
+
+  @override
+  String surveyImprovement(String points) {
+    return '¡Tu conocimiento financiero mejoró $points puntos respecto a la encuesta inicial!';
+  }
+
+  @override
+  String get feedbackTitle => 'Enviar comentarios';
+
+  @override
+  String get feedbackTypeLabel => 'Tipo';
+
+  @override
+  String get feedbackRatingLabel => 'Calificación';
+
+  @override
+  String get feedbackMessageLabel => 'Mensaje';
+
+  @override
+  String get feedbackMessageHint => 'Cuéntanos qué piensas...';
+
+  @override
+  String get feedbackSubmitButton => 'Enviar comentario';
+
+  @override
+  String get feedbackThanks => '¡Gracias por tus comentarios!';
+
+  @override
+  String get feedbackMessageRequired => 'Por favor ingresa un mensaje';
+
+  @override
+  String get feedbackSubmitError =>
+      'No se pudo enviar el comentario. Inténtalo de nuevo.';
+
+  @override
+  String get notificationsTitle => 'Preferencias de notificaciones';
+
+  @override
+  String get notificationsErrorLoad => 'No se pudieron cargar las preferencias';
+
+  @override
+  String get notificationTypeBudgetAlert => 'Alertas de presupuesto';
+
+  @override
+  String get notificationTypeAnomalyAlert => 'Alertas de gasto inusual';
+
+  @override
+  String get notificationTypePredictionReady => 'Predicción lista';
+
+  @override
+  String get notificationTypeChallengeReminder => 'Recordatorios de desafíos';
+
+  @override
+  String get notificationTypeDailyReminder => 'Recordatorio diario';
+
+  @override
+  String get notificationTypeBadgeEarned => 'Insignia obtenida';
+
+  @override
+  String get consentTitle => 'Tus datos, tu control';
+  @override
+  String get consentSubtitle => 'Antes de empezar, revisa cómo Zenda maneja tu información.';
+  @override
+  String get consentBodyTitle => '¿Qué datos recopilamos?';
+  @override
+  String get consentBodyText => 'Zenda recopila tus registros de ingresos y gastos, perfil financiero (edad, universidad, tipo de ingreso) y datos de uso de la app para generar predicciones y recomendaciones personalizadas. Tus datos nunca se comparten con terceros y se almacenan de forma segura.';
+  @override
+  String get consentLawNote => 'En cumplimiento con la Ley 29733 — Ley de Protección de Datos Personales del Perú';
+  @override
+  String get consentCheckbox => 'Acepto que mis datos financieros sean procesados para generar reportes y predicciones personalizadas';
+  @override
+  String get consentAcceptButton => 'Aceptar y continuar';
+  @override
+  String get consentMustAccept => 'Debes aceptar para continuar';
+
+  @override
+  String get emailSentTitle => '¡Cuenta creada!';
+  @override
+  String emailSentSubtitle(String name) => 'Bienvenido a Zenda, $name';
+  @override
+  String emailSentBody(String email) => 'Se envió un correo de bienvenida a $email. Ahora configuremos tu perfil financiero.';
+  @override
+  String get emailSentContinue => 'Configurar mi perfil';
+  @override
+  String get emailSentSkip => 'Saltar por ahora';
+
+  @override
+  String get profileSetupTitle => 'Cuéntanos sobre ti';
+  @override
+  String get profileSetupSubtitle => 'Ayuda a Zenda a personalizar tu experiencia. Puedes editar esto en cualquier momento.';
+  @override
+  String get profileSetupAge => '¿Cuántos años tienes?';
+  @override
+  String get profileSetupAgeHint => 'ej. 21';
+  @override
+  String get profileSetupUniversity => '¿Dónde estudias?';
+  @override
+  String get profileSetupUniversityHint => 'ej. PUCP, UNMSM';
+  @override
+  String get profileSetupIncomeType => '¿Cómo obtienes ingresos principalmente?';
+  @override
+  String get profileSetupMonthlyIncome => 'Ingreso mensual promedio (S/)';
+  @override
+  String get profileSetupMonthlyIncomeHint => 'ej. 1500';
+  @override
+  String get profileSetupNext => 'Siguiente';
+  @override
+  String get profileSetupSave => 'Terminar';
+  @override
+  String get profileSetupSkip => 'Omitir';
+  @override
+  String get profileSetupCompleteTitle => '¡Listo!';
+  @override
+  String get profileSetupCompleteBody => 'Tu perfil está configurado. Tomemos el control de tus finanzas.';
+  @override
+  String get profileSetupGoToDashboard => 'Ir al inicio';
+  @override
+  String get incomeTypeNone => 'Sin ingresos';
+  @override
+  String get incomeTypePartTime => 'Trabajo a tiempo parcial';
+  @override
+  String get incomeTypeFullTime => 'Trabajo a tiempo completo';
+  @override
+  String get incomeTypeFreelance => 'Freelance';
+  @override
+  String get incomeTypeAllowance => 'Apoyo familiar / Beca';
+
+  @override
+  String get aiChatTitle => 'Zenda IA';
+  @override
+  String get aiChatInputHint => 'Pregunta lo que quieras sobre tus finanzas...';
+  @override
+  String get aiChatSend => 'Enviar';
+  @override
+  String get aiChatWelcome => '¡Hola! Soy Zenda, tu asistente financiero. Pregúntame sobre presupuestos, ahorros o gastos.';
+  @override
+  String get aiChatError => 'No pude obtener una respuesta. Inténtalo de nuevo.';
+  @override
+  String get aiChatNavLabel => 'Zenda IA';
+
+  @override
+  String get quizTitle => 'Quiz';
+  @override
+  String get quizEmpty => 'Aún no hay quiz disponible para este tema.';
+  @override
+  String get quizSubmit => 'Enviar';
+  @override
+  String get quizCorrect => '¡Correcto!';
+  @override
+  String get quizIncorrect => 'Incorrecto';
+  @override
+  String quizResult(int score) => 'Obtuviste $score%';
+  @override
+  String get quizFinish => 'Ver resultados';
+  @override
+  String get quizNext => 'Siguiente pregunta';
 }

@@ -242,6 +242,11 @@
 
   "profileBudgets": "Budgets",
   "profileGoals": "Savings Goals",
+  "profileSectionFinance": "Finance",
+  "profileSectionLearnGrow": "Learn & Grow",
+  "profileSectionSurveys": "Surveys",
+  "profileSectionSupport": "Support",
+  "profileSendFeedback": "Send feedback",
 
   "budgetTitle": "Budgets",
   "budgetEmptyTitle": "No budgets yet",
@@ -320,5 +325,156 @@
   "errorTxInvalidSourceAccount": "Source account not found.",
   "errorTxInvalidDestAccount": "Destination account not found.",
   "errorTxCreditTransferNotSupported": "Transfers from a credit card are not available.",
-  "errorTxSaveFailed": "Could not save the transaction. Please try again."
+  "errorTxSaveFailed": "Could not save the transaction. Please try again.",
+
+  "predictionsTitle": "AI Predictions",
+  "predictionsExpenseTitle": "Next month expenses",
+  "predictionsConfidence": "Confidence",
+  "predictionsErrorLoad": "Could not load predictions",
+  "predictionsDisclaimer": "Predictions are estimates based on your spending history. Actual results may vary.",
+
+  "recommendationsTitle": "Recommendations",
+  "recommendationsEmpty": "No recommendations available yet. Add more transactions to get personalized tips.",
+  "recommendationsErrorLoad": "Could not load recommendations",
+  "recommendationsAccept": "Helpful",
+  "recommendationsReject": "Not helpful",
+
+  "educationTitle": "Financial Education",
+  "educationErrorLoad": "Could not load topics",
+  "educationProgressLabel": "{completed} of {total} topics completed",
+  "@educationProgressLabel": {
+    "placeholders": {
+      "completed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "educationTopicDetailTitle": "Topic",
+  "educationMarkComplete": "Mark as completed",
+  "educationTopicCompleted": "Topic completed!",
+
+  "challengesTitle": "Challenges",
+  "challengesEmpty": "No challenges available right now.",
+  "challengesErrorLoad": "Could not load challenges",
+  "challengesAcceptButton": "Accept challenge",
+  "challengesAccepted": "Challenge accepted!",
+
+  "badgesTitle": "Badges",
+  "badgesErrorLoad": "Could not load badges",
+  "badgesEarnedCount": "{earned} of {total} badges earned",
+  "@badgesEarnedCount": {
+    "placeholders": {
+      "earned": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "progressTitle": "Financial Progress",
+  "progressErrorLoad": "Could not load progress data",
+  "progressCurrentMonth": "Current month",
+  "progressPreviousMonth": "Previous month",
+  "progressChangesTitle": "Month-over-month changes",
+  "progressExpensesChange": "Expenses",
+  "progressSavingsChange": "Savings",
+  "progressBalanceChange": "Balance",
+  "progressNoData": "No data",
+
+  "surveyPreTitle": "Pre-Usage Survey",
+  "surveyPostTitle": "Post-Usage Survey",
+  "surveyErrorLoad": "Could not load survey",
+  "surveyAnswerAll": "Please answer all questions before submitting",
+  "surveySubmitButton": "Submit answers",
+  "surveySubmitError": "Could not submit survey. Please try again.",
+  "surveyResultTitle": "Your results",
+  "surveyImprovement": "Your financial knowledge improved by {points} points since the pre-survey!",
+  "@surveyImprovement": {
+    "placeholders": {
+      "points": { "type": "String" }
+    }
+  },
+
+  "feedbackTitle": "Send feedback",
+  "feedbackTypeLabel": "Type",
+  "feedbackRatingLabel": "Rating",
+  "feedbackMessageLabel": "Message",
+  "feedbackMessageHint": "Tell us what you think...",
+  "feedbackSubmitButton": "Send feedback",
+  "feedbackThanks": "Thank you for your feedback!",
+  "feedbackMessageRequired": "Please enter a message",
+  "feedbackSubmitError": "Could not send feedback. Please try again.",
+
+  "notificationsTitle": "Notification Preferences",
+  "notificationsErrorLoad": "Could not load preferences",
+  "notificationTypeBudgetAlert": "Budget alerts",
+  "notificationTypeAnomalyAlert": "Unusual spending alerts",
+  "notificationTypePredictionReady": "Prediction ready",
+  "notificationTypeChallengeReminder": "Challenge reminders",
+  "notificationTypeDailyReminder": "Daily log reminder",
+  "notificationTypeBadgeEarned": "Badge earned",
+
+  "consentTitle": "Your data, your control",
+  "consentSubtitle": "Before you start, please review how Zenda handles your information.",
+  "consentBodyTitle": "What data do we collect?",
+  "consentBodyText": "Zenda collects your income and expense records, financial profile (age, university, income type), and app usage data to generate personalized predictions and recommendations. Your data is never shared with third parties and is stored securely.",
+  "consentLawNote": "In compliance with Law 29733 — Peruvian Personal Data Protection Law",
+  "consentCheckbox": "I agree that my financial data will be processed to generate personalized reports and predictions",
+  "consentAcceptButton": "Accept and continue",
+  "consentMustAccept": "You must accept to continue",
+
+  "emailSentTitle": "Account created!",
+  "emailSentSubtitle": "Welcome to Zenda, {name}",
+  "@emailSentSubtitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "emailSentBody": "A welcome email was sent to {email}. Now let's set up your financial profile.",
+  "@emailSentBody": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "emailSentContinue": "Set up my profile",
+  "emailSentSkip": "Skip for now",
+
+  "profileSetupTitle": "Tell us about yourself",
+  "profileSetupSubtitle": "Help Zenda personalize your experience. You can edit this anytime.",
+  "profileSetupAge": "How old are you?",
+  "profileSetupAgeHint": "e.g. 21",
+  "profileSetupUniversity": "Where do you study?",
+  "profileSetupUniversityHint": "e.g. PUCP, UNMSM",
+  "profileSetupIncomeType": "How do you mainly get income?",
+  "profileSetupMonthlyIncome": "Average monthly income (S/)",
+  "profileSetupMonthlyIncomeHint": "e.g. 1500",
+  "profileSetupNext": "Next",
+  "profileSetupSave": "Finish",
+  "profileSetupSkip": "Skip",
+  "profileSetupCompleteTitle": "All set!",
+  "profileSetupCompleteBody": "Your profile is ready. Let's take control of your finances.",
+  "profileSetupGoToDashboard": "Go to dashboard",
+  "incomeTypeNone": "No income",
+  "incomeTypePartTime": "Part-time job",
+  "incomeTypeFullTime": "Full-time job",
+  "incomeTypeFreelance": "Freelance",
+  "incomeTypeAllowance": "Family allowance / Scholarship",
+
+  "aiChatTitle": "Zenda AI",
+  "aiChatInputHint": "Ask anything about your finances...",
+  "aiChatSend": "Send",
+  "aiChatWelcome": "Hi! I'm Zenda, your financial assistant. Ask me anything about budgets, savings, or expenses.",
+  "aiChatError": "Could not get a response. Please try again.",
+  "aiChatNavLabel": "Zenda AI",
+
+  "quizTitle": "Quiz",
+  "quizEmpty": "No quiz available for this topic yet.",
+  "quizSubmit": "Submit",
+  "quizCorrect": "Correct!",
+  "quizIncorrect": "Incorrect",
+  "quizResult": "You scored {score}%",
+  "@quizResult": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "quizFinish": "See results",
+  "quizNext": "Next question"
 }

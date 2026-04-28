@@ -57,4 +57,29 @@ class TransactionApiService {
     final body = await ApiClient.getList('/transactions$query');
     return body.cast<Map<String, dynamic>>();
   }
+
+  Future<void> update({
+    required String id,
+    required TransactionKind kind,
+    required double amount,
+    required TransactionCategory category,
+    required DateTime occurredAt,
+    String? description,
+  }) async {
+    if (kind == TransactionKind.transfer) return;
+    await ApiClient.put(
+      '/transactions/$id',
+      {
+        'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
+        'amount': amount,
+        'newCategoryName': categoryToApiName(category),
+        'description': description ?? '',
+        'occurredAt': occurredAt.toUtc().toIso8601String(),
+      },
+    );
+  }
+
+  Future<void> deleteTransaction(String id) async {
+    await ApiClient.delete('/transactions/$id');
+  }
 }
