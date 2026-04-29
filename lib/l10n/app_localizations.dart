@@ -698,6 +698,12 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get txCategoryLabel;
 
+  /// No description provided for @txAddCustomCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get txAddCustomCategory;
+
   /// No description provided for @txNoteLabel.
   ///
   /// In en, this message translates to:
@@ -1094,6 +1100,12 @@ abstract class AppLocalizations {
   /// **'Compare'**
   String get reportsTabCompare;
 
+  /// No description provided for @reportsTabDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get reportsTabDay;
+
   /// No description provided for @reportsTopCategories.
   ///
   /// In en, this message translates to:
@@ -1388,6 +1400,18 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get goalsDeleteLabel;
 
+  /// No description provided for @goalsDueDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date (optional)'**
+  String get goalsDueDateLabel;
+
+  /// No description provided for @goalsMarkComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark complete'**
+  String get goalsMarkComplete;
+
   /// No description provided for @goalsDetailTitle.
   ///
   /// In en, this message translates to:
@@ -1639,6 +1663,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Challenge accepted!'**
   String get challengesAccepted;
+
+  /// No description provided for @challengesCompleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark completed'**
+  String get challengesCompleteButton;
+
+  /// No description provided for @challengesCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge completed!'**
+  String get challengesCompleted;
 
   /// No description provided for @badgesTitle.
   ///

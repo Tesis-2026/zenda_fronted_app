@@ -15,6 +15,7 @@ class NewTransactionState {
   final String? toAccountId;
   final double? amount;
   final TransactionCategory? category;
+  final String? customCategoryName;
   final String note;
   final DateTime date;
   final TransactionSource source;
@@ -28,6 +29,7 @@ class NewTransactionState {
     required this.toAccountId,
     required this.amount,
     required this.category,
+    this.customCategoryName,
     required this.note,
     required this.date,
     required this.source,
@@ -42,6 +44,7 @@ class NewTransactionState {
     toAccountId: null,
     amount: null,
     category: null,
+    customCategoryName: null,
     note: '',
     date: DateTime.now(),
     source: TransactionSource.manual,
@@ -62,6 +65,7 @@ class NewTransactionState {
     String? toAccountId,
     double? amount,
     TransactionCategory? category,
+    String? customCategoryName,
     String? note,
     DateTime? date,
     TransactionSource? source,
@@ -69,13 +73,16 @@ class NewTransactionState {
     String? error,
     int? saveTick,
     bool clearError = false,
+    bool clearCategory = false,
+    bool clearCustomCategory = false,
   }) {
     return NewTransactionState(
       kind: kind ?? this.kind,
       fromAccountId: fromAccountId ?? this.fromAccountId,
       toAccountId: toAccountId ?? this.toAccountId,
       amount: amount ?? this.amount,
-      category: category ?? this.category,
+      category: clearCategory ? null : (category ?? this.category),
+      customCategoryName: clearCustomCategory ? null : (customCategoryName ?? this.customCategoryName),
       note: note ?? this.note,
       date: date ?? this.date,
       source: source ?? this.source,
@@ -123,7 +130,11 @@ class NewTransactionController extends Notifier<NewTransactionState> {
   }
 
   void setCategory(TransactionCategory category) {
-    state = state.copyWith(category: category, clearError: true);
+    state = state.copyWith(category: category, clearCustomCategory: true, clearError: true);
+  }
+
+  void setCustomCategory(String name) {
+    state = state.copyWith(customCategoryName: name, clearCategory: true, clearError: true);
   }
 
   void setNote(String note) {
@@ -158,10 +169,12 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     }
 
     final category = state.category;
-    if (category == null) {
+    final customName = state.customCategoryName;
+    if (category == null && (customName == null || customName.isEmpty)) {
       state = state.copyWith(error: TxErrorCode.noCategory);
       return;
     }
+    final effectiveCategory = category ?? TransactionCategory.otros;
 
     final kind = state.kind;
     final toId = state.toAccountId;
@@ -226,8 +239,8 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         kind: kind,
         amount: amount,
         currency: 'PEN',
-        category: category,
-        bucket: bucketForCategory(category),
+        category: effectiveCategory,
+        bucket: bucketForCategory(effectiveCategory),
         timestamp: state.date,
         note: state.note.isEmpty ? null : state.note,
         source: state.source,
@@ -240,9 +253,10 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         await apiService.create(
           kind: kind,
           amount: amount,
-          category: category,
+          category: effectiveCategory,
           occurredAt: state.date,
           description: state.note.isEmpty ? null : state.note,
+          customCategoryName: customName,
         );
       } catch (_) {
         // Backend sync failure is non-blocking — local save succeeded

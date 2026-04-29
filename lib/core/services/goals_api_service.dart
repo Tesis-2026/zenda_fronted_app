@@ -64,5 +64,10 @@ class GoalsApiService {
         .toList();
   }
 
+  Future<SavingsGoal> complete(String id) async {
+    final json = await ApiClient.post('/goals/$id/complete', {}, authenticated: true);
+    return SavingsGoal.fromJson(json);
+  }
+
   Future<void> delete(String id) => ApiClient.delete('/goals/$id');
 }

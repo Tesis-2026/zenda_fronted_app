@@ -25,6 +25,7 @@ class TransactionApiService {
     required TransactionCategory category,
     required DateTime occurredAt,
     String? description,
+    String? customCategoryName,
   }) async {
     // Only EXPENSE and INCOME map to the backend (transfers are local-only).
     if (kind == TransactionKind.transfer) return;
@@ -33,7 +34,7 @@ class TransactionApiService {
       {
         'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
         'amount': amount,
-        'newCategoryName': categoryToApiName(category),
+        'newCategoryName': customCategoryName ?? categoryToApiName(category),
         'description': description ?? '',
         'occurredAt': occurredAt.toUtc().toIso8601String(),
       },

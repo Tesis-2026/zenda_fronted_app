@@ -336,6 +336,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txCategoryLabel => 'Category';
 
   @override
+  String get txAddCustomCategory => 'New category';
+
+  @override
   String get txNoteLabel => 'Note (optional)';
 
   @override
@@ -539,6 +542,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsTabCompare => 'Compare';
 
   @override
+  String get reportsTabDay => 'Day';
+
+  @override
   String get reportsTopCategories => 'Top Categories';
 
   @override
@@ -701,6 +707,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalsDeleteLabel => 'Delete';
 
   @override
+  String get goalsDueDateLabel => 'Due date (optional)';
+
+  @override
+  String get goalsMarkComplete => 'Mark complete';
+
+  @override
   String get goalsDetailTitle => 'Goal Detail';
 
   @override
@@ -835,6 +847,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get challengesAccepted => 'Challenge accepted!';
+
+  @override
+  String get challengesCompleteButton => 'Mark completed';
+
+  @override
+  String get challengesCompleted => 'Challenge completed!';
 
   @override
   String get badgesTitle => 'Badges';

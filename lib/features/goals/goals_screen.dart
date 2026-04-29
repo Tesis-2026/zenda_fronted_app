@@ -55,6 +55,7 @@ class GoalsScreen extends ConsumerWidget {
                   ),
                   onContribute: () =>
                       _showContributeDialog(context, ref, goals[index]),
+                  onComplete: () => _completeGoal(context, ref, goals[index].id),
                   onDelete: () => _deleteGoal(context, ref, goals[index].id),
                 ),
               ),
@@ -70,48 +71,77 @@ class GoalsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final nameController = TextEditingController();
     final targetController = TextEditingController();
+    DateTime? dueDate;
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.goalsAddTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              autofocus: true,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.goalsNameLabel,
-                hintText: l10n.goalsNameHint,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text(l10n.goalsAddTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: l10n.goalsNameLabel,
+                  hintText: l10n.goalsNameHint,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: targetController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: l10n.goalsTargetLabel,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: ctx,
+                    initialDate: dueDate ?? DateTime.now().add(const Duration(days: 30)),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 3650)),
+                  );
+                  if (picked != null) setDialogState(() => dueDate = picked);
+                },
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: l10n.goalsDueDateLabel,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+                  ),
+                  child: Text(
+                    dueDate != null
+                        ? '${dueDate!.day.toString().padLeft(2, '0')}/${dueDate!.month.toString().padLeft(2, '0')}/${dueDate!.year}'
+                        : '',
+                    style: Theme.of(ctx).textTheme.bodyMedium,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.commonCancel),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: targetController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: l10n.goalsTargetLabel,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.commonSave),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.commonSave),
-          ),
-        ],
       ),
     );
 
@@ -120,9 +150,11 @@ class GoalsScreen extends ConsumerWidget {
     final target = double.tryParse(targetController.text.trim());
     if (name.isEmpty || target == null || target <= 0) return;
 
-    await ref
-        .read(_goalsServiceProvider)
-        .create(name: name, targetAmount: target);
+    await ref.read(_goalsServiceProvider).create(
+          name: name,
+          targetAmount: target,
+          dueDate: dueDate?.toIso8601String(),
+        );
     ref.invalidate(_goalsProvider);
   }
 
@@ -166,6 +198,11 @@ class GoalsScreen extends ConsumerWidget {
     await ref
         .read(_goalsServiceProvider)
         .contribute(goal.id, amount: amount);
+    ref.invalidate(_goalsProvider);
+  }
+
+  Future<void> _completeGoal(BuildContext context, WidgetRef ref, String id) async {
+    await ref.read(_goalsServiceProvider).complete(id);
     ref.invalidate(_goalsProvider);
   }
 
@@ -238,12 +275,14 @@ class _GoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final VoidCallback onTap;
   final VoidCallback onContribute;
+  final VoidCallback onComplete;
   final VoidCallback onDelete;
 
   const _GoalCard({
     required this.goal,
     required this.onTap,
     required this.onContribute,
+    required this.onComplete,
     required this.onDelete,
   });
 
@@ -323,13 +362,27 @@ class _GoalCard extends StatelessWidget {
             ),
             if (!isComplete) ...[
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onContribute,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(l10n.goalsContributeTitle),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onContribute,
+                      icon: const Icon(Icons.add, size: 18),
+                      label: Text(l10n.goalsContributeTitle),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: onComplete,
+                      icon: const Icon(Icons.check, size: 18),
+                      label: Text(l10n.goalsMarkComplete),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF10B981),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ],

@@ -35,4 +35,8 @@ class ChallengesApiService {
   Future<void> accept(String id) async {
     await ApiClient.post('/challenges/$id/accept', {});
   }
+
+  Future<void> complete(String id) async {
+    await ApiClient.post('/challenges/$id/complete', {});
+  }
 }

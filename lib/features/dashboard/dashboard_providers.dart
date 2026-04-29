@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
 import '../../core/models/breakdown_503020.dart';
+import '../../core/services/recommendations_api_service.dart';
 import '../../core/services/streak_repository.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -96,7 +97,26 @@ final budgetBreakdownProvider = Provider<BudgetBreakdown503020>((ref) {
   );
 });
 
+final _recommendationsServiceProvider = Provider<RecommendationsApiService>(
+  (_) => RecommendationsApiService(),
+);
+
+final recommendationsProvider = FutureProvider<List<Recommendation>>((ref) {
+  return ref.read(_recommendationsServiceProvider).getAll();
+});
+
 final aiAdviceProvider = Provider<String>((ref) {
+  final recs = ref.watch(recommendationsProvider).maybeWhen(
+        data: (list) => list,
+        orElse: () => const <Recommendation>[],
+      );
+
+  if (recs.isNotEmpty) {
+    final r = recs.first;
+    return r.body.isNotEmpty ? '${r.title}\n${r.body}' : r.title;
+  }
+
+  // Local fallback when API has no recommendations yet
   final breakdown = ref.watch(budgetBreakdownProvider);
   if (breakdown.total == 0) return 'Empieza a registrar para recibir consejos.';
 

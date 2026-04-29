@@ -60,6 +60,17 @@ class ChallengesScreen extends ConsumerWidget {
                     );
                   }
                 },
+                onComplete: () async {
+                  await ref
+                      .read(_challengesServiceProvider)
+                      .complete(challenges[index].id);
+                  ref.invalidate(_challengesProvider);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.challengesCompleted)),
+                    );
+                  }
+                },
               ),
             ),
           );
@@ -70,9 +81,14 @@ class ChallengesScreen extends ConsumerWidget {
 }
 
 class _ChallengeCard extends StatelessWidget {
-  const _ChallengeCard({required this.challenge, required this.onAccept});
+  const _ChallengeCard({
+    required this.challenge,
+    required this.onAccept,
+    required this.onComplete,
+  });
   final Challenge challenge;
   final Future<void> Function() onAccept;
+  final Future<void> Function() onComplete;
 
   Color _statusColor(String status) {
     switch (status) {
@@ -142,6 +158,20 @@ class _ChallengeCard extends StatelessWidget {
                 child: FilledButton(
                   onPressed: onAccept,
                   child: Text(l10n.challengesAcceptButton),
+                ),
+              ),
+            ],
+            if (challenge.status == 'ACTIVE') ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton.icon(
+                  onPressed: onComplete,
+                  icon: const Icon(Icons.check, size: 18),
+                  label: Text(l10n.challengesCompleteButton),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF10B981),
+                  ),
                 ),
               ),
             ],

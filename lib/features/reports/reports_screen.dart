@@ -24,6 +24,10 @@ final _comparisonProvider = FutureProvider.family<List<MonthComparisonEntry>, in
   (ref, months) => ref.read(_insightsServiceProvider).getComparison(months: months),
 );
 
+final _daySummaryProvider = FutureProvider.family<PeriodSummary, String>(
+  (ref, date) => ref.read(_insightsServiceProvider).getDaySummary(date: date),
+);
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 int _isoWeekNumber(DateTime date) {
@@ -57,7 +61,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -79,6 +83,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             Tab(text: l10n.reportsTabMonth),
             Tab(text: l10n.reportsTabWeek),
             Tab(text: l10n.reportsTabCompare),
+            Tab(text: l10n.reportsTabDay),
           ],
         ),
       ),
@@ -88,6 +93,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           _MonthTab(),
           _WeekTab(),
           _CompareTab(),
+          _DayTab(),
         ],
       ),
     );
@@ -295,6 +301,64 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
             data: (data) => data.isEmpty
                 ? Center(child: Text(l10n.reportsNoComparisonData))
                 : _ComparisonChart(entries: data),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => _ErrorView(message: context.l10n.reportsErrorLoad),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Day Tab ────────────────────────────────────────────────────────────────
+
+class _DayTab extends ConsumerStatefulWidget {
+  const _DayTab();
+
+  @override
+  ConsumerState<_DayTab> createState() => _DayTabState();
+}
+
+class _DayTabState extends ConsumerState<_DayTab> {
+  late DateTime _date;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = DateTime.now();
+  }
+
+  void _prev() => setState(() => _date = _date.subtract(const Duration(days: 1)));
+
+  void _next() {
+    final today = DateTime.now();
+    if (_date.year == today.year && _date.month == today.month && _date.day == today.day) return;
+    setState(() => _date = _date.add(const Duration(days: 1)));
+  }
+
+  String get _dateLabel {
+    final y = _date.year;
+    final m = _date.month.toString().padLeft(2, '0');
+    final d = _date.day.toString().padLeft(2, '0');
+    return '$d/$m/$y';
+  }
+
+  String get _dateKey {
+    final y = _date.year;
+    final m = _date.month.toString().padLeft(2, '0');
+    final d = _date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final summary = ref.watch(_daySummaryProvider(_dateKey));
+    return Column(
+      children: [
+        _PeriodSelector(label: _dateLabel, onPrev: _prev, onNext: _next),
+        Expanded(
+          child: summary.when(
+            data: (data) => _SummaryView(summary: data),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => _ErrorView(message: context.l10n.reportsErrorLoad),
           ),
