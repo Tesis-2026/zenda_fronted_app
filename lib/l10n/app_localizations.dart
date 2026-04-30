@@ -2515,6 +2515,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next question'**
   String get quizNext;
+
+  /// No description provided for @quizPersonalizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalized Quiz'**
+  String get quizPersonalizedTitle;
+
+  /// No description provided for @quizPersonalizedButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Take personalized quiz'**
+  String get quizPersonalizedButton;
+
+  /// No description provided for @quizPersonalizedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-generated questions based on your habits'**
+  String get quizPersonalizedSubtitle;
+
+  /// No description provided for @quizPersonalizedAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing your financial habits...'**
+  String get quizPersonalizedAnalyzing;
+
+  /// No description provided for @quizPersonalizedAttemptsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 attempt left today} other{{count} attempts left today}}'**
+  String quizPersonalizedAttemptsLeft(int count);
+
+  /// No description provided for @quizPersonalizedLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You reached the limit of 5 personalized quizzes for today.'**
+  String get quizPersonalizedLimitReached;
+
+  /// No description provided for @quizPersonalizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not generate quiz. Please try again.'**
+  String get quizPersonalizedError;
+
+  /// No description provided for @educationRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get educationRecommended;
+
+  /// No description provided for @reportsWeekDailyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily activity'**
+  String get reportsWeekDailyTitle;
+
+  /// No description provided for @reportsProgressChipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes vs previous month'**
+  String get reportsProgressChipsTitle;
+
+  /// No description provided for @reportsExpensesChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses {sign}{pct}%'**
+  String reportsExpensesChip(String sign, String pct);
+
+  /// No description provided for @reportsSavingsChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings {sign}{pct}%'**
+  String reportsSavingsChip(String sign, String pct);
+
+  /// No description provided for @reportsBalanceChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance {sign}{pct}%'**
+  String reportsBalanceChip(String sign, String pct);
 }
 
 class _AppLocalizationsDelegate

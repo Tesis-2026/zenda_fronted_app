@@ -2,6 +2,11 @@ import 'api_client.dart';
 import '../models/summary_models.dart';
 
 class InsightsApiService {
+  Future<ProgressSummary> getProgress() async {
+    final json = await ApiClient.get('/summary/progress');
+    return ProgressSummary.fromJson(json);
+  }
+
   Future<PeriodSummary> getMonthSummary({required int year, required int month}) async {
     final json = await ApiClient.get('/summary/month?year=$year&month=$month');
     return PeriodSummary.fromJson(json);

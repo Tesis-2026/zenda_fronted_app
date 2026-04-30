@@ -1337,4 +1337,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quizNext => 'Next question';
+
+  @override
+  String get quizPersonalizedTitle => 'Personalized Quiz';
+
+  @override
+  String get quizPersonalizedButton => 'Take personalized quiz';
+
+  @override
+  String get quizPersonalizedSubtitle =>
+      'AI-generated questions based on your habits';
+
+  @override
+  String get quizPersonalizedAnalyzing => 'Analyzing your financial habits...';
+
+  @override
+  String quizPersonalizedAttemptsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts left today',
+      one: '1 attempt left today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get quizPersonalizedLimitReached =>
+      'You reached the limit of 5 personalized quizzes for today.';
+
+  @override
+  String get quizPersonalizedError =>
+      'Could not generate quiz. Please try again.';
+
+  @override
+  String get educationRecommended => 'Recommended';
+
+  @override
+  String get reportsWeekDailyTitle => 'Daily activity';
+
+  @override
+  String get reportsProgressChipsTitle => 'Changes vs previous month';
+
+  @override
+  String reportsExpensesChip(String sign, String pct) {
+    return 'Expenses $sign$pct%';
+  }
+
+  @override
+  String reportsSavingsChip(String sign, String pct) {
+    return 'Savings $sign$pct%';
+  }
+
+  @override
+  String reportsBalanceChip(String sign, String pct) {
+    return 'Balance $sign$pct%';
+  }
 }

@@ -605,5 +605,44 @@
     }
   },
   "quizFinish": "See results",
-  "quizNext": "Next question"
+  "quizNext": "Next question",
+
+  "quizPersonalizedTitle": "Personalized Quiz",
+  "quizPersonalizedButton": "Take personalized quiz",
+  "quizPersonalizedSubtitle": "AI-generated questions based on your habits",
+  "quizPersonalizedAnalyzing": "Analyzing your financial habits...",
+  "quizPersonalizedAttemptsLeft": "{count, plural, =1{1 attempt left today} other{{count} attempts left today}}",
+  "@quizPersonalizedAttemptsLeft": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "quizPersonalizedLimitReached": "You reached the limit of 5 personalized quizzes for today.",
+  "quizPersonalizedError": "Could not generate quiz. Please try again.",
+
+  "educationRecommended": "Recommended",
+
+  "reportsWeekDailyTitle": "Daily activity",
+  "reportsProgressChipsTitle": "Changes vs previous month",
+  "reportsExpensesChip": "Expenses {sign}{pct}%",
+  "@reportsExpensesChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "reportsSavingsChip": "Savings {sign}{pct}%",
+  "@reportsSavingsChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "reportsBalanceChip": "Balance {sign}{pct}%",
+  "@reportsBalanceChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  }
 }

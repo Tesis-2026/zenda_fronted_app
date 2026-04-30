@@ -35,7 +35,7 @@ TransactionCategory? categoryFromApiName(String name) {
 }
 
 class TransactionApiService {
-  Future<void> create({
+  Future<List<String>> create({
     required TransactionKind kind,
     required double amount,
     required TransactionCategory category,
@@ -44,8 +44,8 @@ class TransactionApiService {
     String? customCategoryName,
   }) async {
     // Only EXPENSE and INCOME map to the backend (transfers are local-only).
-    if (kind == TransactionKind.transfer) return;
-    await ApiClient.post(
+    if (kind == TransactionKind.transfer) return [];
+    final json = await ApiClient.post(
       '/transactions',
       {
         'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
@@ -56,6 +56,9 @@ class TransactionApiService {
       },
       authenticated: true,
     );
+    final raw = json['newlyCompletedChallenges'];
+    if (raw is List) return raw.cast<String>();
+    return [];
   }
 
   Future<List<Map<String, dynamic>>> getAll({

@@ -24,6 +24,10 @@ final _comparisonProvider = FutureProvider.family<List<MonthComparisonEntry>, in
   (ref, months) => ref.read(_insightsServiceProvider).getComparison(months: months),
 );
 
+final _progressProvider = FutureProvider<ProgressSummary>(
+  (ref) => ref.read(_insightsServiceProvider).getProgress(),
+);
+
 final _daySummaryProvider = FutureProvider.family<PeriodSummary, String>(
   (ref, date) => ref.read(_insightsServiceProvider).getDaySummary(date: date),
 );
@@ -255,7 +259,31 @@ class _WeekTabState extends ConsumerState<_WeekTab> {
         ),
         Expanded(
           child: summary.when(
-            data: (data) => _SummaryView(summary: data),
+            data: (data) => ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _TotalsRow(summary: data),
+                if (data.dailyBreakdown.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.reportsWeekDailyTitle,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  _DailyBarChart(breakdown: data.dailyBreakdown),
+                ],
+                const SizedBox(height: 24),
+                Text(
+                  l10n.reportsTopCategories,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                data.topCategories.isEmpty
+                    ? Text(l10n.reportsNoCategoryData,
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))
+                    : _CategoryBarChart(categories: data.topCategories),
+              ],
+            ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => _ErrorView(message: context.l10n.reportsErrorLoad),
           ),
@@ -281,6 +309,7 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final comparison = ref.watch(_comparisonProvider(_months));
+    final progress = ref.watch(_progressProvider);
     return Column(
       children: [
         Padding(
@@ -294,6 +323,11 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
             selected: {_months},
             onSelectionChanged: (s) => setState(() => _months = s.first),
           ),
+        ),
+        progress.when(
+          data: (p) => _ProgressChips(summary: p),
+          loading: () => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
         ),
         Expanded(
           child: comparison.when(
@@ -723,6 +757,174 @@ class _CategoryBarChart extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+// ── Daily Bar Chart (Week tab) ─────────────────────────────────────────────
+
+class _DailyBarChart extends StatelessWidget {
+  final List<DailyBreakdownItem> breakdown;
+
+  const _DailyBarChart({required this.breakdown});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final maxVal = breakdown
+        .expand((d) => [d.totalIncome, d.totalExpense])
+        .fold(0.0, (a, b) => a > b ? a : b);
+    final chartMax = maxVal == 0 ? 100.0 : maxVal * 1.25;
+
+    return SizedBox(
+      height: 200,
+      child: BarChart(
+        BarChartData(
+          maxY: chartMax,
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (_) => FlLine(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.08),
+              strokeWidth: 1,
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, _) {
+                  final idx = value.toInt();
+                  if (idx < 0 || idx >= breakdown.length) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      breakdown[idx].dayLabel,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          barGroups: breakdown.asMap().entries.map((entry) {
+            final i = entry.key;
+            final d = entry.value;
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: d.totalIncome,
+                  color: const Color(0xFF34D399),
+                  width: 10,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+                BarChartRodData(
+                  toY: d.totalExpense,
+                  color: const Color(0xFFFC8181),
+                  width: 10,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Progress % Chips (Compare tab) ────────────────────────────────────────
+
+class _ProgressChips extends StatelessWidget {
+  final ProgressSummary summary;
+
+  const _ProgressChips({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.reportsProgressChipsTitle,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              if (summary.expensesChangePercent != null)
+                _PctChip(
+                  label: l10n.reportsExpensesChip(
+                    summary.expensesChangePercent! >= 0 ? '+' : '',
+                    summary.expensesChangePercent!.abs().toStringAsFixed(1),
+                  ),
+                  positive: summary.expensesChangePercent! <= 0,
+                ),
+              if (summary.savingsChangePercent != null)
+                _PctChip(
+                  label: l10n.reportsSavingsChip(
+                    summary.savingsChangePercent! >= 0 ? '+' : '',
+                    summary.savingsChangePercent!.abs().toStringAsFixed(1),
+                  ),
+                  positive: summary.savingsChangePercent! >= 0,
+                ),
+              if (summary.balanceChangePercent != null)
+                _PctChip(
+                  label: l10n.reportsBalanceChip(
+                    summary.balanceChangePercent! >= 0 ? '+' : '',
+                    summary.balanceChangePercent!.abs().toStringAsFixed(1),
+                  ),
+                  positive: summary.balanceChangePercent! >= 0,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PctChip extends StatelessWidget {
+  final String label;
+  final bool positive;
+
+  const _PctChip({required this.label, required this.positive});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = positive ? const Color(0xFF34D399) : const Color(0xFFFC8181);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/services/education_api_service.dart';
 import '../../l10n/l10n_extension.dart';
 
+
 final _educationServiceProvider = Provider<EducationApiService>(
   (_) => EducationApiService(),
 );
@@ -41,6 +42,7 @@ class EducationScreen extends ConsumerWidget {
         ),
         data: (topics) {
           final completed = topics.where((t) => t.isCompleted).length;
+          final firstIncompleteIndex = topics.indexWhere((t) => !t.isCompleted);
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(_topicsProvider),
             child: CustomScrollView(
@@ -53,8 +55,7 @@ class EducationScreen extends ConsumerWidget {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -79,6 +80,19 @@ class EducationScreen extends ConsumerWidget {
                                     color: Theme.of(context).colorScheme.outline,
                                   ),
                         ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => context.push('/education/quiz/personalized'),
+                            icon: const Icon(Icons.auto_awesome, size: 18),
+                            label: Text(context.l10n.quizPersonalizedButton),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF818CF8),
+                              side: const BorderSide(color: Color(0xFF818CF8)),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -87,6 +101,7 @@ class EducationScreen extends ConsumerWidget {
                   itemCount: topics.length,
                   itemBuilder: (context, index) => _TopicTile(
                     topic: topics[index],
+                    isRecommended: index == firstIncompleteIndex,
                     onTap: () => context.push(
                       '/education/${topics[index].id}',
                     ),
@@ -140,9 +155,14 @@ class _ProgressHeader extends StatelessWidget {
 }
 
 class _TopicTile extends StatelessWidget {
-  const _TopicTile({required this.topic, required this.onTap});
+  const _TopicTile({
+    required this.topic,
+    required this.onTap,
+    this.isRecommended = false,
+  });
   final EducationTopic topic;
   final VoidCallback onTap;
+  final bool isRecommended;
 
   Color _difficultyColor(String difficulty) {
     switch (difficulty.toUpperCase()) {
@@ -172,7 +192,29 @@ class _TopicTile extends StatelessWidget {
           size: 20,
         ),
       ),
-      title: Text(topic.title),
+      title: Row(
+        children: [
+          Expanded(child: Text(topic.title)),
+          if (isRecommended) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFF818CF8).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                context.l10n.educationRecommended,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF818CF8),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
       subtitle: Chip(
         label: Text(topic.difficulty),
         backgroundColor: _difficultyColor(topic.difficulty).withValues(alpha: 0.12),
