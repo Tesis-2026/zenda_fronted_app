@@ -314,6 +314,83 @@
   },
   "goalsDetailProgressChart": "Cumulative progress",
 
+  "authVerifyTitle": "Enter verification code",
+  "authVerifySubtitle": "We sent a 6-digit code to {email}. It expires in 15 minutes.",
+  "@authVerifySubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "authVerifyResend": "Resend code",
+  "authVerifyResendCooldown": "Resend in {seconds}s",
+  "@authVerifyResendCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "authVerifyButton": "Verify code",
+  "authVerifyInvalidCode": "Invalid or expired code. Please try again.",
+  "authLockedAccount": "Account locked. Try again in 15 minutes.",
+  "authAttemptsRemaining": "{count, plural, =1{1 attempt remaining before lockout} other{{count} attempts remaining before lockout}}",
+  "@authAttemptsRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "goalsCompletedSection": "Completed goals",
+  "goalsActiveSection": "Active goals",
+  "goalsDueDate": "Due {date}",
+  "@goalsDueDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDaysLeft": "{days, plural, =1{1 day left} other{{days} days left}}",
+  "@goalsDaysLeft": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "goalsOverdue": "Overdue",
+  "goalsCelebrate": "Goal achieved!",
+  "goalsCelebrateMessage": "Congratulations! You reached your savings goal for \"{name}\".",
+  "@goalsCelebrateMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "goalsMarkCompleteConfirm": "Mark this goal as completed?",
+  "goalsMarkCompleteConfirmBody": "This will close the goal and mark it as achieved.",
+  "goalsDetailDueDate": "Target date",
+  "goalsDetailDaysLeft": "Days remaining",
+  "goalsDetailMarkComplete": "Mark as achieved",
+  "goalsDetailDelete": "Delete goal",
+
+  "reportsCalendarTitle": "Spending calendar",
+  "reportsCalendarNoData": "No spending on this day",
+  "reportsDayTotal": "S/ {total}",
+  "@reportsDayTotal": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+
+  "txAiSuggests": "Zenda suggests: {category}",
+  "@txAiSuggests": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "txAiApply": "Apply suggestion",
+
+  "educationPersonalized": "Personalized for you",
+  "educationPersonalizedSubtitle": "Topics ordered based on your spending patterns",
+
+  "profileNumberFormat": "Number format",
+  "profileNumberFormatDot": "1,234.56 (dot decimal)",
+  "profileNumberFormatComma": "1.234,56 (comma decimal)",
+
   "errorAuthInvalidCredentials": "Incorrect email or password.",
   "errorAuthEmailTaken": "This email is already registered.",
   "errorAuthTokenExpired": "Reset link is invalid or has expired.",

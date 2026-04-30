@@ -314,6 +314,83 @@
   },
   "goalsDetailProgressChart": "Progreso acumulado",
 
+  "authVerifyTitle": "Ingresa el código de verificación",
+  "authVerifySubtitle": "Enviamos un código de 6 dígitos a {email}. Expira en 15 minutos.",
+  "@authVerifySubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "authVerifyResend": "Reenviar código",
+  "authVerifyResendCooldown": "Reenviar en {seconds}s",
+  "@authVerifyResendCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "authVerifyButton": "Verificar código",
+  "authVerifyInvalidCode": "Código inválido o expirado. Intenta de nuevo.",
+  "authLockedAccount": "Cuenta bloqueada. Intenta de nuevo en 15 minutos.",
+  "authAttemptsRemaining": "{count, plural, =1{1 intento restante antes del bloqueo} other{{count} intentos restantes antes del bloqueo}}",
+  "@authAttemptsRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "goalsCompletedSection": "Metas completadas",
+  "goalsActiveSection": "Metas activas",
+  "goalsDueDate": "Fecha: {date}",
+  "@goalsDueDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDaysLeft": "{days, plural, =1{1 día restante} other{{days} días restantes}}",
+  "@goalsDaysLeft": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "goalsOverdue": "Vencida",
+  "goalsCelebrate": "¡Meta lograda!",
+  "goalsCelebrateMessage": "¡Felicitaciones! Alcanzaste tu meta de ahorro para \"{name}\".",
+  "@goalsCelebrateMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "goalsMarkCompleteConfirm": "¿Marcar esta meta como completada?",
+  "goalsMarkCompleteConfirmBody": "Esto cerrará la meta y la marcará como lograda.",
+  "goalsDetailDueDate": "Fecha objetivo",
+  "goalsDetailDaysLeft": "Días restantes",
+  "goalsDetailMarkComplete": "Marcar como lograda",
+  "goalsDetailDelete": "Eliminar meta",
+
+  "reportsCalendarTitle": "Calendario de gastos",
+  "reportsCalendarNoData": "Sin gastos este día",
+  "reportsDayTotal": "S/ {total}",
+  "@reportsDayTotal": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+
+  "txAiSuggests": "Zenda sugiere: {category}",
+  "@txAiSuggests": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "txAiApply": "Aplicar sugerencia",
+
+  "educationPersonalized": "Personalizado para ti",
+  "educationPersonalizedSubtitle": "Temas ordenados según tus patrones de gasto",
+
+  "profileNumberFormat": "Formato de número",
+  "profileNumberFormatDot": "1,234.56 (decimal con punto)",
+  "profileNumberFormatComma": "1.234,56 (decimal con coma)",
+
   "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
   "errorAuthEmailTaken": "Este correo ya está registrado.",
   "errorAuthTokenExpired": "El enlace es inválido o ha expirado.",
