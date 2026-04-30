@@ -51,6 +51,38 @@ class EducationScreen extends ConsumerWidget {
                     total: topics.length,
                   ),
                 ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              context.l10n.educationPersonalized,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text('✨', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.educationPersonalizedSubtitle,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.outline,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 SliverList.builder(
                   itemCount: topics.length,
                   itemBuilder: (context, index) => _TopicTile(
@@ -143,7 +175,7 @@ class _TopicTile extends StatelessWidget {
       title: Text(topic.title),
       subtitle: Chip(
         label: Text(topic.difficulty),
-        backgroundColor: _difficultyColor(topic.difficulty).withOpacity(0.12),
+        backgroundColor: _difficultyColor(topic.difficulty).withValues(alpha: 0.12),
         labelStyle: TextStyle(
           color: _difficultyColor(topic.difficulty),
           fontSize: 11,
