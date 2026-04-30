@@ -5,6 +5,7 @@ import '../../../core/errors/error_codes.dart';
 import '../../../core/models/account.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/services/budget_api_service.dart';
+import '../../../core/services/pending_transaction_queue.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../providers/repositories_providers.dart';
 import '../../dashboard/dashboard_providers.dart';
@@ -254,7 +255,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       );
       await txRepo.addTransaction(tx);
 
-      // Also sync to backend (fire-and-forget; local save is the source of truth)
+      // Sync to backend; enqueue for retry if offline or unreachable.
       String? budgetAlertName;
       try {
         final apiService = ref.read(transactionApiServiceProvider);
@@ -280,7 +281,17 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           }
         }
       } catch (_) {
-        // Backend sync failure is non-blocking — local save succeeded
+        // Offline or unreachable — enqueue for retry when connectivity returns.
+        final queue = ref.read(pendingTransactionQueueProvider);
+        await queue.enqueue(PendingSyncEntry(
+          txId: tx.id,
+          kind: kind,
+          amount: amount,
+          category: effectiveCategory,
+          occurredAt: state.date,
+          description: state.note.isEmpty ? null : state.note,
+          customCategoryName: customName,
+        ));
       }
 
       // Update streak only on save.

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
+import 'providers/repositories_providers.dart';
 import 'routing/app_router.dart';
 
 class App extends ConsumerWidget {
@@ -11,6 +12,8 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Start the offline sync service once on app launch.
+    ref.read(syncServiceProvider);
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
