@@ -94,7 +94,7 @@ final budgetBreakdownProvider = Provider<BudgetBreakdown503020>((ref) {
       .maybeWhen(data: (s) => s, orElse: () => null);
 
   if (summary == null) {
-    return const BudgetBreakdown503020(
+    return BudgetBreakdown503020(
       totalNecesidades: 0,
       totalDeseos: 0,
       totalAhorro: 0,

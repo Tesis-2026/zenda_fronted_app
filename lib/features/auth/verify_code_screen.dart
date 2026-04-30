@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'auth_controller.dart';
+import '../../core/services/auth_api_service.dart';
 import '../../l10n/l10n_extension.dart';
 
 class VerifyCodeScreen extends StatefulWidget {

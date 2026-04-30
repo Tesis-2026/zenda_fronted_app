@@ -404,11 +404,10 @@ class _QuestionView extends StatelessWidget {
             option: option,
             isSelected: state.selectedOption == option,
             isReviewing: reviewing,
-            isCorrect: reviewing && option == selectedAnswer && selectedAnswer == q.correctAnswer ||
-                reviewing && option == selectedAnswer && selectedAnswer != q.correctAnswer,
+            isCorrect: reviewing && state.selectedOption == option,
             showCorrect: reviewing && option == selectedAnswer && selectedAnswer != null,
             correctAnswer: reviewing ? selectedAnswer : null,
-            actualCorrect: q.correctAnswer,
+            actualCorrect: null,
             onTap: reviewing ? null : () => onSelectOption(option),
           ),
         ),
@@ -457,7 +456,7 @@ class _OptionTile extends StatelessWidget {
   final bool isCorrect;
   final bool showCorrect;
   final String? correctAnswer;
-  final String actualCorrect;
+  final String? actualCorrect;
   final VoidCallback? onTap;
 
   @override
