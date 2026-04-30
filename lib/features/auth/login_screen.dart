@@ -6,7 +6,7 @@ import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -151,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF34D399).withOpacity(0.3),
+                          color: const Color(0xFF34D399).withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -182,7 +182,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   l10n.authLoginSubtitle,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -287,7 +287,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      disabledBackgroundColor: const Color(0xFF34D399).withOpacity(0.5),
+                      disabledBackgroundColor: const Color(0xFF34D399).withValues(alpha: 0.5),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
@@ -357,7 +357,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       l10n.authNoAccount,
                       style: TextStyle(
-                        color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
                       ),
                     ),
                     TextButton(
@@ -379,10 +379,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withOpacity(0.1),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF34D399).withOpacity(0.3),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(

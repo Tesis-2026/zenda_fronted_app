@@ -9,6 +9,7 @@ import '../features/onboarding/profile_setup_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/auth/forgot_password_screen.dart';
+import '../features/auth/verify_code_screen.dart';
 import '../features/auth/reset_password_screen.dart';
 import '../features/auth/email_sent_screen.dart';
 import '../features/consent/consent_screen.dart';
@@ -40,6 +41,7 @@ const _publicRoutes = {
   '/onboarding',
   '/consent',
   '/auth/forgot-password',
+  '/auth/verify-code',
   '/auth/reset-password',
   '/auth/email-sent',
   '/login',
@@ -136,8 +138,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
+        path: '/auth/verify-code',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return VerifyCodeScreen(email: email);
+        },
+      ),
+      GoRoute(
         path: '/auth/reset-password',
-        builder: (context, state) => const ResetPasswordScreen(),
+        builder: (context, state) {
+          final token = state.extra as String?;
+          return ResetPasswordScreen(prefillToken: token);
+        },
       ),
       GoRoute(
         path: '/auth/email-sent',

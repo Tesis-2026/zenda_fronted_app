@@ -106,6 +106,27 @@ class AuthApiService {
     }
   }
 
+  Future<AuthResult> sendOtp(String email) async {
+    try {
+      await ApiClient.post('/auth/send-otp', {'email': email});
+      return AuthResult.success(User(id: '', name: '', email: email));
+    } on ApiException catch (e) {
+      return AuthResult.error(_mapError(e));
+    } catch (_) {
+      return AuthResult.error(AuthErrorCode.noConnection);
+    }
+  }
+
+  /// Returns the resetToken on success (store it for the reset-password step).
+  Future<String?> verifyOtp({required String email, required String code}) async {
+    try {
+      final response = await ApiClient.post('/auth/verify-otp', {'email': email, 'code': code});
+      return response['resetToken'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<AuthResult> resetPassword({
     required String token,
     required String newPassword,
