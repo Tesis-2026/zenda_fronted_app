@@ -1928,6 +1928,24 @@ abstract class AppLocalizations {
   /// **'Challenge completed!'**
   String get challengesCompleted;
 
+  /// No description provided for @challengeAutoCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge completed!'**
+  String get challengeAutoCompletedTitle;
+
+  /// No description provided for @challengeAutoCompletedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You completed: {name}'**
+  String challengeAutoCompletedBody(String name);
+
+  /// No description provided for @challengeAutoCompletedDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Great!'**
+  String get challengeAutoCompletedDismiss;
+
   /// No description provided for @badgesTitle.
   ///
   /// In en, this message translates to:

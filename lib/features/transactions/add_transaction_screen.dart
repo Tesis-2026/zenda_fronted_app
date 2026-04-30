@@ -68,41 +68,50 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     ) {
       final prevTick = prev?.saveTick ?? 0;
       if (next.saveTick != prevTick) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(l10n.txSaved)));
-          // Show budget alert after pop so it appears on the dashboard.
-          if (next.budgetAlert != null) {
-            final categoryName = next.budgetAlert!;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) {
-                final pct = '80';
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        const Icon(Icons.warning_amber_rounded,
-                            color: Colors.white),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            l10n.txBudgetAlert80(categoryName, pct),
-                          ),
-                        ),
-                      ],
-                    ),
-                    backgroundColor: const Color(0xFFF59E0B),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    margin: const EdgeInsets.all(16),
-                    duration: const Duration(seconds: 5),
-                  ),
-                );
-              }
-            });
-          }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.txSaved)));
+
+        if (next.completedChallengeNames.isNotEmpty) {
+          // Show celebration dialog; pop only after the user dismisses.
+          _showChallengeCompletedDialog(
+            context,
+            next.completedChallengeNames,
+            l10n,
+          ).then((_) {
+            if (context.mounted) Navigator.of(context).pop();
+          });
+        } else {
           Navigator.of(context).pop();
+        }
+
+        // Show budget alert after pop so it appears on the previous screen.
+        if (next.budgetAlert != null) {
+          final categoryName = next.budgetAlert!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded,
+                          color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(l10n.txBudgetAlert80(categoryName, '80')),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFFF59E0B),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(16),
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+            }
+          });
         }
       }
     });
@@ -410,6 +419,56 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (a.id == id) return a;
     }
     return null;
+  }
+
+  Future<void> _showChallengeCompletedDialog(
+    BuildContext context,
+    List<String> names,
+    dynamic l10n,
+  ) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(
+          Icons.emoji_events_rounded,
+          color: Color(0xFFFCD34D),
+          size: 48,
+        ),
+        title: Text(
+          l10n.challengeAutoCompletedTitle,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: names
+              .map((name) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_rounded,
+                            color: Color(0xFF34D399), size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(name)),
+                      ],
+                    ),
+                  ))
+              .toList(),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF34D399),
+              minimumSize: const Size(140, 44),
+            ),
+            child: Text(l10n.challengeAutoCompletedDismiss),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<String?> _showAddCategoryDialog(BuildContext context, dynamic l10n) async {

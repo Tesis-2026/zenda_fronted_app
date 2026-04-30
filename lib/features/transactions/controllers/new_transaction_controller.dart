@@ -5,6 +5,7 @@ import '../../../core/errors/error_codes.dart';
 import '../../../core/models/account.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/services/budget_api_service.dart';
+import '../../../core/services/challenges_api_service.dart';
 import '../../../core/services/pending_transaction_queue.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../providers/repositories_providers.dart';
@@ -25,6 +26,7 @@ class NewTransactionState {
   final String? error;
   final int saveTick;
   final String? budgetAlert; // category name at ≥80% after save
+  final List<String> completedChallengeNames; // titles of auto-completed challenges
 
   const NewTransactionState({
     required this.kind,
@@ -40,6 +42,7 @@ class NewTransactionState {
     required this.error,
     required this.saveTick,
     this.budgetAlert,
+    this.completedChallengeNames = const [],
   });
 
   factory NewTransactionState.initial() => NewTransactionState(
@@ -56,6 +59,7 @@ class NewTransactionState {
     error: null,
     saveTick: 0,
     budgetAlert: null,
+    completedChallengeNames: const [],
   );
 
   Bucket503020? get bucket {
@@ -78,6 +82,7 @@ class NewTransactionState {
     String? error,
     int? saveTick,
     String? budgetAlert,
+    List<String>? completedChallengeNames,
     bool clearError = false,
     bool clearCategory = false,
     bool clearCustomCategory = false,
@@ -97,6 +102,7 @@ class NewTransactionState {
       error: clearError ? null : (error ?? this.error),
       saveTick: saveTick ?? this.saveTick,
       budgetAlert: clearBudgetAlert ? null : (budgetAlert ?? this.budgetAlert),
+      completedChallengeNames: completedChallengeNames ?? this.completedChallengeNames,
     );
   }
 }
@@ -255,8 +261,21 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       );
       await txRepo.addTransaction(tx);
 
+      // Snapshot ACTIVE challenges before backend sync so we can detect
+      // which ones the backend's verify-challenges auto-completed.
+      final Set<String> activeBeforeIds = {};
+      if (kind != TransactionKind.transfer) {
+        try {
+          final before = await ChallengesApiService().getAll();
+          activeBeforeIds.addAll(
+            before.where((c) => c.status == 'ACTIVE').map((c) => c.id),
+          );
+        } catch (_) {}
+      }
+
       // Sync to backend; enqueue for retry if offline or unreachable.
       String? budgetAlertName;
+      List<String> completedNames = [];
       try {
         final apiService = ref.read(transactionApiServiceProvider);
         await apiService.create(
@@ -267,6 +286,20 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           description: state.note.isEmpty ? null : state.note,
           customCategoryName: customName,
         );
+
+        // Give the backend's async verify-challenges job time to run.
+        if (activeBeforeIds.isNotEmpty) {
+          await Future.delayed(const Duration(milliseconds: 600));
+          try {
+            final after = await ChallengesApiService().getAll();
+            completedNames = after
+                .where((c) =>
+                    c.status == 'COMPLETED' &&
+                    activeBeforeIds.contains(c.id))
+                .map((c) => c.title)
+                .toList();
+          } catch (_) {}
+        }
 
         // Check if any budget crossed the 80% threshold after this expense.
         if (kind == TransactionKind.expense) {
@@ -306,6 +339,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         isSaving: false,
         saveTick: state.saveTick + 1,
         budgetAlert: budgetAlertName,
+        completedChallengeNames: completedNames,
       );
     } catch (_) {
       state = state.copyWith(isSaving: false, error: TxErrorCode.saveFailed);

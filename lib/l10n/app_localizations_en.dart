@@ -1024,6 +1024,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get challengesCompleted => 'Challenge completed!';
 
   @override
+  String get challengeAutoCompletedTitle => 'Challenge completed!';
+
+  @override
+  String challengeAutoCompletedBody(String name) {
+    return 'You completed: $name';
+  }
+
+  @override
+  String get challengeAutoCompletedDismiss => 'Great!';
+
+  @override
   String get badgesTitle => 'Badges';
 
   @override

@@ -467,6 +467,14 @@
   "challengesAccepted": "¡Desafío aceptado!",
   "challengesCompleteButton": "Marcar completado",
   "challengesCompleted": "¡Desafío completado!",
+  "challengeAutoCompletedTitle": "¡Reto completado!",
+  "challengeAutoCompletedBody": "Completaste: {name}",
+  "@challengeAutoCompletedBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "challengeAutoCompletedDismiss": "¡Genial!",
 
   "badgesTitle": "Insignias",
   "badgesErrorLoad": "No se pudieron cargar las insignias",
