@@ -247,7 +247,7 @@ class _ResultView extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _levelColor(result.level).withOpacity(0.12),
+                  color: _levelColor(result.level).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(

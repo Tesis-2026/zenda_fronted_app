@@ -349,7 +349,7 @@ class _IncomeTypePage extends StatelessWidget {
                     : null,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 tileColor: isSelected
-                    ? const Color(0xFF34D399).withOpacity(0.1)
+                    ? const Color(0xFF34D399).withValues(alpha: 0.1)
                     : (isDark ? const Color(0xFF1E293B) : Colors.white),
               ),
             );

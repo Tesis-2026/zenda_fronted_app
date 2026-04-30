@@ -8,9 +8,9 @@ class OnboardingScreen extends StatefulWidget {
   final bool redirectToRegister;
 
   const OnboardingScreen({
-    Key? key,
+    super.key,
     this.redirectToRegister = false,
-  }) : super(key: key);
+  });
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -127,8 +127,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   backgroundColor: isDark
-                      ? const Color(0xFF1E293B).withOpacity(0.6)
-                      : Colors.white.withOpacity(0.9),
+                      ? const Color(0xFF1E293B).withValues(alpha: 0.6)
+                      : Colors.white.withValues(alpha: 0.9),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -156,11 +156,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     end: Alignment.bottomCenter,
                     colors: isDark
                         ? [
-                            const Color(0xFF0F172A).withOpacity(0),
+                            const Color(0xFF0F172A).withValues(alpha: 0),
                             const Color(0xFF0F172A),
                           ]
                         : [
-                            const Color(0xFFF9FAFB).withOpacity(0),
+                            const Color(0xFFF9FAFB).withValues(alpha: 0),
                             const Color(0xFFF9FAFB),
                           ],
                   ),
@@ -202,7 +202,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           backgroundColor: const Color(0xFF34D399),
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          shadowColor: const Color(0xFF34D399).withOpacity(0.4),
+                          shadowColor: const Color(0xFF34D399).withValues(alpha: 0.4),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
