@@ -85,7 +85,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   Future<void> _skip() async {
     try {
       await UserApiService().updateProfile(profileCompleted: true);
-    } catch (_) {}
+    } catch (_) {
+      // Non-blocking: skip still navigates to dashboard even if the update fails
+    }
     if (mounted) context.go('/dashboard');
   }
 
