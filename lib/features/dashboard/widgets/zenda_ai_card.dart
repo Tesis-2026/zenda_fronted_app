@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../l10n/l10n_extension.dart';
 
 class ZendaAiCard extends StatelessWidget {
@@ -52,6 +52,20 @@ class ZendaAiCard extends StatelessWidget {
                         color: isDark ? Colors.grey[300] : Colors.black87,
                         height: 1.4,
                       ),
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => context.push('/recommendations'),
+                    icon: const Icon(Icons.lightbulb_outline, size: 16),
+                    label: Text(l10n.aiCardSeeRecommendations),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF34D399),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
                 ),
               ],
             ),

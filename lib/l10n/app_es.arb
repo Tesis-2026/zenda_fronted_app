@@ -166,6 +166,27 @@
   "txListFilterThisWeek": "Esta semana",
   "txListFilterThisMonth": "Este mes",
   "txListFilterAllTime": "Todo el tiempo",
+  "txFilterAdvanced": "Más filtros",
+  "txFilterCategory": "Categoría",
+  "txFilterAllCategories": "Todas las categorías",
+  "txFilterMinAmount": "Monto mínimo (S/)",
+  "txFilterMaxAmount": "Monto máximo (S/)",
+  "txFilterClear": "Limpiar filtros",
+  "txFilterApply": "Aplicar",
+  "txFilterActiveCount": "{count, plural, =1{1 filtro activo} other{{count} filtros activos}}",
+  "@txFilterActiveCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "txBudgetAlert80": "Presupuesto de {category} al {pct}% — ¡casi en el límite!",
+  "@txBudgetAlert80": {
+    "placeholders": {
+      "category": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "aiCardSeeRecommendations": "Ver recomendaciones",
   "txDeleteConfirmTitle": "Eliminar transacción",
   "txDeleteConfirmMessage": "Esta acción no se puede deshacer.",
   "txDeleteAction": "Eliminar",
@@ -331,6 +352,12 @@
   "authVerifyButton": "Verificar código",
   "authVerifyInvalidCode": "Código inválido o expirado. Intenta de nuevo.",
   "authLockedAccount": "Cuenta bloqueada. Intenta de nuevo en 15 minutos.",
+  "authLockedCountdown": "Cuenta bloqueada. Intenta de nuevo en {time}.",
+  "@authLockedCountdown": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "authAttemptsRemaining": "{count, plural, =1{1 intento restante antes del bloqueo} other{{count} intentos restantes antes del bloqueo}}",
   "@authAttemptsRemaining": {
     "placeholders": {
@@ -468,6 +495,7 @@
   "surveySubmitButton": "Enviar respuestas",
   "surveySubmitError": "No se pudo enviar la encuesta. Inténtalo de nuevo.",
   "surveyResultTitle": "Tus resultados",
+  "surveyResultContinue": "Continuar al Panel",
   "surveyImprovement": "¡Tu conocimiento financiero mejoró {points} puntos respecto a la encuesta inicial!",
   "@surveyImprovement": {
     "placeholders": {

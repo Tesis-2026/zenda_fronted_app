@@ -32,6 +32,7 @@ import '../features/badges/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/surveys/survey_screen.dart';
 import '../features/surveys/survey_comparison_screen.dart';
+import '../providers/pre_survey_provider.dart';
 import '../features/transactions/edit_transaction_screen.dart';
 import '../features/notifications/notification_preferences_screen.dart';
 import '../features/ai_chat/ai_chat_screen.dart';
@@ -54,18 +55,26 @@ const _authOnlyRoutes = {'/auth/login', '/auth/register'};
 // Routes exempt from the profile-setup redirect.
 const _profileSetupExempt = {'/profile-setup', '/auth/email-sent', '/dashboard'};
 
+// Routes exempt from the pre-survey redirect.
+const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/profile-setup'};
+
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
     _sub = ref.listen<AuthState>(authNotifierProvider, (_, next) {
       notifyListeners();
     });
+    _surveysSub = ref.listen<AsyncValue<bool>>(preSurveyProvider, (_, next) {
+      notifyListeners();
+    });
   }
 
   late final ProviderSubscription<AuthState> _sub;
+  late final ProviderSubscription<AsyncValue<bool>> _surveysSub;
 
   @override
   void dispose() {
     _sub.close();
+    _surveysSub.close();
     super.dispose();
   }
 }
@@ -103,6 +112,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           !_profileSetupExempt.contains(loc) &&
           !_publicRoutes.contains(loc)) {
         return '/profile-setup';
+      }
+
+      // Authenticated user who has not completed the pre-survey → pre-survey.
+      final preSurveyDone =
+          container.read(preSurveyProvider).asData?.value ?? false;
+      if (auth.isAuthenticated &&
+          (auth.user?.profileCompleted ?? true) &&
+          !preSurveyDone &&
+          !_preSurveyExempt.contains(loc) &&
+          !_publicRoutes.contains(loc) &&
+          !_authOnlyRoutes.contains(loc)) {
+        return '/surveys/pre';
       }
 
       return null;

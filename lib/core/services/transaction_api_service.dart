@@ -62,15 +62,17 @@ class TransactionApiService {
     String? type, // 'INCOME' or 'EXPENSE'
     String? from,
     String? to,
+    String? categoryId,
   }) async {
     final params = <String, String>{};
     if (type != null) params['type'] = type;
     if (from != null) params['from'] = from;
     if (to != null) params['to'] = to;
+    if (categoryId != null) params['categoryId'] = categoryId;
 
     final query = params.isEmpty
         ? ''
-        : '?' + params.entries.map((e) => '${e.key}=${e.value}').join('&');
+        : '?${params.entries.map((e) => '${e.key}=${e.value}').join('&')}';
     final body = await ApiClient.getList('/transactions$query');
     return body.cast<Map<String, dynamic>>();
   }

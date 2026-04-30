@@ -2,57 +2,132 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/models/category.dart';
 import '../../core/services/api_client.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
-// ── Filter state providers ───────────────────────────────────────────────────
+// ── Filter state ──────────────────────────────────────────────────────────────
 
-class _StringNotifier extends Notifier<String> {
-  final String initial;
-  _StringNotifier(this.initial);
+class _TxFilters {
+  final String type; // 'ALL', 'INCOME', 'EXPENSE'
+  final String datePreset; // 'all', 'week', 'month'
+  final DateTime? from;
+  final DateTime? to;
+  final String? categoryId;
+  final String? categoryName;
+  final double? minAmount;
+  final double? maxAmount;
 
-  @override
-  String build() => initial;
+  const _TxFilters({
+    this.type = 'ALL',
+    this.datePreset = 'all',
+    this.from,
+    this.to,
+    this.categoryId,
+    this.categoryName,
+    this.minAmount,
+    this.maxAmount,
+  });
 
-  void set(String value) => state = value;
+  int get activeCount {
+    int count = 0;
+    if (type != 'ALL') count++;
+    if (datePreset != 'all' || from != null || to != null) count++;
+    if (categoryId != null) count++;
+    if (minAmount != null || maxAmount != null) count++;
+    return count;
+  }
+
+  _TxFilters copyWith({
+    String? type,
+    String? datePreset,
+    DateTime? from,
+    DateTime? to,
+    bool clearFrom = false,
+    bool clearTo = false,
+    String? categoryId,
+    String? categoryName,
+    bool clearCategory = false,
+    double? minAmount,
+    double? maxAmount,
+    bool clearMinAmount = false,
+    bool clearMaxAmount = false,
+  }) {
+    return _TxFilters(
+      type: type ?? this.type,
+      datePreset: datePreset ?? this.datePreset,
+      from: clearFrom ? null : (from ?? this.from),
+      to: clearTo ? null : (to ?? this.to),
+      categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
+      categoryName: clearCategory ? null : (categoryName ?? this.categoryName),
+      minAmount: clearMinAmount ? null : (minAmount ?? this.minAmount),
+      maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
+    );
+  }
 }
 
-/// 'ALL', 'INCOME', 'EXPENSE'
-final _typeFilterProvider =
-    NotifierProvider<_StringNotifier, String>(() => _StringNotifier('ALL'));
+class _FiltersNotifier extends Notifier<_TxFilters> {
+  @override
+  _TxFilters build() => const _TxFilters();
 
-/// 'all', 'week', 'month'
-final _dateFilterProvider =
-    NotifierProvider<_StringNotifier, String>(() => _StringNotifier('all'));
+  void update(_TxFilters filters) => state = filters;
 
-// ── Data provider ────────────────────────────────────────────────────────────
+  void reset() => state = const _TxFilters();
+}
+
+final _txFiltersProvider =
+    NotifierProvider<_FiltersNotifier, _TxFilters>(() => _FiltersNotifier());
+
+// ── Data provider ─────────────────────────────────────────────────────────────
 
 final transactionListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final type = ref.watch(_typeFilterProvider);
-  final dateFilter = ref.watch(_dateFilterProvider);
-
+  final f = ref.watch(_txFiltersProvider);
   final apiService = ref.read(transactionApiServiceProvider);
 
-  String? typeParam = type == 'ALL' ? null : type;
+  String? typeParam = f.type == 'ALL' ? null : f.type;
   String? fromParam;
+  String? toParam;
 
   final now = DateTime.now();
-  if (dateFilter == 'week') {
+  if (f.datePreset == 'week') {
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     fromParam = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day)
         .toUtc()
         .toIso8601String();
-  } else if (dateFilter == 'month') {
-    fromParam =
-        DateTime(now.year, now.month, 1).toUtc().toIso8601String();
+  } else if (f.datePreset == 'month') {
+    fromParam = DateTime(now.year, now.month, 1).toUtc().toIso8601String();
+  } else if (f.datePreset == 'custom') {
+    fromParam = f.from?.toUtc().toIso8601String();
+    toParam = f.to?.toUtc().toIso8601String();
   }
 
-  return apiService.getAll(type: typeParam, from: fromParam);
+  var txs = await apiService.getAll(
+    type: typeParam,
+    from: fromParam,
+    to: toParam,
+    categoryId: f.categoryId,
+  );
+
+  // Client-side amount range filter (backend doesn't support this param yet).
+  if (f.minAmount != null) {
+    txs = txs.where((tx) {
+      final amount = (tx['amount'] as num?)?.toDouble() ?? 0.0;
+      return amount >= f.minAmount!;
+    }).toList();
+  }
+  if (f.maxAmount != null) {
+    txs = txs.where((tx) {
+      final amount = (tx['amount'] as num?)?.toDouble() ?? 0.0;
+      return amount <= f.maxAmount!;
+    }).toList();
+  }
+
+  return txs;
 });
 
-// ── Category icon helper ─────────────────────────────────────────────────────
+// ── Category icon helper ──────────────────────────────────────────────────────
 
 IconData _iconForCategory(String? categoryName) {
   if (categoryName == null) return Icons.swap_horiz_rounded;
@@ -72,7 +147,7 @@ IconData _iconForCategory(String? categoryName) {
   };
 }
 
-// ── Screen ───────────────────────────────────────────────────────────────────
+// ── Screen ────────────────────────────────────────────────────────────────────
 
 class TransactionListScreen extends ConsumerWidget {
   const TransactionListScreen({super.key});
@@ -84,8 +159,7 @@ class TransactionListScreen extends ConsumerWidget {
     final isNarrow = MediaQuery.of(context).size.width < 600;
     final onSurface = isDark ? Colors.white : Colors.black87;
 
-    final typeFilter = ref.watch(_typeFilterProvider);
-    final dateFilter = ref.watch(_dateFilterProvider);
+    final filters = ref.watch(_txFiltersProvider);
     final txAsync = ref.watch(transactionListProvider);
 
     return RefreshIndicator(
@@ -104,56 +178,115 @@ class TransactionListScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.txListTitle,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: onSurface,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        l10n.txListTitle,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: onSurface,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Filters button with active count badge
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.tune_rounded,
+                              color: filters.activeCount > 0
+                                  ? const Color(0xFF34D399)
+                                  : onSurface.withValues(alpha: 0.6),
+                            ),
+                            tooltip: l10n.txFilterAdvanced,
+                            onPressed: () => _showFilterSheet(context, ref),
+                          ),
+                          if (filters.activeCount > 0)
+                            Positioned(
+                              top: 6,
+                              right: 6,
+                              child: Container(
+                                width: 16,
+                                height: 16,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF34D399),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${filters.activeCount}',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   // Type filter chips
                   _FilterRow(
                     chips: [
-                      _FilterChipData(
-                        label: l10n.txListFilterAll,
-                        value: 'ALL',
-                      ),
-                      _FilterChipData(
-                        label: l10n.txListFilterExpenses,
-                        value: 'EXPENSE',
-                      ),
-                      _FilterChipData(
-                        label: l10n.txListFilterIncome,
-                        value: 'INCOME',
-                      ),
+                      _FilterChipData(label: l10n.txListFilterAll, value: 'ALL'),
+                      _FilterChipData(label: l10n.txListFilterExpenses, value: 'EXPENSE'),
+                      _FilterChipData(label: l10n.txListFilterIncome, value: 'INCOME'),
                     ],
-                    selected: typeFilter,
-                    onSelected: (v) =>
-                        ref.read(_typeFilterProvider.notifier).set(v),
+                    selected: filters.type,
+                    onSelected: (v) => ref
+                        .read(_txFiltersProvider.notifier)
+                        .update(filters.copyWith(type: v)),
                   ),
                   const SizedBox(height: 8),
-                  // Date filter chips
+                  // Date preset chips
                   _FilterRow(
                     chips: [
-                      _FilterChipData(
-                        label: l10n.txListFilterAllTime,
-                        value: 'all',
-                      ),
-                      _FilterChipData(
-                        label: l10n.txListFilterThisWeek,
-                        value: 'week',
-                      ),
-                      _FilterChipData(
-                        label: l10n.txListFilterThisMonth,
-                        value: 'month',
-                      ),
+                      _FilterChipData(label: l10n.txListFilterAllTime, value: 'all'),
+                      _FilterChipData(label: l10n.txListFilterThisWeek, value: 'week'),
+                      _FilterChipData(label: l10n.txListFilterThisMonth, value: 'month'),
                     ],
-                    selected: dateFilter,
-                    onSelected: (v) =>
-                        ref.read(_dateFilterProvider.notifier).set(v),
+                    selected: filters.datePreset == 'custom' ? '' : filters.datePreset,
+                    onSelected: (v) => ref
+                        .read(_txFiltersProvider.notifier)
+                        .update(filters.copyWith(datePreset: v, clearFrom: true, clearTo: true)),
                   ),
+                  // Active advanced filter summary
+                  if (filters.categoryId != null || filters.minAmount != null || filters.maxAmount != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Wrap(
+                        spacing: 6,
+                        children: [
+                          if (filters.categoryId != null)
+                            _ActiveFilterChip(
+                              label: filters.categoryName ?? filters.categoryId!,
+                              onRemove: () => ref
+                                  .read(_txFiltersProvider.notifier)
+                                  .update(filters.copyWith(clearCategory: true)),
+                            ),
+                          if (filters.minAmount != null)
+                            _ActiveFilterChip(
+                              label: '≥ S/${filters.minAmount!.toStringAsFixed(0)}',
+                              onRemove: () => ref
+                                  .read(_txFiltersProvider.notifier)
+                                  .update(filters.copyWith(clearMinAmount: true)),
+                            ),
+                          if (filters.maxAmount != null)
+                            _ActiveFilterChip(
+                              label: '≤ S/${filters.maxAmount!.toStringAsFixed(0)}',
+                              onRemove: () => ref
+                                  .read(_txFiltersProvider.notifier)
+                                  .update(filters.copyWith(clearMaxAmount: true)),
+                            ),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 12),
                 ],
               ),
@@ -191,7 +324,7 @@ class TransactionListScreen extends ConsumerWidget {
                 ),
                 sliver: SliverList.separated(
                   itemCount: txs.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final tx = txs[index];
                     return _TransactionTile(
@@ -203,6 +336,231 @@ class TransactionListScreen extends ConsumerWidget {
                 ),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _FilterSheet(
+        initial: ref.read(_txFiltersProvider),
+        onApply: (updated) {
+          ref.read(_txFiltersProvider.notifier).update(updated);
+          Navigator.pop(context);
+        },
+        onClear: () {
+          ref.read(_txFiltersProvider.notifier).reset();
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+}
+
+// ── Advanced filter bottom sheet ──────────────────────────────────────────────
+
+class _FilterSheet extends ConsumerStatefulWidget {
+  final _TxFilters initial;
+  final ValueChanged<_TxFilters> onApply;
+  final VoidCallback onClear;
+
+  const _FilterSheet({
+    required this.initial,
+    required this.onApply,
+    required this.onClear,
+  });
+
+  @override
+  ConsumerState<_FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends ConsumerState<_FilterSheet> {
+  late _TxFilters _draft;
+  final _minCtrl = TextEditingController();
+  final _maxCtrl = TextEditingController();
+
+  final _categoriesProvider = FutureProvider<List<CategoryModel>>(
+    (ref) => ref.read(categoryApiServiceProvider).getAll(),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _draft = widget.initial;
+    if (_draft.minAmount != null) {
+      _minCtrl.text = _draft.minAmount!.toStringAsFixed(0);
+    }
+    if (_draft.maxAmount != null) {
+      _maxCtrl.text = _draft.maxAmount!.toStringAsFixed(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _minCtrl.dispose();
+    _maxCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final categoriesAsync = ref.watch(_categoriesProvider);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[700] : Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.txFilterAdvanced,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 20),
+
+          // Category
+          Text(l10n.txFilterCategory,
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          categoriesAsync.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (_, _) => const SizedBox.shrink(),
+            data: (categories) => DropdownButtonFormField<String?>(
+              key: ValueKey(_draft.categoryId),
+              initialValue: _draft.categoryId,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+              items: [
+                DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text(l10n.txFilterAllCategories),
+                ),
+                ...categories.map(
+                  (c) => DropdownMenuItem<String?>(
+                    value: c.id,
+                    child: Text(c.name),
+                  ),
+                ),
+              ],
+              onChanged: (id) {
+                final name = id == null
+                    ? null
+                    : categories.firstWhere((c) => c.id == id).name;
+                setState(() {
+                  _draft = _draft.copyWith(
+                    categoryId: id,
+                    categoryName: name,
+                    clearCategory: id == null,
+                  );
+                });
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Amount range
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _minCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: l10n.txFilterMinAmount,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (v) {
+                    final parsed = double.tryParse(v);
+                    setState(() {
+                      _draft = parsed != null
+                          ? _draft.copyWith(minAmount: parsed)
+                          : _draft.copyWith(clearMinAmount: true);
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _maxCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: l10n.txFilterMaxAmount,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (v) {
+                    final parsed = double.tryParse(v);
+                    setState(() {
+                      _draft = parsed != null
+                          ? _draft.copyWith(maxAmount: parsed)
+                          : _draft.copyWith(clearMaxAmount: true);
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: widget.onClear,
+                  child: Text(l10n.txFilterClear),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => widget.onApply(_draft),
+                  child: Text(l10n.txFilterApply),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -246,16 +604,35 @@ class _FilterRow extends StatelessWidget {
               selectedColor: const Color(0xFF34D399).withValues(alpha: 0.2),
               checkmarkColor: const Color(0xFF34D399),
               labelStyle: TextStyle(
-                color: isSelected
-                    ? const Color(0xFF34D399)
-                    : null,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? const Color(0xFF34D399) : null,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           );
         }).toList(),
       ),
+    );
+  }
+}
+
+// ── Active filter chip (dismissible) ─────────────────────────────────────────
+
+class _ActiveFilterChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onRemove;
+
+  const _ActiveFilterChip({required this.label, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      label: Text(label, style: const TextStyle(fontSize: 12)),
+      deleteIcon: const Icon(Icons.close, size: 14),
+      onDeleted: onRemove,
+      backgroundColor: const Color(0xFF34D399).withValues(alpha: 0.1),
+      side: const BorderSide(color: Color(0xFF34D399), width: 0.5),
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
     );
   }
 }
@@ -294,7 +671,8 @@ class _TransactionTile extends ConsumerWidget {
         isIncome ? const Color(0xFF34D399) : const Color(0xFFEF4444);
     final amountSign = isIncome ? '+' : '-';
 
-    final displayLabel = description.isNotEmpty ? description : (categoryName ?? '');
+    final displayLabel =
+        description.isNotEmpty ? description : (categoryName ?? '');
     final dateLabel = parsedDate != null
         ? '${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')} ${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')}'
         : '';
@@ -338,7 +716,6 @@ class _TransactionTile extends ConsumerWidget {
           await ApiClient.delete('/transactions/$id');
           onDeleted();
         } catch (_) {
-          // Deletion failed — restore the item by refreshing the list.
           onDeleted();
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -360,69 +737,69 @@ class _TransactionTile extends ConsumerWidget {
           if (refreshed == true) onDeleted();
         },
         child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: amountColor.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-              child: Icon(
-                _iconForCategory(categoryName),
-                color: amountColor,
-                size: 20,
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: amountColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _iconForCategory(categoryName),
+                  color: amountColor,
+                  size: 20,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    displayLabel,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.black87,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    dateLabel,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    const SizedBox(height: 2),
+                    Text(
+                      dateLabel,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              '$amountSign S/ ${amount.toStringAsFixed(2)}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: amountColor,
+              const SizedBox(width: 10),
+              Text(
+                '$amountSign S/ ${amount.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: amountColor,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

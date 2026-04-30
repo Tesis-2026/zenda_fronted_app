@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/error_codes.dart';
 import '../../../core/models/account.dart';
 import '../../../core/models/transaction.dart';
+import '../../../core/services/budget_api_service.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../providers/repositories_providers.dart';
 import '../../dashboard/dashboard_providers.dart';
@@ -22,6 +23,7 @@ class NewTransactionState {
   final bool isSaving;
   final String? error;
   final int saveTick;
+  final String? budgetAlert; // category name at ≥80% after save
 
   const NewTransactionState({
     required this.kind,
@@ -36,6 +38,7 @@ class NewTransactionState {
     required this.isSaving,
     required this.error,
     required this.saveTick,
+    this.budgetAlert,
   });
 
   factory NewTransactionState.initial() => NewTransactionState(
@@ -51,6 +54,7 @@ class NewTransactionState {
     isSaving: false,
     error: null,
     saveTick: 0,
+    budgetAlert: null,
   );
 
   Bucket503020? get bucket {
@@ -72,9 +76,11 @@ class NewTransactionState {
     bool? isSaving,
     String? error,
     int? saveTick,
+    String? budgetAlert,
     bool clearError = false,
     bool clearCategory = false,
     bool clearCustomCategory = false,
+    bool clearBudgetAlert = false,
   }) {
     return NewTransactionState(
       kind: kind ?? this.kind,
@@ -89,6 +95,7 @@ class NewTransactionState {
       isSaving: isSaving ?? this.isSaving,
       error: clearError ? null : (error ?? this.error),
       saveTick: saveTick ?? this.saveTick,
+      budgetAlert: clearBudgetAlert ? null : (budgetAlert ?? this.budgetAlert),
     );
   }
 }
@@ -248,6 +255,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       await txRepo.addTransaction(tx);
 
       // Also sync to backend (fire-and-forget; local save is the source of truth)
+      String? budgetAlertName;
       try {
         final apiService = ref.read(transactionApiServiceProvider);
         await apiService.create(
@@ -258,6 +266,19 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           description: state.note.isEmpty ? null : state.note,
           customCategoryName: customName,
         );
+
+        // Check if any budget crossed the 80% threshold after this expense.
+        if (kind == TransactionKind.expense) {
+          final now = state.date;
+          final budgets = await BudgetApiService()
+              .getAll(month: now.month, year: now.year);
+          final triggered = budgets.where(
+            (b) => b.percentageUsed >= 0.80 && b.percentageUsed < 1.0,
+          );
+          if (triggered.isNotEmpty) {
+            budgetAlertName = triggered.first.categoryName ?? 'Budget';
+          }
+        }
       } catch (_) {
         // Backend sync failure is non-blocking — local save succeeded
       }
@@ -270,7 +291,11 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       ref.invalidate(transactionsProvider);
       ref.invalidate(streakStateProvider);
 
-      state = state.copyWith(isSaving: false, saveTick: state.saveTick + 1);
+      state = state.copyWith(
+        isSaving: false,
+        saveTick: state.saveTick + 1,
+        budgetAlert: budgetAlertName,
+      );
     } catch (_) {
       state = state.copyWith(isSaving: false, error: TxErrorCode.saveFailed);
     }

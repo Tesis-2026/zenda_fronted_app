@@ -69,9 +69,39 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final prevTick = prev?.saveTick ?? 0;
       if (next.saveTick != prevTick) {
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.txSaved)));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(l10n.txSaved)));
+          // Show budget alert after pop so it appears on the dashboard.
+          if (next.budgetAlert != null) {
+            final categoryName = next.budgetAlert!;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                final pct = '80';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded,
+                            color: Colors.white),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.txBudgetAlert80(categoryName, pct),
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: const Color(0xFFF59E0B),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    margin: const EdgeInsets.all(16),
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              }
+            });
+          }
           Navigator.of(context).pop();
         }
       }
@@ -429,7 +459,7 @@ class _AccountPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DropdownButtonFormField<String>(
-      value: selected?.id,
+      initialValue: selected?.id,
       items: accounts
           .map(
             (a) => DropdownMenuItem(

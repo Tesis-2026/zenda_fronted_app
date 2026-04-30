@@ -166,6 +166,27 @@
   "txListFilterThisWeek": "This week",
   "txListFilterThisMonth": "This month",
   "txListFilterAllTime": "All time",
+  "txFilterAdvanced": "More filters",
+  "txFilterCategory": "Category",
+  "txFilterAllCategories": "All categories",
+  "txFilterMinAmount": "Min amount (S/)",
+  "txFilterMaxAmount": "Max amount (S/)",
+  "txFilterClear": "Clear filters",
+  "txFilterApply": "Apply",
+  "txFilterActiveCount": "{count, plural, =1{1 filter active} other{{count} filters active}}",
+  "@txFilterActiveCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "txBudgetAlert80": "{category} budget is at {pct}% — almost at the limit!",
+  "@txBudgetAlert80": {
+    "placeholders": {
+      "category": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "aiCardSeeRecommendations": "See recommendations",
   "txDeleteConfirmTitle": "Delete transaction",
   "txDeleteConfirmMessage": "This action cannot be undone.",
   "txDeleteAction": "Delete",
@@ -331,6 +352,12 @@
   "authVerifyButton": "Verify code",
   "authVerifyInvalidCode": "Invalid or expired code. Please try again.",
   "authLockedAccount": "Account locked. Try again in 15 minutes.",
+  "authLockedCountdown": "Account locked. Try again in {time}.",
+  "@authLockedCountdown": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
   "authAttemptsRemaining": "{count, plural, =1{1 attempt remaining before lockout} other{{count} attempts remaining before lockout}}",
   "@authAttemptsRemaining": {
     "placeholders": {
@@ -468,6 +495,7 @@
   "surveySubmitButton": "Submit answers",
   "surveySubmitError": "Could not submit survey. Please try again.",
   "surveyResultTitle": "Your results",
+  "surveyResultContinue": "Continue to Dashboard",
   "surveyImprovement": "Your financial knowledge improved by {points} points since the pre-survey!",
   "@surveyImprovement": {
     "placeholders": {

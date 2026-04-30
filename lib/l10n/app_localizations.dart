@@ -872,6 +872,66 @@ abstract class AppLocalizations {
   /// **'All time'**
   String get txListFilterAllTime;
 
+  /// No description provided for @txFilterAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'More filters'**
+  String get txFilterAdvanced;
+
+  /// No description provided for @txFilterCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get txFilterCategory;
+
+  /// No description provided for @txFilterAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get txFilterAllCategories;
+
+  /// No description provided for @txFilterMinAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Min amount (S/)'**
+  String get txFilterMinAmount;
+
+  /// No description provided for @txFilterMaxAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Max amount (S/)'**
+  String get txFilterMaxAmount;
+
+  /// No description provided for @txFilterClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get txFilterClear;
+
+  /// No description provided for @txFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get txFilterApply;
+
+  /// No description provided for @txFilterActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 filter active} other{{count} filters active}}'**
+  String txFilterActiveCount(int count);
+
+  /// No description provided for @txBudgetAlert80.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} budget is at {pct}% — almost at the limit!'**
+  String txBudgetAlert80(String category, String pct);
+
+  /// No description provided for @aiCardSeeRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'See recommendations'**
+  String get aiCardSeeRecommendations;
+
   /// No description provided for @txDeleteConfirmTitle.
   ///
   /// In en, this message translates to:
@@ -1448,6 +1508,198 @@ abstract class AppLocalizations {
   /// **'Cumulative progress'**
   String get goalsDetailProgressChart;
 
+  /// No description provided for @authVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter verification code'**
+  String get authVerifyTitle;
+
+  /// No description provided for @authVerifySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {email}. It expires in 15 minutes.'**
+  String authVerifySubtitle(String email);
+
+  /// No description provided for @authVerifyResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get authVerifyResend;
+
+  /// No description provided for @authVerifyResendCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String authVerifyResendCooldown(int seconds);
+
+  /// No description provided for @authVerifyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get authVerifyButton;
+
+  /// No description provided for @authVerifyInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or expired code. Please try again.'**
+  String get authVerifyInvalidCode;
+
+  /// No description provided for @authLockedAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account locked. Try again in 15 minutes.'**
+  String get authLockedAccount;
+
+  /// No description provided for @authLockedCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Account locked. Try again in {time}.'**
+  String authLockedCountdown(String time);
+
+  /// No description provided for @authAttemptsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 attempt remaining before lockout} other{{count} attempts remaining before lockout}}'**
+  String authAttemptsRemaining(int count);
+
+  /// No description provided for @goalsCompletedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed goals'**
+  String get goalsCompletedSection;
+
+  /// No description provided for @goalsActiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active goals'**
+  String get goalsActiveSection;
+
+  /// No description provided for @goalsDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String goalsDueDate(String date);
+
+  /// No description provided for @goalsDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day left} other{{days} days left}}'**
+  String goalsDaysLeft(int days);
+
+  /// No description provided for @goalsOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get goalsOverdue;
+
+  /// No description provided for @goalsCelebrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal achieved!'**
+  String get goalsCelebrate;
+
+  /// No description provided for @goalsCelebrateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations! You reached your savings goal for \"{name}\".'**
+  String goalsCelebrateMessage(String name);
+
+  /// No description provided for @goalsMarkCompleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark this goal as completed?'**
+  String get goalsMarkCompleteConfirm;
+
+  /// No description provided for @goalsMarkCompleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This will close the goal and mark it as achieved.'**
+  String get goalsMarkCompleteConfirmBody;
+
+  /// No description provided for @goalsDetailDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Target date'**
+  String get goalsDetailDueDate;
+
+  /// No description provided for @goalsDetailDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Days remaining'**
+  String get goalsDetailDaysLeft;
+
+  /// No description provided for @goalsDetailMarkComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as achieved'**
+  String get goalsDetailMarkComplete;
+
+  /// No description provided for @goalsDetailDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete goal'**
+  String get goalsDetailDelete;
+
+  /// No description provided for @reportsCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending calendar'**
+  String get reportsCalendarTitle;
+
+  /// No description provided for @reportsCalendarNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No spending on this day'**
+  String get reportsCalendarNoData;
+
+  /// No description provided for @reportsDayTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ {total}'**
+  String reportsDayTotal(String total);
+
+  /// No description provided for @txAiSuggests.
+  ///
+  /// In en, this message translates to:
+  /// **'Zenda suggests: {category}'**
+  String txAiSuggests(String category);
+
+  /// No description provided for @txAiApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply suggestion'**
+  String get txAiApply;
+
+  /// No description provided for @educationPersonalized.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalized for you'**
+  String get educationPersonalized;
+
+  /// No description provided for @educationPersonalizedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Topics ordered based on your spending patterns'**
+  String get educationPersonalizedSubtitle;
+
+  /// No description provided for @profileNumberFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Number format'**
+  String get profileNumberFormat;
+
+  /// No description provided for @profileNumberFormatDot.
+  ///
+  /// In en, this message translates to:
+  /// **'1,234.56 (dot decimal)'**
+  String get profileNumberFormatDot;
+
+  /// No description provided for @profileNumberFormatComma.
+  ///
+  /// In en, this message translates to:
+  /// **'1.234,56 (comma decimal)'**
+  String get profileNumberFormatComma;
+
   /// No description provided for @errorAuthInvalidCredentials.
   ///
   /// In en, this message translates to:
@@ -1790,11 +2042,77 @@ abstract class AppLocalizations {
   /// **'Your results'**
   String get surveyResultTitle;
 
+  /// No description provided for @surveyResultContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to Dashboard'**
+  String get surveyResultContinue;
+
   /// No description provided for @surveyImprovement.
   ///
   /// In en, this message translates to:
   /// **'Your financial knowledge improved by {points} points since the pre-survey!'**
   String surveyImprovement(String points);
+
+  /// No description provided for @surveyComparisonPreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-survey score'**
+  String get surveyComparisonPreLabel;
+
+  /// No description provided for @surveyComparisonPostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-survey score'**
+  String get surveyComparisonPostLabel;
+
+  /// No description provided for @surveyComparisonImprovementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Improvement'**
+  String get surveyComparisonImprovementLabel;
+
+  /// No description provided for @surveyComparisonGoalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Thesis target: ≥ 20 points'**
+  String get surveyComparisonGoalLabel;
+
+  /// No description provided for @surveyComparisonGoalMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Target reached!'**
+  String get surveyComparisonGoalMet;
+
+  /// No description provided for @surveyComparisonGoalNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep using the app to improve'**
+  String get surveyComparisonGoalNotMet;
+
+  /// No description provided for @surveyComparisonPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete both surveys to see your progress'**
+  String get surveyComparisonPending;
+
+  /// No description provided for @surveyComparisonPrePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-survey not completed yet'**
+  String get surveyComparisonPrePending;
+
+  /// No description provided for @surveyComparisonPostPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-survey not completed yet'**
+  String get surveyComparisonPostPending;
+
+  /// No description provided for @surveyComparisonNavTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge Progress'**
+  String get surveyComparisonNavTitle;
 
   /// No description provided for @feedbackTitle.
   ///
@@ -1898,56 +2216,286 @@ abstract class AppLocalizations {
   /// **'Badge earned'**
   String get notificationTypeBadgeEarned;
 
+  /// No description provided for @consentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data, your control'**
   String get consentTitle;
+
+  /// No description provided for @consentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you start, please review how Zenda handles your information.'**
   String get consentSubtitle;
+
+  /// No description provided for @consentBodyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What data do we collect?'**
   String get consentBodyTitle;
+
+  /// No description provided for @consentBodyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Zenda collects your income and expense records, financial profile (age, university, income type), and app usage data to generate personalized predictions and recommendations. Your data is never shared with third parties and is stored securely.'**
   String get consentBodyText;
+
+  /// No description provided for @consentLawNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In compliance with Law 29733 — Peruvian Personal Data Protection Law'**
   String get consentLawNote;
+
+  /// No description provided for @consentCheckbox.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree that my financial data will be processed to generate personalized reports and predictions'**
   String get consentCheckbox;
+
+  /// No description provided for @consentAcceptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept and continue'**
   String get consentAcceptButton;
+
+  /// No description provided for @consentMustAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'You must accept to continue'**
   String get consentMustAccept;
 
+  /// No description provided for @emailSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created!'**
   String get emailSentTitle;
+
+  /// No description provided for @emailSentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Zenda, {name}'**
   String emailSentSubtitle(String name);
+
+  /// No description provided for @emailSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A welcome email was sent to {email}. Now let\'s set up your financial profile.'**
   String emailSentBody(String email);
+
+  /// No description provided for @emailSentContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up my profile'**
   String get emailSentContinue;
+
+  /// No description provided for @emailSentSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
   String get emailSentSkip;
 
+  /// No description provided for @profileSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about yourself'**
   String get profileSetupTitle;
+
+  /// No description provided for @profileSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Zenda personalize your experience. You can edit this anytime.'**
   String get profileSetupSubtitle;
+
+  /// No description provided for @profileSetupAge.
+  ///
+  /// In en, this message translates to:
+  /// **'How old are you?'**
   String get profileSetupAge;
+
+  /// No description provided for @profileSetupAgeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 21'**
   String get profileSetupAgeHint;
+
+  /// No description provided for @profileSetupUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do you study?'**
   String get profileSetupUniversity;
+
+  /// No description provided for @profileSetupUniversityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. PUCP, UNMSM'**
   String get profileSetupUniversityHint;
+
+  /// No description provided for @profileSetupIncomeType.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you mainly get income?'**
   String get profileSetupIncomeType;
+
+  /// No description provided for @profileSetupMonthlyIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Average monthly income (S/)'**
   String get profileSetupMonthlyIncome;
+
+  /// No description provided for @profileSetupMonthlyIncomeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1500'**
   String get profileSetupMonthlyIncomeHint;
+
+  /// No description provided for @profileSetupNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
   String get profileSetupNext;
+
+  /// No description provided for @profileSetupSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
   String get profileSetupSave;
+
+  /// No description provided for @profileSetupSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
   String get profileSetupSkip;
+
+  /// No description provided for @profileSetupCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All set!'**
   String get profileSetupCompleteTitle;
+
+  /// No description provided for @profileSetupCompleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is ready. Let\'s take control of your finances.'**
   String get profileSetupCompleteBody;
+
+  /// No description provided for @profileSetupGoToDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to dashboard'**
   String get profileSetupGoToDashboard;
+
+  /// No description provided for @incomeTypeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No income'**
   String get incomeTypeNone;
+
+  /// No description provided for @incomeTypePartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Part-time job'**
   String get incomeTypePartTime;
+
+  /// No description provided for @incomeTypeFullTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Full-time job'**
   String get incomeTypeFullTime;
+
+  /// No description provided for @incomeTypeFreelance.
+  ///
+  /// In en, this message translates to:
+  /// **'Freelance'**
   String get incomeTypeFreelance;
+
+  /// No description provided for @incomeTypeAllowance.
+  ///
+  /// In en, this message translates to:
+  /// **'Family allowance / Scholarship'**
   String get incomeTypeAllowance;
 
+  /// No description provided for @aiChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Zenda AI'**
   String get aiChatTitle;
+
+  /// No description provided for @aiChatInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask anything about your finances...'**
   String get aiChatInputHint;
+
+  /// No description provided for @aiChatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
   String get aiChatSend;
+
+  /// No description provided for @aiChatWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! I\'m Zenda, your financial assistant. Ask me anything about budgets, savings, or expenses.'**
   String get aiChatWelcome;
+
+  /// No description provided for @aiChatError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not get a response. Please try again.'**
   String get aiChatError;
+
+  /// No description provided for @aiChatNavLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zenda AI'**
   String get aiChatNavLabel;
 
+  /// No description provided for @quizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
   String get quizTitle;
+
+  /// No description provided for @quizEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No quiz available for this topic yet.'**
   String get quizEmpty;
+
+  /// No description provided for @quizSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
   String get quizSubmit;
+
+  /// No description provided for @quizCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct!'**
   String get quizCorrect;
+
+  /// No description provided for @quizIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect'**
   String get quizIncorrect;
+
+  /// No description provided for @quizResult.
+  ///
+  /// In en, this message translates to:
+  /// **'You scored {score}%'**
   String quizResult(int score);
+
+  /// No description provided for @quizFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'See results'**
   String get quizFinish;
+
+  /// No description provided for @quizNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next question'**
   String get quizNext;
 }
 
