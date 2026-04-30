@@ -12,7 +12,7 @@ import 'widgets/zenda_ai_card.dart';
 import '../../l10n/l10n_extension.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
@@ -75,7 +75,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             color: isDark ? const Color(0xFF0B1220) : Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 12,
                 offset: const Offset(0, -2),
               ),
@@ -191,6 +191,9 @@ class _InicioSection extends ConsumerWidget {
       onRefresh: () async {
         ref.invalidate(accountsProvider);
         ref.invalidate(transactionsProvider);
+        ref.invalidate(daySummaryProvider);
+        ref.invalidate(weekSummaryProvider);
+        ref.invalidate(monthSummaryProvider);
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -467,7 +470,7 @@ class _PerfilSection extends ConsumerWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -477,7 +480,7 @@ class _PerfilSection extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor: const Color(0xFF34D399).withOpacity(0.2),
+                backgroundColor: const Color(0xFF34D399).withValues(alpha: 0.2),
                 child: Text(
                   (user?.name.isNotEmpty == true)
                       ? user!.name[0].toUpperCase()

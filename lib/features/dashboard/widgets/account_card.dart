@@ -4,7 +4,7 @@ import '../../../core/models/account.dart';
 class AccountCard extends StatelessWidget {
   final Account account;
 
-  const AccountCard({Key? key, required this.account}) : super(key: key);
+  const AccountCard({super.key, required this.account});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class AccountCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -34,7 +34,7 @@ class AccountCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(account.iconData, color: color, size: 20),

@@ -5,7 +5,7 @@ import '../../../l10n/l10n_extension.dart';
 class ZendaAiCard extends StatelessWidget {
   final String advice;
 
-  const ZendaAiCard({Key? key, required this.advice}) : super(key: key);
+  const ZendaAiCard({super.key, required this.advice});
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +18,12 @@ class ZendaAiCard extends StatelessWidget {
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF34D399).withOpacity(0.3),
+          color: const Color(0xFF34D399).withValues(alpha: 0.3),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF34D399).withOpacity(0.1),
+            color: const Color(0xFF34D399).withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

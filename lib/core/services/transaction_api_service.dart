@@ -18,6 +18,22 @@ String categoryToApiName(TransactionCategory c) {
   };
 }
 
+TransactionCategory? categoryFromApiName(String name) {
+  return switch (name.toLowerCase()) {
+    'food' => TransactionCategory.comida,
+    'transportation' => TransactionCategory.transporte,
+    'housing' => TransactionCategory.vivienda,
+    'utilities' => TransactionCategory.servicios,
+    'health' => TransactionCategory.salud,
+    'entertainment' => TransactionCategory.ocio,
+    'shopping' => TransactionCategory.compras,
+    'subscriptions' => TransactionCategory.suscripciones,
+    'cravings' => TransactionCategory.antojos,
+    'savings' => TransactionCategory.ahorro,
+    _ => TransactionCategory.otros,
+  };
+}
+
 class TransactionApiService {
   Future<void> create({
     required TransactionKind kind,
@@ -82,5 +98,23 @@ class TransactionApiService {
 
   Future<void> deleteTransaction(String id) async {
     await ApiClient.delete('/transactions/$id');
+  }
+
+  Future<TransactionCategory?> classify({
+    required String description,
+    required double amount,
+  }) async {
+    try {
+      final json = await ApiClient.post(
+        '/transactions/classify',
+        {'description': description, 'amount': amount},
+        authenticated: true,
+      );
+      final name = json['category'] as String?;
+      if (name == null) return null;
+      return categoryFromApiName(name);
+    } catch (_) {
+      return null;
+    }
   }
 }
