@@ -167,7 +167,7 @@ class TransactionListScreen extends ConsumerWidget {
               child: Center(
                 child: Text(
                   err.toString(),
-                  style: TextStyle(color: onSurface.withOpacity(0.75)),
+                  style: TextStyle(color: onSurface.withValues(alpha: 0.75)),
                 ),
               ),
             ),
@@ -177,7 +177,7 @@ class TransactionListScreen extends ConsumerWidget {
                   child: Center(
                     child: Text(
                       l10n.txListEmpty,
-                      style: TextStyle(color: onSurface.withOpacity(0.6)),
+                      style: TextStyle(color: onSurface.withValues(alpha: 0.6)),
                     ),
                   ),
                 );
@@ -243,7 +243,7 @@ class _FilterRow extends StatelessWidget {
               label: Text(chip.label),
               selected: isSelected,
               onSelected: (_) => onSelected(chip.value),
-              selectedColor: const Color(0xFF34D399).withOpacity(0.2),
+              selectedColor: const Color(0xFF34D399).withValues(alpha: 0.2),
               checkmarkColor: const Color(0xFF34D399),
               labelStyle: TextStyle(
                 color: isSelected
@@ -306,7 +306,7 @@ class _TransactionTile extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFFEF4444).withOpacity(0.15),
+          color: const Color(0xFFEF4444).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Icon(Icons.delete_rounded, color: Color(0xFFEF4444)),
@@ -366,7 +366,7 @@ class _TransactionTile extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -378,7 +378,7 @@ class _TransactionTile extends ConsumerWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: amountColor.withOpacity(0.15),
+                color: amountColor.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(

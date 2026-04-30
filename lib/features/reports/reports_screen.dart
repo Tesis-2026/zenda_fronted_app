@@ -320,50 +320,177 @@ class _DayTab extends ConsumerStatefulWidget {
 }
 
 class _DayTabState extends ConsumerState<_DayTab> {
-  late DateTime _date;
+  late DateTime _viewMonth;
+  late DateTime _selected;
 
   @override
   void initState() {
     super.initState();
-    _date = DateTime.now();
+    final now = DateTime.now();
+    _viewMonth = DateTime(now.year, now.month);
+    _selected = DateTime(now.year, now.month, now.day);
   }
 
-  void _prev() => setState(() => _date = _date.subtract(const Duration(days: 1)));
+  void _prevMonth() => setState(() {
+        _viewMonth = DateTime(_viewMonth.year, _viewMonth.month - 1);
+      });
 
-  void _next() {
-    final today = DateTime.now();
-    if (_date.year == today.year && _date.month == today.month && _date.day == today.day) return;
-    setState(() => _date = _date.add(const Duration(days: 1)));
-  }
-
-  String get _dateLabel {
-    final y = _date.year;
-    final m = _date.month.toString().padLeft(2, '0');
-    final d = _date.day.toString().padLeft(2, '0');
-    return '$d/$m/$y';
+  void _nextMonth() {
+    final now = DateTime.now();
+    final next = DateTime(_viewMonth.year, _viewMonth.month + 1);
+    if (next.isAfter(DateTime(now.year, now.month))) return;
+    setState(() => _viewMonth = next);
   }
 
   String get _dateKey {
-    final y = _date.year;
-    final m = _date.month.toString().padLeft(2, '0');
-    final d = _date.day.toString().padLeft(2, '0');
+    final y = _selected.year;
+    final m = _selected.month.toString().padLeft(2, '0');
+    final d = _selected.day.toString().padLeft(2, '0');
     return '$y-$m-$d';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final summary = ref.watch(_daySummaryProvider(_dateKey));
     return Column(
       children: [
-        _PeriodSelector(label: _dateLabel, onPrev: _prev, onNext: _next),
+        _PeriodSelector(
+          label: '${_monthNames[_viewMonth.month - 1]} ${_viewMonth.year}',
+          onPrev: _prevMonth,
+          onNext: _nextMonth,
+        ),
+        _CalendarGrid(
+          viewMonth: _viewMonth,
+          selected: _selected,
+          onDayTap: (date) => setState(() => _selected = date),
+        ),
+        const Divider(height: 1),
         Expanded(
           child: summary.when(
-            data: (data) => _SummaryView(summary: data),
+            data: (data) => data.totalExpense == 0 && data.totalIncome == 0 && data.topCategories.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.event_busy_outlined,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.outlineVariant),
+                        const SizedBox(height: 12),
+                        Text(l10n.reportsCalendarNoData,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline)),
+                      ],
+                    ),
+                  )
+                : _SummaryView(summary: data),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => _ErrorView(message: context.l10n.reportsErrorLoad),
+            error: (_, __) => _ErrorView(message: l10n.reportsErrorLoad),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CalendarGrid extends StatelessWidget {
+  final DateTime viewMonth;
+  final DateTime selected;
+  final ValueChanged<DateTime> onDayTap;
+
+  const _CalendarGrid({
+    required this.viewMonth,
+    required this.selected,
+    required this.onDayTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final daysInMonth =
+        DateUtils.getDaysInMonth(viewMonth.year, viewMonth.month);
+    final firstWeekday = viewMonth.weekday;
+    final offset = firstWeekday - 1;
+
+    const headers = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Column(
+        children: [
+          Row(
+            children: headers
+                .map((h) => Expanded(
+                      child: Center(
+                        child: Text(
+                          h,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+          const SizedBox(height: 4),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              childAspectRatio: 1.1,
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
+            ),
+            itemCount: offset + daysInMonth,
+            itemBuilder: (context, index) {
+              if (index < offset) return const SizedBox.shrink();
+              final day = index - offset + 1;
+              final date = DateTime(viewMonth.year, viewMonth.month, day);
+              final isFuture = date.isAfter(
+                  DateTime(today.year, today.month, today.day));
+              final isToday = DateUtils.isSameDay(date, today);
+              final isSelected = DateUtils.isSameDay(date, selected);
+
+              return GestureDetector(
+                onTap: isFuture ? null : () => onDayTap(date),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF818CF8)
+                        : isToday
+                            ? const Color(0xFF818CF8).withValues(alpha: 0.15)
+                            : null,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$day',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected || isToday
+                            ? FontWeight.w700
+                            : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.white
+                            : isFuture
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .outline
+                                    .withValues(alpha: 0.4)
+                                : null,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

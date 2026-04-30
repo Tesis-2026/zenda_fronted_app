@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/models/savings_goal.dart';
@@ -30,7 +31,86 @@ class GoalDetailScreen extends ConsumerWidget {
         data: (contributions) => _Body(
           goal: goal,
           contributions: contributions,
+          onComplete: () => _completeGoal(context, ref),
+          onDelete: () => _deleteGoal(context, ref),
         ),
+      ),
+    );
+  }
+
+  Future<void> _completeGoal(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.goalsMarkCompleteConfirm),
+        content: Text(l10n.goalsMarkCompleteConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.goalsMarkComplete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await GoalsApiService().complete(goal.id);
+    if (!context.mounted) return;
+    _showCelebrationDialog(context, goal.name);
+  }
+
+  Future<void> _deleteGoal(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(l10n.goalsDeleteConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.goalsDeleteLabel),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await GoalsApiService().delete(goal.id);
+    if (!context.mounted) return;
+    context.pop();
+  }
+
+  void _showCelebrationDialog(BuildContext context, String goalName) {
+    final l10n = context.l10n;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.emoji_events_rounded,
+            color: Color(0xFFF59E0B), size: 48),
+        title: Text(l10n.goalsCelebrate, textAlign: TextAlign.center),
+        content: Text(
+          l10n.goalsCelebrateMessage(goalName),
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (context.mounted) context.pop();
+            },
+            style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981)),
+            child: const Text('🎉'),
+          ),
+        ],
       ),
     );
   }
@@ -39,8 +119,15 @@ class GoalDetailScreen extends ConsumerWidget {
 class _Body extends StatelessWidget {
   final SavingsGoal goal;
   final List<GoalContribution> contributions;
+  final VoidCallback onComplete;
+  final VoidCallback onDelete;
 
-  const _Body({required this.goal, required this.contributions});
+  const _Body({
+    required this.goal,
+    required this.contributions,
+    required this.onComplete,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +152,18 @@ class _Body extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  goal.name,
-                  style: Theme.of(context).textTheme.titleLarge,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        goal.name,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    if (isComplete)
+                      const Icon(Icons.check_circle_rounded,
+                          color: Color(0xFF10B981), size: 22),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 ClipRRect(
@@ -101,6 +197,12 @@ class _Body extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (goal.dueDate != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(height: 1),
+                  const SizedBox(height: 12),
+                  _DueDateRow(goal: goal),
+                ],
               ],
             ),
           ),
@@ -152,12 +254,47 @@ class _Body extends StatelessWidget {
           ...contributions.reversed.map(
             (c) => _ContributionTile(contribution: c),
           ),
+
+        // ── Action buttons ─────────────────────────────────────────
+        const SizedBox(height: 24),
+        if (!isComplete) ...[
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onComplete,
+              icon: const Icon(Icons.check, size: 18),
+              label: Text(l10n.goalsDetailMarkComplete),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: onDelete,
+            icon: Icon(Icons.delete_outline,
+                size: 18, color: Theme.of(context).colorScheme.error),
+            label: Text(
+              l10n.goalsDetailDelete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
       ],
     );
   }
 
-  /// Computes a projection date based on average daily contribution rate.
-  /// Returns null if there are no contributions or rate is zero.
   String? _buildProjection(
     BuildContext context,
     List<GoalContribution> contributions,
@@ -168,15 +305,13 @@ class _Body extends StatelessWidget {
     if (rate <= 0) return null;
 
     final daysNeeded = (remaining / rate).ceil();
-    final projectedDate =
-        DateTime.now().add(Duration(days: daysNeeded));
+    final projectedDate = DateTime.now().add(Duration(days: daysNeeded));
     final formatted =
         DateFormat.yMMMd(Localizations.localeOf(context).toString())
             .format(projectedDate);
     return context.l10n.goalsDetailProjection(formatted);
   }
 
-  /// Returns an alert message when the projected date exceeds dueDate.
   String? _buildAlert(
     BuildContext context,
     List<GoalContribution> contributions,
@@ -191,8 +326,7 @@ class _Body extends StatelessWidget {
     if (rate <= 0) return null;
 
     final daysNeeded = (remaining / rate).ceil();
-    final projectedDate =
-        DateTime.now().add(Duration(days: daysNeeded));
+    final projectedDate = DateTime.now().add(Duration(days: daysNeeded));
 
     if (projectedDate.isAfter(dueDate)) {
       final formatted =
@@ -203,10 +337,8 @@ class _Body extends StatelessWidget {
     return null;
   }
 
-  /// Average daily contribution rate in PEN/day.
   double _dailyRate(List<GoalContribution> contributions) {
     if (contributions.length < 2) {
-      // Only one contribution — use 30-day average assumption
       return contributions.isEmpty ? 0 : contributions.first.amount / 30;
     }
     final first = contributions.first.createdAt;
@@ -215,6 +347,106 @@ class _Body extends StatelessWidget {
     if (days <= 0) return contributions.first.amount / 30;
     final total = contributions.fold<double>(0, (s, c) => s + c.amount);
     return total / days;
+  }
+}
+
+class _DueDateRow extends StatelessWidget {
+  final SavingsGoal goal;
+  const _DueDateRow({required this.goal});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final due = DateTime.tryParse(goal.dueDate!);
+    if (due == null) return const SizedBox.shrink();
+
+    final daysLeft = due.difference(DateTime.now()).inDays;
+    final isOverdue = daysLeft < 0;
+    final isComplete = goal.progressPercent >= 100;
+    final dueLabelColor = isOverdue && !isComplete
+        ? const Color(0xFFFB7185)
+        : Theme.of(context).colorScheme.outline;
+
+    final formattedDate =
+        DateFormat.yMMMd(Localizations.localeOf(context).toString())
+            .format(due);
+
+    final daysText = daysLeft < 0
+        ? l10n.goalsOverdue
+        : daysLeft == 0
+            ? l10n.goalsDaysLeft(1)
+            : l10n.goalsDaysLeft(daysLeft);
+
+    return Row(
+      children: [
+        Expanded(
+          child: _InfoChip(
+            icon: Icons.calendar_today_outlined,
+            label: l10n.goalsDetailDueDate,
+            value: formattedDate,
+            valueColor: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _InfoChip(
+            icon: isOverdue && !isComplete
+                ? Icons.warning_amber_rounded
+                : Icons.schedule_rounded,
+            label: l10n.goalsDetailDaysLeft,
+            value: daysText,
+            valueColor: dueLabelColor,
+            iconColor: dueLabelColor,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color valueColor;
+  final Color? iconColor;
+
+  const _InfoChip({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = iconColor ?? Theme.of(context).colorScheme.outline;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: valueColor,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+      ],
+    );
   }
 }
 
@@ -310,7 +542,6 @@ class _CumulativeChart extends StatelessWidget {
           minY: 0,
           maxY: maxY,
           lineBarsData: [
-            // Target line (dashed)
             LineChartBarData(
               spots: [
                 FlSpot(0, maxY),
@@ -324,7 +555,6 @@ class _CumulativeChart extends StatelessWidget {
               dotData: const FlDotData(show: false),
               dashArray: [4, 4],
             ),
-            // Actual cumulative progress
             LineChartBarData(
               spots: spots,
               isCurved: true,

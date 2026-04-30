@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
+import '../../core/services/transaction_api_service.dart';
 import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -19,13 +22,36 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+  Timer? _classifyDebounce;
+  TransactionCategory? _aiSuggestion;
+  bool _isClassifying = false;
 
   @override
   void dispose() {
+    _classifyDebounce?.cancel();
     ref.invalidate(newTransactionControllerProvider);
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  void _onNoteChanged(String note, double? amount) {
+    _classifyDebounce?.cancel();
+    if (note.trim().length < 3 || amount == null || amount <= 0) {
+      if (_aiSuggestion != null) setState(() => _aiSuggestion = null);
+      return;
+    }
+    _classifyDebounce = Timer(const Duration(milliseconds: 800), () async {
+      if (!mounted) return;
+      setState(() => _isClassifying = true);
+      final suggestion = await TransactionApiService()
+          .classify(description: note.trim(), amount: amount);
+      if (!mounted) return;
+      setState(() {
+        _aiSuggestion = suggestion;
+        _isClassifying = false;
+      });
+    });
   }
 
   @override
@@ -232,8 +258,25 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               borderSide: BorderSide.none,
                             ),
                           ),
-                          onChanged: controller.setNote,
+                          onChanged: (val) {
+                            controller.setNote(val);
+                            _onNoteChanged(val, state.amount);
+                          },
                         ),
+
+                        if (_isClassifying || _aiSuggestion != null) ...[
+                          const SizedBox(height: 10),
+                          _AiSuggestionChip(
+                            category: _aiSuggestion,
+                            isLoading: _isClassifying,
+                            onApply: _aiSuggestion != null
+                                ? () {
+                                    controller.setCategory(_aiSuggestion!);
+                                    setState(() => _aiSuggestion = null);
+                                  }
+                                : null,
+                          ),
+                        ],
 
                         const SizedBox(height: 18),
                         Text(
@@ -281,7 +324,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withValues(alpha: 0.06),
                           blurRadius: 16,
                           offset: const Offset(0, -4),
                         ),
@@ -465,6 +508,97 @@ class _DatePickerTile extends StatelessWidget {
   }
 }
 
+class _AiSuggestionChip extends StatelessWidget {
+  final TransactionCategory? category;
+  final bool isLoading;
+  final VoidCallback? onApply;
+
+  const _AiSuggestionChip({
+    required this.category,
+    required this.isLoading,
+    required this.onApply,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    if (isLoading) {
+      return Row(
+        children: [
+          const SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '...',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+          ),
+        ],
+      );
+    }
+
+    if (category == null) return const SizedBox.shrink();
+
+    final categoryLabel = _categoryLabel(category!, l10n);
+
+    return GestureDetector(
+      onTap: onApply,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF818CF8).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+          border:
+              Border.all(color: const Color(0xFF818CF8).withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.auto_awesome_rounded,
+                size: 15, color: Color(0xFF818CF8)),
+            const SizedBox(width: 6),
+            Text(
+              l10n.txAiSuggests(categoryLabel),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF818CF8),
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n.txAiApply,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: const Color(0xFF818CF8),
+                    decoration: TextDecoration.underline,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _categoryLabel(TransactionCategory c, dynamic l10n) {
+    return switch (c) {
+      TransactionCategory.comida => l10n.txCategoryFood,
+      TransactionCategory.transporte => l10n.txCategoryTransport,
+      TransactionCategory.vivienda => l10n.txCategoryHousing,
+      TransactionCategory.servicios => l10n.txCategoryUtilities,
+      TransactionCategory.salud => l10n.txCategoryHealth,
+      TransactionCategory.ocio => l10n.txCategoryEntertainment,
+      TransactionCategory.compras => l10n.txCategoryShopping,
+      TransactionCategory.suscripciones => l10n.txCategorySubscriptions,
+      TransactionCategory.antojos => l10n.txCategoryCravings,
+      TransactionCategory.ahorro => l10n.txCategorySavings,
+      TransactionCategory.otros => l10n.txCategoryOther,
+    };
+  }
+}
+
 class _BucketChip extends StatelessWidget {
   final Bucket503020 bucket;
   const _BucketChip({required this.bucket});
@@ -480,9 +614,9 @@ class _BucketChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.35)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Text(
         label,
@@ -534,7 +668,7 @@ class _CategoryGrid extends StatelessWidget {
             child: Ink(
               decoration: BoxDecoration(
                 color: hasCustom
-                    ? const Color(0xFF818CF8).withOpacity(0.18)
+                    ? const Color(0xFF818CF8).withValues(alpha: 0.18)
                     : (isDark ? const Color(0xFF1E293B) : Colors.white),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -579,7 +713,7 @@ class _CategoryGrid extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF34D399).withOpacity(0.18)
+                  ? const Color(0xFF34D399).withValues(alpha: 0.18)
                   : (isDark ? const Color(0xFF1E293B) : Colors.white),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
