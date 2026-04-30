@@ -11,7 +11,7 @@ class LightTheme {
     brightness: Brightness.light,
     primaryColor: primary,
     scaffoldBackgroundColor: bg,
-    colorScheme: ColorScheme.fromSeed(seedColor: primary, primary: primary, secondary: secondary, background: bg),
+    colorScheme: ColorScheme.fromSeed(seedColor: primary, primary: primary, secondary: secondary, surface: bg),
     textTheme: GoogleFonts.interTextTheme().apply(bodyColor: textPrimary, displayColor: textPrimary),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),

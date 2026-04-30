@@ -42,7 +42,7 @@ class EducationApiService {
 
   Future<EducationTopic> getTopic(String id) async {
     final data = await ApiClient.get('/education/topics/$id');
-    return EducationTopic.fromJson(data as Map<String, dynamic>);
+    return EducationTopic.fromJson(data);
   }
 
   Future<void> completeTopic(String id) async {

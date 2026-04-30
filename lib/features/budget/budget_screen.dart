@@ -161,7 +161,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       DropdownButtonFormField<String?>(
-                        value: selectedCategoryId,
+                        initialValue: selectedCategoryId,
                         decoration: InputDecoration(
                           labelText: l10n.budgetCategoryAll,
                           border: OutlineInputBorder(
@@ -198,7 +198,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<int>(
-                              value: selectedMonth,
+                              initialValue: selectedMonth,
                               decoration: InputDecoration(
                                 labelText: l10n.budgetMonthLabel,
                                 border: OutlineInputBorder(
@@ -218,7 +218,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: DropdownButtonFormField<int>(
-                              value: selectedYear,
+                              initialValue: selectedYear,
                               decoration: InputDecoration(
                                 labelText: l10n.budgetYearLabel,
                                 border: OutlineInputBorder(

@@ -14,7 +14,6 @@ class AiChatApiService {
     final body = await ApiClient.post('/ai/chat', {
       'messages': messages.map((m) => m.toJson()).toList(),
     });
-    return (body as Map<String, dynamic>)['reply'] as String? ??
-        'No response received.';
+    return body['reply'] as String? ?? 'No response received.';
   }
 }

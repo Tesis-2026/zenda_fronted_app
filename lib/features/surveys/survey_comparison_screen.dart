@@ -20,7 +20,7 @@ class SurveyComparisonScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.surveyComparisonNavTitle)),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

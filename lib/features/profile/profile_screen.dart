@@ -378,7 +378,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          value: _currency,
+          initialValue: _currency,
           decoration: InputDecoration(
             labelText: l10n.profileCurrency,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

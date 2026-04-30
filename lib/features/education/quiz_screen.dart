@@ -85,7 +85,7 @@ class QuizResult {
 
 Future<List<QuizQuestion>> fetchQuiz(String topicId, String language) async {
   final data = await ApiClient.get('/education/topics/$topicId/quiz?language=$language');
-  final map = data as Map<String, dynamic>;
+  final map = data;
   return (map['questions'] as List<dynamic>)
       .map((e) => QuizQuestion.fromJson(e as Map<String, dynamic>))
       .toList();
@@ -100,7 +100,7 @@ Future<QuizResult> submitQuiz(
     {'answers': answers},
     authenticated: true,
   );
-  return QuizResult.fromJson(data as Map<String, dynamic>);
+  return QuizResult.fromJson(data);
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ class QuizScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.quizTitle)),
       body: quizAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(

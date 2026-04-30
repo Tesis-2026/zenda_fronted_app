@@ -141,7 +141,7 @@ class _EditTransactionScreenState
 
           // Category
           DropdownButtonFormField<TransactionCategory>(
-            value: _category,
+            initialValue: _category,
             decoration: InputDecoration(
               labelText: l10n.txCategoryLabel,
               border: const OutlineInputBorder(),

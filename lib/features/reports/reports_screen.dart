@@ -73,7 +73,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.reportsTitle),
@@ -149,10 +148,10 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
       await file.writeAsBytes(bytes);
 
       if (!mounted) return;
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/pdf')],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path, mimeType: 'application/pdf')],
         subject: 'Zenda Report — ${_monthNames[_month - 1]} $_year',
-      );
+      ));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -385,7 +384,7 @@ class _DayTabState extends ConsumerState<_DayTab> {
                   )
                 : _SummaryView(summary: data),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => _ErrorView(message: l10n.reportsErrorLoad),
+            error: (_, _) => _ErrorView(message: l10n.reportsErrorLoad),
           ),
         ),
       ],

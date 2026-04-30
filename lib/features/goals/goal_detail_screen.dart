@@ -27,7 +27,7 @@ class GoalDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.goalsDetailTitle)),
       body: contributionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(child: Text(l10n.goalsErrorLoad)),
+        error: (_, _) => Center(child: Text(l10n.goalsErrorLoad)),
         data: (contributions) => _Body(
           goal: goal,
           contributions: contributions,

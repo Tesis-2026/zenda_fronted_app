@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/services/surveys_api_service.dart';
 import '../../l10n/l10n_extension.dart';
+import '../../providers/pre_survey_provider.dart';
 
 final _surveysServiceProvider = Provider<SurveysApiService>(
   (_) => SurveysApiService(),
@@ -81,6 +83,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       final result = widget.isPre
           ? await service.submitPre(_answers)
           : await service.submitPost(_answers);
+      if (widget.isPre) {
+        await ref.read(preSurveyProvider.notifier).markCompleted();
+      }
       setState(() => _result = result);
     } catch (e) {
       if (mounted) {
@@ -178,16 +183,22 @@ class _QuestionCard extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            ...question.options.map(
-              (option) => RadioListTile<String>(
-                title: Text(option),
-                value: option,
-                groupValue: selectedAnswer,
-                onChanged: (v) {
-                  if (v != null) onChanged(v);
-                },
-                dense: true,
-                contentPadding: EdgeInsets.zero,
+            RadioGroup<String>(
+              groupValue: selectedAnswer,
+              onChanged: (v) {
+                if (v != null) onChanged(v);
+              },
+              child: Column(
+                children: question.options
+                    .map(
+                      (option) => RadioListTile<String>(
+                        title: Text(option),
+                        value: option,
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ],
@@ -267,6 +278,14 @@ class _ResultView extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => context.go('/dashboard'),
+                child: Text(l10n.surveyResultContinue),
+              ),
+            ),
           ],
         ),
       ),

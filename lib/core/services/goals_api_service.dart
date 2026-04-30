@@ -40,7 +40,7 @@ class GoalsApiService {
       {
         'name': name,
         'targetAmount': targetAmount,
-        if (dueDate != null) 'dueDate': dueDate,
+        'dueDate': ?dueDate,
       },
       authenticated: true,
     );

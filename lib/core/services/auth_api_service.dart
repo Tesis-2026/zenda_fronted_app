@@ -151,9 +151,10 @@ class AuthApiService {
       401 => AuthErrorCode.invalidCredentials,
       409 => AuthErrorCode.emailTaken,
       404 => AuthErrorCode.tokenExpired,
-      // 400: pass the backend's validation message as payload after '|'
-      // so the UI can display it directly without a translation key.
-      400 => '${AuthErrorCode.badRequest}|${e.message}',
+      // 400: detect lockout messages before falling through to generic badRequest.
+      400 => e.message.toLowerCase().contains('locked')
+          ? AuthErrorCode.accountLocked
+          : '${AuthErrorCode.badRequest}|${e.message}',
       _ => AuthErrorCode.serverError,
     };
   }

@@ -7,7 +7,7 @@ class DarkTheme {
     brightness: Brightness.dark,
     scaffoldBackgroundColor: bg,
     colorScheme: ColorScheme.dark(
-      background: bg,
+      surface: bg,
       primary: const Color(0xFF34D399),
       secondary: const Color(0xFF38BDF8),
     ),
