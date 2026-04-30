@@ -474,6 +474,16 @@
       "points": { "type": "String" }
     }
   },
+  "surveyComparisonPreLabel": "Puntaje inicial",
+  "surveyComparisonPostLabel": "Puntaje final",
+  "surveyComparisonImprovementLabel": "Mejora",
+  "surveyComparisonGoalLabel": "Meta de tesis: ≥ 20 puntos",
+  "surveyComparisonGoalMet": "¡Meta alcanzada!",
+  "surveyComparisonGoalNotMet": "Sigue usando la app para mejorar",
+  "surveyComparisonPending": "Completa ambas encuestas para ver tu progreso",
+  "surveyComparisonPrePending": "Encuesta inicial no completada",
+  "surveyComparisonPostPending": "Encuesta final no completada",
+  "surveyComparisonNavTitle": "Progreso de conocimiento",
 
   "feedbackTitle": "Enviar comentarios",
   "feedbackTypeLabel": "Tipo",

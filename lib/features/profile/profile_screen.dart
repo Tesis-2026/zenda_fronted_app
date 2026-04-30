@@ -277,6 +277,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           title: l10n.surveyPostTitle,
           onTap: () => context.push('/surveys/post'),
         ),
+        _navTile(
+          icon: Icons.trending_up_outlined,
+          title: l10n.surveyComparisonNavTitle,
+          onTap: () => context.push('/surveys/comparison'),
+        ),
         const SizedBox(height: 8),
         _navTile(
           icon: Icons.psychology_rounded,

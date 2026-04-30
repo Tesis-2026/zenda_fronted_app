@@ -31,6 +31,7 @@ import '../features/challenges/challenges_screen.dart';
 import '../features/badges/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/surveys/survey_screen.dart';
+import '../features/surveys/survey_comparison_screen.dart';
 import '../features/transactions/edit_transaction_screen.dart';
 import '../features/notifications/notification_preferences_screen.dart';
 import '../features/ai_chat/ai_chat_screen.dart';
@@ -253,6 +254,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/surveys/post',
         builder: (context, state) => const SurveyScreen(isPre: false),
+      ),
+      GoRoute(
+        path: '/surveys/comparison',
+        builder: (context, state) => const SurveyComparisonScreen(),
       ),
       GoRoute(
         path: '/edit-transaction',

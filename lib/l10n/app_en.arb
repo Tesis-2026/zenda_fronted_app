@@ -474,6 +474,16 @@
       "points": { "type": "String" }
     }
   },
+  "surveyComparisonPreLabel": "Pre-survey score",
+  "surveyComparisonPostLabel": "Post-survey score",
+  "surveyComparisonImprovementLabel": "Improvement",
+  "surveyComparisonGoalLabel": "Thesis target: ≥ 20 points",
+  "surveyComparisonGoalMet": "Target reached!",
+  "surveyComparisonGoalNotMet": "Keep using the app to improve",
+  "surveyComparisonPending": "Complete both surveys to see your progress",
+  "surveyComparisonPrePending": "Pre-survey not completed yet",
+  "surveyComparisonPostPending": "Post-survey not completed yet",
+  "surveyComparisonNavTitle": "Knowledge Progress",
 
   "feedbackTitle": "Send feedback",
   "feedbackTypeLabel": "Type",
