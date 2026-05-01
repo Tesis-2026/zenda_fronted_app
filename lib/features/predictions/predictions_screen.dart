@@ -93,7 +93,7 @@ class _PredictionCard extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: color.withOpacity(0.12),
+                  backgroundColor: color.withValues(alpha: 0.12),
                   child: Icon(icon, color: color),
                 ),
                 const SizedBox(width: 12),
@@ -128,7 +128,7 @@ class _PredictionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: result.confidenceLevel,
-                      backgroundColor: color.withOpacity(0.15),
+                      backgroundColor: color.withValues(alpha: 0.15),
                       valueColor: AlwaysStoppedAnimation<Color>(color),
                       minHeight: 8,
                     ),

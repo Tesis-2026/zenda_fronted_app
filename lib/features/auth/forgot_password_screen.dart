@@ -5,7 +5,7 @@ import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
-  const ForgotPasswordScreen({Key? key}) : super(key: key);
+  const ForgotPasswordScreen({super.key});
 
   @override
   ConsumerState<ForgotPasswordScreen> createState() =>
@@ -29,40 +29,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     setState(() => _isLoading = true);
 
+    final email = _emailController.text.trim();
     final authService = ref.read(authServiceProvider);
-    await authService.forgotPassword(_emailController.text.trim());
+    await authService.sendOtp(email);
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    // Always show success to prevent email enumeration
-    if (mounted) {
-      final l10n = context.l10n;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(l10n.authCheckEmail),
-          content: Text(l10n.authCheckEmailMessage),
-          actions: [
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.go('/auth/reset-password');
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF34D399),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              child: Text(l10n.authEnterCode),
-            ),
-          ],
-        ),
-      );
-    }
+    // Always navigate to verify-code to prevent email enumeration
+    context.go('/auth/verify-code', extra: email);
   }
 
   @override
@@ -96,7 +71,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withOpacity(0.15),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -125,7 +100,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   l10n.authForgotSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isDark
-                            ? const Color(0xFFF1F5F9).withOpacity(0.7)
+                            ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
                             : const Color(0xFF6B7280),
                       ),
                   textAlign: TextAlign.center,
@@ -176,7 +151,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                       disabledBackgroundColor:
-                          const Color(0xFF34D399).withOpacity(0.5),
+                          const Color(0xFF34D399).withValues(alpha: 0.5),
                     ),
                     child: _isLoading
                         ? const SizedBox(

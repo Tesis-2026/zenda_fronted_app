@@ -85,7 +85,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   Future<void> _skip() async {
     try {
       await UserApiService().updateProfile(profileCompleted: true);
-    } catch (_) {}
+    } catch (_) {
+      // Non-blocking: skip still navigates to dashboard even if the update fails
+    }
     if (mounted) context.go('/dashboard');
   }
 
@@ -349,7 +351,7 @@ class _IncomeTypePage extends StatelessWidget {
                     : null,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 tileColor: isSelected
-                    ? const Color(0xFF34D399).withOpacity(0.1)
+                    ? const Color(0xFF34D399).withValues(alpha: 0.1)
                     : (isDark ? const Color(0xFF1E293B) : Colors.white),
               ),
             );

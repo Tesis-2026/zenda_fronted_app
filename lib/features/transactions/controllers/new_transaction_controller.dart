@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/error_codes.dart';
 import '../../../core/models/account.dart';
 import '../../../core/models/transaction.dart';
+import '../../../core/services/budget_api_service.dart';
+import '../../../core/services/pending_transaction_queue.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../providers/repositories_providers.dart';
 import '../../dashboard/dashboard_providers.dart';
@@ -15,12 +17,15 @@ class NewTransactionState {
   final String? toAccountId;
   final double? amount;
   final TransactionCategory? category;
+  final String? customCategoryName;
   final String note;
   final DateTime date;
   final TransactionSource source;
   final bool isSaving;
   final String? error;
   final int saveTick;
+  final String? budgetAlert; // category name at ≥80% after save
+  final List<String> completedChallengeNames; // titles of auto-completed challenges
 
   const NewTransactionState({
     required this.kind,
@@ -28,12 +33,15 @@ class NewTransactionState {
     required this.toAccountId,
     required this.amount,
     required this.category,
+    this.customCategoryName,
     required this.note,
     required this.date,
     required this.source,
     required this.isSaving,
     required this.error,
     required this.saveTick,
+    this.budgetAlert,
+    this.completedChallengeNames = const [],
   });
 
   factory NewTransactionState.initial() => NewTransactionState(
@@ -42,12 +50,15 @@ class NewTransactionState {
     toAccountId: null,
     amount: null,
     category: null,
+    customCategoryName: null,
     note: '',
     date: DateTime.now(),
     source: TransactionSource.manual,
     isSaving: false,
     error: null,
     saveTick: 0,
+    budgetAlert: null,
+    completedChallengeNames: const [],
   );
 
   Bucket503020? get bucket {
@@ -62,26 +73,35 @@ class NewTransactionState {
     String? toAccountId,
     double? amount,
     TransactionCategory? category,
+    String? customCategoryName,
     String? note,
     DateTime? date,
     TransactionSource? source,
     bool? isSaving,
     String? error,
     int? saveTick,
+    String? budgetAlert,
+    List<String>? completedChallengeNames,
     bool clearError = false,
+    bool clearCategory = false,
+    bool clearCustomCategory = false,
+    bool clearBudgetAlert = false,
   }) {
     return NewTransactionState(
       kind: kind ?? this.kind,
       fromAccountId: fromAccountId ?? this.fromAccountId,
       toAccountId: toAccountId ?? this.toAccountId,
       amount: amount ?? this.amount,
-      category: category ?? this.category,
+      category: clearCategory ? null : (category ?? this.category),
+      customCategoryName: clearCustomCategory ? null : (customCategoryName ?? this.customCategoryName),
       note: note ?? this.note,
       date: date ?? this.date,
       source: source ?? this.source,
       isSaving: isSaving ?? this.isSaving,
       error: clearError ? null : (error ?? this.error),
       saveTick: saveTick ?? this.saveTick,
+      budgetAlert: clearBudgetAlert ? null : (budgetAlert ?? this.budgetAlert),
+      completedChallengeNames: completedChallengeNames ?? this.completedChallengeNames,
     );
   }
 }
@@ -123,7 +143,11 @@ class NewTransactionController extends Notifier<NewTransactionState> {
   }
 
   void setCategory(TransactionCategory category) {
-    state = state.copyWith(category: category, clearError: true);
+    state = state.copyWith(category: category, clearCustomCategory: true, clearError: true);
+  }
+
+  void setCustomCategory(String name) {
+    state = state.copyWith(customCategoryName: name, clearCategory: true, clearError: true);
   }
 
   void setNote(String note) {
@@ -158,10 +182,12 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     }
 
     final category = state.category;
-    if (category == null) {
+    final customName = state.customCategoryName;
+    if (category == null && (customName == null || customName.isEmpty)) {
       state = state.copyWith(error: TxErrorCode.noCategory);
       return;
     }
+    final effectiveCategory = category ?? TransactionCategory.otros;
 
     final kind = state.kind;
     final toId = state.toAccountId;
@@ -226,26 +252,52 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         kind: kind,
         amount: amount,
         currency: 'PEN',
-        category: category,
-        bucket: bucketForCategory(category),
+        category: effectiveCategory,
+        bucket: bucketForCategory(effectiveCategory),
         timestamp: state.date,
         note: state.note.isEmpty ? null : state.note,
         source: state.source,
       );
       await txRepo.addTransaction(tx);
 
-      // Also sync to backend (fire-and-forget; local save is the source of truth)
+      // Sync to backend; enqueue for retry if offline or unreachable.
+      String? budgetAlertName;
+      List<String> completedNames = [];
       try {
         final apiService = ref.read(transactionApiServiceProvider);
-        await apiService.create(
+        completedNames = await apiService.create(
           kind: kind,
           amount: amount,
-          category: category,
+          category: effectiveCategory,
           occurredAt: state.date,
           description: state.note.isEmpty ? null : state.note,
+          customCategoryName: customName,
         );
+
+        // Check if any budget crossed the 80% threshold after this expense.
+        if (kind == TransactionKind.expense) {
+          final now = state.date;
+          final budgets = await BudgetApiService()
+              .getAll(month: now.month, year: now.year);
+          final triggered = budgets.where(
+            (b) => b.percentageUsed >= 0.80 && b.percentageUsed < 1.0,
+          );
+          if (triggered.isNotEmpty) {
+            budgetAlertName = triggered.first.categoryName ?? 'Budget';
+          }
+        }
       } catch (_) {
-        // Backend sync failure is non-blocking — local save succeeded
+        // Offline or unreachable — enqueue for retry when connectivity returns.
+        final queue = ref.read(pendingTransactionQueueProvider);
+        await queue.enqueue(PendingSyncEntry(
+          txId: tx.id,
+          kind: kind,
+          amount: amount,
+          category: effectiveCategory,
+          occurredAt: state.date,
+          description: state.note.isEmpty ? null : state.note,
+          customCategoryName: customName,
+        ));
       }
 
       // Update streak only on save.
@@ -256,7 +308,12 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       ref.invalidate(transactionsProvider);
       ref.invalidate(streakStateProvider);
 
-      state = state.copyWith(isSaving: false, saveTick: state.saveTick + 1);
+      state = state.copyWith(
+        isSaving: false,
+        saveTick: state.saveTick + 1,
+        budgetAlert: budgetAlertName,
+        completedChallengeNames: completedNames,
+      );
     } catch (_) {
       state = state.copyWith(isSaving: false, error: TxErrorCode.saveFailed);
     }

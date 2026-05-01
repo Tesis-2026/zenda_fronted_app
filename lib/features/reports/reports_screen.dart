@@ -24,6 +24,14 @@ final _comparisonProvider = FutureProvider.family<List<MonthComparisonEntry>, in
   (ref, months) => ref.read(_insightsServiceProvider).getComparison(months: months),
 );
 
+final _progressProvider = FutureProvider<ProgressSummary>(
+  (ref) => ref.read(_insightsServiceProvider).getProgress(),
+);
+
+final _daySummaryProvider = FutureProvider.family<PeriodSummary, String>(
+  (ref, date) => ref.read(_insightsServiceProvider).getDaySummary(date: date),
+);
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 int _isoWeekNumber(DateTime date) {
@@ -57,7 +65,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -69,7 +77,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.reportsTitle),
@@ -79,6 +86,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             Tab(text: l10n.reportsTabMonth),
             Tab(text: l10n.reportsTabWeek),
             Tab(text: l10n.reportsTabCompare),
+            Tab(text: l10n.reportsTabDay),
           ],
         ),
       ),
@@ -88,6 +96,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           _MonthTab(),
           _WeekTab(),
           _CompareTab(),
+          _DayTab(),
         ],
       ),
     );
@@ -143,10 +152,10 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
       await file.writeAsBytes(bytes);
 
       if (!mounted) return;
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/pdf')],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path, mimeType: 'application/pdf')],
         subject: 'Zenda Report — ${_monthNames[_month - 1]} $_year',
-      );
+      ));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -250,7 +259,31 @@ class _WeekTabState extends ConsumerState<_WeekTab> {
         ),
         Expanded(
           child: summary.when(
-            data: (data) => _SummaryView(summary: data),
+            data: (data) => ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _TotalsRow(summary: data),
+                if (data.dailyBreakdown.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.reportsWeekDailyTitle,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  _DailyBarChart(breakdown: data.dailyBreakdown),
+                ],
+                const SizedBox(height: 24),
+                Text(
+                  l10n.reportsTopCategories,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                data.topCategories.isEmpty
+                    ? Text(l10n.reportsNoCategoryData,
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))
+                    : _CategoryBarChart(categories: data.topCategories),
+              ],
+            ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => _ErrorView(message: context.l10n.reportsErrorLoad),
           ),
@@ -276,6 +309,7 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final comparison = ref.watch(_comparisonProvider(_months));
+    final progress = ref.watch(_progressProvider);
     return Column(
       children: [
         Padding(
@@ -290,6 +324,11 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
             onSelectionChanged: (s) => setState(() => _months = s.first),
           ),
         ),
+        progress.when(
+          data: (p) => _ProgressChips(summary: p),
+          loading: () => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
+        ),
         Expanded(
           child: comparison.when(
             data: (data) => data.isEmpty
@@ -300,6 +339,191 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Day Tab ────────────────────────────────────────────────────────────────
+
+class _DayTab extends ConsumerStatefulWidget {
+  const _DayTab();
+
+  @override
+  ConsumerState<_DayTab> createState() => _DayTabState();
+}
+
+class _DayTabState extends ConsumerState<_DayTab> {
+  late DateTime _viewMonth;
+  late DateTime _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _viewMonth = DateTime(now.year, now.month);
+    _selected = DateTime(now.year, now.month, now.day);
+  }
+
+  void _prevMonth() => setState(() {
+        _viewMonth = DateTime(_viewMonth.year, _viewMonth.month - 1);
+      });
+
+  void _nextMonth() {
+    final now = DateTime.now();
+    final next = DateTime(_viewMonth.year, _viewMonth.month + 1);
+    if (next.isAfter(DateTime(now.year, now.month))) return;
+    setState(() => _viewMonth = next);
+  }
+
+  String get _dateKey {
+    final y = _selected.year;
+    final m = _selected.month.toString().padLeft(2, '0');
+    final d = _selected.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final summary = ref.watch(_daySummaryProvider(_dateKey));
+    return Column(
+      children: [
+        _PeriodSelector(
+          label: '${_monthNames[_viewMonth.month - 1]} ${_viewMonth.year}',
+          onPrev: _prevMonth,
+          onNext: _nextMonth,
+        ),
+        _CalendarGrid(
+          viewMonth: _viewMonth,
+          selected: _selected,
+          onDayTap: (date) => setState(() => _selected = date),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: summary.when(
+            data: (data) => data.totalExpense == 0 && data.totalIncome == 0 && data.topCategories.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.event_busy_outlined,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.outlineVariant),
+                        const SizedBox(height: 12),
+                        Text(l10n.reportsCalendarNoData,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline)),
+                      ],
+                    ),
+                  )
+                : _SummaryView(summary: data),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, _) => _ErrorView(message: l10n.reportsErrorLoad),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CalendarGrid extends StatelessWidget {
+  final DateTime viewMonth;
+  final DateTime selected;
+  final ValueChanged<DateTime> onDayTap;
+
+  const _CalendarGrid({
+    required this.viewMonth,
+    required this.selected,
+    required this.onDayTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final daysInMonth =
+        DateUtils.getDaysInMonth(viewMonth.year, viewMonth.month);
+    final firstWeekday = viewMonth.weekday;
+    final offset = firstWeekday - 1;
+
+    const headers = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Column(
+        children: [
+          Row(
+            children: headers
+                .map((h) => Expanded(
+                      child: Center(
+                        child: Text(
+                          h,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+          const SizedBox(height: 4),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              childAspectRatio: 1.1,
+              mainAxisSpacing: 2,
+              crossAxisSpacing: 2,
+            ),
+            itemCount: offset + daysInMonth,
+            itemBuilder: (context, index) {
+              if (index < offset) return const SizedBox.shrink();
+              final day = index - offset + 1;
+              final date = DateTime(viewMonth.year, viewMonth.month, day);
+              final isFuture = date.isAfter(
+                  DateTime(today.year, today.month, today.day));
+              final isToday = DateUtils.isSameDay(date, today);
+              final isSelected = DateUtils.isSameDay(date, selected);
+
+              return GestureDetector(
+                onTap: isFuture ? null : () => onDayTap(date),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF818CF8)
+                        : isToday
+                            ? const Color(0xFF818CF8).withValues(alpha: 0.15)
+                            : null,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$day',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected || isToday
+                            ? FontWeight.w700
+                            : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.white
+                            : isFuture
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .outline
+                                    .withValues(alpha: 0.4)
+                                : null,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -533,6 +757,174 @@ class _CategoryBarChart extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+// ── Daily Bar Chart (Week tab) ─────────────────────────────────────────────
+
+class _DailyBarChart extends StatelessWidget {
+  final List<DailyBreakdownItem> breakdown;
+
+  const _DailyBarChart({required this.breakdown});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final maxVal = breakdown
+        .expand((d) => [d.totalIncome, d.totalExpense])
+        .fold(0.0, (a, b) => a > b ? a : b);
+    final chartMax = maxVal == 0 ? 100.0 : maxVal * 1.25;
+
+    return SizedBox(
+      height: 200,
+      child: BarChart(
+        BarChartData(
+          maxY: chartMax,
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (_) => FlLine(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.08),
+              strokeWidth: 1,
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, _) {
+                  final idx = value.toInt();
+                  if (idx < 0 || idx >= breakdown.length) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      breakdown[idx].dayLabel,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          barGroups: breakdown.asMap().entries.map((entry) {
+            final i = entry.key;
+            final d = entry.value;
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: d.totalIncome,
+                  color: const Color(0xFF34D399),
+                  width: 10,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+                BarChartRodData(
+                  toY: d.totalExpense,
+                  color: const Color(0xFFFC8181),
+                  width: 10,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Progress % Chips (Compare tab) ────────────────────────────────────────
+
+class _ProgressChips extends StatelessWidget {
+  final ProgressSummary summary;
+
+  const _ProgressChips({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.reportsProgressChipsTitle,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              if (summary.expensesChangePercent != null)
+                _PctChip(
+                  label: l10n.reportsExpensesChip(
+                    summary.expensesChangePercent! >= 0 ? '+' : '',
+                    summary.expensesChangePercent!.abs().toStringAsFixed(1),
+                  ),
+                  positive: summary.expensesChangePercent! <= 0,
+                ),
+              if (summary.savingsChangePercent != null)
+                _PctChip(
+                  label: l10n.reportsSavingsChip(
+                    summary.savingsChangePercent! >= 0 ? '+' : '',
+                    summary.savingsChangePercent!.abs().toStringAsFixed(1),
+                  ),
+                  positive: summary.savingsChangePercent! >= 0,
+                ),
+              if (summary.balanceChangePercent != null)
+                _PctChip(
+                  label: l10n.reportsBalanceChip(
+                    summary.balanceChangePercent! >= 0 ? '+' : '',
+                    summary.balanceChangePercent!.abs().toStringAsFixed(1),
+                  ),
+                  positive: summary.balanceChangePercent! >= 0,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PctChip extends StatelessWidget {
+  final String label;
+  final bool positive;
+
+  const _PctChip({required this.label, required this.positive});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = positive ? const Color(0xFF34D399) : const Color(0xFFFC8181);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
     );
   }
 }

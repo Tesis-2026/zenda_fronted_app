@@ -5,7 +5,8 @@ import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
-  const ResetPasswordScreen({Key? key}) : super(key: key);
+  final String? prefillToken;
+  const ResetPasswordScreen({super.key, this.prefillToken});
 
   @override
   ConsumerState<ResetPasswordScreen> createState() =>
@@ -18,6 +19,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefillToken != null) {
+      _tokenController.text = widget.prefillToken!;
+    }
+  }
 
   @override
   void dispose() {
@@ -105,7 +114,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withOpacity(0.15),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -134,7 +143,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   l10n.authResetSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isDark
-                            ? const Color(0xFFF1F5F9).withOpacity(0.7)
+                            ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
                             : const Color(0xFF6B7280),
                       ),
                   textAlign: TextAlign.center,
@@ -218,7 +227,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                       disabledBackgroundColor:
-                          const Color(0xFF34D399).withOpacity(0.5),
+                          const Color(0xFF34D399).withValues(alpha: 0.5),
                     ),
                     child: _isLoading
                         ? const SizedBox(

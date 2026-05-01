@@ -5,7 +5,7 @@ import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -98,7 +98,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF34D399).withOpacity(0.3),
+                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -128,7 +128,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(
                   l10n.authRegisterSubtitle,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -244,7 +244,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      disabledBackgroundColor: const Color(0xFF34D399).withOpacity(0.5),
+                      disabledBackgroundColor: const Color(0xFF34D399).withValues(alpha: 0.5),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
@@ -275,7 +275,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Text(
                       l10n.authHaveAccount,
                       style: TextStyle(
-                        color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
                       ),
                     ),
                     TextButton(
@@ -297,10 +297,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withOpacity(0.1),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF34D399).withOpacity(0.3),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Column(
@@ -328,7 +328,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       Text(
                         l10n.authDataSecureRegister,
                         style: TextStyle(
-                          color: isDark ? const Color(0xFF34D399).withOpacity(0.9) : const Color(0xFF059669),
+                          color: isDark ? const Color(0xFF34D399).withValues(alpha: 0.9) : const Color(0xFF059669),
                           fontSize: 12,
                         ),
                       ),

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
 import '../auth/auth_controller.dart';
 import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
+
+const _kNumberFormatKey = 'zenda.number_format';
 
 final _profileProvider = FutureProvider<User>((ref) async {
   return UserApiService().getProfile();
@@ -21,6 +24,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isEditing = false;
   bool _isSaving = false;
+  String _currency = 'PEN';
+  bool _useCommaSeparator = false;
 
   late TextEditingController _nameController;
   late TextEditingController _ageController;
@@ -32,6 +37,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _nameController = TextEditingController();
     _ageController = TextEditingController();
     _universityController = TextEditingController();
+    _loadNumberFormat();
+  }
+
+  Future<void> _loadNumberFormat() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_kNumberFormatKey) ?? 'dot';
+    if (mounted) setState(() => _useCommaSeparator = value == 'comma');
+  }
+
+  Future<void> _saveNumberFormat(bool useComma) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kNumberFormatKey, useComma ? 'comma' : 'dot');
+    if (mounted) setState(() => _useCommaSeparator = useComma);
   }
 
   @override
@@ -46,6 +64,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _nameController.text = user.name;
     _ageController.text = user.age?.toString() ?? '';
     _universityController.text = user.university ?? '';
+    _currency = user.currency.isNotEmpty ? user.currency : 'PEN';
     setState(() => _isEditing = true);
   }
 
@@ -56,6 +75,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         fullName: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
         age: int.tryParse(_ageController.text),
         university: _universityController.text.trim().isEmpty ? null : _universityController.text.trim(),
+        currency: _currency,
       );
       ref.invalidate(_profileProvider);
       if (mounted) setState(() => _isEditing = false);
@@ -162,7 +182,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _infoTile(l10n.profileIncomeType, user.incomeType?.name ?? l10n.commonNotSet),
         _infoTile(l10n.profileMonthlyIncome, user.averageMonthlyIncome != null ? 'S/ ${user.averageMonthlyIncome!.toStringAsFixed(2)}' : l10n.commonNotSet),
         _infoTile(l10n.profileFinancialLiteracy, user.financialLiteracyLevel?.name ?? l10n.commonNotSet),
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
+        _sectionHeader(l10n.profileNumberFormat),
+        const SizedBox(height: 8),
+        SegmentedButton<bool>(
+          segments: [
+            ButtonSegment(
+              value: false,
+              label: Text(l10n.profileNumberFormatDot, style: const TextStyle(fontSize: 12)),
+            ),
+            ButtonSegment(
+              value: true,
+              label: Text(l10n.profileNumberFormatComma, style: const TextStyle(fontSize: 12)),
+            ),
+          ],
+          selected: {_useCommaSeparator},
+          onSelectionChanged: (s) => _saveNumberFormat(s.first),
+          style: const ButtonStyle(
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        const SizedBox(height: 24),
         FilledButton.icon(
           onPressed: () => _startEdit(user),
           icon: const Icon(Icons.edit_outlined),
@@ -236,6 +276,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           icon: Icons.assignment_turned_in_outlined,
           title: l10n.surveyPostTitle,
           onTap: () => context.push('/surveys/post'),
+        ),
+        _navTile(
+          icon: Icons.trending_up_outlined,
+          title: l10n.surveyComparisonNavTitle,
+          onTap: () => context.push('/surveys/comparison'),
         ),
         const SizedBox(height: 8),
         _navTile(
@@ -330,6 +375,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             labelText: l10n.profileUniversityLabel,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
+        ),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          initialValue: _currency,
+          decoration: InputDecoration(
+            labelText: l10n.profileCurrency,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          items: const [
+            DropdownMenuItem(value: 'PEN', child: Text('PEN — Peruvian Sol (S/)')),
+            DropdownMenuItem(value: 'USD', child: Text('USD — US Dollar (\$)')),
+          ],
+          onChanged: (v) { if (v != null) setState(() => _currency = v); },
         ),
         const SizedBox(height: 32),
         Row(

@@ -18,9 +18,9 @@ class Recommendation {
   factory Recommendation.fromJson(Map<String, dynamic> json) {
     return Recommendation(
       id: json['id'] as String,
-      type: json['type'] as String,
-      title: json['title'] as String,
-      body: json['body'] as String,
+      type: (json['type'] as String?) ?? 'GENERAL',
+      title: (json['message'] as String?) ?? '',
+      body: (json['suggestedAction'] as String?) ?? '',
       impactScore: (json['impactScore'] as num?)?.toDouble(),
     );
   }

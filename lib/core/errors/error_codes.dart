@@ -26,6 +26,9 @@ abstract final class AuthErrorCode {
 
   /// Network unreachable or connection timed out.
   static const noConnection = 'auth.noConnection';
+
+  /// Account is temporarily locked after too many failed attempts.
+  static const accountLocked = 'auth.accountLocked';
 }
 
 abstract final class TxErrorCode {

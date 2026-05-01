@@ -1,3 +1,4 @@
+import '../models/quiz_models.dart';
 import 'api_client.dart';
 
 class EducationTopic {
@@ -42,10 +43,23 @@ class EducationApiService {
 
   Future<EducationTopic> getTopic(String id) async {
     final data = await ApiClient.get('/education/topics/$id');
-    return EducationTopic.fromJson(data as Map<String, dynamic>);
+    return EducationTopic.fromJson(data);
   }
 
   Future<void> completeTopic(String id) async {
     await ApiClient.patch('/education/topics/$id/complete', {});
+  }
+
+  Future<PersonalizedQuizResult> getPersonalizedQuiz({String language = 'es'}) async {
+    final data = await ApiClient.get('/education/quiz/personalized?language=$language');
+    return PersonalizedQuizResult.fromJson(data);
+  }
+
+  Future<Map<String, dynamic>> submitPersonalizedQuiz(Map<String, String> answers) async {
+    return ApiClient.post(
+      '/education/quiz/personalized/submit',
+      {'answers': answers},
+      authenticated: true,
+    );
   }
 }

@@ -29,7 +29,7 @@ class PredictionResult {
 class PredictionsApiService {
   Future<PredictionResult> getExpensePrediction() async {
     final data = await ApiClient.get('/predictions/expenses');
-    return PredictionResult.fromJson(data as Map<String, dynamic>);
+    return PredictionResult.fromJson(data);
   }
 
 }
