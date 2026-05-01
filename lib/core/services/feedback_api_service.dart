@@ -10,8 +10,8 @@ class FeedbackApiService {
     await ApiClient.post('/feedback', {
       'type': type,
       'message': message,
-      if (screenName != null) 'screenName': screenName,
-      if (rating != null) 'rating': rating,
+      'screenName': ?screenName,
+      'rating': ?rating,
     });
   }
 }

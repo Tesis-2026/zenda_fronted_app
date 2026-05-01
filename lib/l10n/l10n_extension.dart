@@ -26,6 +26,7 @@ extension ErrorL10n on AppLocalizations {
       AuthErrorCode.badRequest => payload ?? errorAuthBadRequest,
       AuthErrorCode.serverError => errorServerError,
       AuthErrorCode.noConnection => errorNoConnection,
+      AuthErrorCode.accountLocked => authLockedAccount,
       // ── Transactions ────────────────────────────────────────────────────
       TxErrorCode.noSourceAccount => errorTxNoSourceAccount,
       TxErrorCode.invalidAmount => errorTxInvalidAmount,

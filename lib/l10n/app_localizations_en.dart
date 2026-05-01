@@ -336,6 +336,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txCategoryLabel => 'Category';
 
   @override
+  String get txAddCustomCategory => 'New category';
+
+  @override
   String get txNoteLabel => 'Note (optional)';
 
   @override
@@ -420,6 +423,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txListFilterAllTime => 'All time';
+
+  @override
+  String get txFilterAdvanced => 'More filters';
+
+  @override
+  String get txFilterCategory => 'Category';
+
+  @override
+  String get txFilterAllCategories => 'All categories';
+
+  @override
+  String get txFilterMinAmount => 'Min amount (S/)';
+
+  @override
+  String get txFilterMaxAmount => 'Max amount (S/)';
+
+  @override
+  String get txFilterClear => 'Clear filters';
+
+  @override
+  String get txFilterApply => 'Apply';
+
+  @override
+  String txFilterActiveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count filters active',
+      one: '1 filter active',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String txBudgetAlert80(String category, String pct) {
+    return '$category budget is at $pct% — almost at the limit!';
+  }
+
+  @override
+  String get aiCardSeeRecommendations => 'See recommendations';
 
   @override
   String get txDeleteConfirmTitle => 'Delete transaction';
@@ -537,6 +580,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsTabCompare => 'Compare';
+
+  @override
+  String get reportsTabDay => 'Day';
 
   @override
   String get reportsTopCategories => 'Top Categories';
@@ -701,6 +747,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalsDeleteLabel => 'Delete';
 
   @override
+  String get goalsDueDateLabel => 'Due date (optional)';
+
+  @override
+  String get goalsMarkComplete => 'Mark complete';
+
+  @override
   String get goalsDetailTitle => 'Goal Detail';
 
   @override
@@ -721,6 +773,135 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsDetailProgressChart => 'Cumulative progress';
+
+  @override
+  String get authVerifyTitle => 'Enter verification code';
+
+  @override
+  String authVerifySubtitle(String email) {
+    return 'We sent a 6-digit code to $email. It expires in 15 minutes.';
+  }
+
+  @override
+  String get authVerifyResend => 'Resend code';
+
+  @override
+  String authVerifyResendCooldown(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get authVerifyButton => 'Verify code';
+
+  @override
+  String get authVerifyInvalidCode =>
+      'Invalid or expired code. Please try again.';
+
+  @override
+  String get authLockedAccount => 'Account locked. Try again in 15 minutes.';
+
+  @override
+  String authLockedCountdown(String time) {
+    return 'Account locked. Try again in $time.';
+  }
+
+  @override
+  String authAttemptsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts remaining before lockout',
+      one: '1 attempt remaining before lockout',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goalsCompletedSection => 'Completed goals';
+
+  @override
+  String get goalsActiveSection => 'Active goals';
+
+  @override
+  String goalsDueDate(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String goalsDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days left',
+      one: '1 day left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goalsOverdue => 'Overdue';
+
+  @override
+  String get goalsCelebrate => 'Goal achieved!';
+
+  @override
+  String goalsCelebrateMessage(String name) {
+    return 'Congratulations! You reached your savings goal for \"$name\".';
+  }
+
+  @override
+  String get goalsMarkCompleteConfirm => 'Mark this goal as completed?';
+
+  @override
+  String get goalsMarkCompleteConfirmBody =>
+      'This will close the goal and mark it as achieved.';
+
+  @override
+  String get goalsDetailDueDate => 'Target date';
+
+  @override
+  String get goalsDetailDaysLeft => 'Days remaining';
+
+  @override
+  String get goalsDetailMarkComplete => 'Mark as achieved';
+
+  @override
+  String get goalsDetailDelete => 'Delete goal';
+
+  @override
+  String get reportsCalendarTitle => 'Spending calendar';
+
+  @override
+  String get reportsCalendarNoData => 'No spending on this day';
+
+  @override
+  String reportsDayTotal(String total) {
+    return 'S/ $total';
+  }
+
+  @override
+  String txAiSuggests(String category) {
+    return 'Zenda suggests: $category';
+  }
+
+  @override
+  String get txAiApply => 'Apply suggestion';
+
+  @override
+  String get educationPersonalized => 'Personalized for you';
+
+  @override
+  String get educationPersonalizedSubtitle =>
+      'Topics ordered based on your spending patterns';
+
+  @override
+  String get profileNumberFormat => 'Number format';
+
+  @override
+  String get profileNumberFormatDot => '1,234.56 (dot decimal)';
+
+  @override
+  String get profileNumberFormatComma => '1.234,56 (comma decimal)';
 
   @override
   String get errorAuthInvalidCredentials => 'Incorrect email or password.';
@@ -837,6 +1018,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get challengesAccepted => 'Challenge accepted!';
 
   @override
+  String get challengesCompleteButton => 'Mark completed';
+
+  @override
+  String get challengesCompleted => 'Challenge completed!';
+
+  @override
+  String get challengeAutoCompletedTitle => 'Challenge completed!';
+
+  @override
+  String challengeAutoCompletedBody(String name) {
+    return 'You completed: $name';
+  }
+
+  @override
+  String get challengeAutoCompletedDismiss => 'Great!';
+
+  @override
   String get badgesTitle => 'Badges';
 
   @override
@@ -896,9 +1094,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get surveyResultTitle => 'Your results';
 
   @override
+  String get surveyResultContinue => 'Continue to Dashboard';
+
+  @override
   String surveyImprovement(String points) {
     return 'Your financial knowledge improved by $points points since the pre-survey!';
   }
+
+  @override
+  String get surveyComparisonPreLabel => 'Pre-survey score';
+
+  @override
+  String get surveyComparisonPostLabel => 'Post-survey score';
+
+  @override
+  String get surveyComparisonImprovementLabel => 'Improvement';
+
+  @override
+  String get surveyComparisonGoalLabel => 'Thesis target: ≥ 20 points';
+
+  @override
+  String get surveyComparisonGoalMet => 'Target reached!';
+
+  @override
+  String get surveyComparisonGoalNotMet => 'Keep using the app to improve';
+
+  @override
+  String get surveyComparisonPending =>
+      'Complete both surveys to see your progress';
+
+  @override
+  String get surveyComparisonPrePending => 'Pre-survey not completed yet';
+
+  @override
+  String get surveyComparisonPostPending => 'Post-survey not completed yet';
+
+  @override
+  String get surveyComparisonNavTitle => 'Knowledge Progress';
 
   @override
   String get feedbackTitle => 'Send feedback';
@@ -954,100 +1186,211 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get consentTitle => 'Your data, your control';
+
   @override
-  String get consentSubtitle => 'Before you start, please review how Zenda handles your information.';
+  String get consentSubtitle =>
+      'Before you start, please review how Zenda handles your information.';
+
   @override
   String get consentBodyTitle => 'What data do we collect?';
+
   @override
-  String get consentBodyText => 'Zenda collects your income and expense records, financial profile (age, university, income type), and app usage data to generate personalized predictions and recommendations. Your data is never shared with third parties and is stored securely.';
+  String get consentBodyText =>
+      'Zenda collects your income and expense records, financial profile (age, university, income type), and app usage data to generate personalized predictions and recommendations. Your data is never shared with third parties and is stored securely.';
+
   @override
-  String get consentLawNote => 'In compliance with Law 29733 — Peruvian Personal Data Protection Law';
+  String get consentLawNote =>
+      'In compliance with Law 29733 — Peruvian Personal Data Protection Law';
+
   @override
-  String get consentCheckbox => 'I agree that my financial data will be processed to generate personalized reports and predictions';
+  String get consentCheckbox =>
+      'I agree that my financial data will be processed to generate personalized reports and predictions';
+
   @override
   String get consentAcceptButton => 'Accept and continue';
+
   @override
   String get consentMustAccept => 'You must accept to continue';
 
   @override
   String get emailSentTitle => 'Account created!';
+
   @override
-  String emailSentSubtitle(String name) => 'Welcome to Zenda, $name';
+  String emailSentSubtitle(String name) {
+    return 'Welcome to Zenda, $name';
+  }
+
   @override
-  String emailSentBody(String email) => 'A welcome email was sent to $email. Now let\'s set up your financial profile.';
+  String emailSentBody(String email) {
+    return 'A welcome email was sent to $email. Now let\'s set up your financial profile.';
+  }
+
   @override
   String get emailSentContinue => 'Set up my profile';
+
   @override
   String get emailSentSkip => 'Skip for now';
 
   @override
   String get profileSetupTitle => 'Tell us about yourself';
+
   @override
-  String get profileSetupSubtitle => 'Help Zenda personalize your experience. You can edit this anytime.';
+  String get profileSetupSubtitle =>
+      'Help Zenda personalize your experience. You can edit this anytime.';
+
   @override
   String get profileSetupAge => 'How old are you?';
+
   @override
   String get profileSetupAgeHint => 'e.g. 21';
+
   @override
   String get profileSetupUniversity => 'Where do you study?';
+
   @override
   String get profileSetupUniversityHint => 'e.g. PUCP, UNMSM';
+
   @override
   String get profileSetupIncomeType => 'How do you mainly get income?';
+
   @override
   String get profileSetupMonthlyIncome => 'Average monthly income (S/)';
+
   @override
   String get profileSetupMonthlyIncomeHint => 'e.g. 1500';
+
   @override
   String get profileSetupNext => 'Next';
+
   @override
   String get profileSetupSave => 'Finish';
+
   @override
   String get profileSetupSkip => 'Skip';
+
   @override
   String get profileSetupCompleteTitle => 'All set!';
+
   @override
-  String get profileSetupCompleteBody => 'Your profile is ready. Let\'s take control of your finances.';
+  String get profileSetupCompleteBody =>
+      'Your profile is ready. Let\'s take control of your finances.';
+
   @override
   String get profileSetupGoToDashboard => 'Go to dashboard';
+
   @override
   String get incomeTypeNone => 'No income';
+
   @override
   String get incomeTypePartTime => 'Part-time job';
+
   @override
   String get incomeTypeFullTime => 'Full-time job';
+
   @override
   String get incomeTypeFreelance => 'Freelance';
+
   @override
   String get incomeTypeAllowance => 'Family allowance / Scholarship';
 
   @override
   String get aiChatTitle => 'Zenda AI';
+
   @override
   String get aiChatInputHint => 'Ask anything about your finances...';
+
   @override
   String get aiChatSend => 'Send';
+
   @override
-  String get aiChatWelcome => 'Hi! I\'m Zenda, your financial assistant. Ask me anything about budgets, savings, or expenses.';
+  String get aiChatWelcome =>
+      'Hi! I\'m Zenda, your financial assistant. Ask me anything about budgets, savings, or expenses.';
+
   @override
   String get aiChatError => 'Could not get a response. Please try again.';
+
   @override
   String get aiChatNavLabel => 'Zenda AI';
 
   @override
   String get quizTitle => 'Quiz';
+
   @override
   String get quizEmpty => 'No quiz available for this topic yet.';
+
   @override
   String get quizSubmit => 'Submit';
+
   @override
   String get quizCorrect => 'Correct!';
+
   @override
   String get quizIncorrect => 'Incorrect';
+
   @override
-  String quizResult(int score) => 'You scored $score%';
+  String quizResult(int score) {
+    return 'You scored $score%';
+  }
+
   @override
   String get quizFinish => 'See results';
+
   @override
   String get quizNext => 'Next question';
+
+  @override
+  String get quizPersonalizedTitle => 'Personalized Quiz';
+
+  @override
+  String get quizPersonalizedButton => 'Take personalized quiz';
+
+  @override
+  String get quizPersonalizedSubtitle =>
+      'AI-generated questions based on your habits';
+
+  @override
+  String get quizPersonalizedAnalyzing => 'Analyzing your financial habits...';
+
+  @override
+  String quizPersonalizedAttemptsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts left today',
+      one: '1 attempt left today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get quizPersonalizedLimitReached =>
+      'You reached the limit of 5 personalized quizzes for today.';
+
+  @override
+  String get quizPersonalizedError =>
+      'Could not generate quiz. Please try again.';
+
+  @override
+  String get educationRecommended => 'Recommended';
+
+  @override
+  String get reportsWeekDailyTitle => 'Daily activity';
+
+  @override
+  String get reportsProgressChipsTitle => 'Changes vs previous month';
+
+  @override
+  String reportsExpensesChip(String sign, String pct) {
+    return 'Expenses $sign$pct%';
+  }
+
+  @override
+  String reportsSavingsChip(String sign, String pct) {
+    return 'Savings $sign$pct%';
+  }
+
+  @override
+  String reportsBalanceChip(String sign, String pct) {
+    return 'Balance $sign$pct%';
+  }
 }

@@ -20,7 +20,7 @@ class BudgetApiService {
     final json = await ApiClient.post(
       '/budgets',
       {
-        if (categoryId != null) 'categoryId': categoryId,
+        'categoryId': ?categoryId,
         'amountLimit': amountLimit,
         'month': month,
         'year': year,

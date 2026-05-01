@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +8,7 @@ import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -18,8 +20,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  // Lockout countdown state
+  int _lockoutSeconds = 0;
+  Timer? _lockoutTimer;
+
+  void _startLockoutCountdown() {
+    _lockoutTimer?.cancel();
+    setState(() => _lockoutSeconds = 15 * 60); // 15 minutes
+    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      setState(() {
+        if (_lockoutSeconds > 0) {
+          _lockoutSeconds--;
+        } else {
+          t.cancel();
+        }
+      });
+    });
+  }
+
+  String _formatCountdown(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
   @override
   void dispose() {
+    _lockoutTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -91,6 +122,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ),
           );
+        } else if (next.error == AuthErrorCode.accountLocked) {
+          _startLockoutCountdown();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.lock_clock, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(l10n.authLockedAccount)),
+                ],
+              ),
+              backgroundColor: const Color(0xFFF59E0B),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.all(16),
+              duration: const Duration(seconds: 6),
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -126,15 +175,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Logo
                 GestureDetector(
                   onLongPress: () async {
-                    // Debug: Reset onboarding
-                    // Import shared_preferences manually or use riverpod if available
-                    // Since I don't want to add imports, I'll use a cleaner approach or skip if complex.
-                    // But wait, I can modify the import.
-                    // Let's just wrap the logo and assume SharedPreferences is available via our service or just skip it if too complex.
-                    // Actually, I'll just tell the user to reinstall.
-                    // But if I want to be helpful:
-                    final authNotifier = ref.read(authNotifierProvider.notifier);
-                    // I need access to prefs.
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(l10n.authOnboardingReset)),
                     );
@@ -151,7 +191,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF34D399).withOpacity(0.3),
+                          color: const Color(0xFF34D399).withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -182,7 +222,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   l10n.authLoginSubtitle,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -273,13 +313,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                // Lockout countdown banner
+                if (_lockoutSeconds > 0) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.lock_clock, color: Color(0xFFF59E0B), size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n.authLockedCountdown(_formatCountdown(_lockoutSeconds)),
+                            style: const TextStyle(
+                              color: Color(0xFFF59E0B),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ] else
+                  const SizedBox(height: 8),
 
                 // Login button
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: authState.isLoading ? null : _handleLogin,
+                    onPressed: (authState.isLoading || _lockoutSeconds > 0) ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF34D399),
                       foregroundColor: Colors.white,
@@ -287,7 +359,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      disabledBackgroundColor: const Color(0xFF34D399).withOpacity(0.5),
+                      disabledBackgroundColor: const Color(0xFF34D399).withValues(alpha: 0.5),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
@@ -298,6 +370,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
+                        : _lockoutSeconds > 0
+                            ? Text(
+                                _formatCountdown(_lockoutSeconds),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              )
                         : Text(
                             l10n.authSignIn,
                             style: const TextStyle(
@@ -357,7 +438,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       l10n.authNoAccount,
                       style: TextStyle(
-                        color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.7) : const Color(0xFF6B7280),
+                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
                       ),
                     ),
                     TextButton(
@@ -379,10 +460,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withOpacity(0.1),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF34D399).withOpacity(0.3),
+                      color: const Color(0xFF34D399).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(

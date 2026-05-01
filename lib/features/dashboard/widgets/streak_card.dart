@@ -4,7 +4,7 @@ import '../../../l10n/l10n_extension.dart';
 class StreakCard extends StatelessWidget {
   final int streakDays;
 
-  const StreakCard({Key? key, required this.streakDays}) : super(key: key);
+  const StreakCard({super.key, required this.streakDays});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class StreakCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -51,7 +51,7 @@ class StreakCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.92),
+                  color: Colors.white.withValues(alpha: 0.92),
                 ),
               ),
             ],

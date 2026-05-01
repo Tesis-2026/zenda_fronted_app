@@ -40,7 +40,7 @@ class GoalsApiService {
       {
         'name': name,
         'targetAmount': targetAmount,
-        if (dueDate != null) 'dueDate': dueDate,
+        'dueDate': ?dueDate,
       },
       authenticated: true,
     );
@@ -62,6 +62,11 @@ class GoalsApiService {
         .cast<Map<String, dynamic>>()
         .map(GoalContribution.fromJson)
         .toList();
+  }
+
+  Future<SavingsGoal> complete(String id) async {
+    final json = await ApiClient.post('/goals/$id/complete', {}, authenticated: true);
+    return SavingsGoal.fromJson(json);
   }
 
   Future<void> delete(String id) => ApiClient.delete('/goals/$id');

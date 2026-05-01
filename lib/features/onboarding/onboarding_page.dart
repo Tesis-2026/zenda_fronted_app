@@ -8,13 +8,13 @@ class OnboardingPage extends StatelessWidget {
   final String microcopy;
 
   const OnboardingPage({
-    Key? key,
+    super.key,
     required this.icon,
     required this.gradientColors,
     required this.title,
     required this.subtitle,
     required this.microcopy,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class OnboardingPage extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: gradientColors[0].withOpacity(0.3),
+                    color: gradientColors[0].withValues(alpha: 0.3),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -62,14 +62,14 @@ class OnboardingPage extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 color: isDark 
-                    ? const Color(0xFF1E293B).withOpacity(0.6)
+                    ? const Color(0xFF1E293B).withValues(alpha: 0.6)
                     : Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
                     color: isDark 
-                        ? Colors.black.withOpacity(0.3)
-                        : Colors.black.withOpacity(0.05),
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.05),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -95,7 +95,7 @@ class OnboardingPage extends StatelessWidget {
                     subtitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: isDark ? const Color(0xFFF1F5F9).withOpacity(0.8) : const Color(0xFF6B7280),
+                      color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.8) : const Color(0xFF6B7280),
                       height: 1.5,
                     ),
                   ),
@@ -106,10 +106,10 @@ class OnboardingPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: gradientColors[0].withOpacity(0.1),
+                      color: gradientColors[0].withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: gradientColors[0].withOpacity(0.3),
+                        color: gradientColors[0].withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),

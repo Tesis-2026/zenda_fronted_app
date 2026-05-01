@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
+import '../../core/services/transaction_api_service.dart';
 import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -19,13 +22,36 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+  Timer? _classifyDebounce;
+  TransactionCategory? _aiSuggestion;
+  bool _isClassifying = false;
 
   @override
   void dispose() {
+    _classifyDebounce?.cancel();
     ref.invalidate(newTransactionControllerProvider);
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  void _onNoteChanged(String note, double? amount) {
+    _classifyDebounce?.cancel();
+    if (note.trim().length < 3 || amount == null || amount <= 0) {
+      if (_aiSuggestion != null) setState(() => _aiSuggestion = null);
+      return;
+    }
+    _classifyDebounce = Timer(const Duration(milliseconds: 800), () async {
+      if (!mounted) return;
+      setState(() => _isClassifying = true);
+      final suggestion = await TransactionApiService()
+          .classify(description: note.trim(), amount: amount);
+      if (!mounted) return;
+      setState(() {
+        _aiSuggestion = suggestion;
+        _isClassifying = false;
+      });
+    });
   }
 
   @override
@@ -42,11 +68,50 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     ) {
       final prevTick = prev?.saveTick ?? 0;
       if (next.saveTick != prevTick) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.txSaved)));
+
+        if (next.completedChallengeNames.isNotEmpty) {
+          // Show celebration dialog; pop only after the user dismisses.
+          _showChallengeCompletedDialog(
             context,
-          ).showSnackBar(SnackBar(content: Text(l10n.txSaved)));
+            next.completedChallengeNames,
+            l10n,
+          ).then((_) {
+            if (context.mounted) Navigator.of(context).pop();
+          });
+        } else {
           Navigator.of(context).pop();
+        }
+
+        // Show budget alert after pop so it appears on the previous screen.
+        if (next.budgetAlert != null) {
+          final categoryName = next.budgetAlert!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded,
+                          color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(l10n.txBudgetAlert80(categoryName, '80')),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFFF59E0B),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(16),
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+            }
+          });
         }
       }
     });
@@ -202,7 +267,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         const SizedBox(height: 10),
                         _CategoryGrid(
                           selected: state.category,
+                          customCategoryName: state.customCategoryName,
                           onSelected: controller.setCategory,
+                          onAddCustom: () async {
+                            final name = await _showAddCategoryDialog(context, l10n);
+                            if (name != null && name.isNotEmpty) {
+                              controller.setCustomCategory(name);
+                            }
+                          },
                         ),
 
                         const SizedBox(height: 18),
@@ -225,8 +297,25 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               borderSide: BorderSide.none,
                             ),
                           ),
-                          onChanged: controller.setNote,
+                          onChanged: (val) {
+                            controller.setNote(val);
+                            _onNoteChanged(val, state.amount);
+                          },
                         ),
+
+                        if (_isClassifying || _aiSuggestion != null) ...[
+                          const SizedBox(height: 10),
+                          _AiSuggestionChip(
+                            category: _aiSuggestion,
+                            isLoading: _isClassifying,
+                            onApply: _aiSuggestion != null
+                                ? () {
+                                    controller.setCategory(_aiSuggestion!);
+                                    setState(() => _aiSuggestion = null);
+                                  }
+                                : null,
+                          ),
+                        ],
 
                         const SizedBox(height: 18),
                         Text(
@@ -274,7 +363,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withValues(alpha: 0.06),
                           blurRadius: 16,
                           offset: const Offset(0, -4),
                         ),
@@ -331,6 +420,85 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
     return null;
   }
+
+  Future<void> _showChallengeCompletedDialog(
+    BuildContext context,
+    List<String> names,
+    dynamic l10n,
+  ) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(
+          Icons.emoji_events_rounded,
+          color: Color(0xFFFCD34D),
+          size: 48,
+        ),
+        title: Text(
+          l10n.challengeAutoCompletedTitle,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: names
+              .map((name) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_rounded,
+                            color: Color(0xFF34D399), size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(name)),
+                      ],
+                    ),
+                  ))
+              .toList(),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF34D399),
+              minimumSize: const Size(140, 44),
+            ),
+            child: Text(l10n.challengeAutoCompletedDismiss),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<String?> _showAddCategoryDialog(BuildContext context, dynamic l10n) async {
+    final ctrl = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.txAddCustomCategory),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            hintText: l10n.txAddCustomCategory,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: Text(l10n.commonSave),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _AccountPicker extends StatelessWidget {
@@ -350,7 +518,7 @@ class _AccountPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DropdownButtonFormField<String>(
-      value: selected?.id,
+      initialValue: selected?.id,
       items: accounts
           .map(
             (a) => DropdownMenuItem(
@@ -429,6 +597,97 @@ class _DatePickerTile extends StatelessWidget {
   }
 }
 
+class _AiSuggestionChip extends StatelessWidget {
+  final TransactionCategory? category;
+  final bool isLoading;
+  final VoidCallback? onApply;
+
+  const _AiSuggestionChip({
+    required this.category,
+    required this.isLoading,
+    required this.onApply,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    if (isLoading) {
+      return Row(
+        children: [
+          const SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '...',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+          ),
+        ],
+      );
+    }
+
+    if (category == null) return const SizedBox.shrink();
+
+    final categoryLabel = _categoryLabel(category!, l10n);
+
+    return GestureDetector(
+      onTap: onApply,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF818CF8).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+          border:
+              Border.all(color: const Color(0xFF818CF8).withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.auto_awesome_rounded,
+                size: 15, color: Color(0xFF818CF8)),
+            const SizedBox(width: 6),
+            Text(
+              l10n.txAiSuggests(categoryLabel),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF818CF8),
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n.txAiApply,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: const Color(0xFF818CF8),
+                    decoration: TextDecoration.underline,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _categoryLabel(TransactionCategory c, dynamic l10n) {
+    return switch (c) {
+      TransactionCategory.comida => l10n.txCategoryFood,
+      TransactionCategory.transporte => l10n.txCategoryTransport,
+      TransactionCategory.vivienda => l10n.txCategoryHousing,
+      TransactionCategory.servicios => l10n.txCategoryUtilities,
+      TransactionCategory.salud => l10n.txCategoryHealth,
+      TransactionCategory.ocio => l10n.txCategoryEntertainment,
+      TransactionCategory.compras => l10n.txCategoryShopping,
+      TransactionCategory.suscripciones => l10n.txCategorySubscriptions,
+      TransactionCategory.antojos => l10n.txCategoryCravings,
+      TransactionCategory.ahorro => l10n.txCategorySavings,
+      TransactionCategory.otros => l10n.txCategoryOther,
+    };
+  }
+}
+
 class _BucketChip extends StatelessWidget {
   final Bucket503020 bucket;
   const _BucketChip({required this.bucket});
@@ -444,9 +703,9 @@ class _BucketChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.35)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Text(
         label,
@@ -462,15 +721,23 @@ class _BucketChip extends StatelessWidget {
 
 class _CategoryGrid extends StatelessWidget {
   final TransactionCategory? selected;
+  final String? customCategoryName;
   final ValueChanged<TransactionCategory> onSelected;
+  final Future<void> Function() onAddCustom;
 
-  const _CategoryGrid({required this.selected, required this.onSelected});
+  const _CategoryGrid({
+    required this.selected,
+    required this.customCategoryName,
+    required this.onSelected,
+    required this.onAddCustom,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
     final items = TransactionCategory.values;
+    final hasCustom = customCategoryName != null && customCategoryName!.isNotEmpty;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -480,8 +747,51 @@ class _CategoryGrid extends StatelessWidget {
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: items.length,
+      itemCount: items.length + 1,
       itemBuilder: (context, index) {
+        if (index == items.length) {
+          // "+" add custom category chip
+          return InkWell(
+            onTap: onAddCustom,
+            borderRadius: BorderRadius.circular(16),
+            child: Ink(
+              decoration: BoxDecoration(
+                color: hasCustom
+                    ? const Color(0xFF818CF8).withValues(alpha: 0.18)
+                    : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: hasCustom
+                      ? const Color(0xFF818CF8)
+                      : (isDark ? Colors.white10 : Colors.black12),
+                ),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    hasCustom ? Icons.label_rounded : Icons.add_rounded,
+                    size: 22,
+                    color: hasCustom ? const Color(0xFF818CF8) : null,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    hasCustom ? customCategoryName! : l10n.txAddCustomCategory,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: hasCustom ? FontWeight.w800 : FontWeight.w600,
+                      fontSize: 12,
+                      color: hasCustom ? const Color(0xFF818CF8) : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
         final c = items[index];
         final isSelected = c == selected;
         final icon = _categoryIcon(c);
@@ -492,7 +802,7 @@ class _CategoryGrid extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF34D399).withOpacity(0.18)
+                  ? const Color(0xFF34D399).withValues(alpha: 0.18)
                   : (isDark ? const Color(0xFF1E293B) : Colors.white),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(

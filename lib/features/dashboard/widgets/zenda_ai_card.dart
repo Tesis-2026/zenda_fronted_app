@@ -1,11 +1,11 @@
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../l10n/l10n_extension.dart';
 
 class ZendaAiCard extends StatelessWidget {
   final String advice;
 
-  const ZendaAiCard({Key? key, required this.advice}) : super(key: key);
+  const ZendaAiCard({super.key, required this.advice});
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +18,12 @@ class ZendaAiCard extends StatelessWidget {
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF34D399).withOpacity(0.3),
+          color: const Color(0xFF34D399).withValues(alpha: 0.3),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF34D399).withOpacity(0.1),
+            color: const Color(0xFF34D399).withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -52,6 +52,20 @@ class ZendaAiCard extends StatelessWidget {
                         color: isDark ? Colors.grey[300] : Colors.black87,
                         height: 1.4,
                       ),
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => context.push('/recommendations'),
+                    icon: const Icon(Icons.lightbulb_outline, size: 16),
+                    label: Text(l10n.aiCardSeeRecommendations),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF34D399),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
                 ),
               ],
             ),

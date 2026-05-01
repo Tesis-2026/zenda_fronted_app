@@ -43,7 +43,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                         height: 72,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFF34D399).withOpacity(0.15),
+                          color: const Color(0xFF34D399).withValues(alpha: 0.15),
                         ),
                         child: const Icon(
                           Icons.shield_outlined,
@@ -108,7 +108,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF34D399).withOpacity(0.08),
+                        color: const Color(0xFF34D399).withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(

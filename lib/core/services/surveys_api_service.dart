@@ -67,6 +67,26 @@ class SurveyResult {
   }
 }
 
+class SurveyComparison {
+  final double? preScore;
+  final double? postScore;
+  final double? improvementPercentage;
+
+  const SurveyComparison({
+    required this.preScore,
+    required this.postScore,
+    required this.improvementPercentage,
+  });
+
+  factory SurveyComparison.fromJson(Map<String, dynamic> json) {
+    return SurveyComparison(
+      preScore: (json['preScore'] as num?)?.toDouble(),
+      postScore: (json['postScore'] as num?)?.toDouble(),
+      improvementPercentage: (json['improvementPercentage'] as num?)?.toDouble(),
+    );
+  }
+}
+
 class SurveysApiService {
   Future<Survey> getPreSurvey() async {
     final data = await ApiClient.get('/surveys/pre');
@@ -86,5 +106,10 @@ class SurveysApiService {
   Future<SurveyResult> submitPost(Map<String, String> answers) async {
     final data = await ApiClient.post('/surveys/post/response', {'answers': answers});
     return SurveyResult.fromJson(data);
+  }
+
+  Future<SurveyComparison> getComparison() async {
+    final data = await ApiClient.get('/surveys/comparison');
+    return SurveyComparison.fromJson(data);
   }
 }

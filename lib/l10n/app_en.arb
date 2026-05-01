@@ -131,6 +131,7 @@
   "txAmountLabel": "Amount (PEN)",
   "txAmountHint": "0.00",
   "txCategoryLabel": "Category",
+  "txAddCustomCategory": "New category",
   "txNoteLabel": "Note (optional)",
   "txNoteHint": "e.g. Coffee shop",
   "txDateLabel": "Date",
@@ -165,6 +166,27 @@
   "txListFilterThisWeek": "This week",
   "txListFilterThisMonth": "This month",
   "txListFilterAllTime": "All time",
+  "txFilterAdvanced": "More filters",
+  "txFilterCategory": "Category",
+  "txFilterAllCategories": "All categories",
+  "txFilterMinAmount": "Min amount (S/)",
+  "txFilterMaxAmount": "Max amount (S/)",
+  "txFilterClear": "Clear filters",
+  "txFilterApply": "Apply",
+  "txFilterActiveCount": "{count, plural, =1{1 filter active} other{{count} filters active}}",
+  "@txFilterActiveCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "txBudgetAlert80": "{category} budget is at {pct}% — almost at the limit!",
+  "@txBudgetAlert80": {
+    "placeholders": {
+      "category": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "aiCardSeeRecommendations": "See recommendations",
   "txDeleteConfirmTitle": "Delete transaction",
   "txDeleteConfirmMessage": "This action cannot be undone.",
   "txDeleteAction": "Delete",
@@ -206,6 +228,7 @@
   "reportsTabMonth": "Month",
   "reportsTabWeek": "Week",
   "reportsTabCompare": "Compare",
+  "reportsTabDay": "Day",
   "reportsTopCategories": "Top Categories",
   "reportsNoCategoryData": "No expense data for this period",
   "reportsIncome": "Income",
@@ -293,6 +316,8 @@
   "goalsErrorLoad": "Could not load goals",
   "goalsDeleteConfirm": "Delete this goal?",
   "goalsDeleteLabel": "Delete",
+  "goalsDueDateLabel": "Due date (optional)",
+  "goalsMarkComplete": "Mark complete",
   "goalsDetailTitle": "Goal Detail",
   "goalsDetailContributionHistory": "Contribution history",
   "goalsDetailNoContributions": "No contributions yet",
@@ -309,6 +334,89 @@
     }
   },
   "goalsDetailProgressChart": "Cumulative progress",
+
+  "authVerifyTitle": "Enter verification code",
+  "authVerifySubtitle": "We sent a 6-digit code to {email}. It expires in 15 minutes.",
+  "@authVerifySubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "authVerifyResend": "Resend code",
+  "authVerifyResendCooldown": "Resend in {seconds}s",
+  "@authVerifyResendCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "authVerifyButton": "Verify code",
+  "authVerifyInvalidCode": "Invalid or expired code. Please try again.",
+  "authLockedAccount": "Account locked. Try again in 15 minutes.",
+  "authLockedCountdown": "Account locked. Try again in {time}.",
+  "@authLockedCountdown": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "authAttemptsRemaining": "{count, plural, =1{1 attempt remaining before lockout} other{{count} attempts remaining before lockout}}",
+  "@authAttemptsRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "goalsCompletedSection": "Completed goals",
+  "goalsActiveSection": "Active goals",
+  "goalsDueDate": "Due {date}",
+  "@goalsDueDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDaysLeft": "{days, plural, =1{1 day left} other{{days} days left}}",
+  "@goalsDaysLeft": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "goalsOverdue": "Overdue",
+  "goalsCelebrate": "Goal achieved!",
+  "goalsCelebrateMessage": "Congratulations! You reached your savings goal for \"{name}\".",
+  "@goalsCelebrateMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "goalsMarkCompleteConfirm": "Mark this goal as completed?",
+  "goalsMarkCompleteConfirmBody": "This will close the goal and mark it as achieved.",
+  "goalsDetailDueDate": "Target date",
+  "goalsDetailDaysLeft": "Days remaining",
+  "goalsDetailMarkComplete": "Mark as achieved",
+  "goalsDetailDelete": "Delete goal",
+
+  "reportsCalendarTitle": "Spending calendar",
+  "reportsCalendarNoData": "No spending on this day",
+  "reportsDayTotal": "S/ {total}",
+  "@reportsDayTotal": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+
+  "txAiSuggests": "Zenda suggests: {category}",
+  "@txAiSuggests": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "txAiApply": "Apply suggestion",
+
+  "educationPersonalized": "Personalized for you",
+  "educationPersonalizedSubtitle": "Topics ordered based on your spending patterns",
+
+  "profileNumberFormat": "Number format",
+  "profileNumberFormatDot": "1,234.56 (dot decimal)",
+  "profileNumberFormatComma": "1.234,56 (comma decimal)",
 
   "errorAuthInvalidCredentials": "Incorrect email or password.",
   "errorAuthEmailTaken": "This email is already registered.",
@@ -357,6 +465,16 @@
   "challengesErrorLoad": "Could not load challenges",
   "challengesAcceptButton": "Accept challenge",
   "challengesAccepted": "Challenge accepted!",
+  "challengesCompleteButton": "Mark completed",
+  "challengesCompleted": "Challenge completed!",
+  "challengeAutoCompletedTitle": "Challenge completed!",
+  "challengeAutoCompletedBody": "You completed: {name}",
+  "@challengeAutoCompletedBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "challengeAutoCompletedDismiss": "Great!",
 
   "badgesTitle": "Badges",
   "badgesErrorLoad": "Could not load badges",
@@ -385,12 +503,23 @@
   "surveySubmitButton": "Submit answers",
   "surveySubmitError": "Could not submit survey. Please try again.",
   "surveyResultTitle": "Your results",
+  "surveyResultContinue": "Continue to Dashboard",
   "surveyImprovement": "Your financial knowledge improved by {points} points since the pre-survey!",
   "@surveyImprovement": {
     "placeholders": {
       "points": { "type": "String" }
     }
   },
+  "surveyComparisonPreLabel": "Pre-survey score",
+  "surveyComparisonPostLabel": "Post-survey score",
+  "surveyComparisonImprovementLabel": "Improvement",
+  "surveyComparisonGoalLabel": "Thesis target: ≥ 20 points",
+  "surveyComparisonGoalMet": "Target reached!",
+  "surveyComparisonGoalNotMet": "Keep using the app to improve",
+  "surveyComparisonPending": "Complete both surveys to see your progress",
+  "surveyComparisonPrePending": "Pre-survey not completed yet",
+  "surveyComparisonPostPending": "Post-survey not completed yet",
+  "surveyComparisonNavTitle": "Knowledge Progress",
 
   "feedbackTitle": "Send feedback",
   "feedbackTypeLabel": "Type",
@@ -476,5 +605,44 @@
     }
   },
   "quizFinish": "See results",
-  "quizNext": "Next question"
+  "quizNext": "Next question",
+
+  "quizPersonalizedTitle": "Personalized Quiz",
+  "quizPersonalizedButton": "Take personalized quiz",
+  "quizPersonalizedSubtitle": "AI-generated questions based on your habits",
+  "quizPersonalizedAnalyzing": "Analyzing your financial habits...",
+  "quizPersonalizedAttemptsLeft": "{count, plural, =1{1 attempt left today} other{{count} attempts left today}}",
+  "@quizPersonalizedAttemptsLeft": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "quizPersonalizedLimitReached": "You reached the limit of 5 personalized quizzes for today.",
+  "quizPersonalizedError": "Could not generate quiz. Please try again.",
+
+  "educationRecommended": "Recommended",
+
+  "reportsWeekDailyTitle": "Daily activity",
+  "reportsProgressChipsTitle": "Changes vs previous month",
+  "reportsExpensesChip": "Expenses {sign}{pct}%",
+  "@reportsExpensesChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "reportsSavingsChip": "Savings {sign}{pct}%",
+  "@reportsSavingsChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "reportsBalanceChip": "Balance {sign}{pct}%",
+  "@reportsBalanceChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  }
 }

@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'onboarding_prefs.dart';
 
 class SplashDecider extends StatefulWidget {
-  const SplashDecider({Key? key}) : super(key: key);
+  const SplashDecider({super.key});
 
   @override
   State<SplashDecider> createState() => _SplashDeciderState();
@@ -57,7 +57,7 @@ class _SplashDeciderState extends State<SplashDecider> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF34D399).withOpacity(0.3),
+                    color: const Color(0xFF34D399).withValues(alpha: 0.3),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),

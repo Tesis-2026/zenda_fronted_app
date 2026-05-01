@@ -131,6 +131,7 @@
   "txAmountLabel": "Monto (PEN)",
   "txAmountHint": "0.00",
   "txCategoryLabel": "Categoría",
+  "txAddCustomCategory": "Nueva categoría",
   "txNoteLabel": "Nota (opcional)",
   "txNoteHint": "ej. Cafetería",
   "txDateLabel": "Fecha",
@@ -165,6 +166,27 @@
   "txListFilterThisWeek": "Esta semana",
   "txListFilterThisMonth": "Este mes",
   "txListFilterAllTime": "Todo el tiempo",
+  "txFilterAdvanced": "Más filtros",
+  "txFilterCategory": "Categoría",
+  "txFilterAllCategories": "Todas las categorías",
+  "txFilterMinAmount": "Monto mínimo (S/)",
+  "txFilterMaxAmount": "Monto máximo (S/)",
+  "txFilterClear": "Limpiar filtros",
+  "txFilterApply": "Aplicar",
+  "txFilterActiveCount": "{count, plural, =1{1 filtro activo} other{{count} filtros activos}}",
+  "@txFilterActiveCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "txBudgetAlert80": "Presupuesto de {category} al {pct}% — ¡casi en el límite!",
+  "@txBudgetAlert80": {
+    "placeholders": {
+      "category": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "aiCardSeeRecommendations": "Ver recomendaciones",
   "txDeleteConfirmTitle": "Eliminar transacción",
   "txDeleteConfirmMessage": "Esta acción no se puede deshacer.",
   "txDeleteAction": "Eliminar",
@@ -206,6 +228,7 @@
   "reportsTabMonth": "Mes",
   "reportsTabWeek": "Semana",
   "reportsTabCompare": "Comparar",
+  "reportsTabDay": "Día",
   "reportsTopCategories": "Principales categorías",
   "reportsNoCategoryData": "Sin datos de gasto para este período",
   "reportsIncome": "Ingresos",
@@ -293,6 +316,8 @@
   "goalsErrorLoad": "No se pudieron cargar las metas",
   "goalsDeleteConfirm": "¿Eliminar esta meta?",
   "goalsDeleteLabel": "Eliminar",
+  "goalsDueDateLabel": "Fecha límite (opcional)",
+  "goalsMarkComplete": "Marcar como completada",
   "goalsDetailTitle": "Detalle de meta",
   "goalsDetailContributionHistory": "Historial de aportes",
   "goalsDetailNoContributions": "Sin aportes todavía",
@@ -309,6 +334,89 @@
     }
   },
   "goalsDetailProgressChart": "Progreso acumulado",
+
+  "authVerifyTitle": "Ingresa el código de verificación",
+  "authVerifySubtitle": "Enviamos un código de 6 dígitos a {email}. Expira en 15 minutos.",
+  "@authVerifySubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "authVerifyResend": "Reenviar código",
+  "authVerifyResendCooldown": "Reenviar en {seconds}s",
+  "@authVerifyResendCooldown": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "authVerifyButton": "Verificar código",
+  "authVerifyInvalidCode": "Código inválido o expirado. Intenta de nuevo.",
+  "authLockedAccount": "Cuenta bloqueada. Intenta de nuevo en 15 minutos.",
+  "authLockedCountdown": "Cuenta bloqueada. Intenta de nuevo en {time}.",
+  "@authLockedCountdown": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "authAttemptsRemaining": "{count, plural, =1{1 intento restante antes del bloqueo} other{{count} intentos restantes antes del bloqueo}}",
+  "@authAttemptsRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "goalsCompletedSection": "Metas completadas",
+  "goalsActiveSection": "Metas activas",
+  "goalsDueDate": "Fecha: {date}",
+  "@goalsDueDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "goalsDaysLeft": "{days, plural, =1{1 día restante} other{{days} días restantes}}",
+  "@goalsDaysLeft": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "goalsOverdue": "Vencida",
+  "goalsCelebrate": "¡Meta lograda!",
+  "goalsCelebrateMessage": "¡Felicitaciones! Alcanzaste tu meta de ahorro para \"{name}\".",
+  "@goalsCelebrateMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "goalsMarkCompleteConfirm": "¿Marcar esta meta como completada?",
+  "goalsMarkCompleteConfirmBody": "Esto cerrará la meta y la marcará como lograda.",
+  "goalsDetailDueDate": "Fecha objetivo",
+  "goalsDetailDaysLeft": "Días restantes",
+  "goalsDetailMarkComplete": "Marcar como lograda",
+  "goalsDetailDelete": "Eliminar meta",
+
+  "reportsCalendarTitle": "Calendario de gastos",
+  "reportsCalendarNoData": "Sin gastos este día",
+  "reportsDayTotal": "S/ {total}",
+  "@reportsDayTotal": {
+    "placeholders": {
+      "total": { "type": "String" }
+    }
+  },
+
+  "txAiSuggests": "Zenda sugiere: {category}",
+  "@txAiSuggests": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "txAiApply": "Aplicar sugerencia",
+
+  "educationPersonalized": "Personalizado para ti",
+  "educationPersonalizedSubtitle": "Temas ordenados según tus patrones de gasto",
+
+  "profileNumberFormat": "Formato de número",
+  "profileNumberFormatDot": "1,234.56 (decimal con punto)",
+  "profileNumberFormatComma": "1.234,56 (decimal con coma)",
 
   "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
   "errorAuthEmailTaken": "Este correo ya está registrado.",
@@ -357,6 +465,16 @@
   "challengesErrorLoad": "No se pudieron cargar los desafíos",
   "challengesAcceptButton": "Aceptar desafío",
   "challengesAccepted": "¡Desafío aceptado!",
+  "challengesCompleteButton": "Marcar completado",
+  "challengesCompleted": "¡Desafío completado!",
+  "challengeAutoCompletedTitle": "¡Reto completado!",
+  "challengeAutoCompletedBody": "Completaste: {name}",
+  "@challengeAutoCompletedBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "challengeAutoCompletedDismiss": "¡Genial!",
 
   "badgesTitle": "Insignias",
   "badgesErrorLoad": "No se pudieron cargar las insignias",
@@ -385,12 +503,23 @@
   "surveySubmitButton": "Enviar respuestas",
   "surveySubmitError": "No se pudo enviar la encuesta. Inténtalo de nuevo.",
   "surveyResultTitle": "Tus resultados",
+  "surveyResultContinue": "Continuar al Panel",
   "surveyImprovement": "¡Tu conocimiento financiero mejoró {points} puntos respecto a la encuesta inicial!",
   "@surveyImprovement": {
     "placeholders": {
       "points": { "type": "String" }
     }
   },
+  "surveyComparisonPreLabel": "Puntaje inicial",
+  "surveyComparisonPostLabel": "Puntaje final",
+  "surveyComparisonImprovementLabel": "Mejora",
+  "surveyComparisonGoalLabel": "Meta de tesis: ≥ 20 puntos",
+  "surveyComparisonGoalMet": "¡Meta alcanzada!",
+  "surveyComparisonGoalNotMet": "Sigue usando la app para mejorar",
+  "surveyComparisonPending": "Completa ambas encuestas para ver tu progreso",
+  "surveyComparisonPrePending": "Encuesta inicial no completada",
+  "surveyComparisonPostPending": "Encuesta final no completada",
+  "surveyComparisonNavTitle": "Progreso de conocimiento",
 
   "feedbackTitle": "Enviar comentarios",
   "feedbackTypeLabel": "Tipo",
@@ -476,5 +605,44 @@
     }
   },
   "quizFinish": "Ver resultados",
-  "quizNext": "Siguiente pregunta"
+  "quizNext": "Siguiente pregunta",
+
+  "quizPersonalizedTitle": "Quiz personalizado",
+  "quizPersonalizedButton": "Tomar quiz personalizado",
+  "quizPersonalizedSubtitle": "Preguntas generadas con IA basadas en tus hábitos",
+  "quizPersonalizedAnalyzing": "Analizando tus hábitos financieros...",
+  "quizPersonalizedAttemptsLeft": "{count, plural, =1{1 intento restante hoy} other{{count} intentos restantes hoy}}",
+  "@quizPersonalizedAttemptsLeft": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "quizPersonalizedLimitReached": "Alcanzaste el límite de 5 quizzes personalizados por hoy.",
+  "quizPersonalizedError": "No se pudo generar el quiz. Inténtalo de nuevo.",
+
+  "educationRecommended": "Recomendado",
+
+  "reportsWeekDailyTitle": "Actividad diaria",
+  "reportsProgressChipsTitle": "Cambios vs mes anterior",
+  "reportsExpensesChip": "Gastos {sign}{pct}%",
+  "@reportsExpensesChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "reportsSavingsChip": "Ahorros {sign}{pct}%",
+  "@reportsSavingsChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "reportsBalanceChip": "Balance {sign}{pct}%",
+  "@reportsBalanceChip": {
+    "placeholders": {
+      "sign": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  }
 }

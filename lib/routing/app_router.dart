@@ -9,6 +9,7 @@ import '../features/onboarding/profile_setup_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/auth/forgot_password_screen.dart';
+import '../features/auth/verify_code_screen.dart';
 import '../features/auth/reset_password_screen.dart';
 import '../features/auth/email_sent_screen.dart';
 import '../features/consent/consent_screen.dart';
@@ -26,10 +27,13 @@ import '../features/recommendations/recommendations_screen.dart';
 import '../features/education/education_screen.dart';
 import '../features/education/topic_detail_screen.dart';
 import '../features/education/quiz_screen.dart';
+import '../features/education/personalized_quiz_screen.dart';
 import '../features/challenges/challenges_screen.dart';
 import '../features/badges/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/surveys/survey_screen.dart';
+import '../features/surveys/survey_comparison_screen.dart';
+import '../providers/pre_survey_provider.dart';
 import '../features/transactions/edit_transaction_screen.dart';
 import '../features/notifications/notification_preferences_screen.dart';
 import '../features/ai_chat/ai_chat_screen.dart';
@@ -40,6 +44,7 @@ const _publicRoutes = {
   '/onboarding',
   '/consent',
   '/auth/forgot-password',
+  '/auth/verify-code',
   '/auth/reset-password',
   '/auth/email-sent',
   '/login',
@@ -51,18 +56,26 @@ const _authOnlyRoutes = {'/auth/login', '/auth/register'};
 // Routes exempt from the profile-setup redirect.
 const _profileSetupExempt = {'/profile-setup', '/auth/email-sent', '/dashboard'};
 
+// Routes exempt from the pre-survey redirect.
+const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/profile-setup'};
+
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
     _sub = ref.listen<AuthState>(authNotifierProvider, (_, next) {
       notifyListeners();
     });
+    _surveysSub = ref.listen<AsyncValue<bool>>(preSurveyProvider, (_, next) {
+      notifyListeners();
+    });
   }
 
   late final ProviderSubscription<AuthState> _sub;
+  late final ProviderSubscription<AsyncValue<bool>> _surveysSub;
 
   @override
   void dispose() {
     _sub.close();
+    _surveysSub.close();
     super.dispose();
   }
 }
@@ -102,6 +115,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/profile-setup';
       }
 
+      // Authenticated user who has not completed the pre-survey → pre-survey.
+      final preSurveyDone =
+          container.read(preSurveyProvider).asData?.value ?? false;
+      if (auth.isAuthenticated &&
+          (auth.user?.profileCompleted ?? true) &&
+          !preSurveyDone &&
+          !_preSurveyExempt.contains(loc) &&
+          !_publicRoutes.contains(loc) &&
+          !_authOnlyRoutes.contains(loc)) {
+        return '/surveys/pre';
+      }
+
       return null;
     },
     routes: [
@@ -136,8 +161,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
+        path: '/auth/verify-code',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return VerifyCodeScreen(email: email);
+        },
+      ),
+      GoRoute(
         path: '/auth/reset-password',
-        builder: (context, state) => const ResetPasswordScreen(),
+        builder: (context, state) {
+          final token = state.extra as String?;
+          return ResetPasswordScreen(prefillToken: token);
+        },
       ),
       GoRoute(
         path: '/auth/email-sent',
@@ -207,6 +242,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const EducationScreen(),
         routes: [
           GoRoute(
+            path: 'quiz/personalized',
+            builder: (context, state) => const PersonalizedQuizScreen(),
+          ),
+          GoRoute(
             path: ':id',
             builder: (context, state) => TopicDetailScreen(
               topicId: state.pathParameters['id']!,
@@ -241,6 +280,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/surveys/post',
         builder: (context, state) => const SurveyScreen(isPre: false),
+      ),
+      GoRoute(
+        path: '/surveys/comparison',
+        builder: (context, state) => const SurveyComparisonScreen(),
       ),
       GoRoute(
         path: '/edit-transaction',
