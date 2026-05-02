@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/category.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -40,6 +41,7 @@ class CategoryManagementScreen extends ConsumerWidget {
         onPressed: () => _showAddDialog(context, ref),
         child: const Icon(Icons.add),
       ),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 4),
     );
   }
 

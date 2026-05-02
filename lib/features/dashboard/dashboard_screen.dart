@@ -1,139 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../features/auth/auth_controller.dart';
-import '../../features/transactions/transaction_list_screen.dart';
 import '../../providers/pre_survey_provider.dart';
 import 'dashboard_providers.dart';
-import 'widgets/summary_card.dart';
 import 'widgets/streak_card.dart';
-import 'widgets/account_card.dart';
-import 'widgets/budget_pie_chart.dart';
 import 'widgets/zenda_ai_card.dart';
 import '../../l10n/l10n_extension.dart';
 
-class DashboardScreen extends ConsumerStatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
-
-  @override
-  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  late final PageController _pageController;
-  int _index = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _index);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _goTo(int nextIndex) {
-    if (nextIndex == _index) return;
-    _pageController.animateToPage(
-      nextIndex,
-      duration: const Duration(milliseconds: 240),
-      curve: Curves.easeOut,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isNarrow = MediaQuery.of(context).size.width < 600;
-    final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF0F172A)
-          : const Color(0xFFF8FAFC),
-      body: SafeArea(
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: (value) => setState(() => _index = value),
-          children: const [
-            _InicioSection(),
-            _MovsSection(),
-            _PresupuestoSection(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isNarrow ? 16 : 20,
-            vertical: 10,
-          ),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0B1220) : Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: _BottomOption(
-                  icon: Icons.home_rounded,
-                  label: l10n.dashboardNavHome,
-                  isActive: _index == 0,
-                  onTap: () => _goTo(0),
-                ),
-              ),
-              Expanded(
-                child: _BottomOption(
-                  icon: Icons.receipt_long_rounded,
-                  label: l10n.dashboardNavTransactions,
-                  isActive: _index == 1,
-                  onTap: () => _goTo(1),
-                ),
-              ),
-              Expanded(
-                child: _BottomOption(
-                  icon: Icons.pie_chart_rounded,
-                  label: l10n.dashboardNavBudget,
-                  isActive: _index == 2,
-                  onTap: () => _goTo(2),
-                ),
-              ),
-              Expanded(
-                child: _BottomOption(
-                  icon: Icons.person_rounded,
-                  label: l10n.dashboardNavProfile,
-                  isActive: false,
-                  onTap: () => context.push('/profile'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-              onPressed: () {
-                context.push('/add-transaction');
-              },
-              backgroundColor: const Color(0xFF34D399),
-              foregroundColor: Colors.white,
-              elevation: 4,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(
-                l10n.dashboardRecord,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      body: const SafeArea(child: _InicioSection()),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 0),
     );
   }
 }
@@ -146,51 +35,35 @@ class _InicioSection extends ConsumerWidget {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.user;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isNarrow = MediaQuery.of(context).size.width < 600;
     final l10n = context.l10n;
 
     final onSurface = isDark ? Colors.white : Colors.black87;
     final onSurfaceMuted = isDark ? Colors.grey[400] : Colors.grey[600];
 
     final accountsAsync = ref.watch(accountsProvider);
+    final monthSummaryAsync = ref.watch(monthSummaryProvider);
 
-    // Post-survey banner: show after 30 days if pre done but post not done
     final preSurveyDone = ref.watch(preSurveyProvider).asData?.value ?? false;
     final postSurveyDone = ref.watch(postSurveyProvider).asData?.value ?? false;
 
-    // Expense values
-    final todayExpense = ref.watch(todayExpenseProvider);
-    final weekExpense = ref.watch(weekExpenseProvider);
-
-    // Streak
     final streak = ref.watch(streakProvider);
-
-    // Budget Breakdown
-    final breakdown = ref.watch(budgetBreakdownProvider);
-
-    // AI Advice
     final advice = ref.watch(aiAdviceProvider(l10n));
 
-    final legendColumn = Column(
-      children: [
-        _LegendItem(
-          color: const Color(0xFF34D399),
-          label: l10n.dashboardNeeds,
-          value: breakdown.totalNecesidades,
-        ),
-        const SizedBox(height: 12),
-        _LegendItem(
-          color: const Color(0xFFC084FC),
-          label: l10n.dashboardWants,
-          value: breakdown.totalDeseos,
-        ),
-        const SizedBox(height: 12),
-        _LegendItem(
-          color: const Color(0xFFFCD34D),
-          label: l10n.dashboardSavings,
-          value: breakdown.totalAhorro,
-        ),
-      ],
+    final totalBalance = accountsAsync.asData?.value.fold<double>(
+          0.0,
+          (sum, a) => sum + a.balance,
+        ) ??
+        0.0;
+
+    final income = monthSummaryAsync.when(
+      data: (s) => s.totalIncome,
+      loading: () => 0.0,
+      error: (_, _) => 0.0,
+    );
+    final expense = monthSummaryAsync.when(
+      data: (s) => s.totalExpense,
+      loading: () => 0.0,
+      error: (_, _) => 0.0,
     );
 
     return RefreshIndicator(
@@ -203,42 +76,56 @@ class _InicioSection extends ConsumerWidget {
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(
-          isNarrow ? 16 : 20,
-          isNarrow ? 16 : 24,
-          isNarrow ? 16 : 20,
-          120,
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 130),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Greeting
             Row(
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.dashboardGreeting(user?.name.split(' ').first ?? l10n.dashboardUserFallback),
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: onSurface,
-                          ),
+                      l10n.dashboardGreeting(
+                        user?.name.split(' ').first ??
+                            l10n.dashboardUserFallback,
+                      ),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: onSurface,
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
-                      l10n.dashboardMotivation,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: onSurfaceMuted),
+                      DateFormat.yMMMM(
+                        Localizations.localeOf(context).languageCode,
+                      ).format(DateTime.now()),
+                      style: TextStyle(fontSize: 13, color: onSurfaceMuted),
                     ),
                   ],
                 ),
                 const Spacer(),
+                GestureDetector(
+                  onTap: () => context.go('/notifications'),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                    ),
+                    child: const Center(
+                      child: Text('🔔', style: TextStyle(fontSize: 18)),
+                    ),
+                  ),
+                ),
               ],
             ),
 
-            SizedBox(height: isNarrow ? 16 : 24),
+            const SizedBox(height: 20),
 
             if (preSurveyDone && !postSurveyDone)
               FutureBuilder<DateTime?>(
@@ -249,102 +136,32 @@ class _InicioSection extends ConsumerWidget {
                       ? DateTime.now().difference(completedAt).inDays
                       : 0;
                   if (daysSince < 30) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _PostSurveyBanner(l10n: l10n),
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 16),
+                    child: _PostSurveyBanner(),
                   );
                 },
               ),
 
-            SummaryCard(todayExpense: todayExpense, weekExpense: weekExpense),
+            // Balance card
+            _TotalBalanceCard(totalBalance: totalBalance),
 
-            SizedBox(height: isNarrow ? 16 : 24),
+            const SizedBox(height: 12),
 
-            Center(child: StreakCard(streakDays: streak)),
+            // Income / Expense summary
+            _SummaryCards(income: income, expense: expense),
 
-            SizedBox(height: isNarrow ? 16 : 24),
+            const SizedBox(height: 20),
 
-            Text(
-              l10n.dashboardMyAccounts,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: onSurface,
-              ),
-            ),
-            SizedBox(height: isNarrow ? 12 : 16),
-            SizedBox(
-              height: isNarrow ? 130 : 140,
-              child: accountsAsync.when(
-                data: (accounts) => ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: accounts.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == accounts.length) {
-                      return Container(
-                        width: 60,
-                        margin: const EdgeInsets.only(right: 16),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E293B)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.grey[800]!
-                                : Colors.grey[300]!,
-                            style: BorderStyle.solid,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.add, color: Colors.grey),
-                        ),
-                      );
-                    }
-                    return AccountCard(account: accounts[index]);
-                  },
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Text(l10n.dashboardErrorAccounts(err.toString())),
-              ),
-            ),
+            // 50/30/20 Budget card
+            _BudgetRuleCard(),
 
-            SizedBox(height: isNarrow ? 24 : 32),
+            const SizedBox(height: 20),
 
-            Text(
-              l10n.dashboardBudgetTitle,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: onSurface,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.dashboardBudgetSubtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: isDark ? Colors.grey[400] : Colors.grey,
-              ),
-            ),
-            SizedBox(height: isNarrow ? 16 : 24),
+            StreakCard(streakDays: streak),
 
-            if (isNarrow) ...[
-              BudgetPieChart(breakdown: breakdown),
-              const SizedBox(height: 16),
-              legendColumn,
-            ] else ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: BudgetPieChart(breakdown: breakdown),
-                  ),
-                  const SizedBox(width: 24),
-                  Expanded(flex: 3, child: legendColumn),
-                ],
-              ),
-            ],
+            const SizedBox(height: 16),
 
-            SizedBox(height: isNarrow ? 16 : 24),
             ZendaAiCard(advice: advice),
           ],
         ),
@@ -353,204 +170,251 @@ class _InicioSection extends ConsumerWidget {
   }
 }
 
-class _MovsSection extends ConsumerWidget {
-  const _MovsSection();
+class _TotalBalanceCard extends StatelessWidget {
+  final double totalBalance;
+
+  const _TotalBalanceCard({required this.totalBalance});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return const TransactionListScreen();
-  }
-}
-
-class _PresupuestoSection extends ConsumerWidget {
-  const _PresupuestoSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isNarrow = MediaQuery.of(context).size.width < 600;
-    final breakdown = ref.watch(budgetBreakdownProvider);
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final advice = ref.watch(aiAdviceProvider(l10n));
 
-    final onSurface = isDark ? Colors.white : Colors.black87;
-
-    final legendColumn = Column(
-      children: [
-        _LegendItem(
-          color: const Color(0xFF34D399),
-          label: l10n.dashboardNeeds,
-          value: breakdown.totalNecesidades,
-        ),
-        const SizedBox(height: 12),
-        _LegendItem(
-          color: const Color(0xFFC084FC),
-          label: l10n.dashboardWants,
-          value: breakdown.totalDeseos,
-        ),
-        const SizedBox(height: 12),
-        _LegendItem(
-          color: const Color(0xFFFCD34D),
-          label: l10n.dashboardSavings,
-          value: breakdown.totalAhorro,
-        ),
-      ],
-    );
-
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(
-        isNarrow ? 16 : 20,
-        isNarrow ? 16 : 24,
-        isNarrow ? 16 : 20,
-        120,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F2937),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.dashboardNavBudget,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: onSurface,
-            ),
+            l10n.dashboardTotalBalance,
+            style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.dashboardBudgetTitle,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: onSurface,
+            'S/ ${totalBalance.toStringAsFixed(2)}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.dashboardBudgetSubtitle,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isDark ? Colors.grey[400] : Colors.grey,
-            ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.dashboardCashDebitCredit,
+                style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+              ),
+              GestureDetector(
+                onTap: () {},
+                child: Text(
+                  '▶  ${l10n.dashboardViewAll}',
+                  style: const TextStyle(
+                    color: Color(0xFF34D399),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          if (isNarrow) ...[
-            BudgetPieChart(breakdown: breakdown),
-            const SizedBox(height: 16),
-            legendColumn,
-          ] else ...[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 2, child: BudgetPieChart(breakdown: breakdown)),
-                const SizedBox(width: 24),
-                Expanded(flex: 3, child: legendColumn),
-              ],
-            ),
-          ],
-          const SizedBox(height: 16),
-          ZendaAiCard(advice: advice),
         ],
       ),
     );
   }
 }
 
-class _LegendItem extends StatelessWidget {
-  final Color color;
-  final String label;
-  final double value;
+class _SummaryCards extends StatelessWidget {
+  final double income;
+  final double expense;
 
-  const _LegendItem({
-    required this.color,
-    required this.label,
-    required this.value,
-  });
+  const _SummaryCards({required this.income, required this.expense});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
     return Row(
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '↑  ${l10n.dashboardMonthlyIncome}',
+                  style: const TextStyle(color: Color(0xFF059669), fontSize: 12),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'S/ ${income.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    color: Color(0xFF065F46),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.grey[300] : Colors.black87,
-                fontSize: 13,
-              ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF2F2),
+              borderRadius: BorderRadius.circular(16),
             ),
-            Text(
-              'S/ ${value.toStringAsFixed(2)}',
-              style: TextStyle(
-                color: isDark ? Colors.grey[500] : Colors.grey[600],
-                fontSize: 12,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '↓  ${l10n.dashboardMonthlyExpense}',
+                  style: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'S/ ${expense.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    color: Color(0xFF7F1D1D),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _BottomOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _BottomOption({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
+class _BudgetRuleCard extends StatelessWidget {
+  const _BudgetRuleCard();
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final color = isActive
-        ? const Color(0xFF34D399)
-        : (isDark ? Colors.grey[400]! : Colors.grey[600]!);
+    final l10n = context.l10n;
+    final month = DateFormat.MMM(
+      Localizations.localeOf(context).languageCode,
+    ).format(DateTime.now());
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFF3F4F6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.dashboardBudgetTitle,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+              Text(
+                month,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF6B7280),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: const SizedBox(
+                    height: 10,
+                    child: ColoredBox(color: Color(0xFF34D399)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: const SizedBox(
+                    height: 10,
+                    child: ColoredBox(color: Color(0xFF60A5FA)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: const SizedBox(
+                    height: 10,
+                    child: ColoredBox(color: Color(0xFFF97316)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _LegendDot(color: const Color(0xFF34D399), label: '${l10n.dashboardNeeds} 50%'),
+              const SizedBox(width: 16),
+              _LegendDot(color: const Color(0xFF60A5FA), label: '${l10n.dashboardWants} 30%'),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LegendDot({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(5)),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+        ),
+      ],
+    );
+  }
+}
+
 class _PostSurveyBanner extends StatefulWidget {
-  const _PostSurveyBanner({required this.l10n});
-  final dynamic l10n;
+  const _PostSurveyBanner();
 
   @override
   State<_PostSurveyBanner> createState() => _PostSurveyBannerState();
@@ -572,7 +436,7 @@ class _PostSurveyBannerState extends State<_PostSurveyBanner> {
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
 
-    final l10n = widget.l10n;
+    final l10n = context.l10n;
     const bannerColor = Color(0xFF3B82F6);
 
     return Container(
@@ -588,7 +452,8 @@ class _PostSurveyBannerState extends State<_PostSurveyBanner> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.assignment_rounded, color: bannerColor, size: 22),
+              const Icon(Icons.assignment_rounded,
+                  color: bannerColor, size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -624,7 +489,7 @@ class _PostSurveyBannerState extends State<_PostSurveyBanner> {
                   foregroundColor: bannerColor,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
-                child: const Text('Later'),
+                child: Text(l10n.commonLater),
               ),
               const SizedBox(width: 8),
               FilledButton(

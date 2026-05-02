@@ -5,6 +5,7 @@ import '../../core/models/budget.dart';
 import '../../core/models/category.dart';
 import '../../core/services/budget_api_service.dart';
 import '../../core/services/category_api_service.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 
 final _budgetServiceProvider = Provider<BudgetApiService>((ref) {
@@ -79,59 +80,175 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
   ];
 
+  static const _needsCategories = {
+    'food', 'transportation', 'housing', 'utilities', 'health'
+  };
+  static const _savingsCategories = {'savings'};
+
+  _BucketSummary _computeSummary(List<Budget> budgets) {
+    double needsSpent = 0, needsLimit = 0;
+    double wantsSpent = 0, wantsLimit = 0;
+    double savingsSpent = 0, savingsLimit = 0;
+
+    for (final b in budgets) {
+      final cat = (b.categoryName ?? '').toLowerCase();
+      if (_needsCategories.contains(cat)) {
+        needsSpent += b.currentSpent;
+        needsLimit += b.amountLimit;
+      } else if (_savingsCategories.contains(cat)) {
+        savingsSpent += b.currentSpent;
+        savingsLimit += b.amountLimit;
+      } else {
+        wantsSpent += b.currentSpent;
+        wantsLimit += b.amountLimit;
+      }
+    }
+    return _BucketSummary(
+      needsSpent: needsSpent,
+      needsLimit: needsLimit,
+      wantsSpent: wantsSpent,
+      wantsLimit: wantsLimit,
+      savingsSpent: savingsSpent,
+      savingsLimit: savingsLimit,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final budgetsAsync = ref.watch(_budgetsProvider(_filter));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.budgetTitle)),
-      body: Column(
-        children: [
-          _MonthSelector(
-            label: '${_monthNames[_month - 1]} $_year',
-            onPrev: _prevMonth,
-            onNext: _nextMonth,
-          ),
-          Expanded(
-            child: budgetsAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (_, _) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+      appBar: AppBar(
+        title: Text(l10n.budgetTitle),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              onTap: () => _showMonthPicker(context),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(l10n.budgetErrorLoad),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () =>
-                          ref.invalidate(_budgetsProvider(_filter)),
-                      child: Text(l10n.commonRetry),
+                    Text(
+                      '${_monthNames[_month - 1]} $_year',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.calendar_today_outlined, size: 14),
                   ],
                 ),
               ),
-              data: (budgets) => budgets.isEmpty
-                  ? _EmptyState(
-                      title: l10n.budgetEmptyTitle,
-                      subtitle: l10n.budgetEmptySubtitle,
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: budgets.length,
-                      itemBuilder: (context, index) => _BudgetCard(
-                        budget: budgets[index],
-                        onDelete: () => _deleteBudget(budgets[index].id),
-                        onEdit: () => _showEditDialog(budgets[index]),
-                      ),
-                    ),
             ),
           ),
         ],
       ),
+      body: budgetsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(l10n.budgetErrorLoad),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(_budgetsProvider(_filter)),
+                child: Text(l10n.commonRetry),
+              ),
+            ],
+          ),
+        ),
+        data: (budgets) {
+          if (budgets.isEmpty) {
+            return _EmptyState(
+              title: l10n.budgetEmptyTitle,
+              subtitle: l10n.budgetEmptySubtitle,
+            );
+          }
+          final summary = _computeSummary(budgets);
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // 3-column summary
+              _BucketSummaryRow(summary: summary),
+              const SizedBox(height: 20),
+              // By Category header
+              Text(
+                l10n.budgetByCategory,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              ...budgets.map((b) => _BudgetCard(
+                    budget: b,
+                    onDelete: () => _deleteBudget(b.id),
+                    onEdit: () => _showEditDialog(b),
+                  )),
+            ],
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateDialog,
-        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFF34D399),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 0),
+    );
+  }
+
+  Future<void> _showMonthPicker(BuildContext context) async {
+    // Simple prev/next dialog for month navigation
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.budgetSelectPeriod),
+        content: StatefulBuilder(
+          builder: (ctx, setDlg) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () {
+                  _prevMonth();
+                  setDlg(() {});
+                },
+                icon: const Icon(Icons.chevron_left),
+              ),
+              SizedBox(
+                width: 110,
+                child: Text(
+                  '${_monthNames[_month - 1]} $_year',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  _nextMonth();
+                  setDlg(() {});
+                },
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.commonDone),
+          ),
+        ],
       ),
     );
   }
@@ -337,7 +454,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
@@ -348,34 +465,110 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   }
 }
 
-class _MonthSelector extends StatelessWidget {
-  final String label;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
+class _BucketSummary {
+  final double needsSpent;
+  final double needsLimit;
+  final double wantsSpent;
+  final double wantsLimit;
+  final double savingsSpent;
+  final double savingsLimit;
 
-  const _MonthSelector({
+  const _BucketSummary({
+    required this.needsSpent,
+    required this.needsLimit,
+    required this.wantsSpent,
+    required this.wantsLimit,
+    required this.savingsSpent,
+    required this.savingsLimit,
+  });
+}
+
+class _BucketSummaryRow extends StatelessWidget {
+  final _BucketSummary summary;
+  const _BucketSummaryRow({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Row(
+      children: [
+        Expanded(
+          child: _BucketCell(
+            label: l10n.dashboardNeeds,
+            spent: summary.needsSpent,
+            limit: summary.needsLimit,
+            color: const Color(0xFF34D399),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _BucketCell(
+            label: l10n.dashboardWants,
+            spent: summary.wantsSpent,
+            limit: summary.wantsLimit,
+            color: const Color(0xFF60A5FA),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _BucketCell(
+            label: l10n.dashboardSavings,
+            spent: summary.savingsSpent,
+            limit: summary.savingsLimit,
+            color: const Color(0xFFF59E0B),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BucketCell extends StatelessWidget {
+  final String label;
+  final double spent;
+  final double limit;
+  final Color color;
+
+  const _BucketCell({
     required this.label,
-    required this.onPrev,
-    required this.onNext,
+    required this.spent,
+    required this.limit,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(onPressed: onPrev, icon: const Icon(Icons.chevron_left)),
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
-          IconButton(onPressed: onNext, icon: const Icon(Icons.chevron_right)),
+          const SizedBox(height: 4),
+          Text(
+            'S/ ${spent.toStringAsFixed(0)}',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          if (limit > 0)
+            Text(
+              'of S/ ${limit.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+            ),
         ],
       ),
     );

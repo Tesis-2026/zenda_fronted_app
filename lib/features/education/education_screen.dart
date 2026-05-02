@@ -15,11 +15,39 @@ final _topicsProvider =
   return ref.read(_educationServiceProvider).listTopics();
 });
 
-class EducationScreen extends ConsumerWidget {
+class EducationScreen extends ConsumerStatefulWidget {
   const EducationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EducationScreen> createState() => _EducationScreenState();
+}
+
+class _EducationScreenState extends ConsumerState<EducationScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+  String _filter = 'all';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<EducationTopic> _applyFilters(List<EducationTopic> topics) {
+    var result = topics;
+    if (_query.isNotEmpty) {
+      result = result
+          .where((t) => t.title.toLowerCase().contains(_query.toLowerCase()))
+          .toList();
+    }
+    if (_filter != 'all') {
+      result = result.where((t) => t.difficulty.toLowerCase() == _filter).toList();
+    }
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final topicsAsync = ref.watch(_topicsProvider);
 
@@ -42,7 +70,10 @@ class EducationScreen extends ConsumerWidget {
         ),
         data: (topics) {
           final completed = topics.where((t) => t.isCompleted).length;
-          final firstIncompleteIndex = topics.indexWhere((t) => !t.isCompleted);
+          final filtered = _applyFilters(topics);
+          final featured = filtered.firstOrNull;
+          final rest = filtered.length > 1 ? filtered.sublist(1) : <EducationTopic>[];
+
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(_topicsProvider),
             child: CustomScrollView(
@@ -55,6 +86,62 @@ class EducationScreen extends ConsumerWidget {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (v) => setState(() => _query = v),
+                      decoration: InputDecoration(
+                        hintText: l10n.educationSearchHint,
+                        prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        suffixIcon: _query.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _query = '');
+                                },
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: _FilterChips(
+                    selected: _filter,
+                    onSelect: (v) => setState(() => _filter = v),
+                  ),
+                ),
+                if (featured != null) ...[
+                  SliverToBoxAdapter(
+                    child: _FeaturedCard(
+                      topic: featured,
+                      onTap: () => context.push('/education/${featured.id}'),
+                    ),
+                  ),
+                  SliverList.builder(
+                    itemCount: rest.length,
+                    itemBuilder: (context, index) => _TopicTile(
+                      topic: rest[index],
+                      isRecommended: false,
+                      onTap: () => context.push('/education/${rest[index].id}'),
+                    ),
+                  ),
+                ] else
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Center(child: Text(l10n.educationErrorLoad)),
+                    ),
+                  ),
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +149,7 @@ class EducationScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Text(
-                              context.l10n.educationPersonalized,
+                              l10n.educationPersonalized,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall
@@ -74,22 +161,23 @@ class EducationScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          context.l10n.educationPersonalizedSubtitle,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.outline,
-                                  ),
+                          l10n.educationPersonalizedSubtitle,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                         const SizedBox(height: 10),
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            onPressed: () => context.push('/education/quiz/personalized'),
+                            onPressed: () =>
+                                context.push('/education/quiz/personalized'),
                             icon: const Icon(Icons.auto_awesome, size: 18),
-                            label: Text(context.l10n.quizPersonalizedButton),
+                            label: Text(l10n.quizPersonalizedButton),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF818CF8),
-                              side: const BorderSide(color: Color(0xFF818CF8)),
+                              side:
+                                  const BorderSide(color: Color(0xFF818CF8)),
                             ),
                           ),
                         ),
@@ -97,20 +185,125 @@ class EducationScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                SliverList.builder(
-                  itemCount: topics.length,
-                  itemBuilder: (context, index) => _TopicTile(
-                    topic: topics[index],
-                    isRecommended: index == firstIncompleteIndex,
-                    onTap: () => context.push(
-                      '/education/${topics[index].id}',
-                    ),
-                  ),
-                ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _FilterChips extends StatelessWidget {
+  const _FilterChips({required this.selected, required this.onSelect});
+  final String selected;
+  final void Function(String) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final chips = {
+      'all': l10n.educationFilterAll,
+      'beginner': l10n.educationFilterBeginner,
+      'intermediate': l10n.educationFilterIntermediate,
+      'advanced': l10n.educationFilterAdvanced,
+    };
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      child: Row(
+        children: chips.entries.map((e) {
+          final isSelected = selected == e.key;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(e.value),
+              selected: isSelected,
+              onSelected: (_) => onSelect(e.key),
+              selectedColor: const Color(0xFF34D399).withValues(alpha: 0.2),
+              checkmarkColor: const Color(0xFF10B981),
+              labelStyle: TextStyle(
+                color: isSelected ? const Color(0xFF065F46) : null,
+                fontWeight: isSelected ? FontWeight.w600 : null,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _FeaturedCard extends StatelessWidget {
+  const _FeaturedCard({required this.topic, required this.onTap});
+  final EducationTopic topic;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFF1F2937),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    l10n.educationFeaturedLabel,
+                    style: const TextStyle(
+                      color: Color(0xFF34D399),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                if (topic.isCompleted)
+                  const Icon(Icons.check_circle_rounded,
+                      color: Color(0xFF34D399), size: 18),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              topic.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              child: ElevatedButton(
+                onPressed: onTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF34D399),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                ),
+                child: Text(l10n.educationStartLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/ai_chat_api_service.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 
 class _ChatBubble {
@@ -123,6 +124,19 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
               },
             ),
           ),
+          if (!_loading)
+            _QuickActions(
+              isDark: isDark,
+              onTap: (text) {
+                _inputController.text = text;
+                _send();
+              },
+              labels: [
+                l10n.aiChatQuickAnalyze,
+                l10n.aiChatQuickBudget,
+                l10n.aiChatQuickGoal,
+              ],
+            ),
           _InputBar(
             controller: _inputController,
             onSend: _send,
@@ -133,6 +147,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 2),
     );
   }
 }
@@ -205,6 +220,52 @@ class _TypingBubble extends StatelessWidget {
           width: 40,
           height: 16,
           child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF34D399)),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickActions extends StatelessWidget {
+  const _QuickActions({
+    required this.isDark,
+    required this.onTap,
+    required this.labels,
+  });
+
+  final bool isDark;
+  final void Function(String) onTap;
+  final List<String> labels;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      color: isDark ? const Color(0xFF0B1220) : Colors.white,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: labels
+              .map((label) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      label: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? const Color(0xFF34D399) : const Color(0xFF065F46),
+                        ),
+                      ),
+                      backgroundColor: const Color(0xFF34D399).withValues(alpha: 0.12),
+                      side: BorderSide(
+                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
+                      ),
+                      onPressed: () => onTap(label),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ))
+              .toList(),
         ),
       ),
     );

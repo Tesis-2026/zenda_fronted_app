@@ -11,58 +11,63 @@ class EmailSentScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final user = ref.watch(authNotifierProvider).user;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final onSurface = isDark ? Colors.white : const Color(0xFF1F2937);
-    final muted = isDark ? Colors.grey[400] : Colors.grey[600];
+    final email = user?.email ?? '';
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Spacer(),
+              // Envelope icon
               Container(
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF34D399), Color(0xFF10B981)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF34D399).withValues(alpha: 0.3),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  color: const Color(0xFF34D399).withValues(alpha: 0.12),
                 ),
-                child: const Icon(Icons.check_rounded, size: 48, color: Colors.white),
+                child: const Icon(
+                  Icons.mail_outline_rounded,
+                  size: 48,
+                  color: Color(0xFF34D399),
+                ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
               Text(
-                l10n.emailSentTitle,
+                l10n.emailVerifTitle,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: onSurface,
                     ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.emailSentSubtitle(user?.name.split(' ').first ?? ''),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: const Color(0xFF34D399)),
+                l10n.emailVerifSubtitle(email),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.emailSentBody(user?.email ?? ''),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted, height: 1.6),
-                textAlign: TextAlign.center,
+              const SizedBox(height: 32),
+              // Numbered steps card
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: Column(
+                  children: [
+                    _StepRow(number: 1, text: l10n.emailVerifStep1, active: true),
+                    Divider(height: 1, color: Theme.of(context).dividerColor),
+                    _StepRow(number: 2, text: l10n.emailVerifStep2),
+                    Divider(height: 1, color: Theme.of(context).dividerColor),
+                    _StepRow(number: 3, text: l10n.emailVerifStep3),
+                  ],
+                ),
               ),
               const Spacer(),
               SizedBox(
@@ -72,26 +77,93 @@ class EmailSentScreen extends ConsumerWidget {
                   onPressed: () => context.go('/profile-setup'),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF34D399),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                   child: Text(
-                    l10n.emailSentContinue,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    l10n.emailVerifOpenApp,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => context.go('/dashboard'),
-                child: Text(
-                  l10n.emailSentSkip,
-                  style: TextStyle(color: muted),
-                ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    l10n.emailVerifResendText,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Email resent')),
+                      );
+                    },
+                    child: Text(
+                      l10n.emailVerifResendAction,
+                      style: const TextStyle(color: Color(0xFF34D399)),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _StepRow extends StatelessWidget {
+  final int number;
+  final String text;
+  final bool active;
+
+  const _StepRow({
+    required this.number,
+    required this.text,
+    this.active = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: active
+                  ? const Color(0xFF34D399)
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
+            child: Center(
+              child: Text(
+                '$number',
+                style: TextStyle(
+                  color: active
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.outline,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
       ),
     );
   }

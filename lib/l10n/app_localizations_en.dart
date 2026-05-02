@@ -36,6 +36,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSignOut => 'Sign out';
 
   @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get commonLater => 'Later';
+
+  @override
   String get validationEnterEmail => 'Enter your email';
 
   @override
@@ -234,16 +240,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'ve been using Zenda for 30 days — complete the post-survey to measure your progress.';
 
   @override
-  String get dashboardNavHome => 'Home';
+  String get dashboardNavHome => 'HOME';
 
   @override
-  String get dashboardNavTransactions => 'Txns';
+  String get dashboardNavTransactions => 'TXNS';
 
   @override
-  String get dashboardNavBudget => 'Budget';
+  String get dashboardNavAi => 'AI';
 
   @override
-  String get dashboardNavProfile => 'Profile';
+  String get dashboardNavGoals => 'GOALS';
+
+  @override
+  String get dashboardNavProfile => 'PROFILE';
 
   @override
   String get dashboardRecord => 'Record';
@@ -344,6 +353,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txCategoryLabel => 'Category';
+
+  @override
+  String get txAddButton => '+ Add';
 
   @override
   String get txAddCustomCategory => 'New category';
@@ -537,6 +549,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileEditButton => 'Edit profile';
+
+  @override
+  String get profileEdit => 'Edit';
 
   @override
   String get profileFullNameLabel => 'Full name';
@@ -1605,4 +1620,204 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardPostSurveyBannerAction => 'Take survey';
+
+  @override
+  String get authConfirmPasswordHint => 'Confirm password';
+
+  @override
+  String get validationPasswordsMismatch => 'Passwords do not match';
+
+  @override
+  String get dashboardTotalBalance => 'Total Balance';
+
+  @override
+  String get dashboardViewAll => 'View all';
+
+  @override
+  String get dashboardMonthlyIncome => 'Income';
+
+  @override
+  String get dashboardMonthlyExpense => 'Expense';
+
+  @override
+  String get dashboardCashDebitCredit => 'Cash · Debit · Credit';
+
+  @override
+  String get goalsNewButton => '+ New';
+
+  @override
+  String get emailVerifTitle => 'Check your email';
+
+  @override
+  String emailVerifSubtitle(String email) {
+    return 'We sent a verification link to $email';
+  }
+
+  @override
+  String get emailVerifStep1 => 'Open the email from Zenda';
+
+  @override
+  String get emailVerifStep2 => 'Click the verification link';
+
+  @override
+  String get emailVerifStep3 => 'Return to the app to continue';
+
+  @override
+  String get emailVerifOpenApp => 'Open Email App';
+
+  @override
+  String get emailVerifResendText => 'Didn\'t receive it?';
+
+  @override
+  String get emailVerifResendAction => 'Resend';
+
+  @override
+  String get txSavedTitle => 'Transaction saved!';
+
+  @override
+  String get txSavedBody =>
+      'Your expense has been recorded and your budget updated.';
+
+  @override
+  String get txSavedLabelAmount => 'Amount';
+
+  @override
+  String get txSavedLabelCategory => 'Category';
+
+  @override
+  String get txSavedLabelDate => 'Date';
+
+  @override
+  String get txSavedLabelBudget => 'Budget impact';
+
+  @override
+  String get txSavedBackButton => 'Back to Transactions';
+
+  @override
+  String get txSavedAddAnother => 'Add Another';
+
+  @override
+  String get authResetSuccessTitle => 'Password updated!';
+
+  @override
+  String get authResetSuccessBody =>
+      'Your password has been reset successfully. You can now sign in with your new password.';
+
+  @override
+  String get authResetSuccessSecurity =>
+      'For your security, you\'ve been signed out of all devices.';
+
+  @override
+  String get authResetSuccessButton => 'Sign In Now';
+
+  @override
+  String get authSetNewPasswordTitle => 'Set new password';
+
+  @override
+  String get authSetNewPasswordSubtitle =>
+      'Your new password must be at least 8 characters with 1 uppercase, 1 number.';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String get authPasswordStrengthWeak => 'Weak';
+
+  @override
+  String get authPasswordStrengthFair => 'Fair';
+
+  @override
+  String get authPasswordStrengthStrong => 'Strong';
+
+  @override
+  String goalsDetailLeftToReach(String amount) {
+    return 'S/ $amount left to reach your goal!';
+  }
+
+  @override
+  String get goalsDetailAddContrib => '+ Add';
+
+  @override
+  String get budgetByCategory => 'By Category';
+
+  @override
+  String get authForgotCodeExpiry =>
+      'The verification code expires in 15 minutes. Check your spam folder if you don\'t see it.';
+
+  @override
+  String get aiChatQuickAnalyze => 'Analyze spending';
+
+  @override
+  String get aiChatQuickBudget => 'Budget tips';
+
+  @override
+  String get aiChatQuickGoal => 'Goal progress';
+
+  @override
+  String get profileSetupAgeStepperLabel => 'years old';
+
+  @override
+  String get profileSetupPopularUniversities => 'Popular universities';
+
+  @override
+  String get profileSetupIncomeQuick500 => 'S/ 500';
+
+  @override
+  String get profileSetupIncomeQuick1200 => 'S/ 1,200';
+
+  @override
+  String get profileSetupIncomeQuick2000 => 'S/ 2,000';
+
+  @override
+  String get educationSearchHint => 'Search topics...';
+
+  @override
+  String get educationFilterAll => 'All';
+
+  @override
+  String get educationFilterBeginner => 'Beginner';
+
+  @override
+  String get educationFilterIntermediate => 'Intermediate';
+
+  @override
+  String get educationFilterAdvanced => 'Advanced';
+
+  @override
+  String get educationFeaturedLabel => 'Featured';
+
+  @override
+  String get educationStartLabel => 'Start';
+
+  @override
+  String get authSignUpLink => 'Sign up';
+
+  @override
+  String get goalManualContribution => 'Manual contribution';
+
+  @override
+  String get goalTargetSuffix => 'goal';
+
+  @override
+  String get profileSetupSaveError =>
+      'Could not save profile. Continuing anyway.';
+
+  @override
+  String get profileSetupComplete40pct => '40% better predictions';
+
+  @override
+  String get profileSetupCompleteImproves =>
+      'Completing your profile improves forecast accuracy.';
+
+  @override
+  String get budgetSelectPeriod => 'Select period';
+
+  @override
+  String get commonDone => 'Done';
+
+  @override
+  String get profileCurrencyPEN => 'PEN — Peruvian Sol (S/)';
+
+  @override
+  String get profileCurrencyUSD => 'USD — US Dollar (\$)';
 }

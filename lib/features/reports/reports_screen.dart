@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/models/summary_models.dart';
 import '../../core/services/amount_formatter.dart';
 import '../../core/services/insights_api_service.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -104,6 +105,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           _CategoriesTab(),
         ],
       ),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 0),
     );
   }
 }

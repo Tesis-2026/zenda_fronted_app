@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../dashboard/dashboard_providers.dart';
@@ -69,20 +70,28 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final prevTick = prev?.saveTick ?? 0;
       if (next.saveTick != prevTick) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.txSaved)));
+        final savedExtra = {
+          'amount': next.amount ?? 0.0,
+          'categoryName': next.category != null
+              ? categoryToApiName(next.category!)
+              : 'Other',
+          'date': next.date,
+          'kind': next.kind,
+        };
 
         if (next.completedChallengeNames.isNotEmpty) {
-          // Show celebration dialog; pop only after the user dismisses.
+          // Show celebration dialog; navigate to saved screen after dismiss.
           _showChallengeCompletedDialog(
             context,
             next.completedChallengeNames,
             l10n,
           ).then((_) {
-            if (context.mounted) Navigator.of(context).pop();
+            if (context.mounted) {
+              context.go('/transaction-saved', extra: savedExtra);
+            }
           });
         } else {
-          Navigator.of(context).pop();
+          context.go('/transaction-saved', extra: savedExtra);
         }
 
         // Show budget alert after pop so it appears on the previous screen.
@@ -566,7 +575,7 @@ class _AccountPicker extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     a.type == AccountType.credit
-                        ? 'Deuda: S/ ${a.creditDebt.toStringAsFixed(0)}'
+                        ? 'Debt: S/ ${a.creditDebt.toStringAsFixed(0)}'
                         : 'S/ ${a.balance.toStringAsFixed(0)}',
                     style: TextStyle(
                       fontSize: 12,

@@ -21,7 +21,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  // Lockout countdown state — persisted across app restarts
   static const _lockoutKey = 'zenda.auth.lockout_until';
   int _lockoutSeconds = 0;
   Timer? _lockoutTimer;
@@ -66,8 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _lockoutSeconds--;
         } else {
           t.cancel();
-          SharedPreferences.getInstance()
-              .then((p) => p.remove(_lockoutKey));
+          SharedPreferences.getInstance().then((p) => p.remove(_lockoutKey));
         }
       });
     });
@@ -89,8 +87,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-
-    // Close keyboard
     FocusScope.of(context).unfocus();
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
@@ -99,7 +95,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _passwordController.text,
     );
 
-    // Check if login was successful — route to profile setup if not completed
     final authState = ref.read(authNotifierProvider);
     if (authState.isAuthenticated && mounted) {
       final profileCompleted = authState.user?.profileCompleted ?? true;
@@ -107,21 +102,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void _showForgotPasswordDialog() {
-    context.go('/auth/forgot-password');
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.watch(authNotifierProvider);
     final l10n = context.l10n;
 
-    // Show error if exists
-    // Show error if exists
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.error != null) {
-        // Wrong credentials → suggest creating an account instead of a generic snackbar.
         if (next.error == AuthErrorCode.invalidCredentials) {
           showDialog(
             context: context,
@@ -132,12 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    l10n.commonCancel,
-                    style: TextStyle(
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                    ),
-                  ),
+                  child: Text(l10n.commonCancel),
                 ),
                 FilledButton(
                   onPressed: () {
@@ -174,13 +156,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(l10n.resolveError(next.error!))),
-                ],
-              ),
+              content: Text(l10n.resolveError(next.error!)),
               backgroundColor: const Color(0xFFFB7185),
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -193,45 +169,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 60),
 
-                // Logo
-                GestureDetector(
-                  onLongPress: () async {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.authOnboardingReset)),
-                    );
-                  },
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF34D399), Color(0xFF10B981)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                // Z logo — circle with white Z
+                Center(
+                  child: GestureDetector(
+                    onLongPress: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.authOnboardingReset)),
+                      );
+                    },
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF34D399),
+                        shape: BoxShape.circle,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF34D399).withValues(alpha: 0.3),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
+                      child: const Center(
+                        child: Text(
+                          'Z',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_wallet_rounded,
-                      size: 40,
-                      color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -239,22 +212,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // Title
-                Text(
-                  l10n.authLoginTitle,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
-                      ),
+                const Text(
+                  'Welcome back',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
                   textAlign: TextAlign.center,
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
                 Text(
-                  l10n.authLoginSubtitle,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
-                      ),
+                  'Sign in to your account',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey[600],
+                  ),
                   textAlign: TextAlign.center,
                 ),
 
@@ -263,65 +238,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Email field
                 TextFormField(
                   controller: _emailController,
-                  style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: l10n.authEmailLabel,
-                    hintText: l10n.authEmailHint,
-                    prefixIcon: const Icon(Icons.email_outlined),
+                    hintText: 'Email address',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                          color: Color(0xFF34D399), width: 2),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return l10n.validationEnterEmail;
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
                       return l10n.validationInvalidEmail;
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                // Password field
-                TextFormField(
-                  controller: _passwordController,
-                  style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: l10n.authPasswordLabel,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.validationEnterPassword;
-                    }
-                    if (value.length < 8) {
-                      return l10n.validationMinPassword;
                     }
                     return null;
                   },
@@ -329,27 +274,76 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 12),
 
-                // Forgot password
+                // Password field
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    hintText: 'Password',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                          color: Color(0xFF34D399), width: 2),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                        color: Colors.grey[500],
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return l10n.validationEnterPassword;
+                    }
+                    if (value.length < 8) return l10n.validationMinPassword;
+                    return null;
+                  },
+                ),
+
+                // Forgot password — right-aligned
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: _showForgotPasswordDialog,
-                    child: Text(
-                      l10n.authForgotPassword,
+                    onPressed: () => context.go('/auth/forgot-password'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 8),
+                    ),
+                    child: const Text(
+                      'Forgot password?',
                       style: TextStyle(
-                        color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF60A5FA),
+                        color: Color(0xFF34D399),
                         fontWeight: FontWeight.w600,
+                        fontSize: 14,
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 16),
-
-                // Lockout countdown banner
+                // Lockout banner
                 if (_lockoutSeconds > 0) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
@@ -359,11 +353,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.lock_clock, color: Color(0xFFF59E0B), size: 20),
+                        const Icon(Icons.lock_clock,
+                            color: Color(0xFFF59E0B), size: 20),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            l10n.authLockedCountdown(_formatCountdown(_lockoutSeconds)),
+                            l10n.authLockedCountdown(
+                                _formatCountdown(_lockoutSeconds)),
                             style: const TextStyle(
                               color: Color(0xFFF59E0B),
                               fontSize: 13,
@@ -378,107 +374,71 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ] else
                   const SizedBox(height: 8),
 
-                // Login button
+                // Sign In button
                 SizedBox(
-                  height: 56,
+                  height: 52,
                   child: ElevatedButton(
-                    onPressed: (authState.isLoading || _lockoutSeconds > 0) ? null : _handleLogin,
+                    onPressed: (authState.isLoading || _lockoutSeconds > 0)
+                        ? null
+                        : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF34D399),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      disabledBackgroundColor: const Color(0xFF34D399).withValues(alpha: 0.5),
+                      disabledBackgroundColor:
+                          const Color(0xFF34D399).withValues(alpha: 0.5),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
-                            width: 24,
-                            height: 24,
+                            width: 22,
+                            height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : _lockoutSeconds > 0
                             ? Text(
                                 _formatCountdown(_lockoutSeconds),
                                 style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              )
+                            : const Text(
+                                'Sign In',
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
                                 ),
-                              )
-                        : Text(
-                            l10n.authSignIn,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                              ),
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: isDark ? const Color(0xFF6B7280) : const Color(0xFFD1D5DB))),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        l10n.commonOr,
-                        style: TextStyle(
-                          color: isDark ? const Color(0xFF6B7280) : const Color(0xFF6B7280),
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: isDark ? const Color(0xFF6B7280) : const Color(0xFFD1D5DB))),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Google button (demo only)
-                SizedBox(
-                  height: 56,
-                  child: OutlinedButton.icon(
-                    onPressed: null, // Disabled
-                    icon: const Icon(Icons.g_mobiledata, size: 28),
-                    label: Text(l10n.authContinueGoogle),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      side: BorderSide(
-                        color: isDark ? const Color(0xFF6B7280) : const Color(0xFFD1D5DB),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Register link
+                // Sign up link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       l10n.authNoAccount,
-                      style: TextStyle(
-                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     TextButton(
-                      onPressed: () => context.go('/onboarding?flow=register'),
+                      onPressed: () =>
+                          context.go('/onboarding?flow=register'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                      ),
                       child: Text(
-                        l10n.authSignUp,
+                        l10n.authSignUpLink,
                         style: const TextStyle(
                           color: Color(0xFF34D399),
                           fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -486,38 +446,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Privacy note
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF34D399).withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.lock_outline,
-                        color: Color(0xFF34D399),
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          l10n.authPrivacyNote,
-                          style: TextStyle(
-                            color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),

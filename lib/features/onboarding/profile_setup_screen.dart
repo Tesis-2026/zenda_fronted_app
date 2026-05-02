@@ -73,7 +73,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not save profile. Continuing anyway.')),
+          SnackBar(content: Text(context.l10n.profileSetupSaveError)),
         );
         context.go('/surveys/pre');
       }
@@ -97,7 +97,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      backgroundColor: _page == 4
+          ? const Color(0xFF34D399)
+          : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
       body: SafeArea(
         child: Column(
           children: [
@@ -207,7 +209,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   Widget _buildCompleteFooter(AppLocalizations l10n) {
-    return Padding(
+    return Container(
+      color: const Color(0xFF34D399),
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
       child: SizedBox(
         width: double.infinity,
@@ -215,7 +218,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         child: FilledButton(
           onPressed: () => context.go('/surveys/pre'),
           style: FilledButton.styleFrom(
-            backgroundColor: _green,
+            backgroundColor: Colors.white,
+            foregroundColor: const Color(0xFF065F46),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
           child: Text(
@@ -228,37 +232,103 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 }
 
-class _AgePage extends StatelessWidget {
+class _AgePage extends StatefulWidget {
   const _AgePage({required this.controller, required this.l10n, required this.isDark});
   final TextEditingController controller;
   final AppLocalizations l10n;
   final bool isDark;
 
   @override
+  State<_AgePage> createState() => _AgePageState();
+}
+
+class _AgePageState extends State<_AgePage> {
+  int _age = 21;
+
+  @override
+  void initState() {
+    super.initState();
+    final parsed = int.tryParse(widget.controller.text.trim());
+    if (parsed != null && parsed >= 16 && parsed <= 60) _age = parsed;
+    widget.controller.text = _age.toString();
+  }
+
+  void _adjust(int delta) {
+    final next = (_age + delta).clamp(16, 60);
+    setState(() => _age = next);
+    widget.controller.text = next.toString();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = widget.l10n;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.profileSetupAge,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 20),
-          TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: l10n.profileSetupAgeHint,
-              prefixIcon: const Icon(Icons.cake_outlined),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
-              ),
+          const SizedBox(height: 8),
+          Text(l10n.profileSetupAgeHint,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+          const SizedBox(height: 48),
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _StepperButton(
+                  icon: Icons.remove_rounded,
+                  onTap: () => _adjust(-1),
+                ),
+                const SizedBox(width: 32),
+                Column(
+                  children: [
+                    Text(
+                      '$_age',
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF34D399),
+                          ),
+                    ),
+                    Text(
+                      l10n.profileSetupAgeStepperLabel,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 32),
+                _StepperButton(
+                  icon: Icons.add_rounded,
+                  onTap: () => _adjust(1),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StepperButton extends StatelessWidget {
+  const _StepperButton({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFF34D399).withValues(alpha: 0.15),
+          border: Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.4)),
+        ),
+        child: Icon(icon, color: const Color(0xFF34D399), size: 24),
       ),
     );
   }
@@ -269,6 +339,10 @@ class _UniversityPage extends StatelessWidget {
   final TextEditingController controller;
   final AppLocalizations l10n;
   final bool isDark;
+
+  static const _popular = [
+    'UPC', 'PUCP', 'UNMSM', 'UL', 'USMP', 'UNFV', 'UNI', 'UTEC',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -286,13 +360,42 @@ class _UniversityPage extends StatelessWidget {
             autofocus: true,
             decoration: InputDecoration(
               hintText: l10n.profileSetupUniversityHint,
-              prefixIcon: const Icon(Icons.school_outlined),
+              prefixIcon: const Icon(Icons.search_rounded),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
               ),
             ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.profileSetupPopularUniversities,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _popular
+                .map((u) => GestureDetector(
+                      onTap: () => controller.text = u,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                          border: Border.all(
+                            color: isDark ? Colors.white24 : Colors.black12,
+                          ),
+                        ),
+                        child: Text(u,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                )),
+                      ),
+                    ))
+                .toList(),
           ),
         ],
       ),
@@ -362,14 +465,45 @@ class _IncomeTypePage extends StatelessWidget {
   }
 }
 
-class _MonthlyIncomePage extends StatelessWidget {
+class _MonthlyIncomePage extends StatefulWidget {
   const _MonthlyIncomePage({required this.controller, required this.l10n, required this.isDark});
   final TextEditingController controller;
   final AppLocalizations l10n;
   final bool isDark;
 
   @override
+  State<_MonthlyIncomePage> createState() => _MonthlyIncomePageState();
+}
+
+class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
+  static const _quickValues = [500.0, 1200.0, 2000.0];
+  double? _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    final v = double.tryParse(widget.controller.text.trim());
+    if (v != null && _quickValues.contains(v)) _selected = v;
+  }
+
+  void _pickQuick(double value) {
+    setState(() => _selected = value);
+    widget.controller.text = value.toStringAsFixed(0);
+  }
+
+  String _formatQuick(double v) {
+    if (v == 500) return 'S/ 500';
+    if (v == 1200) return 'S/ 1,200';
+    if (v == 2000) return 'S/ 2,000';
+    return 'S/ ${v.toStringAsFixed(0)}';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final isDark = widget.isDark;
+    final displayVal = double.tryParse(widget.controller.text.trim()) ?? 0.0;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
       child: Column(
@@ -377,14 +511,62 @@ class _MonthlyIncomePage extends StatelessWidget {
         children: [
           Text(l10n.profileSetupMonthlyIncome,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
+          Text(l10n.profileSetupMonthlyIncomeHint,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+          const SizedBox(height: 32),
+          Center(
+            child: Text(
+              'S/ ${displayVal == 0.0 ? '0' : displayVal.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF34D399),
+                  ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _quickValues.map((v) {
+              final isSelected = _selected == v;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: GestureDetector(
+                  onTap: () => _pickQuick(v),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF34D399)
+                          : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF34D399)
+                            : (isDark ? Colors.white24 : Colors.black12),
+                      ),
+                    ),
+                    child: Text(
+                      _formatQuick(v),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark ? Colors.white70 : const Color(0xFF1F2937)),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
           TextField(
-            controller: controller,
+            controller: widget.controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            autofocus: true,
+            onChanged: (_) => setState(() => _selected = null),
             decoration: InputDecoration(
               hintText: l10n.profileSetupMonthlyIncomeHint,
-              prefixIcon: const Icon(Icons.attach_money_outlined),
               prefixText: 'S/ ',
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               focusedBorder: OutlineInputBorder(
@@ -406,44 +588,75 @@ class _CompletePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [Color(0xFF34D399), Color(0xFF10B981)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFF34D399),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.celebration_rounded, size: 80, color: Colors.white),
+              const SizedBox(height: 24),
+              Text(
+                l10n.profileSetupCompleteTitle,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.profileSetupCompleteBody,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.trending_up_rounded, color: Colors.white, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.profileSetupComplete40pct,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.profileSetupCompleteImproves,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: const Icon(Icons.check_rounded, size: 48, color: Colors.white),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              l10n.profileSetupCompleteTitle,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF1F2937),
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.profileSetupCompleteBody,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    height: 1.6,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

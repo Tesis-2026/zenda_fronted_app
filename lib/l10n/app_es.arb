@@ -11,6 +11,8 @@
   "commonNotSet": "No definido",
   "commonUnknownError": "Error desconocido",
   "commonSignOut": "Cerrar sesión",
+  "commonDelete": "Eliminar",
+  "commonLater": "Más tarde",
 
   "validationEnterEmail": "Ingresa tu correo",
   "validationInvalidEmail": "Correo inválido",
@@ -81,10 +83,11 @@
   "dashboardMotivation": "Mejoremos tus finanzas hoy.",
   "dashboardPostSurveyBannerTitle": "Encuesta final disponible",
   "dashboardPostSurveyBannerBody": "Llevas 30 días usando Zenda — completa la encuesta final para medir tu progreso.",
-  "dashboardNavHome": "Inicio",
-  "dashboardNavTransactions": "Movs.",
-  "dashboardNavBudget": "Presupuesto",
-  "dashboardNavProfile": "Perfil",
+  "dashboardNavHome": "INICIO",
+  "dashboardNavTransactions": "MOVS",
+  "dashboardNavAi": "IA",
+  "dashboardNavGoals": "METAS",
+  "dashboardNavProfile": "PERFIL",
   "dashboardRecord": "Registrar",
   "dashboardMyAccounts": "Mis Cuentas",
   "dashboardBudgetTitle": "Tu Presupuesto 50/30/20",
@@ -134,6 +137,7 @@
   "txAmountLabel": "Monto (PEN)",
   "txAmountHint": "0.00",
   "txCategoryLabel": "Categoría",
+  "txAddButton": "+ Agregar",
   "txAddCustomCategory": "Nueva categoría",
   "txNoteLabel": "Nota (opcional)",
   "txNoteHint": "ej. Cafetería",
@@ -216,6 +220,7 @@
   "profileMonthlyIncome": "Ingreso mensual",
   "profileFinancialLiteracy": "Educación financiera",
   "profileEditButton": "Editar perfil",
+  "profileEdit": "Editar",
   "profileFullNameLabel": "Nombre completo",
   "profileAgeLabel": "Edad",
   "profileUniversityLabel": "Universidad",
@@ -757,5 +762,91 @@
   "reportsEvolutionBalance": "Balance",
   "reportsEvolutionNoData": "Agrega datos de al menos 2 meses para ver tu evolución",
 
-  "dashboardPostSurveyBannerAction": "Completar encuesta"
+  "dashboardPostSurveyBannerAction": "Completar encuesta",
+
+  "authConfirmPasswordHint": "Confirmar contraseña",
+  "validationPasswordsMismatch": "Las contraseñas no coinciden",
+  "dashboardTotalBalance": "Balance Total",
+  "dashboardViewAll": "Ver todo",
+  "dashboardMonthlyIncome": "Ingresos",
+  "dashboardMonthlyExpense": "Gastos",
+  "dashboardCashDebitCredit": "Efectivo · Débito · Crédito",
+
+  "goalsNewButton": "+ Nuevo",
+
+  "emailVerifTitle": "Revisa tu correo",
+  "emailVerifSubtitle": "Enviamos un enlace de verificación a {email}",
+  "@emailVerifSubtitle": {
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "emailVerifStep1": "Abre el correo de Zenda",
+  "emailVerifStep2": "Haz clic en el enlace de verificación",
+  "emailVerifStep3": "Vuelve a la app para continuar",
+  "emailVerifOpenApp": "Abrir app de correo",
+  "emailVerifResendText": "¿No lo recibiste?",
+  "emailVerifResendAction": "Reenviar",
+
+  "txSavedTitle": "¡Transacción guardada!",
+  "txSavedBody": "Tu gasto fue registrado y tu presupuesto actualizado.",
+  "txSavedLabelAmount": "Monto",
+  "txSavedLabelCategory": "Categoría",
+  "txSavedLabelDate": "Fecha",
+  "txSavedLabelBudget": "Impacto en presupuesto",
+  "txSavedBackButton": "Volver a transacciones",
+  "txSavedAddAnother": "Agregar otra",
+
+  "authResetSuccessTitle": "¡Contraseña actualizada!",
+  "authResetSuccessBody": "Tu contraseña fue restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.",
+  "authResetSuccessSecurity": "Por tu seguridad, se cerraron todas tus sesiones.",
+  "authResetSuccessButton": "Iniciar sesión",
+
+  "authSetNewPasswordTitle": "Nueva contraseña",
+  "authSetNewPasswordSubtitle": "Tu nueva contraseña debe tener al menos 8 caracteres, 1 mayúscula y 1 número.",
+  "authConfirmPasswordLabel": "Confirmar contraseña",
+  "authPasswordStrengthWeak": "Débil",
+  "authPasswordStrengthFair": "Regular",
+  "authPasswordStrengthStrong": "Fuerte",
+
+  "goalsDetailLeftToReach": "S/ {amount} restante para alcanzar tu meta",
+  "@goalsDetailLeftToReach": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "goalsDetailAddContrib": "+ Agregar",
+
+  "budgetByCategory": "Por categoría",
+
+  "authForgotCodeExpiry": "El código de verificación expira en 15 minutos. Revisa tu carpeta de spam si no lo encuentras.",
+
+  "aiChatQuickAnalyze": "Analizar gastos",
+  "aiChatQuickBudget": "Tips de presupuesto",
+  "aiChatQuickGoal": "Progreso de metas",
+
+  "profileSetupAgeStepperLabel": "años",
+  "profileSetupPopularUniversities": "Universidades populares",
+  "profileSetupIncomeQuick500": "S/ 500",
+  "profileSetupIncomeQuick1200": "S/ 1,200",
+  "profileSetupIncomeQuick2000": "S/ 2,000",
+
+  "educationSearchHint": "Buscar temas...",
+  "educationFilterAll": "Todos",
+  "educationFilterBeginner": "Básico",
+  "educationFilterIntermediate": "Intermedio",
+  "educationFilterAdvanced": "Avanzado",
+  "educationFeaturedLabel": "Destacado",
+  "educationStartLabel": "Comenzar",
+
+  "authSignUpLink": "Regístrate",
+  "goalManualContribution": "Contribución manual",
+  "goalTargetSuffix": "meta",
+  "profileSetupSaveError": "No se pudo guardar el perfil. Continuando de todos modos.",
+  "profileSetupComplete40pct": "40% mejores predicciones",
+  "profileSetupCompleteImproves": "Completar tu perfil mejora la precisión del pronóstico.",
+  "budgetSelectPeriod": "Seleccionar período",
+  "commonDone": "Listo",
+  "profileCurrencyPEN": "PEN — Sol peruano (S/)",
+  "profileCurrencyUSD": "USD — Dólar americano ($)"
 }

@@ -231,7 +231,7 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Done'),
+                child: Text(l10n.commonDone),
               ),
             ),
           ],

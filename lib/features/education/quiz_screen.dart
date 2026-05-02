@@ -594,7 +594,7 @@ class _ResultsView extends StatelessWidget {
             width: double.infinity,
             child: FilledButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Done'),
+              child: Text(l10n.commonDone),
             ),
           ),
           const SizedBox(height: 16),

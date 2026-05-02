@@ -16,20 +16,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
-
-    // Close keyboard
     FocusScope.of(context).unfocus();
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
@@ -39,7 +40,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _passwordController.text,
     );
 
-    // Check if registration was successful — route to email-sent screen
     final authState = ref.read(authNotifierProvider);
     if (authState.isAuthenticated && mounted) {
       context.go('/auth/email-sent');
@@ -48,17 +48,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final authState = ref.watch(authNotifierProvider);
     final l10n = context.l10n;
 
-    // Show error if exists
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.resolveError(next.error!)),
             backgroundColor: const Color(0xFFFB7185),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+            margin: const EdgeInsets.all(16),
           ),
         );
         ref.read(authNotifierProvider.notifier).clearError();
@@ -66,93 +68,51 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
-          ),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
           onPressed: () => context.go('/auth/login'),
         ),
       ),
       body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF34D399), Color(0xFF10B981)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                const SizedBox(height: 16),
+
+                Text(
+                  l10n.authRegisterTitle,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
                   ),
-                  child: const Icon(
-                    Icons.account_balance_wallet_rounded,
-                    size: 40,
-                    color: Colors.white,
-                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  l10n.authRegisterSubtitle,
+                  style: TextStyle(fontSize: 15, color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 32),
 
-                // Title
-                Text(
-                  l10n.authRegisterTitle,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  l10n.authRegisterSubtitle,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: 40),
-
-                // Name field
+                // Full name field
                 TextFormField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
-                  style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
-                  decoration: InputDecoration(
-                    labelText: l10n.authFullNameLabel,
-                    hintText: l10n.authFullNameHint,
-                    prefixIcon: const Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
-                    ),
-                  ),
+                  decoration: _fieldDecoration(l10n.authFullNameHint),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return l10n.validationEnterName;
@@ -161,81 +121,89 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   },
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Email field
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
-                  decoration: InputDecoration(
-                    labelText: l10n.authEmailLabel,
-                    hintText: l10n.authEmailHint,
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
-                    ),
-                  ),
+                  decoration: _fieldDecoration(l10n.authEmailHint),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return l10n.validationEnterEmail;
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
                       return l10n.validationInvalidEmail;
                     }
                     return null;
                   },
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Password field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: isDark ? const TextStyle(color: Colors.white) : const TextStyle(color: Color(0xFF1F2937)),
-                  decoration: InputDecoration(
-                    labelText: l10n.authPasswordLabel,
-                    hintText: l10n.authPasswordHint,
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
+                  decoration: _fieldDecoration(
+                    l10n.authPasswordHint,
+                    suffix: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                        color: Colors.grey[500],
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
+                      onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return l10n.validationEnterPassword;
                     }
-                    if (value.length < 8) {
-                      return l10n.validationMinPassword;
+                    if (value.length < 8) return l10n.validationMinPassword;
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                // Confirm password field
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _obscureConfirm,
+                  decoration: _fieldDecoration(
+                    l10n.authConfirmPasswordHint,
+                    suffix: IconButton(
+                      icon: Icon(
+                        _obscureConfirm
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                        color: Colors.grey[500],
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscureConfirm = !_obscureConfirm),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return l10n.validationEnterPassword;
+                    }
+                    if (value != _passwordController.text) {
+                      return l10n.validationPasswordsMismatch;
                     }
                     return null;
                   },
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
 
-                // Register button
                 SizedBox(
-                  height: 56,
+                  height: 52,
                   child: ElevatedButton(
                     onPressed: authState.isLoading ? null : _handleRegister,
                     style: ElevatedButton.styleFrom(
@@ -243,17 +211,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      disabledBackgroundColor: const Color(0xFF34D399).withValues(alpha: 0.5),
+                      disabledBackgroundColor:
+                          const Color(0xFF34D399).withValues(alpha: 0.5),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
-                            width: 24,
-                            height: 24,
+                            width: 22,
+                            height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : Text(
@@ -261,31 +231,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
                             ),
                           ),
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
 
-                // Login link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       l10n.authHaveAccount,
-                      style: TextStyle(
-                        color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.7) : const Color(0xFF6B7280),
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     TextButton(
                       onPressed: () => context.go('/auth/login'),
+                      style: TextButton.styleFrom(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 6),
+                      ),
                       child: Text(
                         l10n.authSignIn,
                         style: const TextStyle(
                           color: Color(0xFF34D399),
                           fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -293,54 +264,43 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Privacy note
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF34D399).withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.shield_outlined,
-                            color: Color(0xFF34D399),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            l10n.authDataSecure,
-                            style: TextStyle(
-                              color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.authDataSecureRegister,
-                        style: TextStyle(
-                          color: isDark ? const Color(0xFF34D399).withValues(alpha: 0.9) : const Color(0xFF059669),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  InputDecoration _fieldDecoration(String hint, {Widget? suffix}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey[400]),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFFB7185)),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFFB7185), width: 2),
+      ),
+      suffixIcon: suffix,
     );
   }
 }

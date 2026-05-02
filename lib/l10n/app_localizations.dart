@@ -152,6 +152,18 @@ abstract class AppLocalizations {
   /// **'Sign out'**
   String get commonSignOut;
 
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @commonLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get commonLater;
+
   /// No description provided for @validationEnterEmail.
   ///
   /// In en, this message translates to:
@@ -521,25 +533,31 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardNavHome.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
+  /// **'HOME'**
   String get dashboardNavHome;
 
   /// No description provided for @dashboardNavTransactions.
   ///
   /// In en, this message translates to:
-  /// **'Txns'**
+  /// **'TXNS'**
   String get dashboardNavTransactions;
 
-  /// No description provided for @dashboardNavBudget.
+  /// No description provided for @dashboardNavAi.
   ///
   /// In en, this message translates to:
-  /// **'Budget'**
-  String get dashboardNavBudget;
+  /// **'AI'**
+  String get dashboardNavAi;
+
+  /// No description provided for @dashboardNavGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'GOALS'**
+  String get dashboardNavGoals;
 
   /// No description provided for @dashboardNavProfile.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'PROFILE'**
   String get dashboardNavProfile;
 
   /// No description provided for @dashboardRecord.
@@ -715,6 +733,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Category'**
   String get txCategoryLabel;
+
+  /// No description provided for @txAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add'**
+  String get txAddButton;
 
   /// No description provided for @txAddCustomCategory.
   ///
@@ -1069,6 +1093,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit profile'**
   String get profileEditButton;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get profileEdit;
 
   /// No description provided for @profileFullNameLabel.
   ///
@@ -2951,6 +2981,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Take survey'**
   String get dashboardPostSurveyBannerAction;
+
+  /// No description provided for @authConfirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authConfirmPasswordHint;
+
+  /// No description provided for @validationPasswordsMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get validationPasswordsMismatch;
+
+  /// No description provided for @dashboardTotalBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Balance'**
+  String get dashboardTotalBalance;
+
+  /// No description provided for @dashboardViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get dashboardViewAll;
+
+  /// No description provided for @dashboardMonthlyIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get dashboardMonthlyIncome;
+
+  /// No description provided for @dashboardMonthlyExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get dashboardMonthlyExpense;
+
+  /// No description provided for @dashboardCashDebitCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash · Debit · Credit'**
+  String get dashboardCashDebitCredit;
+
+  /// No description provided for @goalsNewButton.
+  ///
+  /// In en, this message translates to:
+  /// **'+ New'**
+  String get goalsNewButton;
+
+  /// No description provided for @emailVerifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get emailVerifTitle;
+
+  /// No description provided for @emailVerifSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification link to {email}'**
+  String emailVerifSubtitle(String email);
+
+  /// No description provided for @emailVerifStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the email from Zenda'**
+  String get emailVerifStep1;
+
+  /// No description provided for @emailVerifStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the verification link'**
+  String get emailVerifStep2;
+
+  /// No description provided for @emailVerifStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to the app to continue'**
+  String get emailVerifStep3;
+
+  /// No description provided for @emailVerifOpenApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Email App'**
+  String get emailVerifOpenApp;
+
+  /// No description provided for @emailVerifResendText.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive it?'**
+  String get emailVerifResendText;
+
+  /// No description provided for @emailVerifResendAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get emailVerifResendAction;
+
+  /// No description provided for @txSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction saved!'**
+  String get txSavedTitle;
+
+  /// No description provided for @txSavedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your expense has been recorded and your budget updated.'**
+  String get txSavedBody;
+
+  /// No description provided for @txSavedLabelAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get txSavedLabelAmount;
+
+  /// No description provided for @txSavedLabelCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get txSavedLabelCategory;
+
+  /// No description provided for @txSavedLabelDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get txSavedLabelDate;
+
+  /// No description provided for @txSavedLabelBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget impact'**
+  String get txSavedLabelBudget;
+
+  /// No description provided for @txSavedBackButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Transactions'**
+  String get txSavedBackButton;
+
+  /// No description provided for @txSavedAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Another'**
+  String get txSavedAddAnother;
+
+  /// No description provided for @authResetSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated!'**
+  String get authResetSuccessTitle;
+
+  /// No description provided for @authResetSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been reset successfully. You can now sign in with your new password.'**
+  String get authResetSuccessBody;
+
+  /// No description provided for @authResetSuccessSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, you\'ve been signed out of all devices.'**
+  String get authResetSuccessSecurity;
+
+  /// No description provided for @authResetSuccessButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In Now'**
+  String get authResetSuccessButton;
+
+  /// No description provided for @authSetNewPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set new password'**
+  String get authSetNewPasswordTitle;
+
+  /// No description provided for @authSetNewPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new password must be at least 8 characters with 1 uppercase, 1 number.'**
+  String get authSetNewPasswordSubtitle;
+
+  /// No description provided for @authConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authConfirmPasswordLabel;
+
+  /// No description provided for @authPasswordStrengthWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak'**
+  String get authPasswordStrengthWeak;
+
+  /// No description provided for @authPasswordStrengthFair.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair'**
+  String get authPasswordStrengthFair;
+
+  /// No description provided for @authPasswordStrengthStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get authPasswordStrengthStrong;
+
+  /// No description provided for @goalsDetailLeftToReach.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ {amount} left to reach your goal!'**
+  String goalsDetailLeftToReach(String amount);
+
+  /// No description provided for @goalsDetailAddContrib.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add'**
+  String get goalsDetailAddContrib;
+
+  /// No description provided for @budgetByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'By Category'**
+  String get budgetByCategory;
+
+  /// No description provided for @authForgotCodeExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'The verification code expires in 15 minutes. Check your spam folder if you don\'t see it.'**
+  String get authForgotCodeExpiry;
+
+  /// No description provided for @aiChatQuickAnalyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze spending'**
+  String get aiChatQuickAnalyze;
+
+  /// No description provided for @aiChatQuickBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget tips'**
+  String get aiChatQuickBudget;
+
+  /// No description provided for @aiChatQuickGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal progress'**
+  String get aiChatQuickGoal;
+
+  /// No description provided for @profileSetupAgeStepperLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'years old'**
+  String get profileSetupAgeStepperLabel;
+
+  /// No description provided for @profileSetupPopularUniversities.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular universities'**
+  String get profileSetupPopularUniversities;
+
+  /// No description provided for @profileSetupIncomeQuick500.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ 500'**
+  String get profileSetupIncomeQuick500;
+
+  /// No description provided for @profileSetupIncomeQuick1200.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ 1,200'**
+  String get profileSetupIncomeQuick1200;
+
+  /// No description provided for @profileSetupIncomeQuick2000.
+  ///
+  /// In en, this message translates to:
+  /// **'S/ 2,000'**
+  String get profileSetupIncomeQuick2000;
+
+  /// No description provided for @educationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search topics...'**
+  String get educationSearchHint;
+
+  /// No description provided for @educationFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get educationFilterAll;
+
+  /// No description provided for @educationFilterBeginner.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginner'**
+  String get educationFilterBeginner;
+
+  /// No description provided for @educationFilterIntermediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate'**
+  String get educationFilterIntermediate;
+
+  /// No description provided for @educationFilterAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get educationFilterAdvanced;
+
+  /// No description provided for @educationFeaturedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get educationFeaturedLabel;
+
+  /// No description provided for @educationStartLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get educationStartLabel;
+
+  /// No description provided for @authSignUpLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get authSignUpLink;
+
+  /// No description provided for @goalManualContribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual contribution'**
+  String get goalManualContribution;
+
+  /// No description provided for @goalTargetSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'goal'**
+  String get goalTargetSuffix;
+
+  /// No description provided for @profileSetupSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save profile. Continuing anyway.'**
+  String get profileSetupSaveError;
+
+  /// No description provided for @profileSetupComplete40pct.
+  ///
+  /// In en, this message translates to:
+  /// **'40% better predictions'**
+  String get profileSetupComplete40pct;
+
+  /// No description provided for @profileSetupCompleteImproves.
+  ///
+  /// In en, this message translates to:
+  /// **'Completing your profile improves forecast accuracy.'**
+  String get profileSetupCompleteImproves;
+
+  /// No description provided for @budgetSelectPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select period'**
+  String get budgetSelectPeriod;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get commonDone;
+
+  /// No description provided for @profileCurrencyPEN.
+  ///
+  /// In en, this message translates to:
+  /// **'PEN — Peruvian Sol (S/)'**
+  String get profileCurrencyPEN;
+
+  /// No description provided for @profileCurrencyUSD.
+  ///
+  /// In en, this message translates to:
+  /// **'USD — US Dollar (\$)'**
+  String get profileCurrencyUSD;
 }
 
 class _AppLocalizationsDelegate

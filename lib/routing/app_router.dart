@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth_controller.dart';
+import '../features/transactions/transaction_list_screen.dart';
 import '../features/onboarding/splash_decider.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/profile_setup_screen.dart';
@@ -21,6 +22,7 @@ import '../features/categories/category_management_screen.dart';
 import '../features/goals/goals_screen.dart';
 import '../features/goals/goal_detail_screen.dart';
 import '../core/models/savings_goal.dart';
+import '../core/models/transaction.dart';
 import '../features/reports/reports_screen.dart';
 import '../features/predictions/predictions_screen.dart';
 import '../features/recommendations/recommendations_screen.dart';
@@ -35,9 +37,10 @@ import '../features/surveys/survey_screen.dart';
 import '../features/surveys/survey_comparison_screen.dart';
 import '../features/surveys/sus_screen.dart';
 import '../providers/pre_survey_provider.dart';
-import '../features/transactions/edit_transaction_screen.dart';
 import '../features/notifications/notification_preferences_screen.dart';
 import '../features/ai_chat/ai_chat_screen.dart';
+import '../features/transactions/transaction_saved_screen.dart';
+import '../features/auth/reset_success_screen.dart';
 
 // Routes that do not require authentication.
 const _publicRoutes = {
@@ -55,7 +58,13 @@ const _publicRoutes = {
 const _authOnlyRoutes = {'/auth/login', '/auth/register'};
 
 // Routes exempt from the profile-setup redirect.
-const _profileSetupExempt = {'/profile-setup', '/auth/email-sent', '/dashboard'};
+const _profileSetupExempt = {
+  '/profile-setup',
+  '/auth/email-sent',
+  '/dashboard',
+  '/transaction-saved',
+  '/auth/reset-success',
+};
 
 // Routes exempt from the pre-survey redirect.
 const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/surveys/sus', '/profile-setup'};
@@ -202,6 +211,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
+        path: '/transactions',
+        builder: (context, state) => const TransactionsScreen(),
+      ),
+      GoRoute(
         path: '/add-transaction',
         builder: (context, state) => const AddTransactionScreen(),
       ),
@@ -224,7 +237,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: ':id',
             builder: (context, state) {
-              final goal = state.extra as SavingsGoal;
+              final goal = state.extra as SavingsGoal?;
+              if (goal == null) return const GoalsScreen();
               return GoalDetailScreen(goal: goal);
             },
           ),
@@ -291,19 +305,29 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SusScreen(),
       ),
       GoRoute(
-        path: '/edit-transaction',
-        builder: (context, state) {
-          final tx = state.extra as Map<String, dynamic>;
-          return EditTransactionScreen(transaction: tx);
-        },
-      ),
-      GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationPreferencesScreen(),
       ),
       GoRoute(
         path: '/ai-chat',
         builder: (context, state) => const AiChatScreen(),
+      ),
+      GoRoute(
+        path: '/transaction-saved',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          if (extra == null) return const DashboardScreen();
+          return TransactionSavedScreen(
+            amount: extra['amount'] as double,
+            categoryName: extra['categoryName'] as String,
+            date: extra['date'] as DateTime,
+            kind: extra['kind'] as TransactionKind,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/auth/reset-success',
+        builder: (context, state) => const ResetSuccessScreen(),
       ),
     ],
   );

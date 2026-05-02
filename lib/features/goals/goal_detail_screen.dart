@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 
 final _contributionsProvider =
@@ -13,38 +13,70 @@ final _contributionsProvider =
   (ref, goalId) => GoalsApiService().getContributions(goalId),
 );
 
-class GoalDetailScreen extends ConsumerWidget {
+class GoalDetailScreen extends ConsumerStatefulWidget {
   final SavingsGoal goal;
 
   const GoalDetailScreen({super.key, required this.goal});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GoalDetailScreen> createState() => _GoalDetailScreenState();
+}
+
+class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
+  late SavingsGoal _goal;
+
+  @override
+  void initState() {
+    super.initState();
+    _goal = widget.goal;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final contributionsAsync = ref.watch(_contributionsProvider(goal.id));
+    final contributionsAsync = ref.watch(_contributionsProvider(_goal.id));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.goalsDetailTitle)),
       body: contributionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(l10n.goalsErrorLoad)),
-        data: (contributions) => _Body(
-          goal: goal,
-          contributions: contributions,
-          onComplete: () => _completeGoal(context, ref),
-          onDelete: () => _deleteGoal(context, ref),
+        data: (contributions) => Column(
+          children: [
+            _GreenHeader(goal: _goal),
+            Expanded(
+              child: _Body(
+                goal: _goal,
+                contributions: contributions,
+                onContribute: () => _showContributeDialog(context),
+                onDelete: () => _deleteGoal(context),
+              ),
+            ),
+          ],
         ),
       ),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 3),
     );
   }
 
-  Future<void> _completeGoal(BuildContext context, WidgetRef ref) async {
+  Future<void> _showContributeDialog(BuildContext context) async {
     final l10n = context.l10n;
+    final controller = TextEditingController();
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.goalsMarkCompleteConfirm),
-        content: Text(l10n.goalsMarkCompleteConfirmBody),
+        title: Text(l10n.goalsContributeTitle),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType:
+              const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: l10n.goalsContributeLabel,
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -52,18 +84,23 @@ class GoalDetailScreen extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.goalsMarkComplete),
+            child: Text(l10n.commonSave),
           ),
         ],
       ),
     );
+
     if (confirmed != true || !context.mounted) return;
-    await GoalsApiService().complete(goal.id);
+    final amount = double.tryParse(controller.text.trim());
+    if (amount == null || amount <= 0) return;
+
+    final updated = await GoalsApiService().contribute(_goal.id, amount: amount);
     if (!context.mounted) return;
-    _showCelebrationDialog(context, goal.name);
+    setState(() => _goal = updated);
+    ref.invalidate(_contributionsProvider(_goal.id));
   }
 
-  Future<void> _deleteGoal(BuildContext context, WidgetRef ref) async {
+  Future<void> _deleteGoal(BuildContext context) async {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -82,35 +119,103 @@ class GoalDetailScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await GoalsApiService().delete(goal.id);
+    await GoalsApiService().delete(_goal.id);
     if (!context.mounted) return;
     context.pop();
   }
+}
 
-  void _showCelebrationDialog(BuildContext context, String goalName) {
-    final l10n = context.l10n;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.emoji_events_rounded,
-            color: Color(0xFFF59E0B), size: 48),
-        title: Text(l10n.goalsCelebrate, textAlign: TextAlign.center),
-        content: Text(
-          l10n.goalsCelebrateMessage(goalName),
-          textAlign: TextAlign.center,
+class _GreenHeader extends StatelessWidget {
+  final SavingsGoal goal;
+  const _GreenHeader({required this.goal});
+
+  IconData _iconFor(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('trip') ||
+        lower.contains('travel') ||
+        lower.contains('vacation') ||
+        lower.contains('flight')) {
+      return Icons.flight;
+    }
+    if (lower.contains('laptop') ||
+        lower.contains('computer') ||
+        lower.contains('tech')) {
+      return Icons.laptop_outlined;
+    }
+    if (lower.contains('emergency') ||
+        lower.contains('safety') ||
+        lower.contains('shield')) {
+      return Icons.security_outlined;
+    }
+    if (lower.contains('car') || lower.contains('auto')) {
+      return Icons.directions_car_outlined;
+    }
+    if (lower.contains('home') || lower.contains('house')) {
+      return Icons.home_outlined;
+    }
+    if (lower.contains('education') ||
+        lower.contains('study') ||
+        lower.contains('school')) {
+      return Icons.school_outlined;
+    }
+    return Icons.savings_outlined;
+  }
+
+  String? _dueDateMonthYear(String? dueDateStr) {
+    if (dueDateStr == null) return null;
+    final due = DateTime.tryParse(dueDateStr);
+    if (due == null) return null;
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[due.month - 1]} ${due.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final monthYear = _dueDateMonthYear(goal.dueDate);
+    final dueLabel = monthYear != null ? context.l10n.goalsDueDate(monthYear) : null;
+
+    return Container(
+      color: const Color(0xFF34D399),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => context.pop(),
+                  ),
+                ],
+              ),
+            ),
+            Icon(_iconFor(goal.name), size: 56, color: Colors.white),
+            const SizedBox(height: 8),
+            Text(
+              goal.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (dueLabel != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                dueLabel,
+                style: const TextStyle(
+                    color: Colors.white70, fontSize: 14),
+              ),
+            ],
+            const SizedBox(height: 20),
+          ],
         ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              if (context.mounted) context.pop();
-            },
-            style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981)),
-            child: const Text('🎉'),
-          ),
-        ],
       ),
     );
   }
@@ -119,13 +224,13 @@ class GoalDetailScreen extends ConsumerWidget {
 class _Body extends StatelessWidget {
   final SavingsGoal goal;
   final List<GoalContribution> contributions;
-  final VoidCallback onComplete;
+  final VoidCallback onContribute;
   final VoidCallback onDelete;
 
   const _Body({
     required this.goal,
     required this.contributions,
-    required this.onComplete,
+    required this.onContribute,
     required this.onDelete,
   });
 
@@ -134,144 +239,111 @@ class _Body extends StatelessWidget {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final remaining = goal.targetAmount - goal.currentAmount;
-    final pct = goal.progressPercent;
+    final pct = goal.progressPercent.clamp(0.0, 100.0);
     final isComplete = pct >= 100;
-    final progressColor =
-        isComplete ? const Color(0xFF10B981) : const Color(0xFF818CF8);
-
-    final projectionMsg = _buildProjection(context, contributions, remaining);
-    final alertMsg = _buildAlert(context, contributions, remaining);
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       children: [
-        // ── Goal summary card ──────────────────────────────────────
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        goal.name,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    if (isComplete)
-                      const Icon(Icons.check_circle_rounded,
-                          color: Color(0xFF10B981), size: 22),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: pct / 100,
-                    minHeight: 10,
-                    backgroundColor: isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.black.withValues(alpha: 0.08),
-                    valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+        // Stats row: S/ X | Y% | S/ Z
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'S/ ${goal.currentAmount.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.goalsProgressLabel(
-                        goal.currentAmount.toStringAsFixed(2),
-                        goal.targetAmount.toStringAsFixed(2),
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    Text(
-                      '${pct.toStringAsFixed(0)}%',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: progressColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ],
-                ),
-                if (goal.dueDate != null) ...[
-                  const SizedBox(height: 12),
-                  const Divider(height: 1),
-                  const SizedBox(height: 12),
-                  _DueDateRow(goal: goal),
-                ],
-              ],
             ),
-          ),
+            const Spacer(),
+            Text(
+              '${pct.toStringAsFixed(0)}%',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF34D399),
+                  ),
+            ),
+            const Spacer(),
+            Text(
+              'S/ ${goal.targetAmount.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+            ),
+          ],
         ),
-
-        // ── Projection / alert ─────────────────────────────────────
-        if (!isComplete && alertMsg != null) ...[
-          const SizedBox(height: 12),
-          _AlertBanner(message: alertMsg),
-        ] else if (!isComplete && projectionMsg != null) ...[
-          const SizedBox(height: 12),
-          _ProjectionBanner(message: projectionMsg),
-        ],
-
-        // ── Progress chart ─────────────────────────────────────────
-        if (contributions.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          Text(
-            l10n.goalsDetailProgressChart,
-            style: Theme.of(context).textTheme.titleSmall,
+        const SizedBox(height: 12),
+        // Progress bar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: pct / 100,
+            minHeight: 8,
+            backgroundColor: isDark
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.08),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
           ),
-          const SizedBox(height: 8),
-          _CumulativeChart(
-            goal: goal,
-            contributions: contributions,
-          ),
-        ],
-
-        // ── Contribution history ───────────────────────────────────
-        const SizedBox(height: 20),
-        Text(
-          l10n.goalsDetailContributionHistory,
-          style: Theme.of(context).textTheme.titleSmall,
         ),
         const SizedBox(height: 8),
+        if (!isComplete && remaining > 0)
+          Text(
+            l10n.goalsDetailLeftToReach(remaining.toStringAsFixed(0)),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+          ),
+        const SizedBox(height: 28),
+        // Contributions header + add button
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.goalsDetailContributionHistory,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (!isComplete)
+              TextButton(
+                onPressed: onContribute,
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFF34D399),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  l10n.goalsDetailAddContrib,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
         if (contributions.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: Text(
-                l10n.goalsDetailNoContributions,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-              ),
+            child: Text(
+              l10n.goalsDetailNoContributions,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
             ),
           )
         else
           ...contributions.reversed.map(
             (c) => _ContributionTile(contribution: c),
           ),
-
-        // ── Action buttons ─────────────────────────────────────────
-        const SizedBox(height: 24),
-        if (!isComplete) ...[
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: onComplete,
-              icon: const Icon(Icons.check, size: 18),
-              label: Text(l10n.goalsDetailMarkComplete),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
+        const SizedBox(height: 32),
+        // Delete button
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -280,309 +352,22 @@ class _Body extends StatelessWidget {
                 size: 18, color: Theme.of(context).colorScheme.error),
             label: Text(
               l10n.goalsDetailDelete,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style:
+                  TextStyle(color: Theme.of(context).colorScheme.error),
             ),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               side: BorderSide(
-                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+                color: Theme.of(context)
+                    .colorScheme
+                    .error
+                    .withValues(alpha: 0.5),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 24),
       ],
     );
-  }
-
-  String? _buildProjection(
-    BuildContext context,
-    List<GoalContribution> contributions,
-    double remaining,
-  ) {
-    if (contributions.isEmpty || remaining <= 0) return null;
-    final rate = _dailyRate(contributions);
-    if (rate <= 0) return null;
-
-    final daysNeeded = (remaining / rate).ceil();
-    final projectedDate = DateTime.now().add(Duration(days: daysNeeded));
-    final formatted =
-        DateFormat.yMMMd(Localizations.localeOf(context).toString())
-            .format(projectedDate);
-    return context.l10n.goalsDetailProjection(formatted);
-  }
-
-  String? _buildAlert(
-    BuildContext context,
-    List<GoalContribution> contributions,
-    double remaining,
-  ) {
-    final dueDateStr = goal.dueDate;
-    if (dueDateStr == null) return null;
-    if (contributions.isEmpty || remaining <= 0) return null;
-
-    final dueDate = DateTime.parse(dueDateStr);
-    final rate = _dailyRate(contributions);
-    if (rate <= 0) return null;
-
-    final daysNeeded = (remaining / rate).ceil();
-    final projectedDate = DateTime.now().add(Duration(days: daysNeeded));
-
-    if (projectedDate.isAfter(dueDate)) {
-      final formatted =
-          DateFormat.yMMMd(Localizations.localeOf(context).toString())
-              .format(dueDate);
-      return context.l10n.goalsDetailAlert(formatted);
-    }
-    return null;
-  }
-
-  double _dailyRate(List<GoalContribution> contributions) {
-    if (contributions.length < 2) {
-      return contributions.isEmpty ? 0 : contributions.first.amount / 30;
-    }
-    final first = contributions.first.createdAt;
-    final last = contributions.last.createdAt;
-    final days = last.difference(first).inDays;
-    if (days <= 0) return contributions.first.amount / 30;
-    final total = contributions.fold<double>(0, (s, c) => s + c.amount);
-    return total / days;
-  }
-}
-
-class _DueDateRow extends StatelessWidget {
-  final SavingsGoal goal;
-  const _DueDateRow({required this.goal});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final due = DateTime.tryParse(goal.dueDate!);
-    if (due == null) return const SizedBox.shrink();
-
-    final daysLeft = due.difference(DateTime.now()).inDays;
-    final isOverdue = daysLeft < 0;
-    final isComplete = goal.progressPercent >= 100;
-    final dueLabelColor = isOverdue && !isComplete
-        ? const Color(0xFFFB7185)
-        : Theme.of(context).colorScheme.outline;
-
-    final formattedDate =
-        DateFormat.yMMMd(Localizations.localeOf(context).toString())
-            .format(due);
-
-    final daysText = daysLeft < 0
-        ? l10n.goalsOverdue
-        : daysLeft == 0
-            ? l10n.goalsDaysLeft(1)
-            : l10n.goalsDaysLeft(daysLeft);
-
-    return Row(
-      children: [
-        Expanded(
-          child: _InfoChip(
-            icon: Icons.calendar_today_outlined,
-            label: l10n.goalsDetailDueDate,
-            value: formattedDate,
-            valueColor: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _InfoChip(
-            icon: isOverdue && !isComplete
-                ? Icons.warning_amber_rounded
-                : Icons.schedule_rounded,
-            label: l10n.goalsDetailDaysLeft,
-            value: daysText,
-            valueColor: dueLabelColor,
-            iconColor: dueLabelColor,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color valueColor;
-  final Color? iconColor;
-
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.valueColor,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = iconColor ?? Theme.of(context).colorScheme.outline;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 13, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: valueColor,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AlertBanner extends StatelessWidget {
-  final String message;
-  const _AlertBanner({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFB7185).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFB7185).withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.warning_amber_rounded,
-              color: Color(0xFFFB7185), size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFFFB7185),
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProjectionBanner extends StatelessWidget {
-  final String message;
-  const _ProjectionBanner({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF818CF8).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border:
-            Border.all(color: const Color(0xFF818CF8).withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.trending_up_rounded,
-              color: Color(0xFF818CF8), size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF818CF8),
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CumulativeChart extends StatelessWidget {
-  final SavingsGoal goal;
-  final List<GoalContribution> contributions;
-
-  const _CumulativeChart({
-    required this.goal,
-    required this.contributions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final spots = _buildSpots();
-    final maxY = goal.targetAmount;
-
-    return SizedBox(
-      height: 160,
-      child: LineChart(
-        LineChartData(
-          gridData: const FlGridData(show: false),
-          borderData: FlBorderData(show: false),
-          titlesData: const FlTitlesData(show: false),
-          minY: 0,
-          maxY: maxY,
-          lineBarsData: [
-            LineChartBarData(
-              spots: [
-                FlSpot(0, maxY),
-                FlSpot(spots.last.x, maxY),
-              ],
-              isCurved: false,
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.2)
-                  : Colors.black.withValues(alpha: 0.15),
-              barWidth: 1,
-              dotData: const FlDotData(show: false),
-              dashArray: [4, 4],
-            ),
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: const Color(0xFF818CF8),
-              barWidth: 2,
-              dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(
-                show: true,
-                color: const Color(0xFF818CF8).withValues(alpha: 0.15),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<FlSpot> _buildSpots() {
-    double cumulative = 0;
-    final origin = contributions.first.createdAt;
-    final spots = <FlSpot>[FlSpot(0, 0)];
-
-    for (final c in contributions) {
-      cumulative += c.amount;
-      final x = c.createdAt.difference(origin).inHours.toDouble();
-      spots.add(FlSpot(x, cumulative.clamp(0, goal.targetAmount)));
-    }
-    return spots;
   }
 }
 
@@ -597,22 +382,43 @@ class _ContributionTile extends StatelessWidget {
       Localizations.localeOf(context).toString(),
     ).format(contribution.createdAt);
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const CircleAvatar(
-        backgroundColor: Color(0xFF818CF8),
-        radius: 18,
-        child: Icon(Icons.add, color: Colors.white, size: 18),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
       ),
-      title: Text(
-        'S/ ${contribution.amount.toStringAsFixed(2)}',
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.goalManualContribution,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  formatted,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+              ],
             ),
-      ),
-      subtitle: Text(
-        formatted,
-        style: Theme.of(context).textTheme.bodySmall,
+          ),
+          Text(
+            '+ S/ ${contribution.amount.toStringAsFixed(2)}',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF34D399),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
       ),
     );
   }

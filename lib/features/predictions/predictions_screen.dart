@@ -24,14 +24,10 @@ class PredictionsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.predictionsTitle)),
       body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(_expensePredictionProvider);
-        },
+        onRefresh: () async => ref.invalidate(_expensePredictionProvider),
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _SectionHeader(title: l10n.predictionsExpenseTitle),
-            const SizedBox(height: 8),
             expenseAsync.when(
               loading: () => const _PredictionCardSkeleton(),
               error: (e, _) => _ErrorCard(
@@ -39,11 +35,7 @@ class PredictionsScreen extends ConsumerWidget {
                 onRetry: () => ref.invalidate(_expensePredictionProvider),
               ),
               data: (p) => p.confidenceLevel >= 0.60
-                  ? _PredictionCard(
-                      result: p,
-                      color: const Color(0xFFE53935),
-                      icon: Icons.trending_up,
-                    )
+                  ? _ExpenseForecastCard(result: p)
                   : _LowConfidenceCard(message: l10n.predictionsLowConfidence),
             ),
             const SizedBox(height: 24),
@@ -55,117 +47,127 @@ class PredictionsScreen extends ConsumerWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-    );
-  }
-}
-
-class _PredictionCard extends StatelessWidget {
-  const _PredictionCard({
-    required this.result,
-    required this.color,
-    required this.icon,
-  });
-
+class _ExpenseForecastCard extends StatelessWidget {
+  const _ExpenseForecastCard({required this.result});
   final PredictionResult result;
-  final Color color;
-  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final confidencePct = (result.confidenceLevel * 100).toStringAsFixed(0);
+    const red = Color(0xFFEF4444);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Column(
+      children: [
+        // Projected amount card
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundColor: color.withValues(alpha: 0.12),
-                  child: Icon(icon, color: color),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text(
-                      'S/ ${result.predictedAmount.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: color,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Expanded(
+                      child: Text(
+                        l10n.predictionsExpenseTitle,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
                     ),
-                    Text(
-                      result.period,
-                      style: Theme.of(context).textTheme.bodySmall,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF34D399).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '$confidencePct% ${l10n.predictionsConfidence}',
+                        style: const TextStyle(
+                          color: Color(0xFF10B981),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
+                const SizedBox(height: 16),
                 Text(
-                  l10n.predictionsConfidence,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: result.confidenceLevel,
-                      backgroundColor: color.withValues(alpha: 0.15),
-                      valueColor: AlwaysStoppedAnimation<Color>(color),
-                      minHeight: 8,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '$confidencePct%',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                  'S/ ${result.predictedAmount.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        color: red,
+                        fontWeight: FontWeight.bold,
                       ),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  result.period,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: result.confidenceLevel,
+                    minHeight: 8,
+                    backgroundColor: red.withValues(alpha: 0.15),
+                    valueColor: const AlwaysStoppedAnimation<Color>(red),
+                  ),
+                ),
               ],
             ),
-            if (result.narrative != null && result.narrative!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              const Divider(),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.psychology_outlined, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.narrative!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
+          ),
         ),
-      ),
+        // AI narrative card
+        if (result.narrative != null && result.narrative!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF34D399).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                  color: const Color(0xFF34D399).withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.psychology_rounded,
+                    color: Color(0xFF10B981), size: 22),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Zenda AI',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              color: const Color(0xFF10B981),
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        result.narrative!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: const Color(0xFF065F46),
+                              height: 1.5,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

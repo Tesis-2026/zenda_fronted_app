@@ -4,9 +4,27 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/category.dart';
 import '../../core/services/api_client.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../features/dashboard/dashboard_providers.dart';
+import '../../features/transactions/edit_transaction_screen.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
+
+/// Standalone screen wrapper for the transactions list (TXNS tab).
+class TransactionsScreen extends StatelessWidget {
+  const TransactionsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      body: const SafeArea(child: TransactionListScreen()),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 1),
+    );
+  }
+}
 
 // ── Filter state ──────────────────────────────────────────────────────────────
 
@@ -190,6 +208,26 @@ class TransactionListScreen extends ConsumerWidget {
                         ),
                       ),
                       const Spacer(),
+                      TextButton(
+                        onPressed: () => context.push('/add-transaction'),
+                        style: TextButton.styleFrom(
+                          backgroundColor: const Color(0xFF34D399),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 6),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          l10n.txAddButton,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
                       // Filters button with active count badge
                       Stack(
                         clipBehavior: Clip.none,
@@ -858,10 +896,7 @@ class _TransactionTile extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () async {
-          final refreshed = await context.push<bool>(
-            '/edit-transaction',
-            extra: tx,
-          );
+          final refreshed = await EditTransactionScreen.show(context, tx);
           if (refreshed == true) onDeleted();
         },
         child: Container(

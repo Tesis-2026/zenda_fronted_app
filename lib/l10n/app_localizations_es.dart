@@ -36,6 +36,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonSignOut => 'Cerrar sesión';
 
   @override
+  String get commonDelete => 'Eliminar';
+
+  @override
+  String get commonLater => 'Más tarde';
+
+  @override
   String get validationEnterEmail => 'Ingresa tu correo';
 
   @override
@@ -233,16 +239,19 @@ class AppLocalizationsEs extends AppLocalizations {
       'Llevas 30 días usando Zenda — completa la encuesta final para medir tu progreso.';
 
   @override
-  String get dashboardNavHome => 'Inicio';
+  String get dashboardNavHome => 'INICIO';
 
   @override
-  String get dashboardNavTransactions => 'Movs.';
+  String get dashboardNavTransactions => 'MOVS';
 
   @override
-  String get dashboardNavBudget => 'Presupuesto';
+  String get dashboardNavAi => 'IA';
 
   @override
-  String get dashboardNavProfile => 'Perfil';
+  String get dashboardNavGoals => 'METAS';
+
+  @override
+  String get dashboardNavProfile => 'PERFIL';
 
   @override
   String get dashboardRecord => 'Registrar';
@@ -343,6 +352,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get txCategoryLabel => 'Categoría';
+
+  @override
+  String get txAddButton => '+ Agregar';
 
   @override
   String get txAddCustomCategory => 'Nueva categoría';
@@ -537,6 +549,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileEditButton => 'Editar perfil';
+
+  @override
+  String get profileEdit => 'Editar';
 
   @override
   String get profileFullNameLabel => 'Nombre completo';
@@ -1614,4 +1629,204 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dashboardPostSurveyBannerAction => 'Completar encuesta';
+
+  @override
+  String get authConfirmPasswordHint => 'Confirmar contraseña';
+
+  @override
+  String get validationPasswordsMismatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get dashboardTotalBalance => 'Balance Total';
+
+  @override
+  String get dashboardViewAll => 'Ver todo';
+
+  @override
+  String get dashboardMonthlyIncome => 'Ingresos';
+
+  @override
+  String get dashboardMonthlyExpense => 'Gastos';
+
+  @override
+  String get dashboardCashDebitCredit => 'Efectivo · Débito · Crédito';
+
+  @override
+  String get goalsNewButton => '+ Nuevo';
+
+  @override
+  String get emailVerifTitle => 'Revisa tu correo';
+
+  @override
+  String emailVerifSubtitle(String email) {
+    return 'Enviamos un enlace de verificación a $email';
+  }
+
+  @override
+  String get emailVerifStep1 => 'Abre el correo de Zenda';
+
+  @override
+  String get emailVerifStep2 => 'Haz clic en el enlace de verificación';
+
+  @override
+  String get emailVerifStep3 => 'Vuelve a la app para continuar';
+
+  @override
+  String get emailVerifOpenApp => 'Abrir app de correo';
+
+  @override
+  String get emailVerifResendText => '¿No lo recibiste?';
+
+  @override
+  String get emailVerifResendAction => 'Reenviar';
+
+  @override
+  String get txSavedTitle => '¡Transacción guardada!';
+
+  @override
+  String get txSavedBody =>
+      'Tu gasto fue registrado y tu presupuesto actualizado.';
+
+  @override
+  String get txSavedLabelAmount => 'Monto';
+
+  @override
+  String get txSavedLabelCategory => 'Categoría';
+
+  @override
+  String get txSavedLabelDate => 'Fecha';
+
+  @override
+  String get txSavedLabelBudget => 'Impacto en presupuesto';
+
+  @override
+  String get txSavedBackButton => 'Volver a transacciones';
+
+  @override
+  String get txSavedAddAnother => 'Agregar otra';
+
+  @override
+  String get authResetSuccessTitle => '¡Contraseña actualizada!';
+
+  @override
+  String get authResetSuccessBody =>
+      'Tu contraseña fue restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.';
+
+  @override
+  String get authResetSuccessSecurity =>
+      'Por tu seguridad, se cerraron todas tus sesiones.';
+
+  @override
+  String get authResetSuccessButton => 'Iniciar sesión';
+
+  @override
+  String get authSetNewPasswordTitle => 'Nueva contraseña';
+
+  @override
+  String get authSetNewPasswordSubtitle =>
+      'Tu nueva contraseña debe tener al menos 8 caracteres, 1 mayúscula y 1 número.';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirmar contraseña';
+
+  @override
+  String get authPasswordStrengthWeak => 'Débil';
+
+  @override
+  String get authPasswordStrengthFair => 'Regular';
+
+  @override
+  String get authPasswordStrengthStrong => 'Fuerte';
+
+  @override
+  String goalsDetailLeftToReach(String amount) {
+    return 'S/ $amount restante para alcanzar tu meta';
+  }
+
+  @override
+  String get goalsDetailAddContrib => '+ Agregar';
+
+  @override
+  String get budgetByCategory => 'Por categoría';
+
+  @override
+  String get authForgotCodeExpiry =>
+      'El código de verificación expira en 15 minutos. Revisa tu carpeta de spam si no lo encuentras.';
+
+  @override
+  String get aiChatQuickAnalyze => 'Analizar gastos';
+
+  @override
+  String get aiChatQuickBudget => 'Tips de presupuesto';
+
+  @override
+  String get aiChatQuickGoal => 'Progreso de metas';
+
+  @override
+  String get profileSetupAgeStepperLabel => 'años';
+
+  @override
+  String get profileSetupPopularUniversities => 'Universidades populares';
+
+  @override
+  String get profileSetupIncomeQuick500 => 'S/ 500';
+
+  @override
+  String get profileSetupIncomeQuick1200 => 'S/ 1,200';
+
+  @override
+  String get profileSetupIncomeQuick2000 => 'S/ 2,000';
+
+  @override
+  String get educationSearchHint => 'Buscar temas...';
+
+  @override
+  String get educationFilterAll => 'Todos';
+
+  @override
+  String get educationFilterBeginner => 'Básico';
+
+  @override
+  String get educationFilterIntermediate => 'Intermedio';
+
+  @override
+  String get educationFilterAdvanced => 'Avanzado';
+
+  @override
+  String get educationFeaturedLabel => 'Destacado';
+
+  @override
+  String get educationStartLabel => 'Comenzar';
+
+  @override
+  String get authSignUpLink => 'Regístrate';
+
+  @override
+  String get goalManualContribution => 'Contribución manual';
+
+  @override
+  String get goalTargetSuffix => 'meta';
+
+  @override
+  String get profileSetupSaveError =>
+      'No se pudo guardar el perfil. Continuando de todos modos.';
+
+  @override
+  String get profileSetupComplete40pct => '40% mejores predicciones';
+
+  @override
+  String get profileSetupCompleteImproves =>
+      'Completar tu perfil mejora la precisión del pronóstico.';
+
+  @override
+  String get budgetSelectPeriod => 'Seleccionar período';
+
+  @override
+  String get commonDone => 'Listo';
+
+  @override
+  String get profileCurrencyPEN => 'PEN — Sol peruano (S/)';
+
+  @override
+  String get profileCurrencyUSD => 'USD — Dólar americano (\$)';
 }
