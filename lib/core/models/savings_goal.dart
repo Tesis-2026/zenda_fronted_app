@@ -26,6 +26,8 @@ class SavingsGoal {
     return (currentAmount / targetAmount * 100).clamp(0, 100);
   }
 
+  bool get isComplete => progressPercent >= 100;
+
   factory SavingsGoal.fromJson(Map<String, dynamic> json) {
     return SavingsGoal(
       id: json['id'] as String,

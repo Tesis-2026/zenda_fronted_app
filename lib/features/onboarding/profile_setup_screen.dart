@@ -75,7 +75,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not save profile. Continuing anyway.')),
         );
-        context.go('/dashboard');
+        context.go('/surveys/pre');
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -86,9 +86,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     try {
       await UserApiService().updateProfile(profileCompleted: true);
     } catch (_) {
-      // Non-blocking: skip still navigates to dashboard even if the update fails
+      // Non-blocking: skip still navigates forward even if the update fails
     }
-    if (mounted) context.go('/dashboard');
+    if (mounted) context.go('/surveys/pre');
   }
 
   @override
@@ -213,7 +213,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         width: double.infinity,
         height: 56,
         child: FilledButton(
-          onPressed: () => context.go('/dashboard'),
+          onPressed: () => context.go('/surveys/pre'),
           style: FilledButton.styleFrom(
             backgroundColor: _green,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

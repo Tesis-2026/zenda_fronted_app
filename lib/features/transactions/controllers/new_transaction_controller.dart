@@ -8,6 +8,7 @@ import '../../../core/services/budget_api_service.dart';
 import '../../../core/services/pending_transaction_queue.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../providers/repositories_providers.dart';
+import '../../auth/auth_controller.dart';
 import '../../dashboard/dashboard_providers.dart';
 
 @immutable
@@ -24,7 +25,8 @@ class NewTransactionState {
   final bool isSaving;
   final String? error;
   final int saveTick;
-  final String? budgetAlert; // category name at ≥80% after save
+  final String? budgetAlert; // category name at ≥80% after save (US-020)
+  final String? anomalyAlert; // category name when spending >20% over avg (US-016)
   final List<String> completedChallengeNames; // titles of auto-completed challenges
 
   const NewTransactionState({
@@ -41,6 +43,7 @@ class NewTransactionState {
     required this.error,
     required this.saveTick,
     this.budgetAlert,
+    this.anomalyAlert,
     this.completedChallengeNames = const [],
   });
 
@@ -58,6 +61,7 @@ class NewTransactionState {
     error: null,
     saveTick: 0,
     budgetAlert: null,
+    anomalyAlert: null,
     completedChallengeNames: const [],
   );
 
@@ -81,11 +85,13 @@ class NewTransactionState {
     String? error,
     int? saveTick,
     String? budgetAlert,
+    String? anomalyAlert,
     List<String>? completedChallengeNames,
     bool clearError = false,
     bool clearCategory = false,
     bool clearCustomCategory = false,
     bool clearBudgetAlert = false,
+    bool clearAnomalyAlert = false,
   }) {
     return NewTransactionState(
       kind: kind ?? this.kind,
@@ -101,6 +107,7 @@ class NewTransactionState {
       error: clearError ? null : (error ?? this.error),
       saveTick: saveTick ?? this.saveTick,
       budgetAlert: clearBudgetAlert ? null : (budgetAlert ?? this.budgetAlert),
+      anomalyAlert: clearAnomalyAlert ? null : (anomalyAlert ?? this.anomalyAlert),
       completedChallengeNames: completedChallengeNames ?? this.completedChallengeNames,
     );
   }
@@ -246,7 +253,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
 
       final tx = TransactionModel(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
-        userId: 'demo',
+        userId: ref.read(authNotifierProvider).user?.id ?? '',
         accountId: fromId,
         toAccountId: toId,
         kind: kind,
@@ -262,10 +269,11 @@ class NewTransactionController extends Notifier<NewTransactionState> {
 
       // Sync to backend; enqueue for retry if offline or unreachable.
       String? budgetAlertName;
+      String? anomalyAlertName;
       List<String> completedNames = [];
       try {
         final apiService = ref.read(transactionApiServiceProvider);
-        completedNames = await apiService.create(
+        final result = await apiService.create(
           kind: kind,
           amount: amount,
           category: effectiveCategory,
@@ -273,14 +281,20 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           description: state.note.isEmpty ? null : state.note,
           customCategoryName: customName,
         );
+        completedNames = result.completedChallenges;
 
-        // Check if any budget crossed the 80% threshold after this expense.
+        // US-016: anomaly alert returned directly from the create endpoint.
+        if (kind == TransactionKind.expense) {
+          anomalyAlertName = result.anomalyAlert;
+        }
+
+        // US-020: check if any budget just reached ≥80% after this expense.
         if (kind == TransactionKind.expense) {
           final now = state.date;
           final budgets = await BudgetApiService()
               .getAll(month: now.month, year: now.year);
           final triggered = budgets.where(
-            (b) => b.percentageUsed >= 0.80 && b.percentageUsed < 1.0,
+            (b) => b.percentageUsed >= 80.0 && b.percentageUsed < 100.0,
           );
           if (triggered.isNotEmpty) {
             budgetAlertName = triggered.first.categoryName ?? 'Budget';
@@ -307,11 +321,15 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       ref.invalidate(accountsProvider);
       ref.invalidate(transactionsProvider);
       ref.invalidate(streakStateProvider);
+      ref.invalidate(daySummaryProvider);
+      ref.invalidate(weekSummaryProvider);
+      ref.invalidate(monthSummaryProvider);
 
       state = state.copyWith(
         isSaving: false,
         saveTick: state.saveTick + 1,
         budgetAlert: budgetAlertName,
+        anomalyAlert: anomalyAlertName,
         completedChallengeNames: completedNames,
       );
     } catch (_) {

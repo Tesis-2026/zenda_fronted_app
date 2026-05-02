@@ -434,7 +434,7 @@ class _BudgetCard extends StatelessWidget {
   });
 
   Color _progressColor(double pct) {
-    if (pct >= 80) return const Color(0xFFEF4444); // red
+    if (pct > 80) return const Color(0xFFEF4444); // red
     if (pct >= 60) return const Color(0xFFF59E0B); // yellow
     return const Color(0xFF10B981); // green
   }
