@@ -9,6 +9,7 @@ import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
 
 const _kNumberFormatKey = 'zenda.number_format';
+const _kConsentRevokedKey = 'zenda.consent.revoked';
 
 final _profileProvider = FutureProvider<User>((ref) async {
   return UserApiService().getProfile();
@@ -49,7 +50,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _saveNumberFormat(bool useComma) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kNumberFormatKey, useComma ? 'comma' : 'dot');
-    if (mounted) setState(() => _useCommaSeparator = useComma);
+    if (!mounted) return;
+    setState(() => _useCommaSeparator = useComma);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.profileNumberFormatSaved)),
+    );
   }
 
   @override
@@ -88,6 +93,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  Future<void> _revokeConsent() async {
+    final l10n = context.l10n;
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyRevoked = prefs.getBool(_kConsentRevokedKey) ?? false;
+    if (!mounted) return;
+
+    if (alreadyRevoked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.profileConsentAlreadyRevoked)),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.profileRevokeConsentDialogTitle),
+        content: Text(l10n.profileRevokeConsentDialogBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            child: Text(l10n.profileRevokeConsentConfirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+    await prefs.setBool(_kConsentRevokedKey, true);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.profileRevokeConsentDone)),
+    );
   }
 
   Future<void> _confirmLogout() async {
@@ -282,6 +327,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           title: l10n.surveyComparisonNavTitle,
           onTap: () => context.push('/surveys/comparison'),
         ),
+        _navTile(
+          icon: Icons.checklist_rounded,
+          title: l10n.susSurveyTitle,
+          onTap: () => context.push('/surveys/sus'),
+        ),
         const SizedBox(height: 8),
         _navTile(
           icon: Icons.psychology_rounded,
@@ -299,6 +349,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           icon: Icons.feedback_outlined,
           title: l10n.profileSendFeedback,
           onTap: () => FeedbackModal.show(context, screenName: 'profile'),
+        ),
+        const SizedBox(height: 8),
+        _sectionHeader(l10n.profileSectionPrivacy),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.verified_user_outlined, size: 22),
+          title: Text(l10n.profilePrivacyLaw),
+          subtitle: Text(
+            l10n.profilePrivacyLawSubtitle,
+            style: const TextStyle(fontSize: 12),
+          ),
+          trailing: const Icon(Icons.chevron_right, size: 20),
+          onTap: () {
+            showDialog<void>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: Text(l10n.profilePrivacyLaw),
+                content: Text(l10n.profilePrivacyLawBody),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(l10n.commonOk),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        _navTile(
+          icon: Icons.gpp_bad_outlined,
+          title: l10n.profileRevokeConsent,
+          onTap: _revokeConsent,
         ),
         const SizedBox(height: 16),
       ],

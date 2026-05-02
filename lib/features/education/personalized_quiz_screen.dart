@@ -249,11 +249,32 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '${_index + 1} / ${widget.result.questions.length}',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+              Row(
+                children: [
+                  Text(
+                    '${_index + 1} / ${widget.result.questions.length}',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const Spacer(),
+                  if (widget.result.attemptsRemainingToday > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF818CF8).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        context.l10n.quizPersonalizedAttemptsLeft(widget.result.attemptsRemainingToday),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF818CF8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
+                ],
               ),
               const SizedBox(height: 6),
               LinearProgressIndicator(

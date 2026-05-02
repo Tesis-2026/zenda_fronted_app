@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/errors/error_codes.dart';
 import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
@@ -20,13 +21,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  // Lockout countdown state
+  // Lockout countdown state — persisted across app restarts
+  static const _lockoutKey = 'zenda.auth.lockout_until';
   int _lockoutSeconds = 0;
   Timer? _lockoutTimer;
 
-  void _startLockoutCountdown() {
+  @override
+  void initState() {
+    super.initState();
+    _restoreLockout();
+  }
+
+  Future<void> _restoreLockout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedMs = prefs.getInt(_lockoutKey);
+    if (storedMs == null) return;
+    final expiresAt = DateTime.fromMillisecondsSinceEpoch(storedMs);
+    final remaining = expiresAt.difference(DateTime.now()).inSeconds;
+    if (remaining > 0) {
+      setState(() => _lockoutSeconds = remaining);
+      _startLockoutTimer();
+    } else {
+      await prefs.remove(_lockoutKey);
+    }
+  }
+
+  void _startLockoutCountdown() async {
     _lockoutTimer?.cancel();
-    setState(() => _lockoutSeconds = 15 * 60); // 15 minutes
+    final expiresAt = DateTime.now().add(const Duration(minutes: 15));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lockoutKey, expiresAt.millisecondsSinceEpoch);
+    setState(() => _lockoutSeconds = 15 * 60);
+    _startLockoutTimer();
+  }
+
+  void _startLockoutTimer() {
     _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
@@ -37,6 +66,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _lockoutSeconds--;
         } else {
           t.cancel();
+          SharedPreferences.getInstance()
+              .then((p) => p.remove(_lockoutKey));
         }
       });
     });

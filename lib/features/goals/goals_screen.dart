@@ -257,28 +257,9 @@ class GoalsScreen extends ConsumerWidget {
   }
 
   void _showCelebrationDialog(BuildContext context, String goalName) {
-    final l10n = context.l10n;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.emoji_events_rounded,
-            color: Color(0xFFF59E0B), size: 48),
-        title: Text(l10n.goalsCelebrate,
-            textAlign: TextAlign.center),
-        content: Text(
-          l10n.goalsCelebrateMessage(goalName),
-          textAlign: TextAlign.center,
-        ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981)),
-            child: const Text(''),
-          ),
-        ],
-      ),
+      builder: (ctx) => _CelebrationDialog(goalName: goalName),
     );
   }
 
@@ -304,6 +285,69 @@ class GoalsScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     await ref.read(_goalsServiceProvider).delete(id);
     ref.invalidate(_goalsProvider);
+  }
+}
+
+class _CelebrationDialog extends StatefulWidget {
+  final String goalName;
+  const _CelebrationDialog({required this.goalName});
+
+  @override
+  State<_CelebrationDialog> createState() => _CelebrationDialogState();
+}
+
+class _CelebrationDialogState extends State<_CelebrationDialog>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.3), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.3, end: 0.9), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 25),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      icon: ScaleTransition(
+        scale: _scale,
+        child: const Icon(
+          Icons.emoji_events_rounded,
+          color: Color(0xFFF59E0B),
+          size: 56,
+        ),
+      ),
+      title: Text(l10n.goalsCelebrate, textAlign: TextAlign.center),
+      content: Text(
+        l10n.goalsCelebrateMessage(widget.goalName),
+        textAlign: TextAlign.center,
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(context),
+          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+          child: Text(l10n.commonOk),
+        ),
+      ],
+    );
   }
 }
 
@@ -366,6 +410,35 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+class _CompletedOnLabel extends StatelessWidget {
+  final String updatedAt;
+  const _CompletedOnLabel({required this.updatedAt});
+
+  @override
+  Widget build(BuildContext context) {
+    final parsed = DateTime.tryParse(updatedAt)?.toLocal();
+    if (parsed == null) return const SizedBox.shrink();
+    final formatted =
+        '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+    return Row(
+      children: [
+        Icon(
+          Icons.check_circle_outline_rounded,
+          size: 13,
+          color: const Color(0xFF10B981),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          context.l10n.goalCompletedOn(formatted),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: const Color(0xFF10B981),
+              ),
+        ),
+      ],
+    );
+  }
+}
+
 class _GoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final VoidCallback onTap;
@@ -424,7 +497,10 @@ class _GoalCard extends StatelessWidget {
                           goal.name,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        if (dueDateLabel != null) ...[
+                        if (isComplete) ...[
+                          const SizedBox(height: 2),
+                          _CompletedOnLabel(updatedAt: goal.updatedAt),
+                        ] else if (dueDateLabel != null) ...[
                           const SizedBox(height: 2),
                           Row(
                             children: [

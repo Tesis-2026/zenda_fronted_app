@@ -110,6 +110,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get commonCancel;
 
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
   /// No description provided for @commonSave.
   ///
   /// In en, this message translates to:
@@ -499,6 +505,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Let\'s improve your finances today.'**
   String get dashboardMotivation;
+
+  /// No description provided for @dashboardPostSurveyBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-survey ready'**
+  String get dashboardPostSurveyBannerTitle;
+
+  /// No description provided for @dashboardPostSurveyBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been using Zenda for 30 days — complete the post-survey to measure your progress.'**
+  String get dashboardPostSurveyBannerBody;
 
   /// No description provided for @dashboardNavHome.
   ///
@@ -925,6 +943,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{category} budget is at {pct}% — almost at the limit!'**
   String txBudgetAlert80(String category, String pct);
+
+  /// No description provided for @txAnomalyAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Unusual spending in {category} — above your monthly average by more than 20%'**
+  String txAnomalyAlert(String category);
 
   /// No description provided for @aiCardSeeRecommendations.
   ///
@@ -1640,6 +1664,12 @@ abstract class AppLocalizations {
   /// **'Delete goal'**
   String get goalsDetailDelete;
 
+  /// No description provided for @goalCompletedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed on {date}'**
+  String goalCompletedOn(String date);
+
   /// No description provided for @reportsCalendarTitle.
   ///
   /// In en, this message translates to:
@@ -1699,6 +1729,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'1.234,56 (comma decimal)'**
   String get profileNumberFormatComma;
+
+  /// No description provided for @profileNumberFormatSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Number format saved.'**
+  String get profileNumberFormatSaved;
 
   /// No description provided for @errorAuthInvalidCredentials.
   ///
@@ -1820,6 +1856,12 @@ abstract class AppLocalizations {
   /// **'Predictions are estimates based on your spending history. Actual results may vary.'**
   String get predictionsDisclaimer;
 
+  /// No description provided for @predictionsLowConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data for a reliable prediction yet. Keep recording transactions to improve accuracy.'**
+  String get predictionsLowConfidence;
+
   /// No description provided for @recommendationsTitle.
   ///
   /// In en, this message translates to:
@@ -1891,6 +1933,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Challenges'**
   String get challengesTitle;
+
+  /// No description provided for @challengesSectionActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get challengesSectionActive;
+
+  /// No description provided for @challengesSectionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get challengesSectionAvailable;
+
+  /// No description provided for @challengesSectionCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get challengesSectionCompleted;
+
+  /// No description provided for @challengesSectionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get challengesSectionExpired;
 
   /// No description provided for @challengesEmpty.
   ///
@@ -2042,6 +2108,12 @@ abstract class AppLocalizations {
   /// **'Please answer all questions before submitting'**
   String get surveyAnswerAll;
 
+  /// No description provided for @surveyNextButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get surveyNextButton;
+
   /// No description provided for @surveySubmitButton.
   ///
   /// In en, this message translates to:
@@ -2071,6 +2143,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your financial knowledge improved by {points} points since the pre-survey!'**
   String surveyImprovement(String points);
+
+  /// No description provided for @susSurveyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usability Questionnaire'**
+  String get susSurveyTitle;
+
+  /// No description provided for @susSurveyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree).'**
+  String get susSurveyDescription;
+
+  /// No description provided for @susSurveyStronglyDisagree.
+  ///
+  /// In en, this message translates to:
+  /// **'Strongly Disagree'**
+  String get susSurveyStronglyDisagree;
+
+  /// No description provided for @susSurveyStronglyAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'Strongly Agree'**
+  String get susSurveyStronglyAgree;
+
+  /// No description provided for @susSurveySubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get susSurveySubmit;
+
+  /// No description provided for @susSurveySubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting...'**
+  String get susSurveySubmitting;
+
+  /// No description provided for @susSurveyAlreadyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'You have already submitted the usability questionnaire.'**
+  String get susSurveyAlreadyDone;
+
+  /// No description provided for @susSurveyErrorLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the questionnaire. Please try again.'**
+  String get susSurveyErrorLoad;
+
+  /// No description provided for @susSurveyErrorSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit. Please try again.'**
+  String get susSurveyErrorSubmit;
+
+  /// No description provided for @susSurveyResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usability Score'**
+  String get susSurveyResultTitle;
+
+  /// No description provided for @susSurveyResultScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Your SUS score: {score}/100'**
+  String susSurveyResultScore(int score);
+
+  /// No description provided for @susSurveyResultGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade: {grade}'**
+  String susSurveyResultGrade(String grade);
+
+  /// No description provided for @susSurveyResultContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Profile'**
+  String get susSurveyResultContinue;
 
   /// No description provided for @surveyComparisonPreLabel.
   ///
@@ -2593,6 +2743,214 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Balance {sign}{pct}%'**
   String reportsBalanceChip(String sign, String pct);
+
+  /// No description provided for @aiAdviceStartRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Start recording expenses to receive personalized tips.'**
+  String get aiAdviceStartRecording;
+
+  /// No description provided for @aiAdviceReduceWants.
+  ///
+  /// In en, this message translates to:
+  /// **'Your \'wants\' are running high ({pct}%). Consider cutting small habits like coffee or rides to rebalance.'**
+  String aiAdviceReduceWants(String pct);
+
+  /// No description provided for @aiAdviceSaveLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your savings are low ({pct}%). Try setting aside a fixed amount at the start of each week, even if small.'**
+  String aiAdviceSaveLow(String pct);
+
+  /// No description provided for @aiAdviceOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re doing great! Your budget is balanced. Keep it up and consider investing your surplus.'**
+  String get aiAdviceOnTrack;
+
+  /// No description provided for @surveyResultDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your results'**
+  String get surveyResultDialogTitle;
+
+  /// No description provided for @surveyResultDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your financial literacy level: {level} ({score}/100)'**
+  String surveyResultDialogBody(String level, String score);
+
+  /// No description provided for @surveyImprovementDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress measured!'**
+  String get surveyImprovementDialogTitle;
+
+  /// No description provided for @surveyImprovementDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {postScore}/100. Previous: {preScore}/100. You improved by {improvement} points!'**
+  String surveyImprovementDialogBody(
+    String postScore,
+    String preScore,
+    String improvement,
+  );
+
+  /// No description provided for @profileSectionPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'PRIVACY'**
+  String get profileSectionPrivacy;
+
+  /// No description provided for @profilePrivacyLaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Data protection — Ley 29733'**
+  String get profilePrivacyLaw;
+
+  /// No description provided for @profilePrivacyLawSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is protected under Peruvian law'**
+  String get profilePrivacyLawSubtitle;
+
+  /// No description provided for @profilePrivacyLawBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Zenda complies with Peru\'s Ley 29733 (Personal Data Protection). Your financial data is transmitted exclusively over HTTPS/TLS and stored securely. Access requires valid authentication at all times. You may revoke your consent at any time from this screen.'**
+  String get profilePrivacyLawBody;
+
+  /// No description provided for @profileRevokeConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke data consent'**
+  String get profileRevokeConsent;
+
+  /// No description provided for @profileRevokeConsentDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke data consent?'**
+  String get profileRevokeConsentDialogTitle;
+
+  /// No description provided for @profileRevokeConsentDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'AI personalization features (predictions, recommendations) will be disabled. Your data will no longer be processed for AI. You can re-enable this in settings.'**
+  String get profileRevokeConsentDialogBody;
+
+  /// No description provided for @profileRevokeConsentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get profileRevokeConsentConfirm;
+
+  /// No description provided for @profileRevokeConsentDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Data consent revoked. AI features are now disabled.'**
+  String get profileRevokeConsentDone;
+
+  /// No description provided for @profileConsentAlreadyRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Data consent has already been revoked.'**
+  String get profileConsentAlreadyRevoked;
+
+  /// No description provided for @reportsTabCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get reportsTabCategories;
+
+  /// No description provided for @reportsPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get reportsPeriodWeek;
+
+  /// No description provided for @reportsPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get reportsPeriodMonth;
+
+  /// No description provided for @reportsPeriodQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter'**
+  String get reportsPeriodQuarter;
+
+  /// No description provided for @reportsCategoryDrillTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} transactions'**
+  String reportsCategoryDrillTitle(String category);
+
+  /// No description provided for @reportsCategoryNoTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions in this period'**
+  String get reportsCategoryNoTransactions;
+
+  /// No description provided for @txFilterCustomRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range'**
+  String get txFilterCustomRange;
+
+  /// No description provided for @txFilterDateFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get txFilterDateFrom;
+
+  /// No description provided for @txFilterDateTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get txFilterDateTo;
+
+  /// No description provided for @txFilterClearDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear dates'**
+  String get txFilterClearDates;
+
+  /// No description provided for @reportsEvolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly evolution'**
+  String get reportsEvolutionTitle;
+
+  /// No description provided for @reportsEvolutionExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get reportsEvolutionExpenses;
+
+  /// No description provided for @reportsEvolutionSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get reportsEvolutionSavings;
+
+  /// No description provided for @reportsEvolutionBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get reportsEvolutionBalance;
+
+  /// No description provided for @reportsEvolutionNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Add data for at least 2 months to see your evolution'**
+  String get reportsEvolutionNoData;
+
+  /// No description provided for @dashboardPostSurveyBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Take survey'**
+  String get dashboardPostSurveyBannerAction;
 }
 
 class _AppLocalizationsDelegate

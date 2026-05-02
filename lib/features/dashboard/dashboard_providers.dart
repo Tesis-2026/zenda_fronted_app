@@ -8,6 +8,7 @@ import '../../core/services/recommendations_api_service.dart';
 import '../../core/services/streak_repository.dart';
 import '../../core/services/transaction_api_service.dart';
 import '../../providers/repositories_providers.dart';
+import '../../l10n/app_localizations.dart';
 
 // ─── ISO week helper ───────────────────────────────────────────────────────
 
@@ -135,7 +136,7 @@ final recommendationsProvider = FutureProvider<List<Recommendation>>((ref) {
   return ref.read(_recommendationsServiceProvider).getAll();
 });
 
-final aiAdviceProvider = Provider<String>((ref) {
+final aiAdviceProvider = Provider.family<String, AppLocalizations>((ref, l10n) {
   final recs = ref.watch(recommendationsProvider).maybeWhen(
         data: (list) => list,
         orElse: () => const <Recommendation>[],
@@ -148,16 +149,16 @@ final aiAdviceProvider = Provider<String>((ref) {
 
   // Local fallback when API has no recommendations yet
   final breakdown = ref.watch(budgetBreakdownProvider);
-  if (breakdown.total == 0) return 'Empieza a registrar para recibir consejos.';
+  if (breakdown.total == 0) return l10n.aiAdviceStartRecording;
 
   final pDes = breakdown.percentDeseos();
   final pAho = breakdown.percentAhorro();
 
   if (pDes > 30) {
-    return 'Tus "deseos" están volando alto (${pDes.toStringAsFixed(0)}%). Considera reducir gastos hormiga como cafés o taxis para equilibrarte.';
+    return l10n.aiAdviceReduceWants(pDes.toStringAsFixed(0));
   } else if (pAho < 20) {
-    return 'Tu ahorro está bajo (${pAho.toStringAsFixed(0)}%). Intenta separar un monto fijo al inicio de semana, aunque sea pequeño.';
+    return l10n.aiAdviceSaveLow(pAho.toStringAsFixed(0));
   } else {
-    return '¡Vas muy bien! Tu presupuesto está equilibrado. Sigue así y considera invertir tus excedentes.';
+    return l10n.aiAdviceOnTrack;
   }
 });

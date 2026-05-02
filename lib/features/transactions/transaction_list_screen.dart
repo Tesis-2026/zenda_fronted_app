@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/category.dart';
 import '../../core/services/api_client.dart';
+import '../../features/dashboard/dashboard_providers.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -296,10 +297,10 @@ class TransactionListScreen extends ConsumerWidget {
             loading: () => const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (err, _) => SliverFillRemaining(
+            error: (_, _) => SliverFillRemaining(
               child: Center(
                 child: Text(
-                  err.toString(),
+                  l10n.commonUnknownError,
                   style: TextStyle(color: onSurface.withValues(alpha: 0.75)),
                 ),
               ),
@@ -330,7 +331,14 @@ class TransactionListScreen extends ConsumerWidget {
                     return _TransactionTile(
                       tx: tx,
                       isDark: isDark,
-                      onDeleted: () => ref.invalidate(transactionListProvider),
+                      onDeleted: () {
+                        ref.invalidate(transactionListProvider);
+                        ref.invalidate(daySummaryProvider);
+                        ref.invalidate(weekSummaryProvider);
+                        ref.invalidate(monthSummaryProvider);
+                        ref.invalidate(transactionsProvider);
+                        ref.invalidate(accountsProvider);
+                      },
                     );
                   },
                 ),
@@ -385,6 +393,8 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
   late _TxFilters _draft;
   final _minCtrl = TextEditingController();
   final _maxCtrl = TextEditingController();
+  DateTime? _from;
+  DateTime? _to;
 
   final _categoriesProvider = FutureProvider<List<CategoryModel>>(
     (ref) => ref.read(categoryApiServiceProvider).getAll(),
@@ -394,6 +404,8 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
   void initState() {
     super.initState();
     _draft = widget.initial;
+    _from = widget.initial.from;
+    _to = widget.initial.to;
     if (_draft.minAmount != null) {
       _minCtrl.text = _draft.minAmount!.toStringAsFixed(0);
     }
@@ -407,6 +419,42 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
     _minCtrl.dispose();
     _maxCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickFrom(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _from ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _from = picked;
+        _draft = _draft.copyWith(
+          datePreset: 'custom',
+          from: picked,
+        );
+      });
+    }
+  }
+
+  Future<void> _pickTo(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _to ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _to = picked;
+        _draft = _draft.copyWith(
+          datePreset: 'custom',
+          to: picked,
+        );
+      });
+    }
   }
 
   @override
@@ -543,7 +591,87 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          // Date range
+          Text(l10n.txFilterCustomRange,
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => _pickFrom(context),
+                  borderRadius: BorderRadius.circular(12),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: l10n.txFilterDateFrom,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                    ),
+                    child: Text(
+                      _from != null
+                          ? '${_from!.day.toString().padLeft(2, '0')}/${_from!.month.toString().padLeft(2, '0')}/${_from!.year}'
+                          : '—',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _from != null ? null : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: InkWell(
+                  onTap: () => _pickTo(context),
+                  borderRadius: BorderRadius.circular(12),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: l10n.txFilterDateTo,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                    ),
+                    child: Text(
+                      _to != null
+                          ? '${_to!.day.toString().padLeft(2, '0')}/${_to!.month.toString().padLeft(2, '0')}/${_to!.year}'
+                          : '—',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _to != null ? null : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_from != null || _to != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _from = null;
+                    _to = null;
+                    _draft = _draft.copyWith(
+                      datePreset: 'all',
+                      clearFrom: true,
+                      clearTo: true,
+                    );
+                  });
+                },
+                child: Text(l10n.txFilterClearDates),
+              ),
+            ),
+
+          const SizedBox(height: 16),
 
           Row(
             children: [

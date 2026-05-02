@@ -1,8 +1,10 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/transaction.dart';
+
+const _secureStorage = FlutterSecureStorage();
 
 class PendingSyncEntry {
   final String txId;
@@ -50,8 +52,7 @@ class PendingTransactionQueue {
   static const _key = 'zenda.pending_sync.v1';
 
   Future<List<PendingSyncEntry>> getAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
+    final raw = await _secureStorage.read(key: _key);
     if (raw == null || raw.isEmpty) return [];
     final decoded = jsonDecode(raw);
     if (decoded is! List) return [];
@@ -63,7 +64,6 @@ class PendingTransactionQueue {
 
   Future<void> enqueue(PendingSyncEntry entry) async {
     final all = await getAll();
-    // Avoid duplicate entries for the same transaction
     if (all.any((e) => e.txId == entry.txId)) return;
     all.add(entry);
     await _save(all);
@@ -76,7 +76,9 @@ class PendingTransactionQueue {
   }
 
   Future<void> _save(List<PendingSyncEntry> entries) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(entries.map((e) => e.toJson()).toList()));
+    await _secureStorage.write(
+      key: _key,
+      value: jsonEncode(entries.map((e) => e.toJson()).toList()),
+    );
   }
 }

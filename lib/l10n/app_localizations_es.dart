@@ -15,6 +15,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonCancel => 'Cancelar';
 
   @override
+  String get commonOk => 'Aceptar';
+
+  @override
   String get commonSave => 'Guardar';
 
   @override
@@ -221,6 +224,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dashboardMotivation => 'Mejoremos tus finanzas hoy.';
+
+  @override
+  String get dashboardPostSurveyBannerTitle => 'Encuesta final disponible';
+
+  @override
+  String get dashboardPostSurveyBannerBody =>
+      'Llevas 30 días usando Zenda — completa la encuesta final para medir tu progreso.';
 
   @override
   String get dashboardNavHome => 'Inicio';
@@ -458,6 +468,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String txBudgetAlert80(String category, String pct) {
     return 'Presupuesto de $category al $pct% — ¡casi en el límite!';
+  }
+
+  @override
+  String txAnomalyAlert(String category) {
+    return 'Gasto inusual en $category — supera tu promedio mensual en más del 20%';
   }
 
   @override
@@ -870,6 +885,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get goalsDetailDelete => 'Eliminar meta';
 
   @override
+  String goalCompletedOn(String date) {
+    return 'Completado el $date';
+  }
+
+  @override
   String get reportsCalendarTitle => 'Calendario de gastos';
 
   @override
@@ -903,6 +923,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileNumberFormatComma => '1.234,56 (decimal con coma)';
+
+  @override
+  String get profileNumberFormatSaved => 'Formato de número guardado.';
 
   @override
   String get errorAuthInvalidCredentials => 'Correo o contraseña incorrectos.';
@@ -968,6 +991,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Las predicciones son estimaciones basadas en tu historial. Los resultados reales pueden variar.';
 
   @override
+  String get predictionsLowConfidence =>
+      'Aún no hay suficientes datos para una predicción confiable. Sigue registrando transacciones para mejorar la precisión.';
+
+  @override
   String get recommendationsTitle => 'Recomendaciones';
 
   @override
@@ -1006,6 +1033,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get challengesTitle => 'Desafíos';
+
+  @override
+  String get challengesSectionActive => 'Activos';
+
+  @override
+  String get challengesSectionAvailable => 'Disponibles';
+
+  @override
+  String get challengesSectionCompleted => 'Completados';
+
+  @override
+  String get challengesSectionExpired => 'Expirados';
 
   @override
   String get challengesEmpty => 'No hay desafíos disponibles por ahora.';
@@ -1088,6 +1127,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Por favor responde todas las preguntas antes de enviar';
 
   @override
+  String get surveyNextButton => 'Siguiente';
+
+  @override
   String get surveySubmitButton => 'Enviar respuestas';
 
   @override
@@ -1104,6 +1146,52 @@ class AppLocalizationsEs extends AppLocalizations {
   String surveyImprovement(String points) {
     return '¡Tu conocimiento financiero mejoró $points puntos respecto a la encuesta inicial!';
   }
+
+  @override
+  String get susSurveyTitle => 'Cuestionario de Usabilidad';
+
+  @override
+  String get susSurveyDescription =>
+      'Califica cada afirmación del 1 (Totalmente en desacuerdo) al 5 (Totalmente de acuerdo).';
+
+  @override
+  String get susSurveyStronglyDisagree => 'Totalmente en desacuerdo';
+
+  @override
+  String get susSurveyStronglyAgree => 'Totalmente de acuerdo';
+
+  @override
+  String get susSurveySubmit => 'Enviar';
+
+  @override
+  String get susSurveySubmitting => 'Enviando...';
+
+  @override
+  String get susSurveyAlreadyDone =>
+      'Ya enviaste el cuestionario de usabilidad.';
+
+  @override
+  String get susSurveyErrorLoad =>
+      'No se pudo cargar el cuestionario. Inténtalo de nuevo.';
+
+  @override
+  String get susSurveyErrorSubmit => 'No se pudo enviar. Inténtalo de nuevo.';
+
+  @override
+  String get susSurveyResultTitle => 'Puntaje de Usabilidad';
+
+  @override
+  String susSurveyResultScore(int score) {
+    return 'Tu puntaje SUS: $score/100';
+  }
+
+  @override
+  String susSurveyResultGrade(String grade) {
+    return 'Calificación: $grade';
+  }
+
+  @override
+  String get susSurveyResultContinue => 'Volver al Perfil';
 
   @override
   String get surveyComparisonPreLabel => 'Puntaje inicial';
@@ -1400,4 +1488,130 @@ class AppLocalizationsEs extends AppLocalizations {
   String reportsBalanceChip(String sign, String pct) {
     return 'Balance $sign$pct%';
   }
+
+  @override
+  String get aiAdviceStartRecording =>
+      'Empieza a registrar gastos para recibir consejos personalizados.';
+
+  @override
+  String aiAdviceReduceWants(String pct) {
+    return 'Tus \"deseos\" están volando alto ($pct%). Considera reducir gastos hormiga como cafés o taxis para equilibrarte.';
+  }
+
+  @override
+  String aiAdviceSaveLow(String pct) {
+    return 'Tu ahorro está bajo ($pct%). Intenta separar un monto fijo al inicio de semana, aunque sea pequeño.';
+  }
+
+  @override
+  String get aiAdviceOnTrack =>
+      '¡Vas muy bien! Tu presupuesto está equilibrado. Sigue así y considera invertir tus excedentes.';
+
+  @override
+  String get surveyResultDialogTitle => 'Tus resultados';
+
+  @override
+  String surveyResultDialogBody(String level, String score) {
+    return 'Nivel de educación financiera: $level ($score/100)';
+  }
+
+  @override
+  String get surveyImprovementDialogTitle => '¡Progreso medido!';
+
+  @override
+  String surveyImprovementDialogBody(
+    String postScore,
+    String preScore,
+    String improvement,
+  ) {
+    return 'Puntaje: $postScore/100. Anterior: $preScore/100. ¡Mejoraste $improvement puntos!';
+  }
+
+  @override
+  String get profileSectionPrivacy => 'PRIVACIDAD';
+
+  @override
+  String get profilePrivacyLaw => 'Protección de datos — Ley 29733';
+
+  @override
+  String get profilePrivacyLawSubtitle =>
+      'Tus datos están protegidos bajo la ley peruana';
+
+  @override
+  String get profilePrivacyLawBody =>
+      'Zenda cumple con la Ley 29733 de Protección de Datos Personales del Perú. Tus datos financieros se transmiten exclusivamente por HTTPS/TLS y se almacenan de forma segura. El acceso requiere autenticación válida en todo momento. Puedes revocar tu consentimiento en cualquier momento desde esta pantalla.';
+
+  @override
+  String get profileRevokeConsent => 'Revocar consentimiento de datos';
+
+  @override
+  String get profileRevokeConsentDialogTitle =>
+      '¿Revocar consentimiento de datos?';
+
+  @override
+  String get profileRevokeConsentDialogBody =>
+      'Las funciones de personalización de IA (predicciones, recomendaciones) serán desactivadas. Tus datos ya no serán procesados por IA. Puedes reactivar esto en configuración.';
+
+  @override
+  String get profileRevokeConsentConfirm => 'Revocar';
+
+  @override
+  String get profileRevokeConsentDone =>
+      'Consentimiento revocado. Las funciones de IA están desactivadas.';
+
+  @override
+  String get profileConsentAlreadyRevoked =>
+      'El consentimiento de datos ya ha sido revocado.';
+
+  @override
+  String get reportsTabCategories => 'Categorías';
+
+  @override
+  String get reportsPeriodWeek => 'Semana';
+
+  @override
+  String get reportsPeriodMonth => 'Mes';
+
+  @override
+  String get reportsPeriodQuarter => 'Trimestre';
+
+  @override
+  String reportsCategoryDrillTitle(String category) {
+    return 'Transacciones de $category';
+  }
+
+  @override
+  String get reportsCategoryNoTransactions =>
+      'No hay transacciones en este período';
+
+  @override
+  String get txFilterCustomRange => 'Rango de fechas';
+
+  @override
+  String get txFilterDateFrom => 'Desde';
+
+  @override
+  String get txFilterDateTo => 'Hasta';
+
+  @override
+  String get txFilterClearDates => 'Limpiar fechas';
+
+  @override
+  String get reportsEvolutionTitle => 'Evolución mensual';
+
+  @override
+  String get reportsEvolutionExpenses => 'Gastos';
+
+  @override
+  String get reportsEvolutionSavings => 'Ahorro';
+
+  @override
+  String get reportsEvolutionBalance => 'Balance';
+
+  @override
+  String get reportsEvolutionNoData =>
+      'Agrega datos de al menos 2 meses para ver tu evolución';
+
+  @override
+  String get dashboardPostSurveyBannerAction => 'Completar encuesta';
 }

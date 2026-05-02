@@ -113,6 +113,35 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             }
           });
         }
+
+        // Show spending anomaly alert (US-016) after pop.
+        if (next.anomalyAlert != null) {
+          final categoryName = next.anomalyAlert!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.trending_up_rounded,
+                          color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(l10n.txAnomalyAlert(categoryName)),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFFEF4444),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(16),
+                  duration: const Duration(seconds: 6),
+                ),
+              );
+            }
+          });
+        }
       }
     });
 

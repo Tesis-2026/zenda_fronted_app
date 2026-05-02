@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../features/transactions/transaction_list_screen.dart';
+import '../../providers/pre_survey_provider.dart';
 import 'dashboard_providers.dart';
 import 'widgets/summary_card.dart';
 import 'widgets/streak_card.dart';
@@ -152,6 +154,10 @@ class _InicioSection extends ConsumerWidget {
 
     final accountsAsync = ref.watch(accountsProvider);
 
+    // Post-survey banner: show after 30 days if pre done but post not done
+    final preSurveyDone = ref.watch(preSurveyProvider).asData?.value ?? false;
+    final postSurveyDone = ref.watch(postSurveyProvider).asData?.value ?? false;
+
     // Expense values
     final todayExpense = ref.watch(todayExpenseProvider);
     final weekExpense = ref.watch(weekExpenseProvider);
@@ -163,7 +169,7 @@ class _InicioSection extends ConsumerWidget {
     final breakdown = ref.watch(budgetBreakdownProvider);
 
     // AI Advice
-    final advice = ref.watch(aiAdviceProvider);
+    final advice = ref.watch(aiAdviceProvider(l10n));
 
     final legendColumn = Column(
       children: [
@@ -233,6 +239,22 @@ class _InicioSection extends ConsumerWidget {
             ),
 
             SizedBox(height: isNarrow ? 16 : 24),
+
+            if (preSurveyDone && !postSurveyDone)
+              FutureBuilder<DateTime?>(
+                future: PreSurveyNotifier.completedAt(),
+                builder: (context, snap) {
+                  final completedAt = snap.data;
+                  final daysSince = completedAt != null
+                      ? DateTime.now().difference(completedAt).inDays
+                      : 0;
+                  if (daysSince < 30) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _PostSurveyBanner(l10n: l10n),
+                  );
+                },
+              ),
 
             SummaryCard(todayExpense: todayExpense, weekExpense: weekExpense),
 
@@ -348,8 +370,8 @@ class _PresupuestoSection extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isNarrow = MediaQuery.of(context).size.width < 600;
     final breakdown = ref.watch(budgetBreakdownProvider);
-    final advice = ref.watch(aiAdviceProvider);
     final l10n = context.l10n;
+    final advice = ref.watch(aiAdviceProvider(l10n));
 
     final onSurface = isDark ? Colors.white : Colors.black87;
 
@@ -521,6 +543,101 @@ class _BottomOption extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PostSurveyBanner extends StatefulWidget {
+  const _PostSurveyBanner({required this.l10n});
+  final dynamic l10n;
+
+  @override
+  State<_PostSurveyBanner> createState() => _PostSurveyBannerState();
+}
+
+class _PostSurveyBannerState extends State<_PostSurveyBanner> {
+  bool _dismissed = false;
+
+  void _dismiss() => setState(() => _dismissed = true);
+
+  Future<void> _takeSurvey() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('zenda.post_survey_done', 'true');
+    if (!mounted) return;
+    context.push('/surveys/post');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_dismissed) return const SizedBox.shrink();
+
+    final l10n = widget.l10n;
+    const bannerColor = Color(0xFF3B82F6);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bannerColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: bannerColor.withValues(alpha: 0.3)),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.assignment_rounded, color: bannerColor, size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.dashboardPostSurveyBannerTitle,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: bannerColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.dashboardPostSurveyBannerBody,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: bannerColor.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: _dismiss,
+                style: TextButton.styleFrom(
+                  foregroundColor: bannerColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                child: const Text('Later'),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: _takeSurvey,
+                style: FilledButton.styleFrom(
+                  backgroundColor: bannerColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                child: Text(l10n.dashboardPostSurveyBannerAction),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

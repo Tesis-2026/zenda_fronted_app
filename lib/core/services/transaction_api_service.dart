@@ -34,8 +34,13 @@ TransactionCategory? categoryFromApiName(String name) {
   };
 }
 
+typedef CreateTransactionResult = ({
+  List<String> completedChallenges,
+  String? anomalyAlert,
+});
+
 class TransactionApiService {
-  Future<List<String>> create({
+  Future<CreateTransactionResult> create({
     required TransactionKind kind,
     required double amount,
     required TransactionCategory category,
@@ -44,7 +49,9 @@ class TransactionApiService {
     String? customCategoryName,
   }) async {
     // Only EXPENSE and INCOME map to the backend (transfers are local-only).
-    if (kind == TransactionKind.transfer) return [];
+    if (kind == TransactionKind.transfer) {
+      return (completedChallenges: <String>[], anomalyAlert: null);
+    }
     final json = await ApiClient.post(
       '/transactions',
       {
@@ -56,9 +63,16 @@ class TransactionApiService {
       },
       authenticated: true,
     );
-    final raw = json['newlyCompletedChallenges'];
-    if (raw is List) return raw.cast<String>();
-    return [];
+    final rawChallenges = json['newlyCompletedChallenges'];
+    final completedChallenges =
+        rawChallenges is List ? rawChallenges.cast<String>() : <String>[];
+
+    final rawAnomaly = json['anomalyAlert'];
+    final anomalyAlert = rawAnomaly is Map
+        ? rawAnomaly['categoryName'] as String?
+        : null;
+
+    return (completedChallenges: completedChallenges, anomalyAlert: anomalyAlert);
   }
 
   Future<List<Map<String, dynamic>>> getAll({

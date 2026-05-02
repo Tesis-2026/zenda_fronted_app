@@ -67,6 +67,20 @@ class SurveyResult {
   }
 }
 
+class SusResult {
+  final int susScore;
+  final String grade;
+
+  const SusResult({required this.susScore, required this.grade});
+
+  factory SusResult.fromJson(Map<String, dynamic> json) {
+    return SusResult(
+      susScore: (json['susScore'] as num).toInt(),
+      grade: json['grade'] as String,
+    );
+  }
+}
+
 class SurveyComparison {
   final double? preScore;
   final double? postScore;
@@ -111,5 +125,15 @@ class SurveysApiService {
   Future<SurveyComparison> getComparison() async {
     final data = await ApiClient.get('/surveys/comparison');
     return SurveyComparison.fromJson(data);
+  }
+
+  Future<Survey> getSusSurvey() async {
+    final data = await ApiClient.get('/surveys/sus');
+    return Survey.fromJson(data);
+  }
+
+  Future<SusResult> submitSus(Map<String, String> answers) async {
+    final data = await ApiClient.post('/surveys/sus/response', {'answers': answers});
+    return SusResult.fromJson(data);
   }
 }
