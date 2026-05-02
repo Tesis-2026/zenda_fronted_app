@@ -38,11 +38,13 @@ class PredictionsScreen extends ConsumerWidget {
                 message: l10n.predictionsErrorLoad,
                 onRetry: () => ref.invalidate(_expensePredictionProvider),
               ),
-              data: (p) => _PredictionCard(
-                result: p,
-                color: const Color(0xFFE53935),
-                icon: Icons.trending_up,
-              ),
+              data: (p) => p.confidenceLevel >= 0.60
+                  ? _PredictionCard(
+                      result: p,
+                      color: const Color(0xFFE53935),
+                      icon: Icons.trending_up,
+                    )
+                  : _LowConfidenceCard(message: l10n.predictionsLowConfidence),
             ),
             const SizedBox(height: 24),
             _DisclaimerCard(text: l10n.predictionsDisclaimer),
@@ -161,6 +163,38 @@ class _PredictionCard extends StatelessWidget {
                 ],
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LowConfidenceCard extends StatelessWidget {
+  const _LowConfidenceCard({required this.message});
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.hourglass_empty_rounded,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
           ],
         ),
       ),

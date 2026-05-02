@@ -4,6 +4,7 @@
   "appTitle": "Zenda",
 
   "commonCancel": "Cancelar",
+  "commonOk": "Aceptar",
   "commonSave": "Guardar",
   "commonRetry": "Reintentar",
   "commonOr": "o",
@@ -78,6 +79,8 @@
     }
   },
   "dashboardMotivation": "Mejoremos tus finanzas hoy.",
+  "dashboardPostSurveyBannerTitle": "Encuesta final disponible",
+  "dashboardPostSurveyBannerBody": "Llevas 30 días usando Zenda — completa la encuesta final para medir tu progreso.",
   "dashboardNavHome": "Inicio",
   "dashboardNavTransactions": "Movs.",
   "dashboardNavBudget": "Presupuesto",
@@ -184,6 +187,12 @@
     "placeholders": {
       "category": { "type": "String" },
       "pct": { "type": "String" }
+    }
+  },
+  "txAnomalyAlert": "Gasto inusual en {category} — supera tu promedio mensual en más del 20%",
+  "@txAnomalyAlert": {
+    "placeholders": {
+      "category": { "type": "String" }
     }
   },
   "aiCardSeeRecommendations": "Ver recomendaciones",
@@ -393,6 +402,12 @@
   "goalsDetailDaysLeft": "Días restantes",
   "goalsDetailMarkComplete": "Marcar como lograda",
   "goalsDetailDelete": "Eliminar meta",
+  "goalCompletedOn": "Completado el {date}",
+  "@goalCompletedOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
 
   "reportsCalendarTitle": "Calendario de gastos",
   "reportsCalendarNoData": "Sin gastos este día",
@@ -417,6 +432,7 @@
   "profileNumberFormat": "Formato de número",
   "profileNumberFormatDot": "1,234.56 (decimal con punto)",
   "profileNumberFormatComma": "1.234,56 (decimal con coma)",
+  "profileNumberFormatSaved": "Formato de número guardado.",
 
   "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
   "errorAuthEmailTaken": "Este correo ya está registrado.",
@@ -440,6 +456,7 @@
   "predictionsConfidence": "Confianza",
   "predictionsErrorLoad": "No se pudieron cargar las predicciones",
   "predictionsDisclaimer": "Las predicciones son estimaciones basadas en tu historial. Los resultados reales pueden variar.",
+  "predictionsLowConfidence": "Aún no hay suficientes datos para una predicción confiable. Sigue registrando transacciones para mejorar la precisión.",
 
   "recommendationsTitle": "Recomendaciones",
   "recommendationsEmpty": "Aún no hay recomendaciones. Agrega más transacciones para obtener consejos personalizados.",
@@ -461,6 +478,10 @@
   "educationTopicCompleted": "¡Tema completado!",
 
   "challengesTitle": "Desafíos",
+  "challengesSectionActive": "Activos",
+  "challengesSectionAvailable": "Disponibles",
+  "challengesSectionCompleted": "Completados",
+  "challengesSectionExpired": "Expirados",
   "challengesEmpty": "No hay desafíos disponibles por ahora.",
   "challengesErrorLoad": "No se pudieron cargar los desafíos",
   "challengesAcceptButton": "Aceptar desafío",
@@ -500,6 +521,7 @@
   "surveyPostTitle": "Encuesta final",
   "surveyErrorLoad": "No se pudo cargar la encuesta",
   "surveyAnswerAll": "Por favor responde todas las preguntas antes de enviar",
+  "surveyNextButton": "Siguiente",
   "surveySubmitButton": "Enviar respuestas",
   "surveySubmitError": "No se pudo enviar la encuesta. Inténtalo de nuevo.",
   "surveyResultTitle": "Tus resultados",
@@ -510,6 +532,29 @@
       "points": { "type": "String" }
     }
   },
+  "susSurveyTitle": "Cuestionario de Usabilidad",
+  "susSurveyDescription": "Califica cada afirmación del 1 (Totalmente en desacuerdo) al 5 (Totalmente de acuerdo).",
+  "susSurveyStronglyDisagree": "Totalmente en desacuerdo",
+  "susSurveyStronglyAgree": "Totalmente de acuerdo",
+  "susSurveySubmit": "Enviar",
+  "susSurveySubmitting": "Enviando...",
+  "susSurveyAlreadyDone": "Ya enviaste el cuestionario de usabilidad.",
+  "susSurveyErrorLoad": "No se pudo cargar el cuestionario. Inténtalo de nuevo.",
+  "susSurveyErrorSubmit": "No se pudo enviar. Inténtalo de nuevo.",
+  "susSurveyResultTitle": "Puntaje de Usabilidad",
+  "susSurveyResultScore": "Tu puntaje SUS: {score}/100",
+  "@susSurveyResultScore": {
+    "placeholders": {
+      "score": { "type": "int" }
+    }
+  },
+  "susSurveyResultGrade": "Calificación: {grade}",
+  "@susSurveyResultGrade": {
+    "placeholders": {
+      "grade": { "type": "String" }
+    }
+  },
+  "susSurveyResultContinue": "Volver al Perfil",
   "surveyComparisonPreLabel": "Puntaje inicial",
   "surveyComparisonPostLabel": "Puntaje final",
   "surveyComparisonImprovementLabel": "Mejora",
@@ -644,5 +689,73 @@
       "sign": { "type": "String" },
       "pct": { "type": "String" }
     }
-  }
+  },
+  "aiAdviceStartRecording": "Empieza a registrar gastos para recibir consejos personalizados.",
+  "aiAdviceReduceWants": "Tus \"deseos\" están volando alto ({pct}%). Considera reducir gastos hormiga como cafés o taxis para equilibrarte.",
+  "@aiAdviceReduceWants": {
+    "placeholders": {
+      "pct": { "type": "String" }
+    }
+  },
+  "aiAdviceSaveLow": "Tu ahorro está bajo ({pct}%). Intenta separar un monto fijo al inicio de semana, aunque sea pequeño.",
+  "@aiAdviceSaveLow": {
+    "placeholders": {
+      "pct": { "type": "String" }
+    }
+  },
+  "aiAdviceOnTrack": "¡Vas muy bien! Tu presupuesto está equilibrado. Sigue así y considera invertir tus excedentes.",
+
+  "surveyResultDialogTitle": "Tus resultados",
+  "surveyResultDialogBody": "Nivel de educación financiera: {level} ({score}/100)",
+  "@surveyResultDialogBody": {
+    "placeholders": {
+      "level": { "type": "String" },
+      "score": { "type": "String" }
+    }
+  },
+  "surveyImprovementDialogTitle": "¡Progreso medido!",
+  "surveyImprovementDialogBody": "Puntaje: {postScore}/100. Anterior: {preScore}/100. ¡Mejoraste {improvement} puntos!",
+  "@surveyImprovementDialogBody": {
+    "placeholders": {
+      "postScore": { "type": "String" },
+      "preScore": { "type": "String" },
+      "improvement": { "type": "String" }
+    }
+  },
+
+  "profileSectionPrivacy": "PRIVACIDAD",
+  "profilePrivacyLaw": "Protección de datos — Ley 29733",
+  "profilePrivacyLawSubtitle": "Tus datos están protegidos bajo la ley peruana",
+  "profilePrivacyLawBody": "Zenda cumple con la Ley 29733 de Protección de Datos Personales del Perú. Tus datos financieros se transmiten exclusivamente por HTTPS/TLS y se almacenan de forma segura. El acceso requiere autenticación válida en todo momento. Puedes revocar tu consentimiento en cualquier momento desde esta pantalla.",
+  "profileRevokeConsent": "Revocar consentimiento de datos",
+  "profileRevokeConsentDialogTitle": "¿Revocar consentimiento de datos?",
+  "profileRevokeConsentDialogBody": "Las funciones de personalización de IA (predicciones, recomendaciones) serán desactivadas. Tus datos ya no serán procesados por IA. Puedes reactivar esto en configuración.",
+  "profileRevokeConsentConfirm": "Revocar",
+  "profileRevokeConsentDone": "Consentimiento revocado. Las funciones de IA están desactivadas.",
+  "profileConsentAlreadyRevoked": "El consentimiento de datos ya ha sido revocado.",
+
+  "reportsTabCategories": "Categorías",
+  "reportsPeriodWeek": "Semana",
+  "reportsPeriodMonth": "Mes",
+  "reportsPeriodQuarter": "Trimestre",
+  "reportsCategoryDrillTitle": "Transacciones de {category}",
+  "@reportsCategoryDrillTitle": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "reportsCategoryNoTransactions": "No hay transacciones en este período",
+
+  "txFilterCustomRange": "Rango de fechas",
+  "txFilterDateFrom": "Desde",
+  "txFilterDateTo": "Hasta",
+  "txFilterClearDates": "Limpiar fechas",
+
+  "reportsEvolutionTitle": "Evolución mensual",
+  "reportsEvolutionExpenses": "Gastos",
+  "reportsEvolutionSavings": "Ahorro",
+  "reportsEvolutionBalance": "Balance",
+  "reportsEvolutionNoData": "Agrega datos de al menos 2 meses para ver tu evolución",
+
+  "dashboardPostSurveyBannerAction": "Completar encuesta"
 }

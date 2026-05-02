@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/models/summary_models.dart';
+import '../../core/services/amount_formatter.dart';
 import '../../core/services/insights_api_service.dart';
 import '../../l10n/l10n_extension.dart';
+import '../../providers/repositories_providers.dart';
 
 // ── Providers ──────────────────────────────────────────────────────────────
 
@@ -65,7 +67,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -82,11 +84,13 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         title: Text(l10n.reportsTitle),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           tabs: [
             Tab(text: l10n.reportsTabMonth),
             Tab(text: l10n.reportsTabWeek),
             Tab(text: l10n.reportsTabCompare),
             Tab(text: l10n.reportsTabDay),
+            Tab(text: l10n.reportsTabCategories),
           ],
         ),
       ),
@@ -97,6 +101,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           _WeekTab(),
           _CompareTab(),
           _DayTab(),
+          _CategoriesTab(),
         ],
       ),
     );
@@ -312,6 +317,11 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
     final progress = ref.watch(_progressProvider);
     return Column(
       children: [
+        progress.when(
+          data: (p) => _EvolutionCard(summary: p),
+          loading: () => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           child: SegmentedButton<int>(
@@ -323,11 +333,6 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
             selected: {_months},
             onSelectionChanged: (s) => setState(() => _months = s.first),
           ),
-        ),
-        progress.when(
-          data: (p) => _ProgressChips(summary: p),
-          loading: () => const SizedBox.shrink(),
-          error: (_, _) => const SizedBox.shrink(),
         ),
         Expanded(
           child: comparison.when(
@@ -386,6 +391,21 @@ class _DayTabState extends ConsumerState<_DayTab> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final summary = ref.watch(_daySummaryProvider(_dateKey));
+    final monthSummary = ref.watch(
+      _monthSummaryProvider((year: _viewMonth.year, month: _viewMonth.month)),
+    );
+
+    final spendingByDay = <int, double>{};
+    monthSummary.whenData((ms) {
+      for (final item in ms.dailyBreakdown) {
+        final parts = item.date.split('-');
+        if (parts.length == 3) {
+          final day = int.tryParse(parts[2]);
+          if (day != null) spendingByDay[day] = item.totalExpense;
+        }
+      }
+    });
+
     return Column(
       children: [
         _PeriodSelector(
@@ -396,6 +416,7 @@ class _DayTabState extends ConsumerState<_DayTab> {
         _CalendarGrid(
           viewMonth: _viewMonth,
           selected: _selected,
+          spendingByDay: spendingByDay.isEmpty ? null : spendingByDay,
           onDayTap: (date) => setState(() => _selected = date),
         ),
         const Divider(height: 1),
@@ -430,11 +451,13 @@ class _CalendarGrid extends StatelessWidget {
   final DateTime viewMonth;
   final DateTime selected;
   final ValueChanged<DateTime> onDayTap;
+  final Map<int, double>? spendingByDay;
 
   const _CalendarGrid({
     required this.viewMonth,
     required this.selected,
     required this.onDayTap,
+    this.spendingByDay,
   });
 
   @override
@@ -488,6 +511,22 @@ class _CalendarGrid extends StatelessWidget {
               final isToday = DateUtils.isSameDay(date, today);
               final isSelected = DateUtils.isSameDay(date, selected);
 
+              final spending = spendingByDay?[day] ?? 0.0;
+              final maxSpending = spendingByDay == null || spendingByDay!.isEmpty
+                  ? 0.0
+                  : spendingByDay!.values.reduce((a, b) => a > b ? a : b);
+              Color? heatColor;
+              if (!isSelected && spending > 0 && maxSpending > 0) {
+                final ratio = spending / maxSpending;
+                if (ratio > 0.66) {
+                  heatColor = const Color(0xFFFCA5A5); // high — light red
+                } else if (ratio > 0.33) {
+                  heatColor = const Color(0xFFFDE68A); // medium — amber
+                } else {
+                  heatColor = const Color(0xFFBBF7D0); // low — light green
+                }
+              }
+
               return GestureDetector(
                 onTap: isFuture ? null : () => onDayTap(date),
                 child: Container(
@@ -499,24 +538,39 @@ class _CalendarGrid extends StatelessWidget {
                             : null,
                     shape: BoxShape.circle,
                   ),
-                  child: Center(
-                    child: Text(
-                      '$day',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: isSelected || isToday
-                            ? FontWeight.w700
-                            : FontWeight.normal,
-                        color: isSelected
-                            ? Colors.white
-                            : isFuture
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .outline
-                                    .withValues(alpha: 0.4)
-                                : null,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '$day',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected || isToday
+                              ? FontWeight.w700
+                              : FontWeight.normal,
+                          color: isSelected
+                              ? Colors.white
+                              : isFuture
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .outline
+                                      .withValues(alpha: 0.4)
+                                  : null,
+                        ),
                       ),
-                    ),
+                      if (heatColor != null)
+                        Container(
+                          width: 5,
+                          height: 5,
+                          margin: const EdgeInsets.only(top: 1),
+                          decoration: BoxDecoration(
+                            color: heatColor,
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                      else
+                        const SizedBox(height: 6),
+                    ],
                   ),
                 ),
               );
@@ -594,22 +648,24 @@ class _SummaryView extends StatelessWidget {
   }
 }
 
-class _TotalsRow extends StatelessWidget {
+class _TotalsRow extends ConsumerWidget {
   final PeriodSummary summary;
   const _TotalsRow({required this.summary});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final fmtAsync = ref.watch(amountFormatterProvider);
+    final fmt = fmtAsync.asData?.value ?? (double v) => v.toStringAsFixed(2);
 
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             label: l10n.reportsIncome,
-            value: 'S/ ${summary.totalIncome.toStringAsFixed(2)}',
+            value: 'S/ ${fmt(summary.totalIncome)}',
             color: const Color(0xFF34D399),
             cardColor: cardColor,
           ),
@@ -618,7 +674,7 @@ class _TotalsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             label: l10n.reportsExpense,
-            value: 'S/ ${summary.totalExpense.toStringAsFixed(2)}',
+            value: 'S/ ${fmt(summary.totalExpense)}',
             color: const Color(0xFFFC8181),
             cardColor: cardColor,
           ),
@@ -627,7 +683,7 @@ class _TotalsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             label: l10n.reportsBalance,
-            value: 'S/ ${summary.netBalance.toStringAsFixed(2)}',
+            value: 'S/ ${fmt(summary.netBalance)}',
             color: summary.netBalance >= 0
                 ? const Color(0xFF60A5FA)
                 : const Color(0xFFF87171),
@@ -686,8 +742,9 @@ class _StatCard extends StatelessWidget {
 
 class _CategoryBarChart extends StatelessWidget {
   final List<TopCategoryItem> categories;
+  final ValueChanged<String>? onCategoryTap;
 
-  const _CategoryBarChart({required this.categories});
+  const _CategoryBarChart({required this.categories, this.onCategoryTap});
 
   @override
   Widget build(BuildContext context) {
@@ -713,47 +770,63 @@ class _CategoryBarChart extends StatelessWidget {
         ];
         final color = barColors[i % barColors.length];
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(item.name,
-                      style: TextStyle(fontSize: 13, color: textColor)),
-                  Text('S/ ${item.amount.toStringAsFixed(2)}',
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: textColor)),
-                ],
-              ),
-              const SizedBox(height: 4),
-              LayoutBuilder(builder: (context, constraints) {
-                return Stack(
+        return InkWell(
+          onTap: onCategoryTap != null ? () => onCategoryTap!(item.name) : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      height: 8,
-                      width: constraints.maxWidth,
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(item.name,
+                              style: TextStyle(fontSize: 13, color: textColor)),
+                          if (onCategoryTap != null) ...[
+                            const SizedBox(width: 4),
+                            Icon(Icons.chevron_right_rounded,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.outline),
+                          ],
+                        ],
                       ),
                     ),
-                    Container(
-                      height: 8,
-                      width: constraints.maxWidth * ratio,
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                    Text('S/ ${item.amount.toStringAsFixed(2)}',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: textColor)),
                   ],
-                );
-              }),
-            ],
+                ),
+                const SizedBox(height: 4),
+                LayoutBuilder(builder: (context, constraints) {
+                  return Stack(
+                    children: [
+                      Container(
+                        height: 8,
+                        width: constraints.maxWidth,
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      Container(
+                        height: 8,
+                        width: constraints.maxWidth * ratio,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ],
+            ),
           ),
         );
       }).toList(),
@@ -843,88 +916,138 @@ class _DailyBarChart extends StatelessWidget {
   }
 }
 
-// ── Progress % Chips (Compare tab) ────────────────────────────────────────
+// ── Evolution Card (Compare tab) ───────────────────────────────────────────
 
-class _ProgressChips extends StatelessWidget {
+class _EvolutionCard extends StatelessWidget {
   final ProgressSummary summary;
 
-  const _ProgressChips({required this.summary});
+  const _EvolutionCard({required this.summary});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+
+    final hasAnyData = summary.expensesChangePercent != null ||
+        summary.savingsChangePercent != null ||
+        summary.balanceChangePercent != null;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.reportsProgressChipsTitle,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.reportsEvolutionTitle,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            if (!hasAnyData)
+              Text(
+                l10n.reportsEvolutionNoData,
+                style: TextStyle(
+                  fontSize: 13,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              if (summary.expensesChangePercent != null)
-                _PctChip(
-                  label: l10n.reportsExpensesChip(
-                    summary.expensesChangePercent! >= 0 ? '+' : '',
-                    summary.expensesChangePercent!.abs().toStringAsFixed(1),
-                  ),
-                  positive: summary.expensesChangePercent! <= 0,
-                ),
-              if (summary.savingsChangePercent != null)
-                _PctChip(
-                  label: l10n.reportsSavingsChip(
-                    summary.savingsChangePercent! >= 0 ? '+' : '',
-                    summary.savingsChangePercent!.abs().toStringAsFixed(1),
-                  ),
-                  positive: summary.savingsChangePercent! >= 0,
-                ),
-              if (summary.balanceChangePercent != null)
-                _PctChip(
-                  label: l10n.reportsBalanceChip(
-                    summary.balanceChangePercent! >= 0 ? '+' : '',
-                    summary.balanceChangePercent!.abs().toStringAsFixed(1),
-                  ),
-                  positive: summary.balanceChangePercent! >= 0,
-                ),
-            ],
-          ),
-        ],
+              )
+            else
+              Column(
+                children: [
+                  if (summary.expensesChangePercent != null)
+                    _EvolutionRow(
+                      label: l10n.reportsEvolutionExpenses,
+                      percent: summary.expensesChangePercent!,
+                      // expenses down = positive direction
+                      isPositive: summary.expensesChangePercent! <= 0,
+                    ),
+                  if (summary.savingsChangePercent != null) ...[
+                    const SizedBox(height: 8),
+                    _EvolutionRow(
+                      label: l10n.reportsEvolutionSavings,
+                      percent: summary.savingsChangePercent!,
+                      // savings up = positive direction
+                      isPositive: summary.savingsChangePercent! >= 0,
+                    ),
+                  ],
+                  if (summary.balanceChangePercent != null) ...[
+                    const SizedBox(height: 8),
+                    _EvolutionRow(
+                      label: l10n.reportsEvolutionBalance,
+                      percent: summary.balanceChangePercent!,
+                      // balance up = positive direction
+                      isPositive: summary.balanceChangePercent! >= 0,
+                    ),
+                  ],
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _PctChip extends StatelessWidget {
+class _EvolutionRow extends StatelessWidget {
   final String label;
-  final bool positive;
+  final double percent;
+  final bool isPositive;
 
-  const _PctChip({required this.label, required this.positive});
+  const _EvolutionRow({
+    required this.label,
+    required this.percent,
+    required this.isPositive,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = positive ? const Color(0xFF34D399) : const Color(0xFFFC8181);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
+    final color = isPositive ? const Color(0xFF34D399) : const Color(0xFFFC8181);
+    final arrowIcon =
+        percent >= 0 ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded;
+    final sign = percent >= 0 ? '+' : '';
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
         ),
-      ),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(arrowIcon, color: color, size: 20),
+              const SizedBox(width: 4),
+              Text(
+                '$sign${percent.abs().toStringAsFixed(1)}%',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1065,4 +1188,296 @@ class _LegendDot extends StatelessWidget {
           Text(label, style: const TextStyle(fontSize: 12)),
         ],
       );
+}
+
+// ── Categories Tab (US-0405) ───────────────────────────────────────────────
+
+class _CategoriesTab extends ConsumerStatefulWidget {
+  const _CategoriesTab();
+
+  @override
+  ConsumerState<_CategoriesTab> createState() => _CategoriesTabState();
+}
+
+class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
+  String _period = 'month';
+  late int _year;
+  late int _month;
+  late int _week;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _year = now.year;
+    _month = now.month;
+    _week = _isoWeekNumber(now);
+  }
+
+  ({DateTime from, DateTime to}) get _dateRange {
+    final now = DateTime.now();
+    return switch (_period) {
+      'week' => (
+          from: now.subtract(Duration(days: now.weekday - 1)),
+          to: now,
+        ),
+      'quarter' => (
+          from: DateTime(_year, _month - 2, 1),
+          to: DateTime(_year, _month + 1, 0, 23, 59, 59),
+        ),
+      _ => (
+          from: DateTime(_year, _month, 1),
+          to: DateTime(_year, _month + 1, 0, 23, 59, 59),
+        ),
+    };
+  }
+
+  List<TopCategoryItem> _mergeCategories(List<List<TopCategoryItem>> lists) {
+    final map = <String, double>{};
+    for (final list in lists) {
+      for (final item in list) {
+        map[item.name] = (map[item.name] ?? 0) + item.amount;
+      }
+    }
+    final merged = map.entries
+        .map((e) => TopCategoryItem(name: e.key, amount: e.value))
+        .toList()
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+    return merged;
+  }
+
+  void _onCategoryTap(BuildContext context, String categoryName) {
+    final range = _dateRange;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => _CategoryDrillDownSheet(
+        categoryName: categoryName,
+        from: range.from,
+        to: range.to,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    // Gather category data based on selected period
+    final AsyncValue<List<TopCategoryItem>> categoriesAsync;
+
+    if (_period == 'week') {
+      final weekSummary = ref.watch(_weekSummaryProvider((year: _year, week: _week)));
+      categoriesAsync = weekSummary.whenData((s) => s.topCategories);
+    } else if (_period == 'quarter') {
+      // Aggregate 3 months: current + 2 prior
+      final m1 = ref.watch(_monthSummaryProvider((year: _year, month: _month)));
+      final prevMonth1 = _month == 1 ? 12 : _month - 1;
+      final prevYear1 = _month == 1 ? _year - 1 : _year;
+      final prevMonth2 = prevMonth1 == 1 ? 12 : prevMonth1 - 1;
+      final prevYear2 = prevMonth1 == 1 ? prevYear1 - 1 : prevYear1;
+      final m2 = ref.watch(_monthSummaryProvider((year: prevYear1, month: prevMonth1)));
+      final m3 = ref.watch(_monthSummaryProvider((year: prevYear2, month: prevMonth2)));
+
+      if (m1.isLoading || m2.isLoading || m3.isLoading) {
+        categoriesAsync = const AsyncValue.loading();
+      } else if (m1.hasError) {
+        categoriesAsync = AsyncValue.error(m1.error!, m1.stackTrace!);
+      } else {
+        final lists = [
+          m1.asData?.value.topCategories ?? [],
+          m2.asData?.value.topCategories ?? [],
+          m3.asData?.value.topCategories ?? [],
+        ];
+        categoriesAsync = AsyncValue.data(_mergeCategories(lists));
+      }
+    } else {
+      final monthSummary = ref.watch(_monthSummaryProvider((year: _year, month: _month)));
+      categoriesAsync = monthSummary.whenData((s) => s.topCategories);
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: SegmentedButton<String>(
+            segments: [
+              ButtonSegment(value: 'week', label: Text(l10n.reportsPeriodWeek)),
+              ButtonSegment(value: 'month', label: Text(l10n.reportsPeriodMonth)),
+              ButtonSegment(value: 'quarter', label: Text(l10n.reportsPeriodQuarter)),
+            ],
+            selected: {_period},
+            onSelectionChanged: (s) => setState(() => _period = s.first),
+          ),
+        ),
+        Expanded(
+          child: categoriesAsync.when(
+            data: (categories) => categories.isEmpty
+                ? Center(
+                    child: Text(
+                      l10n.reportsNoCategoryData,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                  )
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    children: [
+                      _CategoryBarChart(
+                        categories: categories,
+                        onCategoryTap: (name) =>
+                            _onCategoryTap(context, name),
+                      ),
+                    ],
+                  ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, _) => _ErrorView(message: l10n.reportsErrorLoad),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Category Drill-Down Bottom Sheet ──────────────────────────────────────
+
+class _CategoryDrillDownSheet extends ConsumerWidget {
+  final String categoryName;
+  final DateTime from;
+  final DateTime to;
+
+  const _CategoryDrillDownSheet({
+    required this.categoryName,
+    required this.from,
+    required this.to,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final apiService = ref.read(transactionApiServiceProvider);
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (context, scrollController) {
+        return Column(
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                l10n.reportsCategoryDrillTitle(categoryName),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+            Expanded(
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: apiService
+                    .getAll(
+                      type: 'EXPENSE',
+                      from: from.toUtc().toIso8601String(),
+                      to: to.toUtc().toIso8601String(),
+                    )
+                    .then((txs) => txs
+                        .where((tx) =>
+                            (tx['categoryName'] as String?)
+                                ?.toLowerCase() ==
+                            categoryName.toLowerCase())
+                        .toList()),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return _ErrorView(message: l10n.reportsErrorLoad);
+                  }
+                  final txs = snapshot.data ?? [];
+                  if (txs.isEmpty) {
+                    return Center(
+                      child: Text(l10n.reportsCategoryNoTransactions,
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
+                    );
+                  }
+                  return ListView.separated(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: txs.length,
+                    separatorBuilder: (_, _) =>
+                        const Divider(height: 1, indent: 56),
+                    itemBuilder: (context, i) {
+                      final tx = txs[i];
+                      final amount =
+                          (tx['amount'] as num?)?.toDouble() ?? 0.0;
+                      final desc = tx['description'] as String? ?? '';
+                      final dateStr = tx['occurredAt'] as String? ?? '';
+                      DateTime? date;
+                      try {
+                        date = DateTime.parse(dateStr).toLocal();
+                      } catch (_) {}
+                      return ListTile(
+                        leading: CircleAvatar(
+                          radius: 18,
+                          backgroundColor:
+                              const Color(0xFFFC8181).withValues(alpha: 0.15),
+                          child: const Icon(Icons.remove_rounded,
+                              size: 16, color: Color(0xFFFC8181)),
+                        ),
+                        title: Text(
+                          desc.isEmpty ? categoryName : desc,
+                          style: const TextStyle(fontSize: 14),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: date != null
+                            ? Text(
+                                '${date.day}/${date.month}/${date.year}',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant),
+                              )
+                            : null,
+                        trailing: Text(
+                          'S/ ${amount.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFC8181),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'pending_transaction_queue.dart';
 import 'transaction_api_service.dart';
+
+/// Maximum number of attempts per pending entry before it is dropped.
+const _kMaxRetries = 3;
 
 class SyncService {
   SyncService(this._queue, this._apiService);
@@ -11,6 +17,9 @@ class SyncService {
   final PendingTransactionQueue _queue;
   final TransactionApiService _apiService;
   StreamSubscription<List<ConnectivityResult>>? _sub;
+
+  /// In-memory retry counters — reset on app restart (acceptable for this scope).
+  final Map<String, int> _retryCount = {};
 
   void startListening() {
     _sub = Connectivity().onConnectivityChanged.listen((results) {
@@ -42,6 +51,22 @@ class SyncService {
     if (pending.isEmpty) return;
 
     for (final entry in pending) {
+      final retries = _retryCount[entry.txId] ?? 0;
+
+      if (retries >= _kMaxRetries) {
+        // Drop the entry after max retries — do not keep retrying indefinitely.
+        debugPrint('SyncService: max retries reached for ${entry.txId}');
+        await _queue.remove(entry.txId);
+        _retryCount.remove(entry.txId);
+        continue;
+      }
+
+      // Exponential backoff: wait 2^retries seconds, capped at 30 s.
+      if (retries > 0) {
+        final delaySecs = min(30, pow(2, retries).toInt());
+        await Future<void>.delayed(Duration(seconds: delaySecs));
+      }
+
       try {
         await _apiService.create(
           kind: entry.kind,
@@ -52,8 +77,10 @@ class SyncService {
           customCategoryName: entry.customCategoryName,
         );
         await _queue.remove(entry.txId);
+        _retryCount.remove(entry.txId);
       } catch (_) {
-        // Still unreachable or server error — leave in queue for next event
+        // Still unreachable or server error — increment retry counter.
+        _retryCount[entry.txId] = retries + 1;
       }
     }
   }

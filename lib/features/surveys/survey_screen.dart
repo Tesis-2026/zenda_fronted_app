@@ -29,6 +29,7 @@ class SurveyScreen extends ConsumerStatefulWidget {
 
 class _SurveyScreenState extends ConsumerState<SurveyScreen> {
   final Map<String, String> _answers = {};
+  int _currentIndex = 0;
   bool _submitting = false;
   SurveyResult? _result;
 
@@ -50,17 +51,18 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         error: (_, _) => Center(child: Text(l10n.surveyErrorLoad)),
         data: (survey) {
           if (_result != null) {
-            return _ResultView(
-              result: _result!,
-              isPre: widget.isPre,
-            );
+            return _ResultView(result: _result!, isPre: widget.isPre);
           }
           return _SurveyForm(
             survey: survey,
+            currentIndex: _currentIndex,
             answers: _answers,
             submitting: _submitting,
             onAnswerChanged: (questionId, answer) {
               setState(() => _answers[questionId] = answer);
+            },
+            onNext: () {
+              setState(() => _currentIndex++);
             },
             onSubmit: () => _submit(survey),
           );
@@ -70,13 +72,6 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
   }
 
   Future<void> _submit(Survey survey) async {
-    if (_answers.length < survey.questions.length) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.surveyAnswerAll)),
-      );
-      return;
-    }
-
     setState(() => _submitting = true);
     try {
       final service = ref.read(_surveysServiceProvider);
@@ -85,8 +80,15 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           : await service.submitPost(_answers);
       if (widget.isPre) {
         await ref.read(preSurveyProvider.notifier).markCompleted();
+      } else {
+        await ref.read(postSurveyProvider.notifier).markCompleted();
       }
-      setState(() => _result = result);
+
+      if (mounted) {
+        await _showResultSummaryDialog(result);
+      }
+
+      if (mounted) setState(() => _result = result);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -97,57 +99,125 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       if (mounted) setState(() => _submitting = false);
     }
   }
+
+  Future<void> _showResultSummaryDialog(SurveyResult result) async {
+    final l10n = context.l10n;
+    final level = result.level ?? '—';
+    final score = result.score.toStringAsFixed(0);
+
+    final bool isPostWithImprovement =
+        !widget.isPre && result.improvement != null;
+
+    String title;
+    String body;
+
+    if (isPostWithImprovement) {
+      // For post-survey with improvement data we need a pre-score proxy.
+      // improvement = postScore - preScore → preScore = postScore - improvement
+      final improvement = result.improvement!;
+      final preScore = (result.score - improvement).toStringAsFixed(0);
+      title = l10n.surveyImprovementDialogTitle;
+      body = l10n.surveyImprovementDialogBody(
+        score,
+        preScore,
+        improvement.toStringAsFixed(1),
+      );
+    } else {
+      title = l10n.surveyResultDialogTitle;
+      body = l10n.surveyResultDialogBody(level, score);
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.commonOk),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SurveyForm extends StatelessWidget {
   const _SurveyForm({
     required this.survey,
+    required this.currentIndex,
     required this.answers,
     required this.submitting,
     required this.onAnswerChanged,
+    required this.onNext,
     required this.onSubmit,
   });
 
   final Survey survey;
+  final int currentIndex;
   final Map<String, String> answers;
   final bool submitting;
   final void Function(String questionId, String answer) onAnswerChanged;
+  final VoidCallback onNext;
   final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final total = survey.questions.length;
+    final question = survey.questions[currentIndex];
+    final isLast = currentIndex == total - 1;
+    final hasAnswer = answers.containsKey(question.id);
 
     return Column(
       children: [
+        LinearProgressIndicator(
+          value: (currentIndex + 1) / total,
+          minHeight: 4,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                '${currentIndex + 1} / $total',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: survey.questions.length,
-            itemBuilder: (context, index) {
-              final q = survey.questions[index];
-              return _QuestionCard(
-                question: q,
-                selectedAnswer: answers[q.id],
-                onChanged: (answer) => onAnswerChanged(q.id, answer),
-              );
-            },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _QuestionCard(
+              question: question,
+              selectedAnswer: answers[question.id],
+              onChanged: (answer) => onAnswerChanged(question.id, answer),
+            ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(16),
           child: SizedBox(
             width: double.infinity,
-            child: FilledButton(
-              onPressed: submitting ? null : onSubmit,
-              child: submitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.surveySubmitButton),
-            ),
+            child: isLast
+                ? FilledButton(
+                    onPressed: (hasAnswer && !submitting) ? onSubmit : null,
+                    child: submitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child:
+                                CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(l10n.surveySubmitButton),
+                  )
+                : FilledButton(
+                    onPressed: hasAnswer ? onNext : null,
+                    child: Text(l10n.surveyNextButton),
+                  ),
           ),
         ),
       ],
@@ -176,7 +246,7 @@ class _QuestionCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${question.order}. ${question.text}',
+              question.text,
               style: Theme.of(context)
                   .textTheme
                   .titleSmall

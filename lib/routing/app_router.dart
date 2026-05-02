@@ -33,6 +33,7 @@ import '../features/badges/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/surveys/survey_screen.dart';
 import '../features/surveys/survey_comparison_screen.dart';
+import '../features/surveys/sus_screen.dart';
 import '../providers/pre_survey_provider.dart';
 import '../features/transactions/edit_transaction_screen.dart';
 import '../features/notifications/notification_preferences_screen.dart';
@@ -57,7 +58,7 @@ const _authOnlyRoutes = {'/auth/login', '/auth/register'};
 const _profileSetupExempt = {'/profile-setup', '/auth/email-sent', '/dashboard'};
 
 // Routes exempt from the pre-survey redirect.
-const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/profile-setup'};
+const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/surveys/sus', '/profile-setup'};
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
@@ -284,6 +285,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/surveys/comparison',
         builder: (context, state) => const SurveyComparisonScreen(),
+      ),
+      GoRoute(
+        path: '/surveys/sus',
+        builder: (context, state) => const SusScreen(),
       ),
       GoRoute(
         path: '/edit-transaction',

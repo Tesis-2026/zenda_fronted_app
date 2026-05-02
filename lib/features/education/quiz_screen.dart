@@ -468,14 +468,17 @@ class _OptionTile extends StatelessWidget {
     Widget? trailingIcon;
 
     if (isReviewing) {
-      if (option == actualCorrect) {
+      if (actualCorrect != null && option == actualCorrect) {
         tileColor = Colors.green.withValues(alpha: 0.12);
         borderColor = Colors.green;
         trailingIcon = const Icon(Icons.check_circle, color: Colors.green);
-      } else if (isSelected) {
+      } else if (actualCorrect != null && isSelected) {
         tileColor = Colors.red.withValues(alpha: 0.10);
         borderColor = Colors.red;
         trailingIcon = const Icon(Icons.cancel, color: Colors.red);
+      } else if (isSelected) {
+        tileColor = colorScheme.primaryContainer;
+        borderColor = colorScheme.primary;
       }
     } else if (isSelected) {
       tileColor = colorScheme.primaryContainer;

@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+const _secureStorage = FlutterSecureStorage();
 
 class LocalKvStore {
   static const _kAccounts = 'zenda.accounts.v1';
@@ -8,8 +10,7 @@ class LocalKvStore {
   static const _kStreak = 'zenda.streak.v1';
 
   Future<List<Map<String, dynamic>>> readJsonList(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(key);
+    final raw = await _secureStorage.read(key: key);
     if (raw == null || raw.isEmpty) return <Map<String, dynamic>>[];
     final decoded = jsonDecode(raw);
     if (decoded is! List) return <Map<String, dynamic>>[];
@@ -23,13 +24,11 @@ class LocalKvStore {
     String key,
     List<Map<String, dynamic>> value,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, jsonEncode(value));
+    await _secureStorage.write(key: key, value: jsonEncode(value));
   }
 
   Future<Map<String, dynamic>?> readJsonMap(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(key);
+    final raw = await _secureStorage.read(key: key);
     if (raw == null || raw.isEmpty) return null;
     final decoded = jsonDecode(raw);
     if (decoded is! Map) return null;
@@ -37,8 +36,7 @@ class LocalKvStore {
   }
 
   Future<void> writeJsonMap(String key, Map<String, dynamic> value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, jsonEncode(value));
+    await _secureStorage.write(key: key, value: jsonEncode(value));
   }
 
   // Typed keys
