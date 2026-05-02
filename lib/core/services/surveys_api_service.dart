@@ -113,12 +113,12 @@ class SurveysApiService {
   }
 
   Future<SurveyResult> submitPre(Map<String, String> answers) async {
-    final data = await ApiClient.post('/surveys/pre/response', {'answers': answers});
+    final data = await ApiClient.post('/surveys/pre/response', {'answers': answers}, authenticated: true);
     return SurveyResult.fromJson(data);
   }
 
   Future<SurveyResult> submitPost(Map<String, String> answers) async {
-    final data = await ApiClient.post('/surveys/post/response', {'answers': answers});
+    final data = await ApiClient.post('/surveys/post/response', {'answers': answers}, authenticated: true);
     return SurveyResult.fromJson(data);
   }
 

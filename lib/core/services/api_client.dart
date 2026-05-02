@@ -1,17 +1,11 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-// Production URL must use HTTPS. Dev builds target the local emulator over HTTP.
-// Replace _kProdBaseUrl with your deployed API URL before shipping.
-const String _kProdBaseUrl = 'https://api.zenda.pe/api';
-const String _kDevBaseUrl = kIsWeb
-    ? 'http://localhost:3000/api'
-    : 'http://10.0.2.2:3000/api';
-
-const String _kBaseUrl = kReleaseMode ? _kProdBaseUrl : _kDevBaseUrl;
+const String _kBaseUrl = 'https://5af7-181-65-1-2.ngrok-free.app/api';
 
 const String _kAccessTokenKey = 'zenda.access_token';
 const String _kRefreshTokenKey = 'zenda.refresh_token';
@@ -117,6 +111,21 @@ class ApiClient {
     throw ApiException(statusCode: response.statusCode, message: message);
   }
 
+  static void _log(String method, String url, int statusCode) {
+    developer.log(
+      '[$method] $url → $statusCode',
+      name: 'ApiClient',
+    );
+  }
+
+  static void _logError(String method, String url, Object error) {
+    developer.log(
+      '[$method] $url → ERROR: $error',
+      name: 'ApiClient',
+      level: 900,
+    );
+  }
+
   // ── HTTP verbs ───────────────────────────────────────────────────
 
   static Future<Map<String, dynamic>> post(
@@ -124,163 +133,219 @@ class ApiClient {
     Map<String, dynamic> body, {
     bool authenticated = false,
   }) async {
+    final url = '$_kBaseUrl$path';
     final headers = authenticated
         ? await _authHeaders()
         : {HttpHeaders.contentTypeHeader: 'application/json'};
 
-    var response = await http.post(
-      Uri.parse('$_kBaseUrl$path'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode == 401 && authenticated) {
-      final refreshed = await _tryRefresh();
-      if (refreshed) {
-        final retryHeaders = await _authHeaders();
-        response = await http.post(
-          Uri.parse('$_kBaseUrl$path'),
-          headers: retryHeaders,
-          body: jsonEncode(body),
-        );
+      if (response.statusCode == 401 && authenticated) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          final retryHeaders = await _authHeaders();
+          response = await http.post(
+            Uri.parse(url),
+            headers: retryHeaders,
+            body: jsonEncode(body),
+          );
+        }
       }
-    }
 
-    _throwIfError(response);
-    return _parseBody(response);
+      _log('POST', url, response.statusCode);
+      _throwIfError(response);
+      return _parseBody(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('POST', url, e);
+      rethrow;
+    }
   }
 
   static Future<Map<String, dynamic>> get(String path) async {
-    var response = await http.get(
-      Uri.parse('$_kBaseUrl$path'),
-      headers: await _authHeaders(),
-    );
+    final url = '$_kBaseUrl$path';
+    try {
+      var response = await http.get(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+      );
 
-    if (response.statusCode == 401) {
-      final refreshed = await _tryRefresh();
-      if (refreshed) {
-        response = await http.get(
-          Uri.parse('$_kBaseUrl$path'),
-          headers: await _authHeaders(),
-        );
+      if (response.statusCode == 401) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          response = await http.get(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+          );
+        }
       }
-    }
 
-    _throwIfError(response);
-    return _parseBody(response);
+      _log('GET', url, response.statusCode);
+      _throwIfError(response);
+      return _parseBody(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('GET', url, e);
+      rethrow;
+    }
   }
 
   static Future<Map<String, dynamic>> put(
     String path,
     Map<String, dynamic> body,
   ) async {
-    var response = await http.put(
-      Uri.parse('$_kBaseUrl$path'),
-      headers: await _authHeaders(),
-      body: jsonEncode(body),
-    );
+    final url = '$_kBaseUrl$path';
+    try {
+      var response = await http.put(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode == 401) {
-      final refreshed = await _tryRefresh();
-      if (refreshed) {
-        response = await http.put(
-          Uri.parse('$_kBaseUrl$path'),
-          headers: await _authHeaders(),
-          body: jsonEncode(body),
-        );
+      if (response.statusCode == 401) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          response = await http.put(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+            body: jsonEncode(body),
+          );
+        }
       }
-    }
 
-    _throwIfError(response);
-    return _parseBody(response);
+      _log('PUT', url, response.statusCode);
+      _throwIfError(response);
+      return _parseBody(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('PUT', url, e);
+      rethrow;
+    }
   }
 
   static Future<Map<String, dynamic>> patch(
     String path,
     Map<String, dynamic> body,
   ) async {
-    var response = await http.patch(
-      Uri.parse('$_kBaseUrl$path'),
-      headers: await _authHeaders(),
-      body: jsonEncode(body),
-    );
+    final url = '$_kBaseUrl$path';
+    try {
+      var response = await http.patch(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+        body: jsonEncode(body),
+      );
 
-    if (response.statusCode == 401) {
-      final refreshed = await _tryRefresh();
-      if (refreshed) {
-        response = await http.patch(
-          Uri.parse('$_kBaseUrl$path'),
-          headers: await _authHeaders(),
-          body: jsonEncode(body),
-        );
+      if (response.statusCode == 401) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          response = await http.patch(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+            body: jsonEncode(body),
+          );
+        }
       }
-    }
 
-    _throwIfError(response);
-    return _parseBody(response);
+      _log('PATCH', url, response.statusCode);
+      _throwIfError(response);
+      return _parseBody(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('PATCH', url, e);
+      rethrow;
+    }
   }
 
   static Future<List<dynamic>> getList(String path) async {
-    var response = await http.get(
-      Uri.parse('$_kBaseUrl$path'),
-      headers: await _authHeaders(),
-    );
-
-    if (response.statusCode == 401) {
-      final refreshed = await _tryRefresh();
-      if (refreshed) {
-        response = await http.get(
-          Uri.parse('$_kBaseUrl$path'),
-          headers: await _authHeaders(),
-        );
-      }
-    }
-
-    _throwIfError(response);
-    if (response.body.isEmpty) return [];
+    final url = '$_kBaseUrl$path';
     try {
-      return jsonDecode(response.body) as List<dynamic>;
-    } catch (_) {
-      return [];
+      var response = await http.get(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+      );
+
+      if (response.statusCode == 401) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          response = await http.get(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+          );
+        }
+      }
+
+      _log('GET(list)', url, response.statusCode);
+      _throwIfError(response);
+      if (response.body.isEmpty) return [];
+      try {
+        return jsonDecode(response.body) as List<dynamic>;
+      } catch (_) {
+        return [];
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('GET(list)', url, e);
+      rethrow;
     }
   }
 
   static Future<void> delete(String path) async {
-    var response = await http.delete(
-      Uri.parse('$_kBaseUrl$path'),
-      headers: await _authHeaders(),
-    );
+    final url = '$_kBaseUrl$path';
+    try {
+      var response = await http.delete(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+      );
 
-    if (response.statusCode == 401) {
-      final refreshed = await _tryRefresh();
-      if (refreshed) {
-        response = await http.delete(
-          Uri.parse('$_kBaseUrl$path'),
-          headers: await _authHeaders(),
-        );
+      if (response.statusCode == 401) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          response = await http.delete(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+          );
+        }
       }
-    }
 
-    _throwIfError(response);
+      _log('DELETE', url, response.statusCode);
+      _throwIfError(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('DELETE', url, e);
+      rethrow;
+    }
   }
 
   static Future<List<int>> getBytes(String path) async {
-    var response = await http.get(
-      Uri.parse('$_kBaseUrl$path'),
-      headers: await _authHeaders(),
-    );
+    final url = '$_kBaseUrl$path';
+    try {
+      var response = await http.get(
+        Uri.parse(url),
+        headers: await _authHeaders(),
+      );
 
-    if (response.statusCode == 401) {
-      final refreshed = await _tryRefresh();
-      if (refreshed) {
-        response = await http.get(
-          Uri.parse('$_kBaseUrl$path'),
-          headers: await _authHeaders(),
-        );
+      if (response.statusCode == 401) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          response = await http.get(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+          );
+        }
       }
-    }
 
-    _throwIfError(response);
-    return response.bodyBytes;
+      _log('GET(bytes)', url, response.statusCode);
+      _throwIfError(response);
+      return response.bodyBytes;
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('GET(bytes)', url, e);
+      rethrow;
+    }
   }
 }
