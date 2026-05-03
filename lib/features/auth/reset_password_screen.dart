@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -71,20 +72,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       context.go('/auth/reset-success');
     } else {
       final l10n = context.l10n;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 8),
-              Expanded(child: Text(result.error ?? l10n.commonUnknownError)),
-            ],
-          ),
-          backgroundColor: const Color(0xFFFB7185),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.all(16),
-        ),
+      showAppToast(
+        context,
+        result.error ?? l10n.commonUnknownError,
+        type: ToastType.error,
       );
     }
   }

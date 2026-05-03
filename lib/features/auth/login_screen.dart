@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/errors/error_codes.dart';
+import '../../core/widgets/app_toast.dart';
 import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -137,32 +138,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           );
         } else if (next.error == AuthErrorCode.accountLocked) {
           _startLockoutCountdown();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.lock_clock, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(l10n.authLockedAccount)),
-                ],
-              ),
-              backgroundColor: const Color(0xFFF59E0B),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              margin: const EdgeInsets.all(16),
-              duration: const Duration(seconds: 6),
-            ),
-          );
+          showAppToast(context, l10n.authLockedAccount, type: ToastType.warning);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.resolveError(next.error!)),
-              backgroundColor: const Color(0xFFFB7185),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              margin: const EdgeInsets.all(16),
-            ),
-          );
+          showAppToast(context, l10n.resolveError(next.error!), type: ToastType.error);
         }
         ref.read(authNotifierProvider.notifier).clearError();
       }
@@ -184,9 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Center(
                   child: GestureDetector(
                     onLongPress: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.authOnboardingReset)),
-                      );
+                      showAppToast(context, l10n.authOnboardingReset, type: ToastType.info);
                     },
                     child: Container(
                       width: 72,

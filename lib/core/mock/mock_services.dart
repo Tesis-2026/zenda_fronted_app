@@ -1,8 +1,10 @@
 import '../models/budget.dart';
+import '../models/quiz_models.dart';
 import '../models/savings_goal.dart';
 import '../models/summary_models.dart';
 import '../models/transaction.dart';
 import '../models/user.dart';
+import '../services/ai_chat_api_service.dart';
 import '../services/badges_api_service.dart';
 import '../services/budget_api_service.dart';
 import '../services/challenges_api_service.dart';
@@ -10,6 +12,7 @@ import '../services/education_api_service.dart';
 import '../services/goals_api_service.dart';
 import '../services/insights_api_service.dart';
 import '../services/predictions_api_service.dart';
+import '../services/quiz_api_service.dart';
 import '../services/recommendations_api_service.dart';
 import '../services/transaction_api_service.dart';
 import '../services/user_api_service.dart';
@@ -199,6 +202,90 @@ class MockUserApiService extends UserApiService {
     String? currency,
   }) async =>
       DemoData.user;
+}
+
+class MockQuizApiService extends QuizApiService {
+  @override
+  Future<List<QuizQuestion>> getQuiz(String topicId, String language) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    final entries = DemoData.quizData[topicId] ?? DemoData.quizData['topic-1']!;
+    return entries
+        .map((e) => QuizQuestion(
+              id: e.id,
+              difficulty: e.difficulty,
+              text: e.text,
+              options: List<String>.from(e.options),
+            ))
+        .toList();
+  }
+
+  @override
+  Future<QuizResult> submitQuiz(
+    String topicId,
+    Map<String, String> answers,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final entries = DemoData.quizData[topicId] ?? DemoData.quizData['topic-1']!;
+    int correct = 0;
+    final feedback = <QuizFeedback>[];
+    for (final entry in entries) {
+      final given = answers[entry.id];
+      final correctAnswer = entry.options[entry.correctIndex];
+      final isCorrect = given == correctAnswer;
+      if (isCorrect) correct++;
+      feedback.add(QuizFeedback(
+        questionId: entry.id,
+        correct: isCorrect,
+        correctAnswer: correctAnswer,
+      ));
+    }
+    final total = entries.length;
+    final score = total > 0 ? ((correct / total) * 100).round() : 0;
+    return QuizResult(
+      score: score,
+      correctCount: correct,
+      totalCount: total,
+      level: score >= 80 ? 'advanced' : score >= 50 ? 'intermediate' : 'beginner',
+      feedback: feedback,
+    );
+  }
+}
+
+class MockAiChatApiService extends AiChatApiService {
+  @override
+  Future<String> sendMessage(List<ChatMessage> messages) async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    final last = messages.lastWhere(
+      (m) => m.role == 'user',
+      orElse: () => messages.last,
+    );
+    return _respond(last.content.toLowerCase());
+  }
+
+  String _respond(String input) {
+    if (input.contains('budget') || input.contains('presupuesto')) {
+      return DemoData.aiChatResponses['budget']!;
+    }
+    if (input.contains('sav') || input.contains('ahorro') || input.contains('save')) {
+      return DemoData.aiChatResponses['save']!;
+    }
+    if (input.contains('goal') || input.contains('meta')) {
+      return DemoData.aiChatResponses['goal']!;
+    }
+    if (input.contains('invest') || input.contains('invert')) {
+      return DemoData.aiChatResponses['invest']!;
+    }
+    if (input.contains('spend') || input.contains('gast') || input.contains('expense')) {
+      return DemoData.aiChatResponses['spend']!;
+    }
+    if (input.contains('debt') || input.contains('credit') || input.contains('card') || input.contains('deuda')) {
+      return DemoData.aiChatResponses['debt']!;
+    }
+    if (input.contains('analiz') || input.contains('analys') || input.contains('overview') || input.contains('summary')) {
+      return DemoData.aiChatResponses['analyze']!;
+    }
+    return DemoData.aiChatResponses['default']!;
+  }
 }
 
 class MockTransactionApiService extends TransactionApiService {

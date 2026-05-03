@@ -6,6 +6,7 @@ import '../../core/models/category.dart';
 import '../../core/services/budget_api_service.dart';
 import '../../core/services/category_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 final budgetServiceProvider = Provider<BudgetApiService>((ref) {
@@ -394,9 +395,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       final msg = e.toString().contains('409') || e.toString().contains('already exists')
           ? l10n.budgetDuplicate
           : l10n.commonUnknownError;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      showAppToast(context, msg, type: ToastType.error);
     }
   }
 

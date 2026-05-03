@@ -9,6 +9,7 @@ import '../dashboard/dashboard_providers.dart';
 import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -99,25 +100,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           final categoryName = next.budgetAlert!;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.warning_amber_rounded,
-                          color: Colors.white),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(l10n.txBudgetAlert80(categoryName, '80')),
-                      ),
-                    ],
-                  ),
-                  backgroundColor: const Color(0xFFF59E0B),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  margin: const EdgeInsets.all(16),
-                  duration: const Duration(seconds: 5),
-                ),
+              showAppToast(
+                context,
+                l10n.txBudgetAlert80(categoryName, '80'),
+                type: ToastType.warning,
               );
             }
           });
@@ -128,25 +114,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           final categoryName = next.anomalyAlert!;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.trending_up_rounded,
-                          color: Colors.white),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(l10n.txAnomalyAlert(categoryName)),
-                      ),
-                    ],
-                  ),
-                  backgroundColor: const Color(0xFFEF4444),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  margin: const EdgeInsets.all(16),
-                  duration: const Duration(seconds: 6),
-                ),
+              showAppToast(
+                context,
+                l10n.txAnomalyAlert(categoryName),
+                type: ToastType.error,
               );
             }
           });

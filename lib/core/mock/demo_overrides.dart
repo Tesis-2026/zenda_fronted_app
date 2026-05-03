@@ -1,4 +1,6 @@
 import '../../core/models/user.dart';
+import '../../core/services/ai_chat_api_service.dart';
+import '../../core/services/quiz_api_service.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../features/budget/budget_screen.dart';
 import '../../features/badges/badges_screen.dart';
@@ -58,6 +60,8 @@ buildDemoOverrides() {
     predictionsServiceProvider.overrideWithValue(MockPredictionsApiService()),
     profileUserServiceProvider.overrideWithValue(MockUserApiService()),
     reportsInsightsServiceProvider.overrideWithValue(MockInsightsApiService()),
+    quizServiceProvider.overrideWithValue(MockQuizApiService()),
+    aiChatServiceProvider.overrideWithValue(MockAiChatApiService()),
   ];
 }
 

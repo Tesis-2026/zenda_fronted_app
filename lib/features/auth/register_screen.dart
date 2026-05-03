@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/widgets/app_toast.dart';
 import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -53,16 +54,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.resolveError(next.error!)),
-            backgroundColor: const Color(0xFFFB7185),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+        showAppToast(context, l10n.resolveError(next.error!), type: ToastType.error);
         ref.read(authNotifierProvider.notifier).clearError();
       }
     });

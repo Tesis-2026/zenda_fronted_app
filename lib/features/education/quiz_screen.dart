@@ -3,115 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/api_client.dart';
+import '../../core/models/quiz_models.dart';
+import '../../core/services/quiz_api_service.dart';
 import '../../l10n/l10n_extension.dart';
 
 // ─────────────────────────────────────────────────────────────────
-// Models
-// ─────────────────────────────────────────────────────────────────
-
-class QuizQuestion {
-  final String id;
-  final String difficulty;
-  final String text;
-  final List<String> options;
-
-  const QuizQuestion({
-    required this.id,
-    required this.difficulty,
-    required this.text,
-    required this.options,
-  });
-
-  factory QuizQuestion.fromJson(Map<String, dynamic> json) {
-    return QuizQuestion(
-      id: json['id'] as String,
-      difficulty: json['difficulty'] as String,
-      text: json['text'] as String,
-      options: (json['options'] as List<dynamic>).cast<String>(),
-    );
-  }
-}
-
-class QuizFeedback {
-  final String questionId;
-  final bool correct;
-  final String correctAnswer;
-
-  const QuizFeedback({
-    required this.questionId,
-    required this.correct,
-    required this.correctAnswer,
-  });
-
-  factory QuizFeedback.fromJson(Map<String, dynamic> json) {
-    return QuizFeedback(
-      questionId: json['questionId'] as String,
-      correct: json['correct'] as bool,
-      correctAnswer: json['correctAnswer'] as String,
-    );
-  }
-}
-
-class QuizResult {
-  final int score;
-  final int correctCount;
-  final int totalCount;
-  final String level;
-  final List<QuizFeedback> feedback;
-
-  const QuizResult({
-    required this.score,
-    required this.correctCount,
-    required this.totalCount,
-    required this.level,
-    required this.feedback,
-  });
-
-  factory QuizResult.fromJson(Map<String, dynamic> json) {
-    return QuizResult(
-      score: json['score'] as int,
-      correctCount: json['correctCount'] as int,
-      totalCount: json['totalCount'] as int,
-      level: json['level'] as String,
-      feedback: (json['feedback'] as List<dynamic>)
-          .map((e) => QuizFeedback.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// API service methods (inline, consistent with project pattern)
-// ─────────────────────────────────────────────────────────────────
-
-Future<List<QuizQuestion>> fetchQuiz(String topicId, String language) async {
-  final data = await ApiClient.get('/education/topics/$topicId/quiz?language=$language');
-  final map = data;
-  return (map['questions'] as List<dynamic>)
-      .map((e) => QuizQuestion.fromJson(e as Map<String, dynamic>))
-      .toList();
-}
-
-Future<QuizResult> submitQuiz(
-  String topicId,
-  Map<String, String> answers,
-) async {
-  final data = await ApiClient.post(
-    '/education/topics/$topicId/quiz/submit',
-    {'answers': answers},
-    authenticated: true,
-  );
-  return QuizResult.fromJson(data);
-}
-
-// ─────────────────────────────────────────────────────────────────
-// Providers
+// Provider
 // ─────────────────────────────────────────────────────────────────
 
 final _quizProvider = FutureProvider.autoDispose
     .family<List<QuizQuestion>, ({String topicId, String language})>(
-  (ref, args) => fetchQuiz(args.topicId, args.language),
+  (ref, args) =>
+      ref.read(quizServiceProvider).getQuiz(args.topicId, args.language),
 );
 
 // ─────────────────────────────────────────────────────────────────
@@ -155,7 +58,8 @@ class _QuizState {
       questions: questions,
       currentIndex: currentIndex ?? this.currentIndex,
       answers: answers ?? this.answers,
-      selectedOption: clearSelection ? null : (selectedOption ?? this.selectedOption),
+      selectedOption:
+          clearSelection ? null : (selectedOption ?? this.selectedOption),
       phase: phase ?? this.phase,
       result: result ?? this.result,
       submitting: submitting ?? this.submitting,
@@ -181,7 +85,8 @@ class QuizScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final language = _deviceLanguage(context);
-    final quizAsync = ref.watch(_quizProvider((topicId: topicId, language: language)));
+    final quizAsync =
+        ref.watch(_quizProvider((topicId: topicId, language: language)));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.quizTitle)),
@@ -199,7 +104,7 @@ class QuizScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 OutlinedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Go back'),
+                  child: Text(l10n.commonCancel),
                 ),
               ],
             ),
@@ -208,6 +113,7 @@ class QuizScreen extends ConsumerWidget {
         data: (questions) => _QuizBody(
           topicId: topicId,
           questions: questions,
+          service: ref.read(quizServiceProvider),
         ),
       ),
     );
@@ -219,10 +125,15 @@ class QuizScreen extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────────
 
 class _QuizBody extends StatefulWidget {
-  const _QuizBody({required this.topicId, required this.questions});
+  const _QuizBody({
+    required this.topicId,
+    required this.questions,
+    required this.service,
+  });
 
   final String topicId;
   final List<QuizQuestion> questions;
+  final QuizApiService service;
 
   @override
   State<_QuizBody> createState() => _QuizBodyState();
@@ -297,7 +208,8 @@ class _QuizBodyState extends State<_QuizBody> {
     setState(() =>
         _state = _state.copyWith(submitting: true, phase: _QuizPhase.results));
     try {
-      final result = await submitQuiz(widget.topicId, _state.answers);
+      final result =
+          await widget.service.submitQuiz(widget.topicId, _state.answers);
       setState(
           () => _state = _state.copyWith(result: result, submitting: false));
     } catch (_) {
@@ -412,7 +324,8 @@ class _ProgressBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             minHeight: 3,
             backgroundColor: const Color(0xFFF3F4F6),
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
           ),
         ],
       ),
@@ -469,7 +382,8 @@ class _QuestionView extends StatelessWidget {
           ),
           child: Text(
             q.difficulty,
-            style: TextStyle(color: diffColor, fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(
+                color: diffColor, fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(height: 16),
@@ -479,14 +393,14 @@ class _QuestionView extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         ...q.options.asMap().entries.map(
-          (entry) => _OptionTile(
-            option: entry.value,
-            index: entry.key,
-            isSelected: state.selectedOption == entry.value,
-            isReviewing: reviewing,
-            onTap: reviewing ? null : () => onSelectOption(entry.value),
-          ),
-        ),
+              (entry) => _OptionTile(
+                option: entry.value,
+                index: entry.key,
+                isSelected: state.selectedOption == entry.value,
+                isReviewing: reviewing,
+                onTap: reviewing ? null : () => onSelectOption(entry.value),
+              ),
+            ),
         if (reviewing) ...[
           const SizedBox(height: 4),
           Container(
@@ -586,8 +500,7 @@ class _OptionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(14),
@@ -611,9 +524,8 @@ class _OptionTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF6B7280),
+                      color:
+                          isSelected ? Colors.white : const Color(0xFF6B7280),
                     ),
                   ),
                 ),
@@ -690,7 +602,10 @@ class _ResultsView extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             l10n.quizResult(result.score),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
@@ -732,7 +647,10 @@ class _ReviewList extends StatelessWidget {
       children: [
         Text(
           'Review',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         ...questions.map((q) {
@@ -767,9 +685,10 @@ class _ReviewList extends StatelessWidget {
                       Expanded(
                         child: Text(
                           q.text,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ),
                     ],

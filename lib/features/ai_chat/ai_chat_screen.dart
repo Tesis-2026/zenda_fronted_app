@@ -21,7 +21,6 @@ class AiChatScreen extends ConsumerStatefulWidget {
 class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   final _inputController = TextEditingController();
   final _scrollController = ScrollController();
-  final _service = AiChatApiService();
   final _messages = <_ChatBubble>[];
   bool _loading = false;
 
@@ -58,7 +57,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           .map((m) => ChatMessage(role: m.isUser ? 'user' : 'assistant', content: m.text))
           .toList();
 
-      final reply = await _service.sendMessage(history);
+      final reply = await ref.read(aiChatServiceProvider).sendMessage(history);
       if (mounted) {
         setState(() => _messages.add(_ChatBubble(text: reply, isUser: false)));
         _scrollToBottom();

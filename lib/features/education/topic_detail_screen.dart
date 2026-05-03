@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 import 'education_screen.dart';
 
@@ -38,8 +39,10 @@ class TopicDetailScreen extends ConsumerWidget {
             await ref.read(educationServiceProvider).completeTopic(topic.id);
             ref.invalidate(_topicDetailProvider(topicId));
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.educationTopicCompleted)),
+              showAppToast(
+                context,
+                l10n.educationTopicCompleted,
+                type: ToastType.success,
               );
             }
           },

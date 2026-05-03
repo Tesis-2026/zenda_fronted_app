@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../features/dashboard/dashboard_providers.dart';
 import '../../features/transactions/edit_transaction_screen.dart';
@@ -390,11 +391,10 @@ class _TransactionRow extends ConsumerWidget {
         } catch (_) {
           onDeleted();
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(context.l10n.txDeleteError),
-                backgroundColor: const Color(0xFFEF4444),
-              ),
+            showAppToast(
+              context,
+              context.l10n.txDeleteError,
+              type: ToastType.error,
             );
           }
         }

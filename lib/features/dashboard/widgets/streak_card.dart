@@ -11,6 +11,7 @@ class StreakCard extends StatelessWidget {
     final l10n = context.l10n;
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -28,7 +29,6 @@ class StreakCard extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           const Text('🔥', style: TextStyle(fontSize: 26)),
           const SizedBox(width: 10),
@@ -56,10 +56,10 @@ class StreakCard extends StatelessWidget {
               ),
             ],
           ),
-          if (streakDays > 0) ...[
-            const SizedBox(width: 10),
-            const Icon(Icons.check_circle, size: 18, color: Colors.white),
-          ],
+          const Spacer(),
+          if (streakDays > 0)
+            const Icon(Icons.local_fire_department_rounded,
+                size: 32, color: Colors.white),
         ],
       ),
     );

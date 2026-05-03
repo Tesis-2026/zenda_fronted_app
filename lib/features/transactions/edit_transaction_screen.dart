@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 class EditTransactionScreen extends ConsumerStatefulWidget {
@@ -499,9 +500,7 @@ class _EditTransactionScreenState
       if (mounted) Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.txDeleteError)),
-        );
+        showAppToast(context, l10n.txDeleteError, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _deleting = false);
@@ -515,9 +514,7 @@ class _EditTransactionScreenState
 
     final amount = double.tryParse(_amountController.text.trim()) ?? 0;
     if (amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorTxInvalidAmount)),
-      );
+      showAppToast(context, l10n.errorTxInvalidAmount, type: ToastType.error);
       return;
     }
 
@@ -534,9 +531,7 @@ class _EditTransactionScreenState
       if (mounted) Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorTxSaveFailed)),
-        );
+        showAppToast(context, l10n.errorTxSaveFailed, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

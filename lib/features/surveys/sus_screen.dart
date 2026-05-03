@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/surveys_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 final _susSurveyServiceProvider = Provider<SurveysApiService>(
@@ -26,9 +27,7 @@ class _SusScreenState extends ConsumerState<SusScreen> {
 
   Future<void> _submit(List<SurveyQuestion> questions) async {
     if (_ratings.length < questions.length) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.surveyAnswerAll)),
-      );
+      showAppToast(context, context.l10n.surveyAnswerAll, type: ToastType.warning);
       return;
     }
     setState(() => _submitting = true);
@@ -44,9 +43,7 @@ class _SusScreenState extends ConsumerState<SusScreen> {
         final message = e.toString().contains('409')
             ? l10n.susSurveyAlreadyDone
             : l10n.susSurveyErrorSubmit;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        showAppToast(context, message, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);

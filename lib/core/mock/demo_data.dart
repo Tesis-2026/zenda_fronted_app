@@ -58,7 +58,7 @@ abstract final class DemoData {
 
   static final transactions = <TransactionModel>[
     TransactionModel(
-      id: 'tx-10',
+      id: 'tx-20',
       userId: 'demo-user-1',
       accountId: 'acc-cash-1',
       kind: TransactionKind.expense,
@@ -71,7 +71,20 @@ abstract final class DemoData {
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-9',
+      id: 'tx-19',
+      userId: 'demo-user-1',
+      accountId: 'acc-debit-1',
+      kind: TransactionKind.expense,
+      amount: 45.00,
+      currency: 'PEN',
+      category: TransactionCategory.comida,
+      bucket: Bucket503020.necesidad,
+      timestamp: DateTime(2026, 5, 2, 13, 0),
+      note: 'Supermarket',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-18',
       userId: 'demo-user-1',
       accountId: 'acc-debit-1',
       kind: TransactionKind.expense,
@@ -84,7 +97,7 @@ abstract final class DemoData {
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-8',
+      id: 'tx-17',
       userId: 'demo-user-1',
       accountId: 'acc-debit-1',
       kind: TransactionKind.income,
@@ -93,11 +106,24 @@ abstract final class DemoData {
       category: TransactionCategory.otros,
       bucket: Bucket503020.ahorro,
       timestamp: DateTime(2026, 5, 1, 9, 0),
-      note: 'Salary',
+      note: 'Monthly salary',
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-7',
+      id: 'tx-16',
+      userId: 'demo-user-1',
+      accountId: 'acc-cash-1',
+      kind: TransactionKind.income,
+      amount: 350.00,
+      currency: 'PEN',
+      category: TransactionCategory.otros,
+      bucket: Bucket503020.ahorro,
+      timestamp: DateTime(2026, 4, 30, 15, 0),
+      note: 'Freelance project',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-15',
       userId: 'demo-user-1',
       accountId: 'acc-debit-1',
       kind: TransactionKind.expense,
@@ -106,11 +132,11 @@ abstract final class DemoData {
       category: TransactionCategory.comida,
       bucket: Bucket503020.necesidad,
       timestamp: DateTime(2026, 4, 30, 12, 0),
-      note: 'Groceries',
+      note: 'Weekly groceries',
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-6',
+      id: 'tx-14',
       userId: 'demo-user-1',
       accountId: 'acc-debit-1',
       kind: TransactionKind.expense,
@@ -119,11 +145,11 @@ abstract final class DemoData {
       category: TransactionCategory.servicios,
       bucket: Bucket503020.necesidad,
       timestamp: DateTime(2026, 4, 30, 10, 0),
-      note: 'Internet',
+      note: 'Internet bill',
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-5',
+      id: 'tx-13',
       userId: 'demo-user-1',
       accountId: 'acc-credit-1',
       kind: TransactionKind.expense,
@@ -136,7 +162,7 @@ abstract final class DemoData {
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-4',
+      id: 'tx-12',
       userId: 'demo-user-1',
       accountId: 'acc-cash-1',
       kind: TransactionKind.expense,
@@ -145,11 +171,24 @@ abstract final class DemoData {
       category: TransactionCategory.comida,
       bucket: Bucket503020.necesidad,
       timestamp: DateTime(2026, 4, 29, 13, 0),
-      note: 'Lunch',
+      note: 'Lunch with friends',
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-3',
+      id: 'tx-11',
+      userId: 'demo-user-1',
+      accountId: 'acc-debit-1',
+      kind: TransactionKind.income,
+      amount: 200.00,
+      currency: 'PEN',
+      category: TransactionCategory.otros,
+      bucket: Bucket503020.ahorro,
+      timestamp: DateTime(2026, 4, 29, 8, 0),
+      note: 'Part-time tutoring',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-10',
       userId: 'demo-user-1',
       accountId: 'acc-debit-1',
       kind: TransactionKind.expense,
@@ -162,7 +201,7 @@ abstract final class DemoData {
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-2',
+      id: 'tx-9',
       userId: 'demo-user-1',
       accountId: 'acc-credit-1',
       kind: TransactionKind.expense,
@@ -175,7 +214,20 @@ abstract final class DemoData {
       source: TransactionSource.manual,
     ),
     TransactionModel(
-      id: 'tx-1',
+      id: 'tx-8',
+      userId: 'demo-user-1',
+      accountId: 'acc-debit-1',
+      kind: TransactionKind.expense,
+      amount: 15.00,
+      currency: 'PEN',
+      category: TransactionCategory.transporte,
+      bucket: Bucket503020.necesidad,
+      timestamp: DateTime(2026, 4, 28, 7, 30),
+      note: 'Bus pass',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-7',
       userId: 'demo-user-1',
       accountId: 'acc-cash-1',
       kind: TransactionKind.expense,
@@ -185,6 +237,84 @@ abstract final class DemoData {
       bucket: Bucket503020.deseo,
       timestamp: DateTime(2026, 4, 27, 20, 0),
       note: 'Cinema',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-6',
+      userId: 'demo-user-1',
+      accountId: 'acc-debit-1',
+      kind: TransactionKind.expense,
+      amount: 18.50,
+      currency: 'PEN',
+      category: TransactionCategory.comida,
+      bucket: Bucket503020.necesidad,
+      timestamp: DateTime(2026, 4, 27, 12, 30),
+      note: 'Lunch',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-5',
+      userId: 'demo-user-1',
+      accountId: 'acc-debit-1',
+      kind: TransactionKind.income,
+      amount: 1000.00,
+      currency: 'PEN',
+      category: TransactionCategory.otros,
+      bucket: Bucket503020.ahorro,
+      timestamp: DateTime(2026, 4, 25, 9, 0),
+      note: 'April salary (partial)',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-4',
+      userId: 'demo-user-1',
+      accountId: 'acc-credit-1',
+      kind: TransactionKind.expense,
+      amount: 12.90,
+      currency: 'PEN',
+      category: TransactionCategory.suscripciones,
+      bucket: Bucket503020.deseo,
+      timestamp: DateTime(2026, 4, 24, 9, 0),
+      note: 'Spotify',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-3',
+      userId: 'demo-user-1',
+      accountId: 'acc-debit-1',
+      kind: TransactionKind.expense,
+      amount: 55.00,
+      currency: 'PEN',
+      category: TransactionCategory.salud,
+      bucket: Bucket503020.necesidad,
+      timestamp: DateTime(2026, 4, 22, 10, 0),
+      note: 'Doctor visit',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-2',
+      userId: 'demo-user-1',
+      accountId: 'acc-cash-1',
+      kind: TransactionKind.income,
+      amount: 150.00,
+      currency: 'PEN',
+      category: TransactionCategory.otros,
+      bucket: Bucket503020.ahorro,
+      timestamp: DateTime(2026, 4, 20, 16, 0),
+      note: 'Sold old books',
+      source: TransactionSource.manual,
+    ),
+    TransactionModel(
+      id: 'tx-1',
+      userId: 'demo-user-1',
+      accountId: 'acc-debit-1',
+      kind: TransactionKind.expense,
+      amount: 280.00,
+      currency: 'PEN',
+      category: TransactionCategory.vivienda,
+      bucket: Bucket503020.necesidad,
+      timestamp: DateTime(2026, 4, 1, 8, 0),
+      note: 'April rent',
       source: TransactionSource.manual,
     ),
   ];
@@ -414,6 +544,205 @@ abstract final class DemoData {
     ),
   ];
 
+  // ── Quiz questions (per topic) ────────────────────────────────────────────
+  // Each entry: (question, options list, correctIndex)
+
+  static const quizData = <String, List<_QuizEntry>>{
+    'topic-1': [
+      _QuizEntry(
+        id: 't1-q1',
+        difficulty: 'BEGINNER',
+        text: 'In the 50/30/20 rule, what percentage goes to needs?',
+        options: ['30%', '50%', '20%', '40%'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't1-q2',
+        difficulty: 'BEGINNER',
+        text: 'Which of the following is a "want" in the 50/30/20 rule?',
+        options: ['Rent', 'Groceries', 'Streaming subscription', 'Utilities'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't1-q3',
+        difficulty: 'BEGINNER',
+        text: 'What does the "20" in 50/30/20 represent?',
+        options: ['Entertainment', 'Taxes', 'Savings and debt repayment', 'Housing'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't1-q4',
+        difficulty: 'BEGINNER',
+        text: 'With a monthly income of S/ 2000, how much should go to savings using the 50/30/20 rule?',
+        options: ['S/ 1000', 'S/ 600', 'S/ 400', 'S/ 200'],
+        correctIndex: 2,
+      ),
+    ],
+    'topic-2': [
+      _QuizEntry(
+        id: 't2-q1',
+        difficulty: 'BEGINNER',
+        text: 'What should you list first when building a realistic budget?',
+        options: ['Variable spending', 'Entertainment', 'Fixed recurring costs', 'Savings goals'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't2-q2',
+        difficulty: 'BEGINNER',
+        text: 'How often should you review your budget in the first month?',
+        options: ['Daily', 'Weekly', 'Monthly', 'Quarterly'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't2-q3',
+        difficulty: 'BEGINNER',
+        text: 'When you overspend in a category, the best response is to:',
+        options: ['Abandon the budget', 'Borrow from next month', 'Adjust the category limit', 'Ignore it'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't2-q4',
+        difficulty: 'BEGINNER',
+        text: 'Which data source is most useful for allocating variable spending?',
+        options: ["A friend's expenses", 'Online calculators', "Last month's actual spending", 'Your income tax rate'],
+        correctIndex: 2,
+      ),
+    ],
+    'topic-3': [
+      _QuizEntry(
+        id: 't3-q1',
+        difficulty: 'INTERMEDIATE',
+        text: 'How many months of expenses should an emergency fund cover?',
+        options: ['1–2 months', '3–6 months', '7–9 months', '1 year'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't3-q2',
+        difficulty: 'INTERMEDIATE',
+        text: 'What type of account is best for an emergency fund?',
+        options: ['Long-term investment', 'High-risk stocks', 'Liquid savings account', 'Fixed-term deposit'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't3-q3',
+        difficulty: 'INTERMEDIATE',
+        text: 'The main purpose of an emergency fund is:',
+        options: ['Invest in stocks', 'Cover unexpected costs without debt', 'Pay regular bills', 'Fund vacation travel'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't3-q4',
+        difficulty: 'INTERMEDIATE',
+        text: 'Saving S/ 50/month, how long does it take to reach S/ 600?',
+        options: ['6 months', '1 year', '2 years', '18 months'],
+        correctIndex: 1,
+      ),
+    ],
+    'topic-4': [
+      _QuizEntry(
+        id: 't4-q1',
+        difficulty: 'INTERMEDIATE',
+        text: 'What does "pay yourself first" mean?',
+        options: ['Spend on yourself before bills', 'Save before spending', 'Invest 50% of income', 'Pay debts first'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't4-q2',
+        difficulty: 'INTERMEDIATE',
+        text: 'When is the ideal time to transfer money to savings?',
+        options: ['End of month', 'On payday', 'After all expenses', 'Randomly'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't4-q3',
+        difficulty: 'INTERMEDIATE',
+        text: 'A solid starting savings rate for university students is:',
+        options: ['5%', '20%', '10%', '30%'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't4-q4',
+        difficulty: 'INTERMEDIATE',
+        text: 'How do you calculate your savings rate?',
+        options: ['Savings × 100', 'Savings ÷ expenses × 100', 'Savings ÷ income × 100', 'Savings ÷ 12'],
+        correctIndex: 2,
+      ),
+    ],
+    'topic-5': [
+      _QuizEntry(
+        id: 't5-q1',
+        difficulty: 'INTERMEDIATE',
+        text: 'When do credit cards charge interest?',
+        options: ['On every purchase', 'Only on cash advances', 'On unpaid balances', 'Every month regardless'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't5-q2',
+        difficulty: 'INTERMEDIATE',
+        text: 'The best credit card payment strategy is:',
+        options: ['Pay the minimum', 'Pay the full statement balance', 'Pay half the balance', 'Skip one month'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't5-q3',
+        difficulty: 'INTERMEDIATE',
+        text: 'Paying only the minimum on a credit card results in:',
+        options: ['Better credit score', 'Interest stops', 'A debt cycle', 'Fee waivers'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't5-q4',
+        difficulty: 'INTERMEDIATE',
+        text: 'Paying the full credit card balance each month gives you:',
+        options: ['Higher credit limit', 'Cash rewards', 'Zero interest and builds credit', 'Lower minimums'],
+        correctIndex: 2,
+      ),
+    ],
+    'topic-6': [
+      _QuizEntry(
+        id: 't6-q1',
+        difficulty: 'ADVANCED',
+        text: 'Which investment is lowest risk for a beginner?',
+        options: ['Individual stocks', 'Government bonds', 'Cryptocurrency', 'Commodities'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't6-q2',
+        difficulty: 'ADVANCED',
+        text: 'The main advantage of index funds is:',
+        options: ['Guaranteed returns', 'Diversified risk at low cost', 'No taxes on gains', 'Exclusive access'],
+        correctIndex: 1,
+      ),
+      _QuizEntry(
+        id: 't6-q3',
+        difficulty: 'ADVANCED',
+        text: '"Time in the market" refers to:',
+        options: ['Trading at the right time', 'Day trading', 'Holding investments long-term', 'Timing market dips'],
+        correctIndex: 2,
+      ),
+      _QuizEntry(
+        id: 't6-q4',
+        difficulty: 'ADVANCED',
+        text: 'Why does starting to invest at age 22 beat starting at 35 (even with less per month)?',
+        options: ['Higher contributions', 'More years of compound growth', 'Lower taxes', 'Higher risk tolerance'],
+        correctIndex: 1,
+      ),
+    ],
+  };
+
+  // ── AI Chat predefined responses ──────────────────────────────────────────
+
+  static const aiChatResponses = <String, String>{
+    'budget': 'Based on your spending this month, your food budget is at 77% with S/ 116 spent of S/ 150 limit. Try cooking at home 2–3 times this week to stay on track. Your entertainment and subscriptions are well within limits.',
+    'save': 'You\'ve saved S/ 0 this month so far. A great first step is automating a S/ 100 transfer on payday — before you can spend it. Even S/ 50/month builds S/ 600 in a year for your emergency fund.',
+    'goal': 'Your Emergency Fund is at 28% (S/ 850 of S/ 3000). At your current pace, you\'ll reach it by December 2026. Contributing S/ 200 more per month would let you hit the goal 3 months earlier.',
+    'invest': 'For beginners, I recommend starting with a savings account or low-risk bonds before moving to index funds. Time in the market beats timing the market — even S/ 100/month at age 22 compounds significantly by 30.',
+    'spend': 'Your top spending categories this month: Health S/ 120, Food S/ 116, Shopping S/ 90, Utilities S/ 79. Health and food are near their limits. I\'d suggest reviewing your gym membership if you\'re not using it regularly.',
+    'debt': 'Always pay your credit card full balance monthly to avoid interest charges. Your Visa Credit has S/ 1150 available — that\'s good, keep utilization below 30% to protect your credit score.',
+    'analyze': 'Your finances look healthy this month! Income: S/ 1200, Expenses: S/ 481, Net: S/ 719. You\'re saving 60% of income — excellent for a university student. Your top risk area is food spending, which is approaching budget.',
+    'default': 'That\'s a great financial question! Based on your current spending patterns, I\'d recommend focusing on building your emergency fund first, then tackling your savings goals. Would you like me to analyze a specific area of your finances?',
+  };
+
   // ── Challenges ─────────────────────────────────────────────────────────────
 
   static final challenges = <Challenge>[
@@ -523,4 +852,21 @@ abstract final class DemoData {
         TransactionCategory.ahorro => 'savings',
         _ => 'other',
       };
+}
+
+// Helper to hold quiz question data for demo mode.
+class _QuizEntry {
+  final String id;
+  final String difficulty;
+  final String text;
+  final List<String> options;
+  final int correctIndex;
+
+  const _QuizEntry({
+    required this.id,
+    required this.difficulty,
+    required this.text,
+    required this.options,
+    required this.correctIndex,
+  });
 }

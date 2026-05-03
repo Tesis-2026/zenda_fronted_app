@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/challenges_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 final challengesServiceProvider = Provider<ChallengesApiService>(
@@ -76,8 +77,10 @@ class ChallengesScreen extends ConsumerWidget {
                         .accept(challenge.id);
                     ref.invalidate(_challengesProvider);
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.challengesAccepted)),
+                      showAppToast(
+                        context,
+                        l10n.challengesAccepted,
+                        type: ToastType.success,
                       );
                     }
                   },

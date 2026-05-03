@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 class ConsentScreen extends StatefulWidget {
@@ -164,9 +165,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                 child: FilledButton(
                   onPressed: () {
                     if (!_accepted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.consentMustAccept)),
-                      );
+                      showAppToast(context, l10n.consentMustAccept, type: ToastType.warning);
                       return;
                     }
                     context.go('/auth/register');

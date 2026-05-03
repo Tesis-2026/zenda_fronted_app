@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'api_client.dart';
 
 class ChatMessage {
@@ -9,7 +11,12 @@ class ChatMessage {
   Map<String, dynamic> toJson() => {'role': role, 'content': content};
 }
 
-class AiChatApiService {
+abstract class AiChatApiService {
+  Future<String> sendMessage(List<ChatMessage> messages);
+}
+
+class LiveAiChatApiService extends AiChatApiService {
+  @override
   Future<String> sendMessage(List<ChatMessage> messages) async {
     final body = await ApiClient.post('/ai/chat', {
       'messages': messages.map((m) => m.toJson()).toList(),
@@ -17,3 +24,6 @@ class AiChatApiService {
     return body['reply'] as String? ?? 'No response received.';
   }
 }
+
+final aiChatServiceProvider =
+    Provider<AiChatApiService>((ref) => LiveAiChatApiService());

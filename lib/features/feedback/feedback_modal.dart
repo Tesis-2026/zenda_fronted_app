@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/services/feedback_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 /// Call [FeedbackModal.show] from any screen to display the feedback bottom sheet.
@@ -148,9 +149,7 @@ class _FeedbackModalState extends State<FeedbackModal> {
   Future<void> _submit() async {
     final message = _messageController.text.trim();
     if (message.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.feedbackMessageRequired)),
-      );
+      showAppToast(context, context.l10n.feedbackMessageRequired, type: ToastType.warning);
       return;
     }
 
@@ -165,9 +164,7 @@ class _FeedbackModalState extends State<FeedbackModal> {
       if (mounted) setState(() => _submitted = true);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.feedbackSubmitError)),
-        );
+        showAppToast(context, context.l10n.feedbackSubmitError, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);

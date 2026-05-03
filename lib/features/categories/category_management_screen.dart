@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/category.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -86,9 +87,7 @@ class CategoryManagementScreen extends ConsumerWidget {
       ref.invalidate(_categoriesProvider);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.catMgmtErrorSave)),
-        );
+        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
       }
     }
   }
@@ -206,9 +205,7 @@ class _CustomCategoryTile extends ConsumerWidget {
           ref.invalidate(_categoriesProvider);
         } catch (_) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.l10n.catMgmtErrorSave)),
-            );
+            showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
             ref.invalidate(_categoriesProvider);
           }
         }
@@ -264,9 +261,7 @@ class _CustomCategoryTile extends ConsumerWidget {
       ref.invalidate(_categoriesProvider);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.catMgmtErrorSave)),
-        );
+        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
       }
     }
   }

@@ -8,6 +8,7 @@ import '../../core/models/summary_models.dart';
 import '../../core/services/amount_formatter.dart';
 import '../../core/services/insights_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -165,9 +166,7 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
       ));
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.reportsExportPdfError)),
-      );
+      showAppToast(context, context.l10n.reportsExportPdfError, type: ToastType.error);
     } finally {
       if (mounted) setState(() => _exporting = false);
     }

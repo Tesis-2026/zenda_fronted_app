@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 class EmailSentScreen extends ConsumerWidget {
@@ -99,9 +100,7 @@ class EmailSentScreen extends ConsumerWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Email resent')),
-                      );
+                      showAppToast(context, 'Email resent', type: ToastType.success);
                     },
                     child: Text(
                       l10n.emailVerifResendAction,

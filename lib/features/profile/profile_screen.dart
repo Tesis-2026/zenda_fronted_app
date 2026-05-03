@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_toast.dart';
 import '../auth/auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -70,9 +71,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (mounted) setState(() => _isEditing = false);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.profileErrorSave)),
-        );
+        showAppToast(context, context.l10n.profileErrorSave, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
