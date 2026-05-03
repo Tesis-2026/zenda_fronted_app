@@ -63,7 +63,7 @@ class GoalsScreen extends ConsumerWidget {
                 _SectionHeader(title: l10n.goalsActiveSection),
                 ...active.map((goal) => _GoalCard(
                       goal: goal,
-                      onTap: () => context.go(
+                      onTap: () => context.push(
                         '/goals/${goal.id}',
                         extra: goal,
                       ),
@@ -74,7 +74,7 @@ class GoalsScreen extends ConsumerWidget {
                 _SectionHeader(title: l10n.goalsCompletedSection),
                 ...completed.map((goal) => _GoalCard(
                       goal: goal,
-                      onTap: () => context.go(
+                      onTap: () => context.push(
                         '/goals/${goal.id}',
                         extra: goal,
                       ),
