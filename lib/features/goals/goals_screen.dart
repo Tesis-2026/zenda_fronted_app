@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
+import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_primary_button.dart';
@@ -203,10 +204,9 @@ class _CompletedOnLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parsed = DateTime.tryParse(updatedAt)?.toLocal();
+    final parsed = AppDateFormatter.tryParse(updatedAt);
     if (parsed == null) return const SizedBox.shrink();
-    final formatted =
-        '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+    final formatted = AppDateFormatter.shortDate(parsed);
     return Row(
       children: [
         Icon(
@@ -270,14 +270,9 @@ class _GoalCard extends StatelessWidget {
   }
 
   String _dueDateLabel(BuildContext context) {
-    if (goal.dueDate == null) return '';
-    final due = DateTime.tryParse(goal.dueDate!);
+    final due = AppDateFormatter.tryParse(goal.dueDate);
     if (due == null) return '';
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return context.l10n.goalsDueDate('${months[due.month - 1]} ${due.year}');
+    return context.l10n.goalsDueDate(AppDateFormatter.monthYear(due));
   }
 
   @override
@@ -510,7 +505,7 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
                 ),
                 child: Text(
                   _dueDate != null
-                      ? '${_dueDate!.day.toString().padLeft(2, '0')}/${_dueDate!.month.toString().padLeft(2, '0')}/${_dueDate!.year}'
+                      ? AppDateFormatter.shortDate(_dueDate!)
                       : '',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),

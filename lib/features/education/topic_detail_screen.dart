@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 import 'education_screen.dart';
@@ -197,15 +198,10 @@ class _TopicDetailBody extends StatelessWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: topic.isCompleted ? 1.0 : 0.0,
-                minHeight: 6,
-                backgroundColor: const Color(0xFFE5E7EB),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFF34D399)),
-              ),
+            child: AppProgressBar(
+              value: topic.isCompleted ? 1.0 : 0.0,
+              color: const Color(0xFF34D399),
+              backgroundColor: const Color(0xFFE5E7EB),
             ),
           ),
         ),

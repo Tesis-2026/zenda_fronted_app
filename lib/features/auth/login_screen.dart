@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/errors/error_codes.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_toast.dart';
 import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
@@ -128,7 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     context.go('/onboarding?flow=register');
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF34D399),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: Text(l10n.authSignUp),
@@ -147,7 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.pageBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -168,7 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       width: 80,
                       height: 80,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF34D399),
+                        color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
                       child: const Center(
@@ -188,12 +189,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // Title
-                const Text(
-                  'Welcome back',
-                  style: TextStyle(
+                Text(
+                  l10n.authWelcomeBack,
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: AppColors.textDark,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -201,7 +202,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 6),
 
                 Text(
-                  'Sign in to your account',
+                  l10n.authLoginSubtitle,
                   style: TextStyle(
                     fontSize: 15,
                     color: Colors.grey[600],
@@ -216,24 +217,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    hintText: 'Email address',
+                    hintText: l10n.authEmailHint,
                     hintStyle: TextStyle(color: Colors.grey[400]),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: AppColors.cardBackground,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                          color: Color(0xFF34D399), width: 2),
+                          color: AppColors.primary, width: 2),
                     ),
                   ),
                   validator: (value) {
@@ -255,24 +256,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: 'Password',
+                    hintText: l10n.authPasswordHint,
                     hintStyle: TextStyle(color: Colors.grey[400]),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: AppColors.cardBackground,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                          color: Color(0xFF34D399), width: 2),
+                          color: AppColors.primary, width: 2),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -304,10 +305,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 4, vertical: 8),
                     ),
-                    child: const Text(
-                      'Forgot password?',
-                      style: TextStyle(
-                        color: Color(0xFF34D399),
+                    child: Text(
+                      l10n.authForgotLink,
+                      style: const TextStyle(
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -321,23 +322,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+                      color: AppColors.warning.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                        color: AppColors.warning.withValues(alpha: 0.5),
                       ),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.lock_clock,
-                            color: Color(0xFFF59E0B), size: 20),
+                            color: AppColors.warning, size: 20),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             l10n.authLockedCountdown(
                                 _formatCountdown(_lockoutSeconds)),
                             style: const TextStyle(
-                              color: Color(0xFFF59E0B),
+                              color: AppColors.warning,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -358,14 +359,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? null
                         : _handleLogin,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF34D399),
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                       disabledBackgroundColor:
-                          const Color(0xFF34D399).withValues(alpha: 0.5),
+                          AppColors.primary.withValues(alpha: 0.5),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
@@ -383,9 +384,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               )
-                            : const Text(
-                                'Sign In',
-                                style: TextStyle(
+                            : Text(
+                                l10n.authSignInButton,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -412,7 +413,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Text(
                         l10n.authSignUpLink,
                         style: const TextStyle(
-                          color: Color(0xFF34D399),
+                          color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/services/api_client.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_empty_state.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/user_menu_button.dart';
@@ -73,15 +75,15 @@ Color _bgColorForCategory(String? name, bool isIncome) {
 }
 
 Color _iconColorForCategory(String? name, bool isIncome) {
-  if (isIncome) return const Color(0xFF059669);
-  if (name == null) return const Color(0xFFEF4444);
+  if (isIncome) return AppColors.income;
+  if (name == null) return AppColors.danger;
   return switch (name.toLowerCase()) {
     'food' || 'comida' => const Color(0xFFD97706),
     'transportation' || 'transporte' => const Color(0xFF3B82F6),
     'housing' || 'vivienda' => const Color(0xFF7C3AED),
     'health' || 'salud' => const Color(0xFFEC4899),
-    'savings' || 'ahorro' => const Color(0xFF059669),
-    _ => const Color(0xFFEF4444),
+    'savings' || 'ahorro' => AppColors.income,
+    _ => AppColors.danger,
   };
 }
 
@@ -95,7 +97,7 @@ class TransactionsScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor:
-          isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
+          isDark ? const Color(0xFF0F172A) : AppColors.pageBackground,
       body: const SafeArea(child: TransactionListScreen()),
       bottomNavigationBar: const AppBottomNav(activeIndex: 1),
     );
@@ -111,7 +113,7 @@ class TransactionListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final onSurface = isDark ? Colors.white : const Color(0xFF1F2937);
+    final onSurface = isDark ? Colors.white : AppColors.textDark;
 
     final filters = ref.watch(_txFiltersProvider);
     final txAsync = ref.watch(transactionListProvider);
@@ -146,7 +148,7 @@ class TransactionListScreen extends ConsumerWidget {
                           padding:
                               const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF34D399),
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           alignment: Alignment.center,
@@ -214,12 +216,10 @@ class TransactionListScreen extends ConsumerWidget {
             data: (txs) {
               if (txs.isEmpty) {
                 return SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      l10n.txListEmpty,
-                      style: TextStyle(
-                          color: onSurface.withValues(alpha: 0.6)),
-                    ),
+                  child: AppEmptyState(
+                    icon: Icons.receipt_long_outlined,
+                    title: l10n.txListEmpty,
+                    subtitle: l10n.txListEmptySubtitle,
                   ),
                 );
               }
@@ -230,7 +230,7 @@ class TransactionListScreen extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFF3F4F6)),
+                      border: Border.all(color: AppColors.fillLight),
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: Column(
@@ -283,11 +283,11 @@ class _TxChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color:
-              selected ? const Color(0xFF34D399) : Colors.white,
+              selected ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: selected
               ? null
-              : Border.all(color: const Color(0xFFE5E7EB)),
+              : Border.all(color: AppColors.border),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -298,7 +298,7 @@ class _TxChip extends StatelessWidget {
                 selected ? FontWeight.w600 : FontWeight.normal,
             color: selected
                 ? Colors.white
-                : const Color(0xFF6B7280),
+                : AppColors.textMuted,
           ),
         ),
       ),
@@ -337,7 +337,7 @@ class _TransactionRow extends ConsumerWidget {
 
     final isIncome = type.toUpperCase() == 'INCOME';
     final amountColor =
-        isIncome ? const Color(0xFF059669) : const Color(0xFFEF4444);
+        isIncome ? AppColors.income : AppColors.danger;
     final amountSign = isIncome ? '+' : '-';
     final bgColor = _bgColorForCategory(categoryName, isIncome);
     final iconColor = _iconColorForCategory(categoryName, isIncome);
@@ -351,11 +351,11 @@ class _TransactionRow extends ConsumerWidget {
       final diff = today.difference(txDay).inDays;
       if (diff == 0) return l10n.txListToday;
       if (diff == 1) return l10n.txListYesterday;
-      return DateFormat('MMMd').format(d);
+      return AppDateFormatter.shortMonthDay(d);
     }
 
     final timeStr = parsedDate != null
-        ? '${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')} ${parsedDate.hour < 12 ? 'AM' : 'PM'}'
+        ? AppDateFormatter.timeOfDay(parsedDate)
         : '';
     final categoryDisplay = categoryName != null
         ? categoryName[0].toUpperCase() + categoryName.substring(1).toLowerCase()
@@ -370,8 +370,8 @@ class _TransactionRow extends ConsumerWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        color: const Color(0xFFEF4444).withValues(alpha: 0.12),
-        child: const Icon(Icons.delete_rounded, color: Color(0xFFEF4444)),
+        color: AppColors.danger.withValues(alpha: 0.12),
+        child: const Icon(Icons.delete_rounded, color: AppColors.danger),
       ),
       confirmDismiss: (_) => showDeleteConfirmSheet(
         context,
@@ -447,7 +447,7 @@ class _TransactionRow extends ConsumerWidget {
                           dateLabel,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF9CA3AF),
+                            color: AppColors.textSubtle,
                           ),
                         ),
                       ],

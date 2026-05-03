@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/quiz_models.dart';
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 // ─────────────────────────────────────────────────────────────────
@@ -146,10 +147,14 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
         _submitting = false;
       });
     } catch (_) {
-      setState(() {
-        _submitting = false;
-        _phase = _Phase.reviewing;
-      });
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          _phase = _Phase.reviewing;
+        });
+        showAppToast(context, context.l10n.quizPersonalizedError,
+            type: ToastType.error);
+      }
     }
   }
 

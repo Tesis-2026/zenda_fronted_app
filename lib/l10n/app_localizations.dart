@@ -218,10 +218,16 @@ abstract class AppLocalizations {
   /// **'Welcome to Zenda'**
   String get authLoginTitle;
 
+  /// No description provided for @authWelcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get authWelcomeBack;
+
   /// No description provided for @authLoginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to continue'**
+  /// **'Sign in to your account'**
   String get authLoginSubtitle;
 
   /// No description provided for @authEmailLabel.
@@ -233,7 +239,7 @@ abstract class AppLocalizations {
   /// No description provided for @authEmailHint.
   ///
   /// In en, this message translates to:
-  /// **'you@email.com'**
+  /// **'Email address'**
   String get authEmailHint;
 
   /// No description provided for @authPasswordLabel.
@@ -245,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @authPasswordHint.
   ///
   /// In en, this message translates to:
-  /// **'At least 8 characters'**
+  /// **'Password'**
   String get authPasswordHint;
 
   /// No description provided for @authForgotPassword.
@@ -254,11 +260,23 @@ abstract class AppLocalizations {
   /// **'Forgot your password?'**
   String get authForgotPassword;
 
+  /// No description provided for @authForgotLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authForgotLink;
+
   /// No description provided for @authSignIn.
   ///
   /// In en, this message translates to:
   /// **'Sign in'**
   String get authSignIn;
+
+  /// No description provided for @authSignInButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get authSignInButton;
 
   /// No description provided for @authNoAccount.
   ///
@@ -991,6 +1009,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No transactions yet'**
   String get txListEmpty;
+
+  /// No description provided for @txListEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + Add to record your first transaction'**
+  String get txListEmptySubtitle;
 
   /// No description provided for @txListFilterAll.
   ///

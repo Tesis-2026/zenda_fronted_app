@@ -69,25 +69,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLoginTitle => 'Welcome to Zenda';
 
   @override
-  String get authLoginSubtitle => 'Sign in to continue';
+  String get authWelcomeBack => 'Welcome back';
+
+  @override
+  String get authLoginSubtitle => 'Sign in to your account';
 
   @override
   String get authEmailLabel => 'Email';
 
   @override
-  String get authEmailHint => 'you@email.com';
+  String get authEmailHint => 'Email address';
 
   @override
   String get authPasswordLabel => 'Password';
 
   @override
-  String get authPasswordHint => 'At least 8 characters';
+  String get authPasswordHint => 'Password';
 
   @override
   String get authForgotPassword => 'Forgot your password?';
 
   @override
+  String get authForgotLink => 'Forgot password?';
+
+  @override
   String get authSignIn => 'Sign in';
+
+  @override
+  String get authSignInButton => 'Sign In';
 
   @override
   String get authNoAccount => 'Don\'t have an account?';
@@ -484,6 +493,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txListEmpty => 'No transactions yet';
+
+  @override
+  String get txListEmptySubtitle =>
+      'Tap + Add to record your first transaction';
 
   @override
   String get txListFilterAll => 'All';

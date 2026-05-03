@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/services/progress_api_service.dart';
@@ -62,8 +63,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1F2937)),
-          onPressed: () => Navigator.of(context).maybePop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1F2937)),
+          onPressed: () => context.pop(),
         ),
         title: Text(
           l10n.progressTitle,

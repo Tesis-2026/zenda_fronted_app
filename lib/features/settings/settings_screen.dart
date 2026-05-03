@@ -29,7 +29,7 @@ class SettingsScreen extends ConsumerWidget {
         backgroundColor: cardBg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
         title: Text(

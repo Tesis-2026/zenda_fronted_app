@@ -93,7 +93,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_ios_new_rounded,
             color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
           ),
           onPressed: () => context.go('/auth/forgot-password'),

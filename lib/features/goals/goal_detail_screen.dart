@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
+import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../l10n/l10n_extension.dart';
 import 'goals_screen.dart';
@@ -73,7 +74,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
                       children: [
                         IconButton(
                           onPressed: () => context.pop(),
-                          icon: const Icon(Icons.arrow_back_rounded,
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded,
                               color: Colors.white),
                         ),
                       ],
@@ -258,17 +259,11 @@ class _ContributeSheetState extends State<_ContributeSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: pct / 100,
-                minHeight: 8,
-                backgroundColor: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : const Color(0xFFE5E7EB),
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
-              ),
+            AppProgressBar(
+              value: pct / 100,
+              height: 8,
+              color: const Color(0xFF34D399),
+              isDark: isDark,
             ),
             const SizedBox(height: 20),
             TextField(
@@ -393,17 +388,12 @@ class _Body extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: pct / 100,
-            minHeight: 8,
-            backgroundColor: isDark
-                ? Colors.white.withValues(alpha: 0.1)
-                : const Color(0xFFE5E7EB),
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
-          ),
+        AppProgressBar(
+          value: pct / 100,
+          height: 8,
+          color: const Color(0xFF34D399),
+          backgroundColor: const Color(0xFFE5E7EB),
+          isDark: isDark,
         ),
         const SizedBox(height: 8),
         if (!isComplete && remaining > 0)
