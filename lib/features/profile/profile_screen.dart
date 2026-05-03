@@ -114,11 +114,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (type == null) return context.l10n.commonNotSet;
     final l10n = context.l10n;
     return switch (type) {
-      IncomeType.none => l10n.incomeTypeNone,
+      IncomeType.scholarship => l10n.incomeTypeScholarship,
       IncomeType.partTime => l10n.incomeTypePartTime,
-      IncomeType.fullTime => l10n.incomeTypeFullTime,
-      IncomeType.freelance => l10n.incomeTypeFreelance,
-      IncomeType.allowance => l10n.incomeTypeAllowance,
+      IncomeType.family => l10n.incomeTypeFamily,
+      IncomeType.mixed => l10n.incomeTypeMixed,
     };
   }
 

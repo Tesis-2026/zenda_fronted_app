@@ -1369,9 +1369,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetupSave => 'Finish';
 
   @override
-  String get profileSetupSkip => 'Skip';
-
-  @override
   String get profileSetupCompleteTitle => 'All set!';
 
   @override
@@ -1382,19 +1379,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetupGoToDashboard => 'Go to dashboard';
 
   @override
-  String get incomeTypeNone => 'No income';
+  String get incomeTypeScholarship => 'Scholarship';
 
   @override
   String get incomeTypePartTime => 'Part-time job';
 
   @override
-  String get incomeTypeFullTime => 'Full-time job';
+  String get incomeTypeFamily => 'Family support';
 
   @override
-  String get incomeTypeFreelance => 'Freelance';
-
-  @override
-  String get incomeTypeAllowance => 'Family allowance / Scholarship';
+  String get incomeTypeMixed => 'Mixed (job + support)';
 
   @override
   String get aiChatTitle => 'Zenda AI';

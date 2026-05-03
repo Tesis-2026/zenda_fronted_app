@@ -1,27 +1,34 @@
-enum IncomeType { none, partTime, fullTime, freelance, allowance }
+enum IncomeType { scholarship, partTime, family, mixed }
 
 enum FinancialLiteracyLevel { beginner, intermediate, advanced }
 
-String incomeTypeToString(IncomeType type) => type.name.toUpperCase();
-String literacyLevelToString(FinancialLiteracyLevel level) => level.name.toUpperCase();
+String incomeTypeToString(IncomeType type) => switch (type) {
+      IncomeType.scholarship => 'SCHOLARSHIP',
+      IncomeType.partTime => 'PART_TIME',
+      IncomeType.family => 'FAMILY',
+      IncomeType.mixed => 'MIXED',
+    };
 
-IncomeType? _incomeTypeFromString(String? value) {
-  if (value == null) return null;
-  try {
-    return IncomeType.values.firstWhere((e) => e.name.toUpperCase() == value.toUpperCase());
-  } catch (_) {
-    return null;
-  }
-}
+String literacyLevelToString(FinancialLiteracyLevel level) => switch (level) {
+      FinancialLiteracyLevel.beginner => 'LOW',
+      FinancialLiteracyLevel.intermediate => 'MEDIUM',
+      FinancialLiteracyLevel.advanced => 'HIGH',
+    };
 
-FinancialLiteracyLevel? _literacyLevelFromString(String? value) {
-  if (value == null) return null;
-  try {
-    return FinancialLiteracyLevel.values.firstWhere((e) => e.name.toUpperCase() == value.toUpperCase());
-  } catch (_) {
-    return null;
-  }
-}
+IncomeType? _incomeTypeFromString(String? value) => switch (value) {
+      'SCHOLARSHIP' => IncomeType.scholarship,
+      'PART_TIME' => IncomeType.partTime,
+      'FAMILY' => IncomeType.family,
+      'MIXED' => IncomeType.mixed,
+      _ => null,
+    };
+
+FinancialLiteracyLevel? _literacyLevelFromString(String? value) => switch (value) {
+      'LOW' => FinancialLiteracyLevel.beginner,
+      'MEDIUM' => FinancialLiteracyLevel.intermediate,
+      'HIGH' => FinancialLiteracyLevel.advanced,
+      _ => null,
+    };
 
 class User {
   final String id;
@@ -55,7 +62,7 @@ class User {
       'email': email,
       if (age != null) 'age': age,
       if (university != null) 'university': university,
-      if (incomeType != null) 'incomeType': incomeType!.name.toUpperCase(),
+      if (incomeType != null) 'incomeType': incomeTypeToString(incomeType!),
       if (averageMonthlyIncome != null) 'averageMonthlyIncome': averageMonthlyIncome,
       if (financialLiteracyLevel != null) 'financialLiteracyLevel': financialLiteracyLevel!.name.toUpperCase(),
       'profileCompleted': profileCompleted,

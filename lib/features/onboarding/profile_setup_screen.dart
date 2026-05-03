@@ -82,15 +82,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     }
   }
 
-  Future<void> _skip() async {
-    try {
-      await UserApiService().updateProfile(profileCompleted: true);
-    } catch (_) {
-      // Non-blocking: skip still navigates forward even if the update fails
-    }
-    if (mounted) context.go('/surveys/pre');
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -152,10 +143,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                 )),
-              ),
-              TextButton(
-                onPressed: _skip,
-                child: Text(l10n.profileSetupSkip, style: const TextStyle(color: Colors.grey)),
               ),
             ],
           ),
@@ -416,19 +403,17 @@ class _IncomeTypePage extends StatelessWidget {
   final bool isDark;
 
   String _labelFor(IncomeType t, AppLocalizations l10n) => switch (t) {
-        IncomeType.none => l10n.incomeTypeNone,
+        IncomeType.scholarship => l10n.incomeTypeScholarship,
         IncomeType.partTime => l10n.incomeTypePartTime,
-        IncomeType.fullTime => l10n.incomeTypeFullTime,
-        IncomeType.freelance => l10n.incomeTypeFreelance,
-        IncomeType.allowance => l10n.incomeTypeAllowance,
+        IncomeType.family => l10n.incomeTypeFamily,
+        IncomeType.mixed => l10n.incomeTypeMixed,
       };
 
   IconData _iconFor(IncomeType t) => switch (t) {
-        IncomeType.none => Icons.do_not_disturb_outlined,
+        IncomeType.scholarship => Icons.school_outlined,
         IncomeType.partTime => Icons.access_time_outlined,
-        IncomeType.fullTime => Icons.work_outline,
-        IncomeType.freelance => Icons.laptop_outlined,
-        IncomeType.allowance => Icons.family_restroom_outlined,
+        IncomeType.family => Icons.family_restroom_outlined,
+        IncomeType.mixed => Icons.merge_outlined,
       };
 
   @override

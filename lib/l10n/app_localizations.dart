@@ -2558,12 +2558,6 @@ abstract class AppLocalizations {
   /// **'Finish'**
   String get profileSetupSave;
 
-  /// No description provided for @profileSetupSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get profileSetupSkip;
-
   /// No description provided for @profileSetupCompleteTitle.
   ///
   /// In en, this message translates to:
@@ -2582,11 +2576,11 @@ abstract class AppLocalizations {
   /// **'Go to dashboard'**
   String get profileSetupGoToDashboard;
 
-  /// No description provided for @incomeTypeNone.
+  /// No description provided for @incomeTypeScholarship.
   ///
   /// In en, this message translates to:
-  /// **'No income'**
-  String get incomeTypeNone;
+  /// **'Scholarship'**
+  String get incomeTypeScholarship;
 
   /// No description provided for @incomeTypePartTime.
   ///
@@ -2594,23 +2588,17 @@ abstract class AppLocalizations {
   /// **'Part-time job'**
   String get incomeTypePartTime;
 
-  /// No description provided for @incomeTypeFullTime.
+  /// No description provided for @incomeTypeFamily.
   ///
   /// In en, this message translates to:
-  /// **'Full-time job'**
-  String get incomeTypeFullTime;
+  /// **'Family support'**
+  String get incomeTypeFamily;
 
-  /// No description provided for @incomeTypeFreelance.
+  /// No description provided for @incomeTypeMixed.
   ///
   /// In en, this message translates to:
-  /// **'Freelance'**
-  String get incomeTypeFreelance;
-
-  /// No description provided for @incomeTypeAllowance.
-  ///
-  /// In en, this message translates to:
-  /// **'Family allowance / Scholarship'**
-  String get incomeTypeAllowance;
+  /// **'Mixed (job + support)'**
+  String get incomeTypeMixed;
 
   /// No description provided for @aiChatTitle.
   ///

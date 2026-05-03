@@ -1374,9 +1374,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileSetupSave => 'Terminar';
 
   @override
-  String get profileSetupSkip => 'Omitir';
-
-  @override
   String get profileSetupCompleteTitle => '¡Listo!';
 
   @override
@@ -1387,19 +1384,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileSetupGoToDashboard => 'Ir al inicio';
 
   @override
-  String get incomeTypeNone => 'Sin ingresos';
+  String get incomeTypeScholarship => 'Beca';
 
   @override
   String get incomeTypePartTime => 'Trabajo a tiempo parcial';
 
   @override
-  String get incomeTypeFullTime => 'Trabajo a tiempo completo';
+  String get incomeTypeFamily => 'Apoyo familiar';
 
   @override
-  String get incomeTypeFreelance => 'Freelance';
-
-  @override
-  String get incomeTypeAllowance => 'Apoyo familiar / Beca';
+  String get incomeTypeMixed => 'Mixto (trabajo + apoyo)';
 
   @override
   String get aiChatTitle => 'Zenda IA';
