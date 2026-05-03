@@ -375,14 +375,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     const SizedBox(height: 10),
                     _CategoryGrid(
                       selected: state.category,
-                      customCategoryName: state.customCategoryName,
                       onSelected: controller.setCategory,
-                      onAddCustom: () async {
-                        final name = await _showAddCategoryDialog(context, l10n);
-                        if (name != null && name.isNotEmpty) {
-                          controller.setCustomCategory(name);
-                        }
-                      },
                     ),
 
                     if (state.error != null) ...[
@@ -576,34 +569,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
   }
 
-  Future<String?> _showAddCategoryDialog(BuildContext context, dynamic l10n) async {
-    final ctrl = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.txAddCustomCategory),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(
-            hintText: l10n.txAddCustomCategory,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: Text(l10n.commonSave),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 
@@ -766,15 +731,11 @@ class _BucketChip extends StatelessWidget {
 
 class _CategoryGrid extends StatelessWidget {
   final TransactionCategory? selected;
-  final String? customCategoryName;
   final ValueChanged<TransactionCategory> onSelected;
-  final Future<void> Function() onAddCustom;
 
   const _CategoryGrid({
     required this.selected,
-    required this.customCategoryName,
     required this.onSelected,
-    required this.onAddCustom,
   });
 
   @override
@@ -782,52 +743,8 @@ class _CategoryGrid extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
     final items = TransactionCategory.values;
-    final hasCustom = customCategoryName != null && customCategoryName!.isNotEmpty;
-    final allItems = [...items, null]; // null = "add custom" slot
 
     Widget buildChip(int index) {
-      if (index == items.length) {
-        return InkWell(
-          onTap: onAddCustom,
-          borderRadius: BorderRadius.circular(16),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: hasCustom
-                  ? const Color(0xFF818CF8).withValues(alpha: 0.18)
-                  : (isDark ? const Color(0xFF1E293B) : Colors.white),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: hasCustom
-                    ? const Color(0xFF818CF8)
-                    : (isDark ? Colors.white10 : Colors.black12),
-              ),
-            ),
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  hasCustom ? Icons.label_rounded : Icons.add_rounded,
-                  size: 22,
-                  color: hasCustom ? const Color(0xFF818CF8) : null,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  hasCustom ? customCategoryName! : l10n.txAddCustomCategory,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: hasCustom ? FontWeight.w800 : FontWeight.w600,
-                    fontSize: 12,
-                    color: hasCustom ? const Color(0xFF818CF8) : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
       final c = items[index];
       final isSelected = c == selected;
       final icon = _categoryIcon(c);
@@ -878,7 +795,7 @@ class _CategoryGrid extends StatelessWidget {
           spacing: spacing,
           runSpacing: spacing,
           children: [
-            for (var i = 0; i < allItems.length; i++)
+            for (var i = 0; i < items.length; i++)
               SizedBox(
                 width: itemWidth,
                 height: itemWidth / 1.1,
