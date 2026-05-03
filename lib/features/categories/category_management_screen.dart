@@ -275,6 +275,15 @@ class _CustomCategoryTile extends ConsumerWidget {
             size: 32,
             iconSize: 16,
           ),
+          const SizedBox(width: 8),
+          IconActionButton(
+            icon: Icons.delete_outline,
+            onTap: () => _confirmDelete(context, ref),
+            backgroundColor: const Color(0xFFFEE2E2),
+            iconColor: const Color(0xFFEF4444),
+            size: 32,
+            iconSize: 16,
+          ),
         ],
       ),
     );
@@ -291,26 +300,26 @@ class _CustomCategoryTile extends ConsumerWidget {
           await ref.read(categoryApiServiceProvider).rename(category.id, name);
           ref.invalidate(_categoriesProvider);
         },
-        onDelete: () async {
-          final confirmed = await showDeleteConfirmSheet(
-            context,
-            title: context.l10n.catDeleteTitle,
-            message: context.l10n.catDeleteMessage,
-          );
-          if (confirmed) {
-            try {
-              await ref.read(categoryApiServiceProvider).delete(category.id);
-              ref.invalidate(_categoriesProvider);
-            } catch (_) {
-              if (context.mounted) {
-                showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
-                ref.invalidate(_categoriesProvider);
-              }
-            }
-          }
-        },
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      title: context.l10n.catDeleteTitle,
+      message: context.l10n.catDeleteMessage,
+    );
+    if (!confirmed || !context.mounted) return;
+    try {
+      await ref.read(categoryApiServiceProvider).delete(category.id);
+      ref.invalidate(_categoriesProvider);
+    } catch (_) {
+      if (context.mounted) {
+        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
+        ref.invalidate(_categoriesProvider);
+      }
+    }
   }
 }
 
@@ -389,12 +398,10 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
 class _EditCategorySheet extends StatefulWidget {
   final CategoryModel category;
   final Future<void> Function(String name) onSave;
-  final Future<void> Function() onDelete;
 
   const _EditCategorySheet({
     required this.category,
     required this.onSave,
-    required this.onDelete,
   });
 
   @override
@@ -436,11 +443,6 @@ class _EditCategorySheetState extends State<_EditCategorySheet> {
     }
   }
 
-  Future<void> _handleDelete() async {
-    Navigator.of(context).pop();
-    await widget.onDelete();
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -466,28 +468,6 @@ class _EditCategorySheetState extends State<_EditCategorySheet> {
           AppPrimaryButton(
             label: l10n.catSaveChanges,
             onPressed: _saving ? null : () => _submit(),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: TextButton(
-              onPressed: _saving ? null : () => _handleDelete(),
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFEF4444),
-                backgroundColor: const Color(0xFFFEE2E2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Text(
-                l10n.catDeleteItemLabel,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
           ),
         ],
       ),

@@ -8,8 +8,8 @@ import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_sheet_container.dart';
 import '../../core/widgets/app_toast.dart';
-import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/field_label.dart';
+import '../../core/widgets/sheet_header.dart';
 import '../../core/widgets/kind_toggle.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -43,7 +43,6 @@ class _EditTransactionScreenState
   late TransactionCategory _category;
   late DateTime _date;
   bool _saving = false;
-  bool _deleting = false;
 
   static const _categoryIcons = {
     TransactionCategory.comida: Icons.restaurant_rounded,
@@ -127,7 +126,6 @@ class _EditTransactionScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final busy = _saving || _deleting;
 
     return AppSheetContainer(
       topRadius: 28,
@@ -136,49 +134,11 @@ class _EditTransactionScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.txEditTitle,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1F2937),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: busy ? null : _confirmDelete,
-                  child: Container(
-                    height: 34,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFFCA5A5)),
-                    ),
-                    child: Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.delete_outline_rounded,
-                              size: 14, color: Color(0xFFEF4444)),
-                          const SizedBox(width: 4),
-                          Text(
-                            l10n.txDeleteAction,
-                            style: const TextStyle(
-                              color: Color(0xFFEF4444),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            SheetHeader(
+              title: l10n.txEditTitle,
+              onClose: () => Navigator.of(context).pop(),
             ),
+            const SizedBox(height: 16),
             KindToggle(
               selected: _kind,
               onChanged: (k) => setState(() => _kind = k),
@@ -300,7 +260,7 @@ class _EditTransactionScreenState
             const SizedBox(height: 24),
             AppPrimaryButton(
               label: l10n.txUpdateButton,
-              onPressed: busy ? null : _save,
+              onPressed: _saving ? null : _save,
               isLoading: _saving,
             ),
           ],
@@ -324,31 +284,6 @@ class _EditTransactionScreenState
             _date.hour,
             _date.minute,
           ));
-    }
-  }
-
-  Future<void> _confirmDelete() async {
-    final l10n = context.l10n;
-    final confirmed = await showDeleteConfirmSheet(
-      context,
-      title: l10n.txDeleteConfirmTitle,
-      message: l10n.txDeleteConfirmMessage,
-    );
-    if (confirmed != true || !mounted) return;
-
-    final id = widget.transaction['id'] as String? ?? '';
-    if (id.isEmpty) return;
-
-    setState(() => _deleting = true);
-    try {
-      await TransactionApiService().deleteTransaction(id);
-      if (mounted) Navigator.of(context).pop(true);
-    } catch (_) {
-      if (mounted) {
-        showAppToast(context, l10n.txDeleteError, type: ToastType.error);
-      }
-    } finally {
-      if (mounted) setState(() => _deleting = false);
     }
   }
 
