@@ -105,6 +105,21 @@ class _InicioSection extends ConsumerWidget {
                   ],
                 ),
                 const Spacer(),
+                GestureDetector(
+                  onTap: () => context.push('/notifications'),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                    ),
+                    child: const Icon(Icons.notifications_outlined,
+                        size: 20, color: Color(0xFF1F2937)),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 const UserMenuButton(),
               ],
             ),
@@ -348,7 +363,7 @@ class _BudgetRuleCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
+        border: Border.all(color: const Color(0xFF34D399), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

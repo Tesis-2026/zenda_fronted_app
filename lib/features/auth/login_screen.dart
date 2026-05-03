@@ -165,8 +165,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       showAppToast(context, l10n.authOnboardingReset, type: ToastType.info);
                     },
                     child: Container(
-                      width: 72,
-                      height: 72,
+                      width: 80,
+                      height: 80,
                       decoration: const BoxDecoration(
                         color: Color(0xFF34D399),
                         shape: BoxShape.circle,
@@ -176,7 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           'Z',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 32,
+                            fontSize: 36,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

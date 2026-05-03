@@ -164,9 +164,9 @@ class _CategoryList extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   alignment: Alignment.center,
-                  child: const Text(
-                    '+ Add',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.catMgmtAddButton,
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,

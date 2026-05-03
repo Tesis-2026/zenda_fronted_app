@@ -16,7 +16,8 @@ class ZendaAiCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : const Color(0xFF1F2937),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF818CF8), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +52,7 @@ class ZendaAiCard extends StatelessWidget {
           Text(
             advice,
             style: const TextStyle(
-              color: Colors.white,
+              color: Color(0xFFD1D5DB),
               fontSize: 13,
               height: 1.5,
             ),
@@ -65,8 +66,9 @@ class ZendaAiCard extends StatelessWidget {
                 child: Text(
                   '→ ${l10n.aiCardPredictionsChat}',
                   style: const TextStyle(
-                    color: Color(0xFF9CA3AF),
+                    color: Color(0xFF818CF8),
                     fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -89,6 +91,17 @@ class ZendaAiCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: () => context.push('/recommendations'),
+            child: Text(
+              '→ ${l10n.aiCardSeeRecommendations}',
+              style: const TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontSize: 12,
+              ),
+            ),
           ),
         ],
       ),

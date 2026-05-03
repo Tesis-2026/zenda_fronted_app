@@ -255,6 +255,7 @@
   "catMgmtDeleteAction": "Delete",
   "catMgmtErrorLoad": "Could not load categories",
   "catMgmtErrorSave": "Could not save. Try again.",
+  "catMgmtAddButton": "+ Add",
 
   "reportsTitle": "Reports",
   "reportsTabMonth": "Month",

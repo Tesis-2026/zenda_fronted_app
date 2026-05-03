@@ -255,6 +255,7 @@
   "catMgmtDeleteAction": "Eliminar",
   "catMgmtErrorLoad": "No se pudieron cargar las categorías",
   "catMgmtErrorSave": "No se pudo guardar. Intenta de nuevo.",
+  "catMgmtAddButton": "+ Agregar",
 
   "reportsTitle": "Reportes",
   "reportsTabMonth": "Mes",

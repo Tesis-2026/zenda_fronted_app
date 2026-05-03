@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/challenges_api_service.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../features/dashboard/dashboard_providers.dart';
 import '../../l10n/l10n_extension.dart';
 
 final challengesServiceProvider = Provider<ChallengesApiService>(
@@ -23,6 +24,7 @@ class ChallengesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final challengesAsync = ref.watch(_challengesProvider);
+    final streakDays = ref.watch(streakProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,14 +38,14 @@ class ChallengesScreen extends ConsumerWidget {
                 color: const Color(0xFFFEF3C7),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
-                  SizedBox(width: 4),
+                  const Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
+                  const SizedBox(width: 4),
                   Text(
-                    '12 day streak',
-                    style: TextStyle(
+                    l10n.streakLabel(streakDays),
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFFF59E0B),

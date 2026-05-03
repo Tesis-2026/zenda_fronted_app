@@ -108,13 +108,42 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             color: Color(0xFF1F2937),
           ),
         ),
-        actions: [
-        ],
+        actions: const [],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(0),
-          child: Container(
-            height: 1,
-            color: const Color(0xFFE5E7EB),
+          preferredSize: const Size.fromHeight(52),
+          child: Column(
+            children: [
+              Container(height: 1, color: const Color(0xFFE5E7EB)),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  indicator: BoxDecoration(
+                    color: const Color(0xFF34D399),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: const Color(0xFF6B7280),
+                  labelStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: const TextStyle(fontSize: 13),
+                  padding: EdgeInsets.zero,
+                  tabs: [
+                    Tab(text: l10n.reportsTabMonth),
+                    Tab(text: l10n.reportsTabWeek),
+                    Tab(text: l10n.reportsTabCompare),
+                    Tab(text: l10n.reportsTabDay),
+                    Tab(text: l10n.reportsTabCategories),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

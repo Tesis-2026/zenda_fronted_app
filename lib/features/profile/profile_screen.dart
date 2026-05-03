@@ -152,7 +152,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.more_horiz_rounded, color: Color(0xFF6B7280), size: 20),
+                  icon: const Icon(Icons.edit_outlined, color: Color(0xFF6B7280), size: 20),
                   onPressed: () => profileAsync.whenData((user) => _startEdit(user)),
                   tooltip: l10n.profileEdit,
                   padding: const EdgeInsets.all(8),

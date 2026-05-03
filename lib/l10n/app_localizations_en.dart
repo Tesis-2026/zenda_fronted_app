@@ -654,6 +654,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get catMgmtErrorSave => 'Could not save. Try again.';
 
   @override
+  String get catMgmtAddButton => '+ Add';
+
+  @override
   String get reportsTitle => 'Reports';
 
   @override

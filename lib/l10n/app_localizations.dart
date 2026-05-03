@@ -1298,6 +1298,12 @@ abstract class AppLocalizations {
   /// **'Could not save. Try again.'**
   String get catMgmtErrorSave;
 
+  /// No description provided for @catMgmtAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add'**
+  String get catMgmtAddButton;
+
   /// No description provided for @reportsTitle.
   ///
   /// In en, this message translates to:
