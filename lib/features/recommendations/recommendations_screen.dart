@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/services/recommendations_api_service.dart';
 import '../../l10n/l10n_extension.dart';
+import '../feedback/feedback_modal.dart';
 
 final _recsServiceProvider = Provider<RecommendationsApiService>(
   (_) => RecommendationsApiService(),
@@ -15,6 +17,21 @@ final _recsProvider =
 
 class RecommendationsScreen extends ConsumerWidget {
   const RecommendationsScreen({super.key});
+
+  VoidCallback? _actionRouteFor(BuildContext context, String type) {
+    switch (type.toUpperCase()) {
+      case 'BUDGET':
+        return () => context.push('/budgets');
+      case 'GOAL':
+        return () => context.push('/goals');
+      case 'SAVING':
+        return () => context.push('/reports');
+      case 'SPENDING':
+        return () => context.push('/transactions');
+      default:
+        return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,7 +80,8 @@ class RecommendationsScreen extends ConsumerWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () => FeedbackModal.show(context,
+                                  screenName: 'recommendations'),
                               child: Text(
                                 l10n.recommendationsRateExperience,
                                 style: const TextStyle(
@@ -86,6 +104,7 @@ class RecommendationsScreen extends ConsumerWidget {
                             .submitFeedback(recs[recIndex].id, accepted: accepted);
                         ref.invalidate(_recsProvider);
                       },
+                      onAction: _actionRouteFor(context, recs[recIndex].type),
                     );
                   },
                 ),
@@ -99,10 +118,12 @@ class _RecommendationCard extends StatelessWidget {
   const _RecommendationCard({
     required this.rec,
     required this.onFeedback,
+    required this.onAction,
   });
 
   final Recommendation rec;
   final Future<void> Function(bool accepted) onFeedback;
+  final VoidCallback? onAction;
 
   // Design shows colored category chip labels
   String _labelForType(String type) {
@@ -199,10 +220,10 @@ class _RecommendationCard extends StatelessWidget {
                   ),
             ),
             // Action link (green arrow text)
-            if (actionLink != null && actionLink.isNotEmpty) ...[
+            if (actionLink != null && actionLink.isNotEmpty && onAction != null) ...[
               const SizedBox(height: 10),
               GestureDetector(
-                onTap: () {},
+                onTap: onAction,
                 child: Text(
                   '→ $actionLink',
                   style: const TextStyle(

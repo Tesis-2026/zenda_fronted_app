@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/models/account.dart';
 import '../../core/widgets/app_bottom_nav.dart';
@@ -244,7 +245,7 @@ class _TotalBalanceCard extends StatelessWidget {
                 style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () => context.go('/transactions'),
                 child: Text(
                   '▶  ${l10n.dashboardViewAll}',
                   style: const TextStyle(
@@ -412,7 +413,7 @@ class _BudgetRuleCard extends StatelessWidget {
             children: [
               _LegendDot(color: const Color(0xFF34D399), label: '${l10n.dashboardNeeds} 50%'),
               GestureDetector(
-                onTap: () {},
+                onTap: () => context.push('/budgets'),
                 child: Text(
                   '${l10n.dashboardManageBudgets} →',
                   style: const TextStyle(

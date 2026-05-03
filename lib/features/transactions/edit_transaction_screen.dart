@@ -39,18 +39,18 @@ class _EditTransactionScreenState
   bool _saving = false;
   bool _deleting = false;
 
-  static const _categoryEmojis = {
-    TransactionCategory.comida: '🍔',
-    TransactionCategory.transporte: '🚌',
-    TransactionCategory.vivienda: '🏠',
-    TransactionCategory.servicios: '⚡',
-    TransactionCategory.salud: '💊',
-    TransactionCategory.ocio: '🎮',
-    TransactionCategory.compras: '🛒',
-    TransactionCategory.suscripciones: '📱',
-    TransactionCategory.antojos: '🍩',
-    TransactionCategory.ahorro: '💰',
-    TransactionCategory.otros: '📋',
+  static const _categoryIcons = {
+    TransactionCategory.comida: Icons.restaurant_rounded,
+    TransactionCategory.transporte: Icons.directions_bus_rounded,
+    TransactionCategory.vivienda: Icons.home_rounded,
+    TransactionCategory.servicios: Icons.bolt_rounded,
+    TransactionCategory.salud: Icons.local_pharmacy_rounded,
+    TransactionCategory.ocio: Icons.sports_esports_rounded,
+    TransactionCategory.compras: Icons.shopping_cart_rounded,
+    TransactionCategory.suscripciones: Icons.smartphone_rounded,
+    TransactionCategory.antojos: Icons.icecream_rounded,
+    TransactionCategory.ahorro: Icons.savings_rounded,
+    TransactionCategory.otros: Icons.more_horiz_rounded,
   };
 
   @override
@@ -177,13 +177,21 @@ class _EditTransactionScreenState
                             Border.all(color: const Color(0xFFFCA5A5)),
                       ),
                       child: Center(
-                        child: Text(
-                          '🗑  ${l10n.txDeleteAction}',
-                          style: const TextStyle(
-                            color: Color(0xFFEF4444),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.delete_outline_rounded,
+                                size: 14, color: Color(0xFFEF4444)),
+                            const SizedBox(width: 4),
+                            Text(
+                              l10n.txDeleteAction,
+                              style: const TextStyle(
+                                color: Color(0xFFEF4444),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -345,9 +353,10 @@ class _EditTransactionScreenState
                           fontSize: 14,
                         ),
                       ),
-                      const Text(
-                        '📅',
-                        style: TextStyle(fontSize: 16),
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 16,
+                        color: Color(0xFF9CA3AF),
                       ),
                     ],
                   ),
@@ -382,9 +391,12 @@ class _EditTransactionScreenState
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              _categoryEmojis[cat] ?? '📋',
-                              style: const TextStyle(fontSize: 24),
+                            Icon(
+                              _categoryIcons[cat] ?? Icons.more_horiz_rounded,
+                              size: 24,
+                              color: isSelected
+                                  ? const Color(0xFF065F46)
+                                  : const Color(0xFF6B7280),
                             ),
                             const SizedBox(height: 4),
                             Text(

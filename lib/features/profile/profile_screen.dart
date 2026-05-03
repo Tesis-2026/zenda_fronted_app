@@ -5,6 +5,7 @@ import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
 import '../../core/widgets/app_toast.dart';
 import '../auth/auth_controller.dart';
+import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
 
 final profileUserServiceProvider = Provider<UserApiService>((_) => UserApiService());
@@ -253,6 +254,57 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 24),
+        // ── Learn & Grow ──────────────────────────────────────────────────────
+        _NavSection(
+          label: l10n.profileSectionLearnGrow,
+          items: [
+            _NavItem(
+              icon: Icons.emoji_events_outlined,
+              iconColor: const Color(0xFFF59E0B),
+              title: l10n.challengesTitle,
+              onTap: () => context.push('/challenges'),
+            ),
+            _NavItem(
+              icon: Icons.military_tech_rounded,
+              iconColor: const Color(0xFF8B5CF6),
+              title: l10n.badgesTitle,
+              onTap: () => context.push('/badges'),
+            ),
+            _NavItem(
+              icon: Icons.trending_up_rounded,
+              iconColor: const Color(0xFF34D399),
+              title: l10n.progressTitle,
+              onTap: () => context.push('/progress'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // ── Surveys ───────────────────────────────────────────────────────────
+        _NavSection(
+          label: l10n.profileSectionSurveys,
+          items: [
+            _NavItem(
+              icon: Icons.compare_arrows_rounded,
+              iconColor: const Color(0xFF34D399),
+              title: l10n.surveyComparisonNavTitle,
+              onTap: () => context.push('/surveys/comparison'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // ── Support ───────────────────────────────────────────────────────────
+        _NavSection(
+          label: l10n.profileSectionSupport,
+          items: [
+            _NavItem(
+              icon: Icons.chat_bubble_outline_rounded,
+              iconColor: const Color(0xFF6B7280),
+              title: l10n.profileSendFeedback,
+              onTap: () => _showFeedback(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
         OutlinedButton(
           onPressed: _confirmLogout,
           style: OutlinedButton.styleFrom(
@@ -268,6 +320,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  void _showFeedback(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => const _FeedbackSheetProxy(),
     );
   }
 
@@ -390,5 +451,114 @@ class _InfoRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ── Navigation section card ────────────────────────────────────────────────────
+
+class _NavItem {
+  const _NavItem({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.onTap,
+  });
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final VoidCallback onTap;
+}
+
+class _NavSection extends StatelessWidget {
+  const _NavSection({required this.label, required this.items});
+  final String label;
+  final List<_NavItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF9CA3AF),
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFF3F4F6)),
+          ),
+          child: Column(
+            children: [
+              for (int i = 0; i < items.length; i++) ...[
+                if (i > 0)
+                  const Divider(height: 1, indent: 56, color: Color(0xFFF3F4F6)),
+                _NavRow(item: items[i]),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NavRow extends StatelessWidget {
+  const _NavRow({required this.item});
+  final _NavItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: item.onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: item.iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(item.icon, size: 17, color: item.iconColor),
+            ),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Text(
+                item.title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                size: 18, color: Color(0xFF9CA3AF)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Feedback proxy (avoids importing FeedbackModal state in build) ─────────────
+
+class _FeedbackSheetProxy extends StatelessWidget {
+  const _FeedbackSheetProxy();
+
+  @override
+  Widget build(BuildContext context) {
+    return FeedbackModal(screenName: 'profile');
   }
 }

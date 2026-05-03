@@ -39,7 +39,7 @@ class ChallengesScreen extends ConsumerWidget {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('🔥', style: TextStyle(fontSize: 14)),
+                  Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
                   SizedBox(width: 4),
                   Text(
                     '12 day streak',

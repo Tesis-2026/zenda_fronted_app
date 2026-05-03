@@ -58,7 +58,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('🔥', style: TextStyle(fontSize: 14)),
+                Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
                 SizedBox(width: 2),
                 Text(
                   '12',
@@ -250,18 +250,19 @@ class _FeaturedCard extends StatelessWidget {
   final EducationTopic topic;
   final VoidCallback onTap;
 
-  String _emoji(String category) {
+  IconData _categoryIcon(String category) {
     switch (category.toLowerCase()) {
       case 'budgeting':
-        return '💡';
+        return Icons.lightbulb_outline_rounded;
       case 'saving':
-        return '🐷';
+        return Icons.savings_rounded;
       case 'investing':
-        return '📈';
+        return Icons.trending_up_rounded;
       default:
-        return '📚';
+        return Icons.menu_book_rounded;
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -321,8 +322,8 @@ class _FeaturedCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: Text(_emoji(topic.category),
-                        style: const TextStyle(fontSize: 24)),
+                    child: Icon(_categoryIcon(topic.category),
+                        size: 24, color: Colors.white70),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -586,7 +587,7 @@ class _PersonalizedSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              const Text('✨', style: TextStyle(fontSize: 14)),
+              const Icon(Icons.auto_awesome_rounded, size: 16, color: Color(0xFF818CF8)),
             ],
           ),
           const SizedBox(height: 4),

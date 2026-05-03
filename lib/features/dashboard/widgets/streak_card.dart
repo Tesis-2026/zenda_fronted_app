@@ -23,7 +23,7 @@ class StreakCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Text('🔥', style: TextStyle(fontSize: 22)),
+            const Icon(Icons.local_fire_department_rounded, size: 26, color: Color(0xFFD97706)),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

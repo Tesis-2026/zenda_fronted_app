@@ -35,15 +35,16 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
     if (_goal.dueDate == null) return null;
     final due = DateTime.tryParse(_goal.dueDate!);
     if (due == null) return null;
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return context.l10n.goalsDueDate('${months[due.month - 1]} ${due.year}');
+    return context.l10n.goalsDueDate(DateFormat('MMM yyyy').format(due));
   }
 
-  static const _emojis = ['🎯', '✈️', '🎓', '🏠', '💻', '🎸', '📱', '🏋️', '🌎', '💰'];
-  String _emoji() => _emojis[_goal.name.codeUnitAt(0) % _emojis.length];
+  static const _icons = [
+    Icons.flag_rounded, Icons.flight_rounded, Icons.school_rounded,
+    Icons.home_rounded, Icons.laptop_rounded, Icons.music_note_rounded,
+    Icons.smartphone_rounded, Icons.fitness_center_rounded,
+    Icons.public_rounded, Icons.savings_rounded,
+  ];
+  IconData _icon() => _icons[_goal.name.codeUnitAt(0) % _icons.length];
 
   @override
   Widget build(BuildContext context) {
@@ -69,27 +70,16 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     child: Row(
                       children: [
-                        TextButton.icon(
+                        IconButton(
                           onPressed: () => context.pop(),
-                          icon: const Icon(Icons.arrow_back,
-                              color: Colors.white, size: 18),
-                          label: const Text(
-                            'Back',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                          ),
+                          icon: const Icon(Icons.arrow_back_rounded,
+                              color: Colors.white),
                         ),
                       ],
                     ),
                   ),
                   Center(
-                    child: Text(
-                      _emoji(),
-                      style: const TextStyle(fontSize: 52),
-                    ),
+                    child: Icon(_icon(), size: 52, color: Colors.white70),
                   ),
                   const SizedBox(height: 8),
                   Padding(

@@ -3899,6 +3899,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Based on your answers, Zenda has personalized your dashboard and recommendations to help you build better saving habits.'**
   String get surveyFinancialProfileBody;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsSectionGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsSectionGeneral;
+
+  /// No description provided for @settingsSectionResearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Research'**
+  String get settingsSectionResearch;
+
+  /// No description provided for @settingsCategoriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get settingsCategoriesLabel;
+
+  /// No description provided for @settingsNotificationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotificationsLabel;
+
+  /// No description provided for @settingsSurveysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Surveys'**
+  String get settingsSurveysLabel;
+
+  /// No description provided for @settingsSurveysSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Surveys'**
+  String get settingsSurveysSheetTitle;
+
+  /// No description provided for @settingsSurveyPreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Usage Survey'**
+  String get settingsSurveyPreLabel;
+
+  /// No description provided for @settingsSurveyPreSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Baseline financial literacy assessment'**
+  String get settingsSurveyPreSubtitle;
+
+  /// No description provided for @settingsSurveyPostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-Usage Survey'**
+  String get settingsSurveyPostLabel;
+
+  /// No description provided for @settingsSurveyPostSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure your progress after 30 days'**
+  String get settingsSurveyPostSubtitle;
+
+  /// No description provided for @settingsSurveySusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SUS Questionnaire'**
+  String get settingsSurveySusLabel;
+
+  /// No description provided for @settingsSurveySusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your experience with the app'**
+  String get settingsSurveySusSubtitle;
+
+  /// No description provided for @settingsSurveyComparisonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge Progress'**
+  String get settingsSurveyComparisonLabel;
+
+  /// No description provided for @settingsSurveyComparisonSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare your pre and post survey scores'**
+  String get settingsSurveyComparisonSubtitle;
+
+  /// No description provided for @aiChatOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get aiChatOnline;
+
+  /// No description provided for @txListToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get txListToday;
+
+  /// No description provided for @txListYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get txListYesterday;
 }
 
 class _AppLocalizationsDelegate

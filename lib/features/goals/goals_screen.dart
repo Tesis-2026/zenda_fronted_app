@@ -230,7 +230,18 @@ class _GoalCard extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _emojis = ['🎯', '✈️', '🎓', '🏠', '💻', '🎸', '📱', '🏋️', '🌎', '💰'];
+  static const _icons = [
+    Icons.flag_rounded,
+    Icons.flight_rounded,
+    Icons.school_rounded,
+    Icons.home_rounded,
+    Icons.laptop_rounded,
+    Icons.music_note_rounded,
+    Icons.smartphone_rounded,
+    Icons.fitness_center_rounded,
+    Icons.public_rounded,
+    Icons.savings_rounded,
+  ];
   static const _bgColors = [
     Color(0xFFD1FAE5),
     Color(0xFFFEF3C7),
@@ -246,7 +257,7 @@ class _GoalCard extends StatelessWidget {
     Color(0xFF60A5FA),
   ];
 
-  String _emoji() => _emojis[goal.name.codeUnitAt(0) % _emojis.length];
+  IconData _icon() => _icons[goal.name.codeUnitAt(0) % _icons.length];
   Color _bgColor() => _bgColors[goal.name.length % _bgColors.length];
   Color _progressColor(double pct) {
     if (pct >= 100) return const Color(0xFF10B981);
@@ -308,7 +319,7 @@ class _GoalCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
-                  child: Text(_emoji(), style: const TextStyle(fontSize: 22)),
+                  child: Icon(_icon(), size: 24, color: color),
                 ),
               ),
               const SizedBox(width: 12),

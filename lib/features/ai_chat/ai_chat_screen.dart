@@ -25,7 +25,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
   // Hardcoded personalized welcome message shown when chat history is empty
   static const _demoWelcome =
-      "Hi Paolo! 👋 I'm Zenda AI, your personal finance assistant. "
+      "Hi! I'm Zenda AI, your personal finance assistant. "
       "I can see your spending this month totals S/ 1,240 across 20 transactions. "
       "Your biggest expense category is Food at S/ 320. "
       "How can I help you today?";
@@ -150,9 +150,9 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Text(
-                    'Online',
-                    style: TextStyle(
+                  Text(
+                    l10n.aiChatOnline,
+                    style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF059669),
                       fontWeight: FontWeight.w600,
@@ -164,23 +164,6 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           ],
         ),
         elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.more_horiz_rounded, color: Color(0xFF6B7280), size: 20),
-                onPressed: () {},
-                padding: const EdgeInsets.all(8),
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              ),
-            ),
-          ),
-        ],
       ),
       body: Column(
         children: [

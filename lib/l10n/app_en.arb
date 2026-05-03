@@ -978,5 +978,26 @@
   "surveyCompleteSubtitle": "Thanks for sharing! We'll use your answers to personalize Zenda for you.",
   "surveyBadgeUnlocked": "badge unlocked!",
   "surveyFinancialProfileTitle": "Your Financial Profile",
-  "surveyFinancialProfileBody": "Based on your answers, Zenda has personalized your dashboard and recommendations to help you build better saving habits."
+  "surveyFinancialProfileBody": "Based on your answers, Zenda has personalized your dashboard and recommendations to help you build better saving habits.",
+
+  "settingsTitle": "Settings",
+  "settingsSectionGeneral": "General",
+  "settingsSectionResearch": "Research",
+  "settingsCategoriesLabel": "Categories",
+  "settingsNotificationsLabel": "Notifications",
+  "settingsSurveysLabel": "Surveys",
+  "settingsSurveysSheetTitle": "Surveys",
+  "settingsSurveyPreLabel": "Pre-Usage Survey",
+  "settingsSurveyPreSubtitle": "Baseline financial literacy assessment",
+  "settingsSurveyPostLabel": "Post-Usage Survey",
+  "settingsSurveyPostSubtitle": "Measure your progress after 30 days",
+  "settingsSurveySusLabel": "SUS Questionnaire",
+  "settingsSurveySusSubtitle": "Rate your experience with the app",
+  "settingsSurveyComparisonLabel": "Knowledge Progress",
+  "settingsSurveyComparisonSubtitle": "Compare your pre and post survey scores",
+
+  "aiChatOnline": "Online",
+
+  "txListToday": "Today",
+  "txListYesterday": "Yesterday"
 }

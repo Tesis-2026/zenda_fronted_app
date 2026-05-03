@@ -783,7 +783,7 @@ class _BudgetCard extends StatelessWidget {
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: onDelete,
-                child: const Icon(Icons.delete_outline, size: 16, color: Color(0xFF9CA3AF)),
+                child: const Icon(Icons.delete_outline, size: 16, color: Color(0xFFEF4444)),
               ),
             ],
           ),

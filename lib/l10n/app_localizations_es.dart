@@ -2129,4 +2129,61 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get surveyFinancialProfileBody =>
       'Basándonos en tus respuestas, Zenda ha personalizado tu panel y recomendaciones para ayudarte a construir mejores hábitos de ahorro.';
+
+  @override
+  String get settingsTitle => 'Ajustes';
+
+  @override
+  String get settingsSectionGeneral => 'General';
+
+  @override
+  String get settingsSectionResearch => 'Investigación';
+
+  @override
+  String get settingsCategoriesLabel => 'Categorías';
+
+  @override
+  String get settingsNotificationsLabel => 'Notificaciones';
+
+  @override
+  String get settingsSurveysLabel => 'Encuestas';
+
+  @override
+  String get settingsSurveysSheetTitle => 'Encuestas';
+
+  @override
+  String get settingsSurveyPreLabel => 'Encuesta Pre-Uso';
+
+  @override
+  String get settingsSurveyPreSubtitle =>
+      'Evaluación inicial de conocimiento financiero';
+
+  @override
+  String get settingsSurveyPostLabel => 'Encuesta Post-Uso';
+
+  @override
+  String get settingsSurveyPostSubtitle =>
+      'Mide tu progreso después de 30 días';
+
+  @override
+  String get settingsSurveySusLabel => 'Cuestionario SUS';
+
+  @override
+  String get settingsSurveySusSubtitle => 'Evalúa tu experiencia con la app';
+
+  @override
+  String get settingsSurveyComparisonLabel => 'Progreso de Conocimiento';
+
+  @override
+  String get settingsSurveyComparisonSubtitle =>
+      'Compara tus puntajes de encuesta pre y post';
+
+  @override
+  String get aiChatOnline => 'En línea';
+
+  @override
+  String get txListToday => 'Hoy';
+
+  @override
+  String get txListYesterday => 'Ayer';
 }

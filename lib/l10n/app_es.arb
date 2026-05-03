@@ -978,5 +978,26 @@
   "surveyCompleteSubtitle": "¡Gracias por compartir! Usaremos tus respuestas para personalizar Zenda para ti.",
   "surveyBadgeUnlocked": "insignia desbloqueada!",
   "surveyFinancialProfileTitle": "Tu Perfil Financiero",
-  "surveyFinancialProfileBody": "Basándonos en tus respuestas, Zenda ha personalizado tu panel y recomendaciones para ayudarte a construir mejores hábitos de ahorro."
+  "surveyFinancialProfileBody": "Basándonos en tus respuestas, Zenda ha personalizado tu panel y recomendaciones para ayudarte a construir mejores hábitos de ahorro.",
+
+  "settingsTitle": "Ajustes",
+  "settingsSectionGeneral": "General",
+  "settingsSectionResearch": "Investigación",
+  "settingsCategoriesLabel": "Categorías",
+  "settingsNotificationsLabel": "Notificaciones",
+  "settingsSurveysLabel": "Encuestas",
+  "settingsSurveysSheetTitle": "Encuestas",
+  "settingsSurveyPreLabel": "Encuesta Pre-Uso",
+  "settingsSurveyPreSubtitle": "Evaluación inicial de conocimiento financiero",
+  "settingsSurveyPostLabel": "Encuesta Post-Uso",
+  "settingsSurveyPostSubtitle": "Mide tu progreso después de 30 días",
+  "settingsSurveySusLabel": "Cuestionario SUS",
+  "settingsSurveySusSubtitle": "Evalúa tu experiencia con la app",
+  "settingsSurveyComparisonLabel": "Progreso de Conocimiento",
+  "settingsSurveyComparisonSubtitle": "Compara tus puntajes de encuesta pre y post",
+
+  "aiChatOnline": "En línea",
+
+  "txListToday": "Hoy",
+  "txListYesterday": "Ayer"
 }

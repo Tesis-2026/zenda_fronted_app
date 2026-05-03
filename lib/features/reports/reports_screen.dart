@@ -109,35 +109,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: GestureDetector(
-              onTap: () {},
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      l10n.reportsTabMonth,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF1F2937),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.unfold_more_rounded, size: 16, color: Color(0xFF6B7280)),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0),
@@ -856,7 +827,7 @@ class _AiInsightsCard extends StatelessWidget {
             const _InsightBullet(
               icon: Icons.circle,
               iconColor: Color(0xFF34D399),
-              text: 'You saved S/ 760 this month — 38% of your income. That\'s above the recommended 20%! 🎉',
+              text: 'You saved S/ 760 this month — 38% of your income. That\'s above the recommended 20%!',
             ),
             const SizedBox(height: 8),
             const _InsightBullet(

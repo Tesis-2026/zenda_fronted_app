@@ -41,6 +41,7 @@ import '../features/notifications/notification_preferences_screen.dart';
 import '../features/ai_chat/ai_chat_screen.dart';
 import '../features/transactions/transaction_saved_screen.dart';
 import '../features/auth/reset_success_screen.dart';
+import '../features/settings/settings_screen.dart';
 
 // Routes that do not require authentication.
 const _publicRoutes = {
@@ -329,6 +330,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth/reset-success',
         builder: (context, state) => const ResetSuccessScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

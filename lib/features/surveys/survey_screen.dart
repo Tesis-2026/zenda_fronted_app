@@ -448,7 +448,7 @@ class _ResultView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Celebration icon
-          const Text('🎉', style: TextStyle(fontSize: 64)),
+          const Icon(Icons.celebration_rounded, size: 64, color: Color(0xFF34D399)),
           const SizedBox(height: 20),
           Text(
             l10n.surveyCompleteTitle,

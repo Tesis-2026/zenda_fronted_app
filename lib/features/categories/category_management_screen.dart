@@ -33,19 +33,10 @@ class CategoryManagementScreen extends ConsumerWidget {
                     alignment: Alignment.centerLeft,
                     child: GestureDetector(
                       onTap: () => Navigator.of(context).pop(),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: Color(0xFF374151)),
-                          SizedBox(width: 4),
-                          Text(
-                            'Back',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF374151),
-                            ),
-                          ),
-                        ],
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
+                        color: Color(0xFF374151),
                       ),
                     ),
                   ),

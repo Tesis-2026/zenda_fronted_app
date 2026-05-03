@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/widgets/app_bottom_nav.dart';
@@ -347,13 +348,9 @@ class _TransactionRow extends ConsumerWidget {
       final today = DateTime(now.year, now.month, now.day);
       final txDay = DateTime(d.year, d.month, d.day);
       final diff = today.difference(txDay).inDays;
-      if (diff == 0) return 'Today';
-      if (diff == 1) return 'Yesterday';
-      const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ];
-      return '${months[d.month - 1]} ${d.day}';
+      if (diff == 0) return l10n.txListToday;
+      if (diff == 1) return l10n.txListYesterday;
+      return DateFormat('MMMd').format(d);
     }
 
     final timeStr = parsedDate != null
