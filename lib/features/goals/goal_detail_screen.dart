@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../l10n/l10n_extension.dart';
 import 'goals_screen.dart';
 
@@ -153,10 +154,10 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
 
   Future<void> _deleteGoal(BuildContext context) async {
     final l10n = context.l10n;
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _ConfirmDeleteSheet(l10n: l10n),
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      title: l10n.goalDeleteTitle,
+      message: l10n.goalDeleteMessage,
     );
     if (confirmed != true || !context.mounted) return;
     await ref.read(goalsServiceProvider).delete(_goal.id);
@@ -334,75 +335,6 @@ class _ContributeSheetState extends State<_ContributeSheet> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ── Confirm delete sheet ─────────────────────────────────────────────────────
-
-class _ConfirmDeleteSheet extends StatelessWidget {
-  final dynamic l10n;
-  const _ConfirmDeleteSheet({required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white24 : const Color(0xFFE5E7EB),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.goalsDeleteConfirm as String,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 50),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: Text(l10n.commonCancel as String),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    minimumSize: const Size(0, 50),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: Text(l10n.goalsDeleteLabel as String),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

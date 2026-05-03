@@ -8,6 +8,7 @@ import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_sheet_container.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/field_label.dart';
 import '../../core/widgets/kind_toggle.dart';
 import '../../l10n/l10n_extension.dart';
@@ -328,24 +329,10 @@ class _EditTransactionScreenState
 
   Future<void> _confirmDelete() async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.txDeleteConfirmTitle),
-        content: Text(l10n.txDeleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444)),
-            child: Text(l10n.txDeleteAction),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      title: l10n.txDeleteConfirmTitle,
+      message: l10n.txDeleteConfirmMessage,
     );
     if (confirmed != true || !mounted) return;
 

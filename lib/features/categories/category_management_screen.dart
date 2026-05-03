@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/category.dart';
 import '../../core/widgets/app_card.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/green_pill_button.dart';
 import '../../core/widgets/icon_action_button.dart';
@@ -317,23 +318,10 @@ class _CustomCategoryTile extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref, dynamic l10n) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.txDeleteConfirmTitle),
-        content: Text(l10n.catMgmtDeleteConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.catMgmtDeleteAction),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      title: l10n.catDeleteTitle as String,
+      message: l10n.catDeleteMessage as String,
     );
     if (confirmed != true || !context.mounted) return;
     try {

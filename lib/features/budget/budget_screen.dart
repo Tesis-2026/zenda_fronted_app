@@ -8,6 +8,7 @@ import '../../core/services/budget_api_service.dart';
 import '../../core/services/category_api_service.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_card.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_sheet_container.dart';
@@ -248,22 +249,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
   Future<void> _deleteBudget(String id) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        content: Text(l10n.budgetDeleteConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.commonDelete),
-          ),
-        ],
-      ),
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      title: l10n.budgetDeleteTitle,
+      message: l10n.budgetDeleteMessage,
     );
     if (confirmed != true || !mounted) return;
     await ref.read(budgetServiceProvider).delete(id);

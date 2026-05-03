@@ -39,6 +39,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonDelete => 'Delete';
 
   @override
+  String get deleteConfirmYes => 'Yes, delete';
+
+  @override
   String get commonLater => 'Later';
 
   @override
@@ -546,10 +549,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiCardSeeRecommendations => 'See recommendations';
 
   @override
-  String get txDeleteConfirmTitle => 'Delete transaction';
+  String get txDeleteConfirmTitle => 'Delete transaction?';
 
   @override
-  String get txDeleteConfirmMessage => 'This action cannot be undone.';
+  String get txDeleteConfirmMessage =>
+      'This will permanently remove the transaction from your history. This cannot be undone.';
 
   @override
   String get txDeleteAction => 'Delete';
@@ -646,6 +650,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get catMgmtDeleteAction => 'Delete';
+
+  @override
+  String get catDeleteTitle => 'Delete category?';
+
+  @override
+  String get catDeleteMessage =>
+      'Transactions linked to it will keep their data. This cannot be undone.';
 
   @override
   String get catMgmtErrorLoad => 'Could not load categories';
@@ -785,6 +796,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetDeleteConfirm => 'Delete this budget?';
 
   @override
+  String get budgetDeleteTitle => 'Delete budget?';
+
+  @override
+  String get budgetDeleteMessage =>
+      'This budget will be permanently removed. This cannot be undone.';
+
+  @override
   String get budgetDuplicate =>
       'A budget for this category and period already exists';
 
@@ -832,6 +850,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsDeleteLabel => 'Delete';
+
+  @override
+  String get goalDeleteTitle => 'Delete goal?';
+
+  @override
+  String get goalDeleteMessage =>
+      'All your progress will be lost. This cannot be undone.';
 
   @override
   String get goalsDueDateLabel => 'Due date (optional)';

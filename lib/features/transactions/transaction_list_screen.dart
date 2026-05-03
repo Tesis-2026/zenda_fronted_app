@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/services/api_client.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../features/dashboard/dashboard_providers.dart';
 import '../../features/transactions/add_transaction_screen.dart';
@@ -372,28 +373,11 @@ class _TransactionRow extends ConsumerWidget {
         color: const Color(0xFFEF4444).withValues(alpha: 0.12),
         child: const Icon(Icons.delete_rounded, color: Color(0xFFEF4444)),
       ),
-      confirmDismiss: (_) async {
-        return showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(l10n.txDeleteConfirmTitle),
-            content: Text(l10n.txDeleteConfirmMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(l10n.commonCancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(
-                  l10n.txDeleteAction,
-                  style: const TextStyle(color: Color(0xFFEF4444)),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      confirmDismiss: (_) => showDeleteConfirmSheet(
+        context,
+        title: l10n.txDeleteConfirmTitle,
+        message: l10n.txDeleteConfirmMessage,
+      ),
       onDismissed: (_) async {
         try {
           await ApiClient.delete('/transactions/$id');

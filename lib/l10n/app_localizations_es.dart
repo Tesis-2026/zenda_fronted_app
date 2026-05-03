@@ -39,6 +39,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonDelete => 'Eliminar';
 
   @override
+  String get deleteConfirmYes => 'Sí, eliminar';
+
+  @override
   String get commonLater => 'Más tarde';
 
   @override
@@ -545,10 +548,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get aiCardSeeRecommendations => 'Ver recomendaciones';
 
   @override
-  String get txDeleteConfirmTitle => 'Eliminar transacción';
+  String get txDeleteConfirmTitle => '¿Eliminar transacción?';
 
   @override
-  String get txDeleteConfirmMessage => 'Esta acción no se puede deshacer.';
+  String get txDeleteConfirmMessage =>
+      'Esto eliminará permanentemente la transacción de tu historial. Esta acción no se puede deshacer.';
 
   @override
   String get txDeleteAction => 'Eliminar';
@@ -646,6 +650,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get catMgmtDeleteAction => 'Eliminar';
+
+  @override
+  String get catDeleteTitle => '¿Eliminar categoría?';
+
+  @override
+  String get catDeleteMessage =>
+      'Las transacciones vinculadas conservarán sus datos. Esta acción no se puede deshacer.';
 
   @override
   String get catMgmtErrorLoad => 'No se pudieron cargar las categorías';
@@ -785,6 +796,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get budgetDeleteConfirm => '¿Eliminar este presupuesto?';
 
   @override
+  String get budgetDeleteTitle => '¿Eliminar presupuesto?';
+
+  @override
+  String get budgetDeleteMessage =>
+      'Este presupuesto se eliminará permanentemente. Esta acción no se puede deshacer.';
+
+  @override
   String get budgetDuplicate =>
       'Ya existe un presupuesto para esta categoría y período';
 
@@ -832,6 +850,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get goalsDeleteLabel => 'Eliminar';
+
+  @override
+  String get goalDeleteTitle => '¿Eliminar meta?';
+
+  @override
+  String get goalDeleteMessage =>
+      'Todo tu progreso se perderá. Esta acción no se puede deshacer.';
 
   @override
   String get goalsDueDateLabel => 'Fecha límite (opcional)';

@@ -158,6 +158,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get commonDelete;
 
+  /// No description provided for @deleteConfirmYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete'**
+  String get deleteConfirmYes;
+
   /// No description provided for @commonLater.
   ///
   /// In en, this message translates to:
@@ -1091,13 +1097,13 @@ abstract class AppLocalizations {
   /// No description provided for @txDeleteConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete transaction'**
+  /// **'Delete transaction?'**
   String get txDeleteConfirmTitle;
 
   /// No description provided for @txDeleteConfirmMessage.
   ///
   /// In en, this message translates to:
-  /// **'This action cannot be undone.'**
+  /// **'This will permanently remove the transaction from your history. This cannot be undone.'**
   String get txDeleteConfirmMessage;
 
   /// No description provided for @txDeleteAction.
@@ -1285,6 +1291,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get catMgmtDeleteAction;
+
+  /// No description provided for @catDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category?'**
+  String get catDeleteTitle;
+
+  /// No description provided for @catDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions linked to it will keep their data. This cannot be undone.'**
+  String get catDeleteMessage;
 
   /// No description provided for @catMgmtErrorLoad.
   ///
@@ -1538,6 +1556,18 @@ abstract class AppLocalizations {
   /// **'Delete this budget?'**
   String get budgetDeleteConfirm;
 
+  /// No description provided for @budgetDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete budget?'**
+  String get budgetDeleteTitle;
+
+  /// No description provided for @budgetDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This budget will be permanently removed. This cannot be undone.'**
+  String get budgetDeleteMessage;
+
   /// No description provided for @budgetDuplicate.
   ///
   /// In en, this message translates to:
@@ -1627,6 +1657,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get goalsDeleteLabel;
+
+  /// No description provided for @goalDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete goal?'**
+  String get goalDeleteTitle;
+
+  /// No description provided for @goalDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All your progress will be lost. This cannot be undone.'**
+  String get goalDeleteMessage;
 
   /// No description provided for @goalsDueDateLabel.
   ///
