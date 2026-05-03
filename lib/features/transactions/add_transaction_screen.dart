@@ -176,18 +176,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.txNewTitle),
-        actions: [
-          TextButton.icon(
-            onPressed: state.isSaving
-                ? null
-                : () {
-                    controller.fillFromOcrDemo();
-                  },
-            icon: const Icon(Icons.document_scanner_rounded),
-            label: Text(l10n.txScanReceipt),
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SafeArea(
         child: accountsAsync.when(
@@ -776,76 +764,22 @@ class _CategoryGrid extends StatelessWidget {
     final l10n = context.l10n;
     final items = TransactionCategory.values;
     final hasCustom = customCategoryName != null && customCategoryName!.isNotEmpty;
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1.25,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      itemCount: items.length + 1,
-      itemBuilder: (context, index) {
-        if (index == items.length) {
-          // "+" add custom category chip
-          return InkWell(
-            onTap: onAddCustom,
-            borderRadius: BorderRadius.circular(16),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: hasCustom
-                    ? const Color(0xFF818CF8).withValues(alpha: 0.18)
-                    : (isDark ? const Color(0xFF1E293B) : Colors.white),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: hasCustom
-                      ? const Color(0xFF818CF8)
-                      : (isDark ? Colors.white10 : Colors.black12),
-                ),
-              ),
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    hasCustom ? Icons.label_rounded : Icons.add_rounded,
-                    size: 22,
-                    color: hasCustom ? const Color(0xFF818CF8) : null,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    hasCustom ? customCategoryName! : l10n.txAddCustomCategory,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: hasCustom ? FontWeight.w800 : FontWeight.w600,
-                      fontSize: 12,
-                      color: hasCustom ? const Color(0xFF818CF8) : null,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-        final c = items[index];
-        final isSelected = c == selected;
-        final icon = _categoryIcon(c);
-        final label = _categoryLabel(c, l10n);
+    final allItems = [...items, null]; // null = "add custom" slot
+
+    Widget buildChip(int index) {
+      if (index == items.length) {
         return InkWell(
-          onTap: () => onSelected(c),
+          onTap: onAddCustom,
           borderRadius: BorderRadius.circular(16),
           child: Ink(
             decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color(0xFF34D399).withValues(alpha: 0.18)
+              color: hasCustom
+                  ? const Color(0xFF818CF8).withValues(alpha: 0.18)
                   : (isDark ? const Color(0xFF1E293B) : Colors.white),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF34D399)
+                color: hasCustom
+                    ? const Color(0xFF818CF8)
                     : (isDark ? Colors.white10 : Colors.black12),
               ),
             ),
@@ -853,21 +787,83 @@ class _CategoryGrid extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 22),
+                Icon(
+                  hasCustom ? Icons.label_rounded : Icons.add_rounded,
+                  size: 22,
+                  color: hasCustom ? const Color(0xFF818CF8) : null,
+                ),
                 const SizedBox(height: 6),
                 Text(
-                  label,
+                  hasCustom ? customCategoryName! : l10n.txAddCustomCategory,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    fontWeight: hasCustom ? FontWeight.w800 : FontWeight.w600,
                     fontSize: 12,
+                    color: hasCustom ? const Color(0xFF818CF8) : null,
                   ),
                 ),
               ],
             ),
           ),
+        );
+      }
+      final c = items[index];
+      final isSelected = c == selected;
+      final icon = _categoryIcon(c);
+      final label = _categoryLabel(c, l10n);
+      return InkWell(
+        onTap: () => onSelected(c),
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFF34D399).withValues(alpha: 0.18)
+                : (isDark ? const Color(0xFF1E293B) : Colors.white),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFF34D399)
+                  : (isDark ? Colors.white10 : Colors.black12),
+            ),
+          ),
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 22),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth = (constraints.maxWidth - 20) / 3;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (var i = 0; i < allItems.length; i++)
+              SizedBox(
+                width: itemWidth,
+                height: itemWidth / 1.25,
+                child: buildChip(i),
+              ),
+          ],
         );
       },
     );

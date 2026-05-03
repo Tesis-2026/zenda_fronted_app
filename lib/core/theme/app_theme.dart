@@ -18,9 +18,11 @@ class AppTheme {
     scaffoldBackgroundColor: background,
     colorScheme: ColorScheme.fromSwatch().copyWith(primary: primary, secondary: secondary),
     appBarTheme: const AppBarTheme(
-      backgroundColor: primary,
-      foregroundColor: Colors.white,
+      backgroundColor: Colors.white,
+      foregroundColor: Color(0xFF1F2937),
       elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: primary,

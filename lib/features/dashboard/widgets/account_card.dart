@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/account.dart';
+import '../../../l10n/l10n_extension.dart';
 
 class AccountCard extends StatelessWidget {
   final Account account;
@@ -62,7 +63,7 @@ class AccountCard extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                'Deuda: ${account.currency} ${account.creditDebt.toStringAsFixed(2)}',
+                '${context.l10n.accountDebt} ${account.currency} ${account.creditDebt.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.red[400],
@@ -72,7 +73,7 @@ class AccountCard extends StatelessWidget {
               ),
             ),
             Text(
-              'Disp: ${account.currency} ${account.creditAvailable.toStringAsFixed(0)}',
+              '${context.l10n.accountAvail} ${account.currency} ${account.creditAvailable.toStringAsFixed(0)}',
               style: TextStyle(
                 fontSize: 10,
                 color: isDark ? Colors.grey[400] : Colors.grey,

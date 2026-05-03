@@ -165,16 +165,6 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     state = state.copyWith(date: date, clearError: true);
   }
 
-  void fillFromOcrDemo() {
-    state = state.copyWith(
-      amount: 12.50,
-      category: TransactionCategory.comida,
-      note: 'Cafetería',
-      source: TransactionSource.ocr,
-      clearError: true,
-    );
-  }
-
   Future<void> save() async {
     final fromId = state.fromAccountId;
     if (fromId == null || fromId.isEmpty) {

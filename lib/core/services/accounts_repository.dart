@@ -8,11 +8,6 @@ class AccountsRepository {
 
   Future<List<Account>> getAccounts() async {
     final rows = await _store.readJsonList(_store.accountsKey);
-    if (rows.isEmpty) {
-      final seed = _seedAccounts();
-      await saveAccounts(seed);
-      return seed;
-    }
     return rows.map(Account.fromJson).toList();
   }
 
@@ -47,35 +42,5 @@ class AccountsRepository {
       byId[a.id] = a;
     }
     await saveAccounts(byId.values.toList());
-  }
-
-  List<Account> _seedAccounts() {
-    return const [
-      Account(
-        id: '1',
-        name: 'Efectivo',
-        type: AccountType.cash,
-        balance: 120.00,
-        colorValue: 0xFF34D399,
-        iconName: 'attach_money',
-      ),
-      Account(
-        id: '2',
-        name: 'BCP Débito',
-        type: AccountType.debit,
-        balance: 950.00,
-        colorValue: 0xFF60A5FA,
-        iconName: 'credit_card',
-      ),
-      Account(
-        id: '3',
-        name: 'Interbank Crédito',
-        type: AccountType.credit,
-        creditLimit: 1500.00,
-        creditAvailable: 1070.00,
-        colorValue: 0xFFFCD34D,
-        iconName: 'credit_score',
-      ),
-    ];
   }
 }
