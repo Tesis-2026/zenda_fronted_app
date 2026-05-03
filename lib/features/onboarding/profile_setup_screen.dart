@@ -75,7 +75,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.profileSetupSaveError)),
         );
-        context.go('/surveys/pre');
+        context.go('/dashboard');
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -207,7 +207,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         width: double.infinity,
         height: 56,
         child: FilledButton(
-          onPressed: () => context.go('/surveys/pre'),
+          onPressed: () => context.go('/dashboard'),
           style: FilledButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: const Color(0xFF065F46),
