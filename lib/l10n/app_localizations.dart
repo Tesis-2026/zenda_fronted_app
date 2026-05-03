@@ -1271,14 +1271,32 @@ abstract class AppLocalizations {
   /// No description provided for @catMgmtAddHint.
   ///
   /// In en, this message translates to:
-  /// **'Category name'**
+  /// **'e.g. Coffee shops'**
   String get catMgmtAddHint;
 
   /// No description provided for @catMgmtRenameTitle.
   ///
   /// In en, this message translates to:
-  /// **'Rename category'**
+  /// **'Edit category'**
   String get catMgmtRenameTitle;
+
+  /// No description provided for @catSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save category'**
+  String get catSaveButton;
+
+  /// No description provided for @catSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get catSaveChanges;
+
+  /// No description provided for @catDeleteItemLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category'**
+  String get catDeleteItemLabel;
 
   /// No description provided for @catMgmtDeleteConfirm.
   ///

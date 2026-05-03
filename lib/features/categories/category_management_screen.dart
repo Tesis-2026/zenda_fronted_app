@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/category.dart';
 import '../../core/widgets/app_card.dart';
+import '../../core/widgets/app_primary_button.dart';
+import '../../core/widgets/app_sheet_container.dart';
+import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/green_pill_button.dart';
 import '../../core/widgets/icon_action_button.dart';
+import '../../core/widgets/sheet_header.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -73,7 +77,7 @@ class CategoryManagementScreen extends ConsumerWidget {
                 ),
                 data: (categories) => _CategoryList(
                   categories: categories,
-                  onAddTap: () => _showAddDialog(context, ref),
+                  onAddTap: () => _showAddSheet(context, ref),
                 ),
               ),
             ),
@@ -83,49 +87,20 @@ class CategoryManagementScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showAddDialog(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final controller = TextEditingController();
-
-    final confirmed = await showDialog<bool>(
+  Future<void> _showAddSheet(BuildContext context, WidgetRef ref) async {
+    final saved = await showModalBottomSheet<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.catMgmtAddTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 40,
-          decoration: InputDecoration(
-            hintText: l10n.catMgmtAddHint,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          textCapitalization: TextCapitalization.sentences,
-          onSubmitted: (_) => Navigator.pop(ctx, true),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.commonSave),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AddCategorySheet(
+        onSave: (name) async {
+          await ref.read(categoryApiServiceProvider).create(name);
+          ref.invalidate(_categoriesProvider);
+        },
       ),
     );
-
-    if (confirmed != true || !context.mounted) return;
-    final name = controller.text.trim();
-    if (name.isEmpty) return;
-
-    try {
-      await ref.read(categoryApiServiceProvider).create(name);
-      ref.invalidate(_categoriesProvider);
-    } catch (_) {
-      if (context.mounted) {
-        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
-      }
+    if (saved == true && context.mounted) {
+      // already invalidated inside the sheet
     }
   }
 }
@@ -152,7 +127,6 @@ class _CategoryList extends ConsumerWidget {
           const SizedBox(height: 10),
           _SystemCategoryGrid(categories: system),
           const SizedBox(height: 24),
-          // "My Categories" header row with + Add button
           Row(
             children: [
               Expanded(
@@ -268,8 +242,6 @@ class _CustomCategoryTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-
     return AppCard(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -297,86 +269,228 @@ class _CustomCategoryTile extends ConsumerWidget {
           ),
           IconActionButton(
             icon: Icons.edit_outlined,
-            onTap: () => _showRenameDialog(context, ref),
+            onTap: () => _showEditSheet(context, ref),
             backgroundColor: const Color(0xFFF3F4F6),
             iconColor: const Color(0xFF9CA3AF),
             size: 32,
             iconSize: 16,
           ),
-          const SizedBox(width: 8),
-          IconActionButton(
-            icon: Icons.delete_outline,
-            onTap: () => _confirmDelete(context, ref, l10n),
-            backgroundColor: const Color(0xFFFEE2E2),
-            iconColor: const Color(0xFFEF4444),
-            size: 32,
-            iconSize: 16,
-          ),
         ],
       ),
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, dynamic l10n) async {
-    final confirmed = await showDeleteConfirmSheet(
-      context,
-      title: l10n.catDeleteTitle as String,
-      message: l10n.catDeleteMessage as String,
-    );
-    if (confirmed != true || !context.mounted) return;
-    try {
-      await ref.read(categoryApiServiceProvider).delete(category.id);
-      ref.invalidate(_categoriesProvider);
-    } catch (_) {
-      if (context.mounted) {
-        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
-        ref.invalidate(_categoriesProvider);
-      }
-    }
-  }
-
-  Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final controller = TextEditingController(text: category.name);
-
-    final confirmed = await showDialog<bool>(
+  Future<void> _showEditSheet(BuildContext context, WidgetRef ref) async {
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.catMgmtRenameTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 40,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditCategorySheet(
+        category: category,
+        onSave: (name) async {
+          await ref.read(categoryApiServiceProvider).rename(category.id, name);
+          ref.invalidate(_categoriesProvider);
+        },
+        onDelete: () async {
+          final confirmed = await showDeleteConfirmSheet(
+            context,
+            title: context.l10n.catDeleteTitle,
+            message: context.l10n.catDeleteMessage,
+          );
+          if (confirmed) {
+            try {
+              await ref.read(categoryApiServiceProvider).delete(category.id);
+              ref.invalidate(_categoriesProvider);
+            } catch (_) {
+              if (context.mounted) {
+                showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
+                ref.invalidate(_categoriesProvider);
+              }
+            }
+          }
+        },
+      ),
+    );
+  }
+}
+
+// ── Add category bottom sheet ─────────────────────────────────────────────────
+
+class _AddCategorySheet extends StatefulWidget {
+  final Future<void> Function(String name) onSave;
+
+  const _AddCategorySheet({required this.onSave});
+
+  @override
+  State<_AddCategorySheet> createState() => _AddCategorySheetState();
+}
+
+class _AddCategorySheetState extends State<_AddCategorySheet> {
+  final _controller = TextEditingController();
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final name = _controller.text.trim();
+    if (name.isEmpty) return;
+    setState(() => _saving = true);
+    try {
+      await widget.onSave(name);
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (_) {
+      if (mounted) {
+        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AppSheetContainer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SheetHeader(
+            title: l10n.catMgmtAddTitle,
+            onClose: () => Navigator.of(context).pop(),
           ),
-          textCapitalization: TextCapitalization.sentences,
-          onSubmitted: (_) => Navigator.pop(ctx, true),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
+          const SizedBox(height: 20),
+          AppTextField(
+            controller: _controller,
+            hintText: l10n.catMgmtAddHint,
+            autofocus: true,
+            maxLength: 40,
+            textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.commonSave),
+          const SizedBox(height: 20),
+          AppPrimaryButton(
+            label: l10n.catSaveButton,
+            onPressed: _saving ? null : () => _submit(),
           ),
         ],
       ),
     );
+  }
+}
 
-    if (confirmed != true || !context.mounted) return;
-    final name = controller.text.trim();
-    if (name.isEmpty || name == category.name) return;
+// ── Edit category bottom sheet ────────────────────────────────────────────────
 
+class _EditCategorySheet extends StatefulWidget {
+  final CategoryModel category;
+  final Future<void> Function(String name) onSave;
+  final Future<void> Function() onDelete;
+
+  const _EditCategorySheet({
+    required this.category,
+    required this.onSave,
+    required this.onDelete,
+  });
+
+  @override
+  State<_EditCategorySheet> createState() => _EditCategorySheetState();
+}
+
+class _EditCategorySheetState extends State<_EditCategorySheet> {
+  late final TextEditingController _controller;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.category.name);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final name = _controller.text.trim();
+    if (name.isEmpty || name == widget.category.name) {
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() => _saving = true);
     try {
-      await ref.read(categoryApiServiceProvider).rename(category.id, name);
-      ref.invalidate(_categoriesProvider);
+      await widget.onSave(name);
+      if (mounted) Navigator.of(context).pop();
     } catch (_) {
-      if (context.mounted) {
+      if (mounted) {
         showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
       }
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
+  }
+
+  Future<void> _handleDelete() async {
+    Navigator.of(context).pop();
+    await widget.onDelete();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AppSheetContainer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SheetHeader(
+            title: l10n.catMgmtRenameTitle,
+            onClose: () => Navigator.of(context).pop(),
+          ),
+          const SizedBox(height: 20),
+          AppTextField(
+            controller: _controller,
+            autofocus: true,
+            maxLength: 40,
+            textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _submit(),
+          ),
+          const SizedBox(height: 20),
+          AppPrimaryButton(
+            label: l10n.catSaveChanges,
+            onPressed: _saving ? null : () => _submit(),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: TextButton(
+              onPressed: _saving ? null : () => _handleDelete(),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFEF4444),
+                backgroundColor: const Color(0xFFFEE2E2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                l10n.catDeleteItemLabel,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

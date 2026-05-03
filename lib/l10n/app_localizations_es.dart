@@ -639,10 +639,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get catMgmtAddTitle => 'Nueva categoría';
 
   @override
-  String get catMgmtAddHint => 'Nombre de la categoría';
+  String get catMgmtAddHint => 'ej. Cafeterías';
 
   @override
-  String get catMgmtRenameTitle => 'Renombrar categoría';
+  String get catMgmtRenameTitle => 'Editar categoría';
+
+  @override
+  String get catSaveButton => 'Guardar categoría';
+
+  @override
+  String get catSaveChanges => 'Guardar cambios';
+
+  @override
+  String get catDeleteItemLabel => 'Eliminar categoría';
 
   @override
   String get catMgmtDeleteConfirm =>
