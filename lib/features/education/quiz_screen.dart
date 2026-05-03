@@ -375,7 +375,6 @@ class _QuestionView extends StatelessWidget {
     final l10n = context.l10n;
     final q = state.current;
     final reviewing = state.phase == _QuizPhase.reviewing;
-    final selectedAnswer = state.answers[q.id];
     final diffColor = _difficultyColor(q.difficulty);
 
     return Column(
@@ -404,10 +403,6 @@ class _QuestionView extends StatelessWidget {
             option: option,
             isSelected: state.selectedOption == option,
             isReviewing: reviewing,
-            isCorrect: reviewing && state.selectedOption == option,
-            showCorrect: reviewing && option == selectedAnswer && selectedAnswer != null,
-            correctAnswer: reviewing ? selectedAnswer : null,
-            actualCorrect: null,
             onTap: reviewing ? null : () => onSelectOption(option),
           ),
         ),
@@ -443,81 +438,44 @@ class _OptionTile extends StatelessWidget {
     required this.option,
     required this.isSelected,
     required this.isReviewing,
-    required this.isCorrect,
-    required this.showCorrect,
-    required this.correctAnswer,
-    required this.actualCorrect,
     required this.onTap,
   });
 
   final String option;
   final bool isSelected;
   final bool isReviewing;
-  final bool isCorrect;
-  final bool showCorrect;
-  final String? correctAnswer;
-  final String? actualCorrect;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    Color? tileColor;
-    Color? borderColor;
-    Widget? trailingIcon;
-
-    if (isReviewing) {
-      if (actualCorrect != null && option == actualCorrect) {
-        tileColor = Colors.green.withValues(alpha: 0.12);
-        borderColor = Colors.green;
-        trailingIcon = const Icon(Icons.check_circle, color: Colors.green);
-      } else if (actualCorrect != null && isSelected) {
-        tileColor = Colors.red.withValues(alpha: 0.10);
-        borderColor = Colors.red;
-        trailingIcon = const Icon(Icons.cancel, color: Colors.red);
-      } else if (isSelected) {
-        tileColor = colorScheme.primaryContainer;
-        borderColor = colorScheme.primary;
-      }
-    } else if (isSelected) {
-      tileColor = colorScheme.primaryContainer;
-      borderColor = colorScheme.primary;
-    }
+    final Color bgColor = isSelected
+        ? const Color(0xFFECFDF5)
+        : Colors.white;
+    final Color borderColor = isSelected
+        ? const Color(0xFF34D399)
+        : const Color(0xFFE5E7EB);
+    final double borderWidth = isSelected ? 1.5 : 1.0;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: tileColor ?? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: borderColor ?? colorScheme.outline.withValues(alpha: 0.4),
-              width: borderColor != null ? 1.5 : 1,
-            ),
+            color: bgColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderColor, width: borderWidth),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  option,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: isSelected || (isReviewing && option == actualCorrect)
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
-                ),
-              ),
-              if (trailingIcon != null) ...[
-                const SizedBox(width: 8),
-                trailingIcon,
-              ],
-            ],
+          child: Text(
+            option,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: const Color(0xFF1F2937),
+            ),
           ),
         ),
       ),

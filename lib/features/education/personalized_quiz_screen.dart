@@ -361,11 +361,6 @@ class _DifficultyChip extends StatelessWidget {
 }
 
 class _OptionTile extends StatelessWidget {
-  final String option;
-  final bool isSelected;
-  final bool isReviewing;
-  final VoidCallback? onTap;
-
   const _OptionTile({
     required this.option,
     required this.isSelected,
@@ -373,38 +368,41 @@ class _OptionTile extends StatelessWidget {
     required this.onTap,
   });
 
+  final String option;
+  final bool isSelected;
+  final bool isReviewing;
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    Color? tileColor;
-    Color? borderColor;
-
-    if (isSelected && !isReviewing) {
-      tileColor = colorScheme.primaryContainer;
-      borderColor = colorScheme.primary;
-    }
+    final Color bgColor = isSelected
+        ? const Color(0xFFECFDF5)
+        : Colors.white;
+    final Color borderColor = isSelected
+        ? const Color(0xFF34D399)
+        : const Color(0xFFE5E7EB);
+    final double borderWidth = isSelected ? 1.5 : 1.0;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: tileColor ?? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: borderColor ?? colorScheme.outline.withValues(alpha: 0.4),
-              width: borderColor != null ? 1.5 : 1,
-            ),
+            color: bgColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderColor, width: borderWidth),
           ),
           child: Text(
             option,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: const Color(0xFF1F2937),
+            ),
           ),
         ),
       ),
