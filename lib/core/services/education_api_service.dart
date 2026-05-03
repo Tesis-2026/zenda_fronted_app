@@ -10,6 +10,8 @@ class EducationTopic {
   final int order;
   final bool isCompleted;
   final DateTime? completedAt;
+  final int questionCount;
+  final bool isLocked;
 
   const EducationTopic({
     required this.id,
@@ -20,6 +22,8 @@ class EducationTopic {
     required this.order,
     required this.isCompleted,
     this.completedAt,
+    this.questionCount = 0,
+    this.isLocked = false,
   });
 
   int get readingTimeMinutes => (content.split(' ').length / 200).ceil().clamp(1, 30);
@@ -36,6 +40,8 @@ class EducationTopic {
       completedAt: json['completedAt'] != null
           ? DateTime.tryParse(json['completedAt'] as String)
           : null,
+      questionCount: json['questionCount'] as int? ?? 0,
+      isLocked: json['isLocked'] as bool? ?? false,
     );
   }
 }

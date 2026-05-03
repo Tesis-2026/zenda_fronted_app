@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../features/dashboard/dashboard_providers.dart';
+import '../../features/transactions/add_transaction_screen.dart';
 import '../../features/transactions/edit_transaction_screen.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
@@ -96,13 +96,6 @@ class TransactionsScreen extends StatelessWidget {
           isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
       body: const SafeArea(child: TransactionListScreen()),
       bottomNavigationBar: const AppBottomNav(activeIndex: 1),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add-transaction'),
-        backgroundColor: const Color(0xFF34D399),
-        elevation: 6,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-      ),
     );
   }
 }
@@ -145,7 +138,7 @@ class TransactionListScreen extends ConsumerWidget {
                       ),
                       const Spacer(),
                       GestureDetector(
-                        onTap: () => context.push('/add-transaction'),
+                        onTap: () => AddTransactionScreen.show(context),
                         child: Container(
                           height: 36,
                           padding:
@@ -349,8 +342,28 @@ class _TransactionRow extends ConsumerWidget {
 
     final displayLabel =
         description.isNotEmpty ? description : (categoryName ?? '');
+    String relativeDay(DateTime d) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final txDay = DateTime(d.year, d.month, d.day);
+      final diff = today.difference(txDay).inDays;
+      if (diff == 0) return 'Today';
+      if (diff == 1) return 'Yesterday';
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      ];
+      return '${months[d.month - 1]} ${d.day}';
+    }
+
+    final timeStr = parsedDate != null
+        ? '${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')} ${parsedDate.hour < 12 ? 'AM' : 'PM'}'
+        : '';
+    final categoryDisplay = categoryName != null
+        ? categoryName[0].toUpperCase() + categoryName.substring(1).toLowerCase()
+        : '';
     final dateLabel = parsedDate != null
-        ? '${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')} ${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')}'
+        ? '${relativeDay(parsedDate)}, $timeStr${categoryDisplay.isNotEmpty ? ' · $categoryDisplay' : ''}'
         : '';
 
     return Dismissible(

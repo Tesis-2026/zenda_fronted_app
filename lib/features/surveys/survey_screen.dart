@@ -7,16 +7,16 @@ import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/pre_survey_provider.dart';
 
-final _surveysServiceProvider = Provider<SurveysApiService>(
+final surveysServiceProvider = Provider<SurveysApiService>(
   (_) => SurveysApiService(),
 );
 
 final _preSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
-  return ref.read(_surveysServiceProvider).getPreSurvey();
+  return ref.read(surveysServiceProvider).getPreSurvey();
 });
 
 final _postSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
-  return ref.read(_surveysServiceProvider).getPostSurvey();
+  return ref.read(surveysServiceProvider).getPostSurvey();
 });
 
 /// [isPre] determines which survey (pre vs post) to load and submit.
@@ -46,10 +46,96 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         title: Text(
           widget.isPre ? l10n.surveyPreTitle : l10n.surveyPostTitle,
         ),
+        actions: [
+          TextButton(
+            onPressed: () => context.go('/dashboard'),
+            child: Text(
+              l10n.surveySkipButton,
+              style: const TextStyle(
+                color: Color(0xFF10B981),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
       body: surveyAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.surveyErrorLoad)),
+        error: (_, _) {
+          // Hardcoded fallback with 5 financial literacy questions
+          final fallbackSurvey = Survey(
+            id: widget.isPre ? 'pre-fallback' : 'post-fallback',
+            type: widget.isPre ? 'PRE' : 'POST',
+            questions: const [
+              SurveyQuestion(
+                id: 'fl-1',
+                order: 1,
+                text: 'What percentage of your income should you save each month according to the 50/30/20 rule?',
+                options: ['10%', '20%', '30%', '50%'],
+              ),
+              SurveyQuestion(
+                id: 'fl-2',
+                order: 2,
+                text: 'What is compound interest?',
+                options: [
+                  'Interest on principal only',
+                  'Interest on principal + accumulated interest',
+                  'A fixed monthly fee',
+                  'A type of investment fund',
+                ],
+              ),
+              SurveyQuestion(
+                id: 'fl-3',
+                order: 3,
+                text: 'What is an emergency fund?',
+                options: [
+                  'Money for vacations',
+                  '3-6 months of expenses saved',
+                  'A retirement account',
+                  'A credit card limit',
+                ],
+              ),
+              SurveyQuestion(
+                id: 'fl-4',
+                order: 4,
+                text: "Which of these is a 'Need' in the 50/30/20 rule?",
+                options: [
+                  'Streaming services',
+                  'Restaurant dinners',
+                  'Rent and utilities',
+                  'New clothing',
+                ],
+              ),
+              SurveyQuestion(
+                id: 'fl-5',
+                order: 5,
+                text: 'What does APR stand for?',
+                options: [
+                  'Annual Percentage Rate',
+                  'Average Payment Return',
+                  'Asset Price Ratio',
+                  'Annual Premium Rate',
+                ],
+              ),
+            ],
+          );
+          if (_result != null) {
+            return _ResultView(result: _result!, isPre: widget.isPre);
+          }
+          return _SurveyForm(
+            survey: fallbackSurvey,
+            currentIndex: _currentIndex,
+            answers: _answers,
+            submitting: _submitting,
+            onAnswerChanged: (questionId, answer) {
+              setState(() => _answers[questionId] = answer);
+            },
+            onNext: () {
+              setState(() => _currentIndex++);
+            },
+            onSubmit: () => _submit(fallbackSurvey),
+          );
+        },
         data: (survey) {
           if (_result != null) {
             return _ResultView(result: _result!, isPre: widget.isPre);
@@ -75,7 +161,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
   Future<void> _submit(Survey survey) async {
     setState(() => _submitting = true);
     try {
-      final service = ref.read(_surveysServiceProvider);
+      final service = ref.read(surveysServiceProvider);
       final result = widget.isPre
           ? await service.submitPre(_answers)
           : await service.submitPost(_answers);
@@ -171,26 +257,33 @@ class _SurveyForm extends StatelessWidget {
 
     return Column(
       children: [
+        // Progress bar
         LinearProgressIndicator(
           value: (currentIndex + 1) / total,
           minHeight: 4,
+          backgroundColor: const Color(0xFFE5E7EB),
+          valueColor:
+              const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
         ),
+        // Counter label: "3 of 5" centered in AppBar-style row
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '${currentIndex + 1} / $total',
-                style: Theme.of(context).textTheme.bodySmall,
+                '${currentIndex + 1} ${l10n.surveyProgressOf} $total',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFF6B7280),
+                    ),
               ),
             ],
           ),
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _QuestionCard(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _QuestionContent(
               question: question,
               selectedAnswer: answers[question.id],
               onChanged: (answer) => onAnswerChanged(question.id, answer),
@@ -198,24 +291,35 @@ class _SurveyForm extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: SizedBox(
             width: double.infinity,
+            height: 52,
             child: isLast
                 ? FilledButton(
                     onPressed: (hasAnswer && !submitting) ? onSubmit : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF34D399),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
                     child: submitting
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child:
-                                CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
                           )
                         : Text(l10n.surveySubmitButton),
                   )
                 : FilledButton(
                     onPressed: hasAnswer ? onNext : null,
-                    child: Text(l10n.surveyNextButton),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF34D399),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: Text('${l10n.surveyNextButton} →'),
                   ),
           ),
         ),
@@ -224,8 +328,8 @@ class _SurveyForm extends StatelessWidget {
   }
 }
 
-class _QuestionCard extends StatelessWidget {
-  const _QuestionCard({
+class _QuestionContent extends StatelessWidget {
+  const _QuestionContent({
     required this.question,
     required this.selectedAnswer,
     required this.onChanged,
@@ -237,42 +341,93 @@ class _QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              question.text,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            RadioGroup<String>(
-              groupValue: selectedAnswer,
-              onChanged: (v) {
-                if (v != null) onChanged(v);
-              },
-              child: Column(
-                children: question.options
-                    .map(
-                      (option) => RadioListTile<String>(
-                        title: Text(option),
-                        value: option,
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Optional category icon
+        const SizedBox(height: 8),
+        const Icon(Icons.monetization_on_outlined,
+            size: 40, color: Color(0xFF9CA3AF)),
+        const SizedBox(height: 20),
+        // Large question text (no card wrapper)
+        Text(
+          question.text,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1F2937),
+                height: 1.3,
+              ),
+        ),
+        const SizedBox(height: 24),
+        // Full-width option tiles
+        ...question.options.map((option) {
+          final isSelected = selectedAnswer == option;
+          return GestureDetector(
+            onTap: () => onChanged(option),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              margin: const EdgeInsets.only(bottom: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? const Color(0xFF34D399)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF34D399)
+                      : const Color(0xFFE5E7EB),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFFD1D5DB),
+                        width: 2,
                       ),
-                    )
-                    .toList(),
+                    ),
+                    child: isSelected
+                        ? const Center(
+                            child: CircleAvatar(
+                              radius: 5,
+                              backgroundColor: Color(0xFF34D399),
+                            ),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      option,
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF1F2937),
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          );
+        }),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }
@@ -282,81 +437,142 @@ class _ResultView extends StatelessWidget {
   final SurveyResult result;
   final bool isPre;
 
-  Color _levelColor(String? level) {
-    switch (level) {
-      case 'HIGH':
-        return const Color(0xFF43A047);
-      case 'MEDIUM':
-        return const Color(0xFFFB8C00);
-      default:
-        return const Color(0xFFE53935);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
+    // XP reward from result or default
+    final int xpEarned = result.xpEarned ?? 50;
+    final String? badgeUnlocked = result.badgeUnlocked;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle, size: 64, color: Color(0xFF43A047)),
-            const SizedBox(height: 24),
-            Text(
-              l10n.surveyResultTitle,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '${result.score.toStringAsFixed(0)} / 100',
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            if (result.level != null) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _levelColor(result.level).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Celebration icon
+          const Text('🎉', style: TextStyle(fontSize: 64)),
+          const SizedBox(height: 20),
+          Text(
+            l10n.surveyCompleteTitle,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1F2937),
                 ),
-                child: Text(
-                  result.level!,
-                  style: TextStyle(
-                    color: _levelColor(result.level),
-                    fontWeight: FontWeight.w600,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.surveyCompleteSubtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF6B7280),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 28),
+          // XP earned card
+          Card(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  const Text(
+                    'You earned',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF6B7280),
+                    ),
                   ),
-                ),
-              ),
-            ],
-            if (!isPre && result.improvement != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                l10n.surveyImprovement(result.improvement!.toStringAsFixed(1)),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => context.go('/dashboard'),
-                child: Text(l10n.surveyResultContinue),
+                  const SizedBox(height: 8),
+                  Text(
+                    '+$xpEarned XP',
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF34D399),
+                    ),
+                  ),
+                  if (badgeUnlocked != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.military_tech_rounded,
+                              size: 16, color: Color(0xFF10B981)),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$badgeUnlocked ${l10n.surveyBadgeUnlocked}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF10B981),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          // Financial profile card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF34D399).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.surveyFinancialProfileTitle,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1F2937),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.surveyFinancialProfileBody,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF4B5563),
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Go to Dashboard button
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton(
+              onPressed: () => context.go('/dashboard'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF34D399),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
+              child: Text('${l10n.surveyResultContinue} →'),
+            ),
+          ),
+        ],
       ),
     );
   }

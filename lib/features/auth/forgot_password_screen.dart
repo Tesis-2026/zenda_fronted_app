@@ -46,6 +46,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -75,7 +77,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.lock_reset_rounded,
+                    Icons.key_outlined,
                     size: 36,
                     color: Color(0xFF34D399),
                   ),
@@ -91,7 +93,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             ? const Color(0xFFF1F5F9)
                             : const Color(0xFF1F2937),
                       ),
-                  textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 8),
@@ -103,11 +104,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
                             : const Color(0xFF6B7280),
                       ),
-                  textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 40),
 
+                Text(
+                  l10n.authEmailLabel,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? const Color(0xFFF1F5F9)
+                        : const Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -115,15 +126,35 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       ? const TextStyle(color: Colors.white)
                       : const TextStyle(color: Color(0xFF1F2937)),
                   decoration: InputDecoration(
-                    labelText: l10n.authEmailLabel,
                     hintText: l10n.authEmailHint,
-                    prefixIcon: const Icon(Icons.email_outlined),
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    filled: true,
+                    fillColor: isDark
+                        ? const Color(0xFF1E293B)
+                        : Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       borderSide:
                           const BorderSide(color: Color(0xFF34D399), width: 2),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFEF4444)),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFEF4444), width: 2),
                     ),
                   ),
                   validator: (value) {

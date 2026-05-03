@@ -61,6 +61,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
 
   String get _code => _controllers.map((c) => c.text).join();
 
+  String _formatCountdown(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
   Future<void> _verify() async {
     if (_code.length != 6) return;
     setState(() {
@@ -103,15 +109,30 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
-          ),
+        leadingWidth: 80,
+        leading: TextButton.icon(
           onPressed: () => context.go('/auth/forgot-password'),
+          icon: Icon(
+            Icons.chevron_left,
+            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
+            size: 22,
+          ),
+          label: Text(
+            'Back',
+            style: TextStyle(
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.only(left: 8),
+          ),
         ),
       ),
       body: SafeArea(
@@ -122,17 +143,19 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
             children: [
               const SizedBox(height: 16),
 
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF34D399).withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.mark_email_read_outlined,
-                  size: 36,
-                  color: Color(0xFF34D399),
+              Center(
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.mark_email_read_outlined,
+                    size: 36,
+                    color: Color(0xFF34D399),
+                  ),
                 ),
               ),
 
@@ -181,7 +204,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
               ),
 
               if (_error != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Text(
                   _error!,
                   style: TextStyle(
@@ -191,6 +214,53 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                   textAlign: TextAlign.center,
                 ),
               ],
+
+              const SizedBox(height: 12),
+
+              // Code expiry countdown
+              Text(
+                'Code expires in ${_formatCountdown(_resendCooldown)}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark
+                      ? const Color(0xFFF1F5F9).withValues(alpha: 0.5)
+                      : const Color(0xFF9CA3AF),
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 16),
+
+              // Resend link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Didn't receive a code? ",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark
+                          ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
+                          : const Color(0xFF6B7280),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _resendCooldown == 0 ? _resend : null,
+                    child: Text(
+                      'Resend',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: _resendCooldown == 0
+                            ? const Color(0xFF34D399)
+                            : (isDark
+                                ? const Color(0xFFF1F5F9).withValues(alpha: 0.4)
+                                : const Color(0xFF9CA3AF)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 32),
 
@@ -220,24 +290,6 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              TextButton(
-                onPressed: _resendCooldown == 0 ? _resend : null,
-                child: Text(
-                  _resendCooldown > 0
-                      ? l10n.authVerifyResendCooldown(_resendCooldown)
-                      : l10n.authVerifyResend,
-                  style: TextStyle(
-                    color: _resendCooldown == 0
-                        ? const Color(0xFF34D399)
-                        : (isDark
-                            ? const Color(0xFFF1F5F9).withValues(alpha: 0.4)
-                            : const Color(0xFF9CA3AF)),
-                  ),
                 ),
               ),
             ],

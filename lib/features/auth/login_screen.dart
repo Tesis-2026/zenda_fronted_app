@@ -362,7 +362,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       disabledBackgroundColor:
                           const Color(0xFF34D399).withValues(alpha: 0.5),

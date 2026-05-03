@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../dashboard/dashboard_providers.dart';
-import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart';
 import '../../core/widgets/app_toast.dart';
@@ -14,7 +12,18 @@ import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
-  const AddTransactionScreen({super.key});
+  const AddTransactionScreen({super.key, this.isSheet = false});
+
+  final bool isSheet;
+
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const AddTransactionScreen(isSheet: true),
+    );
+  }
 
   @override
   ConsumerState<AddTransactionScreen> createState() =>
@@ -125,8 +134,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     });
 
-    final accountsAsync = ref.watch(accountsProvider);
-
     // Keep text controllers in sync with OCR demo/autofill.
     if (state.amount != null) {
       final desired = state.amount!.toStringAsFixed(2);
@@ -144,278 +151,377 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.txNewTitle),
-      ),
-      body: SafeArea(
-        child: accountsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Center(child: Text(l10n.txErrorPrefix(e.toString()))),
-          data: (accounts) {
-            final from = _findAccount(accounts, state.fromAccountId);
-            final to = _findAccount(accounts, state.toAccountId);
-
-            return Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    final formContent = Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Expense / Income 2-tab toggle
+                    Row(
                       children: [
-                        SegmentedButton<TransactionKind>(
-                          segments: [
-                            ButtonSegment(
-                              value: TransactionKind.expense,
-                              label: Text(l10n.txExpense),
-                              icon: const Icon(Icons.arrow_upward_rounded),
-                            ),
-                            ButtonSegment(
-                              value: TransactionKind.income,
-                              label: Text(l10n.txIncome),
-                              icon: const Icon(Icons.arrow_downward_rounded),
-                            ),
-                            ButtonSegment(
-                              value: TransactionKind.transfer,
-                              label: Text(l10n.txTransfer),
-                              icon: const Icon(Icons.swap_horiz_rounded),
-                            ),
-                          ],
-                          selected: {state.kind},
-                          onSelectionChanged: (sel) {
-                            controller.setKind(sel.first);
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
-                        Text(
-                          l10n.txAccountLabel,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        _AccountPicker(
-                          label: l10n.txSourceLabel,
-                          accounts: accounts,
-                          selected: from,
-                          onChanged: (id) => controller.setFromAccount(id),
-                        ),
-                        if (state.kind == TransactionKind.transfer) ...[
-                          const SizedBox(height: 12),
-                          _AccountPicker(
-                            label: l10n.txDestLabel,
-                            accounts: accounts,
-                            selected: to,
-                            onChanged: (id) => controller.setToAccount(id),
-                          ),
-                        ],
-
-                        const SizedBox(height: 18),
-                        Text(
-                          l10n.txAmountLabel,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _amountController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          textInputAction: TextInputAction.next,
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            color: onSurface,
-                          ),
-                          decoration: InputDecoration(
-                            prefixText: 'S/ ',
-                            hintText: l10n.txAmountHint,
-                            filled: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          onChanged: controller.setAmountFromText,
-                        ),
-
-                        const SizedBox(height: 18),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                l10n.txCategoryLabel,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: onSurface,
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => controller.setKind(TransactionKind.expense),
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: state.kind == TransactionKind.expense
+                                    ? const Color(0xFFEF4444)
+                                    : const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  l10n.txExpense,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: state.kind == TransactionKind.expense
+                                        ? FontWeight.w700
+                                        : FontWeight.normal,
+                                    color: state.kind == TransactionKind.expense
+                                        ? Colors.white
+                                        : const Color(0xFF9CA3AF),
+                                  ),
                                 ),
                               ),
                             ),
-                            if (state.bucket != null)
-                              _BucketChip(bucket: state.bucket!),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        _CategoryGrid(
-                          selected: state.category,
-                          customCategoryName: state.customCategoryName,
-                          onSelected: controller.setCategory,
-                          onAddCustom: () async {
-                            final name = await _showAddCategoryDialog(context, l10n);
-                            if (name != null && name.isNotEmpty) {
-                              controller.setCustomCategory(name);
-                            }
-                          },
-                        ),
-
-                        const SizedBox(height: 18),
-                        Text(
-                          l10n.txNoteLabel,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: onSurface,
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _noteController,
-                          textInputAction: TextInputAction.done,
-                          decoration: InputDecoration(
-                            hintText: l10n.txNoteHint,
-                            filled: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          onChanged: (val) {
-                            controller.setNote(val);
-                            _onNoteChanged(val, state.amount);
-                          },
-                        ),
-
-                        if (_isClassifying || _aiSuggestion != null) ...[
-                          const SizedBox(height: 10),
-                          _AiSuggestionChip(
-                            category: _aiSuggestion,
-                            isLoading: _isClassifying,
-                            onApply: _aiSuggestion != null
-                                ? () {
-                                    controller.setCategory(_aiSuggestion!);
-                                    setState(() => _aiSuggestion = null);
-                                  }
-                                : null,
-                          ),
-                        ],
-
-                        const SizedBox(height: 18),
-                        Text(
-                          l10n.txDateLabel,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        _DatePickerTile(
-                          date: state.date,
-                          onPick: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: state.date,
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 365),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => controller.setKind(TransactionKind.income),
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: state.kind == TransactionKind.income
+                                    ? const Color(0xFF34D399)
+                                    : const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(14),
                               ),
-                            );
-                            if (picked != null) controller.setDate(picked);
-                          },
-                        ),
-
-                        if (state.error != null) ...[
-                          const SizedBox(height: 14),
-                          Text(
-                            context.l10n.resolveError(state.error!),
-                            style: const TextStyle(
-                              color: Color(0xFFEF4444),
-                              fontWeight: FontWeight.w600,
+                              child: Center(
+                                child: Text(
+                                  l10n.txIncome,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: state.kind == TransactionKind.income
+                                        ? FontWeight.w700
+                                        : FontWeight.normal,
+                                    color: state.kind == TransactionKind.income
+                                        ? Colors.white
+                                        : const Color(0xFF9CA3AF),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-                SafeArea(
-                  top: false,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 16,
-                          offset: const Offset(0, -4),
                         ),
                       ],
                     ),
-                    child: SizedBox(
+                    const SizedBox(height: 16),
+
+                    // Amount dark card
+                    Container(
                       width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: state.isSaving
-                            ? null
-                            : () async {
-                                await controller.save();
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF34D399),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1F2937),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            l10n.txAmountLabel,
+                            style: const TextStyle(
+                              color: Color(0xFF6B7280),
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          IntrinsicWidth(
+                            child: TextField(
+                              controller: _amountController,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                              textInputAction: TextInputAction.next,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 40,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                                prefixText: 'S/ ',
+                                prefixStyle: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                hintText: '0.00',
+                                hintStyle: TextStyle(
+                                  color: Color(0xFF6B7280),
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              onChanged: controller.setAmountFromText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Note
+                    Text(
+                      l10n.txNoteLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _noteController,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        hintText: l10n.txNoteHint,
+                        filled: true,
+                        fillColor: isDark
+                            ? const Color(0xFF1E293B)
+                            : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF34D399)),
+                        ),
+                      ),
+                      onChanged: (val) {
+                        controller.setNote(val);
+                        _onNoteChanged(val, state.amount);
+                      },
+                    ),
+
+                    if (_isClassifying || _aiSuggestion != null) ...[
+                      const SizedBox(height: 10),
+                      _AiSuggestionChip(
+                        category: _aiSuggestion,
+                        isLoading: _isClassifying,
+                        onApply: _aiSuggestion != null
+                            ? () {
+                                controller.setCategory(_aiSuggestion!);
+                                setState(() => _aiSuggestion = null);
+                              }
+                            : null,
+                      ),
+                    ],
+
+                    const SizedBox(height: 18),
+                    Text(
+                      l10n.txDateLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _DatePickerTile(
+                      date: state.date,
+                      onPick: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: state.date,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        );
+                        if (picked != null) controller.setDate(picked);
+                      },
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.txCategoryLabel,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: onSurface,
+                            ),
                           ),
                         ),
-                        child: state.isSaving
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
+                        if (state.bucket != null)
+                          _BucketChip(bucket: state.bucket!),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    _CategoryGrid(
+                      selected: state.category,
+                      customCategoryName: state.customCategoryName,
+                      onSelected: controller.setCategory,
+                      onAddCustom: () async {
+                        final name = await _showAddCategoryDialog(context, l10n);
+                        if (name != null && name.isNotEmpty) {
+                          controller.setCustomCategory(name);
+                        }
+                      },
+                    ),
+
+                    if (state.error != null) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        context.l10n.resolveError(state.error!),
+                        style: const TextStyle(
+                          color: Color(0xFFEF4444),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            SafeArea(
+              top: false,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: widget.isSheet ? Colors.white : Theme.of(context).scaffoldBackgroundColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 16,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: state.isSaving
+                        ? null
+                        : () async {
+                            await controller.save();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF34D399),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                    ),
+                    child: state.isSaving
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
                                 l10n.txSaveButton,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+
+    if (widget.isSheet) {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.92,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E7EB),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Text(
+                    l10n.txNewTitle,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: Color(0xFF6B7280),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(child: formContent),
+          ],
         ),
-      ),
-    );
-  }
-
-  Account? _findAccount(List<Account> accounts, String? id) {
-    if (id == null) return null;
-    for (final a in accounts) {
-      if (a.id == id) return a;
+      );
     }
-    return null;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.txNewTitle),
+      ),
+      body: SafeArea(child: formContent),
+    );
   }
 
   Future<void> _showChallengeCompletedDialog(
@@ -498,66 +604,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 }
 
-class _AccountPicker extends StatelessWidget {
-  final String label;
-  final List<Account> accounts;
-  final Account? selected;
-  final ValueChanged<String?> onChanged;
-
-  const _AccountPicker({
-    required this.label,
-    required this.accounts,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return DropdownButtonFormField<String>(
-      initialValue: selected?.id,
-      items: accounts
-          .map(
-            (a) => DropdownMenuItem(
-              value: a.id,
-              child: Row(
-                children: [
-                  Icon(a.iconData, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      a.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    a.type == AccountType.credit
-                        ? 'Debt: S/ ${a.creditDebt.toStringAsFixed(0)}'
-                        : 'S/ ${a.balance.toStringAsFixed(0)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.grey[300] : Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-          .toList(),
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-}
 
 class _DatePickerTile extends StatelessWidget {
   final DateTime date;
@@ -823,15 +869,17 @@ class _CategoryGrid extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final itemWidth = (constraints.maxWidth - 20) / 3;
+        const crossAxisCount = 4;
+        const spacing = 8.0;
+        final itemWidth = (constraints.maxWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
         return Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: spacing,
+          runSpacing: spacing,
           children: [
             for (var i = 0; i < allItems.length; i++)
               SizedBox(
                 width: itemWidth,
-                height: itemWidth / 1.25,
+                height: itemWidth / 1.1,
                 child: buildChip(i),
               ),
           ],

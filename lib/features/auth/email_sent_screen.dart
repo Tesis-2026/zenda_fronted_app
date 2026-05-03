@@ -15,6 +15,7 @@ class EmailSentScreen extends ConsumerWidget {
     final email = user?.email ?? '';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -41,6 +42,7 @@ class EmailSentScreen extends ConsumerWidget {
                 l10n.emailVerifTitle,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -48,7 +50,7 @@ class EmailSentScreen extends ConsumerWidget {
               Text(
                 l10n.emailVerifSubtitle(email),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
+                      color: const Color(0xFF6B7280),
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -56,16 +58,16 @@ class EmailSentScreen extends ConsumerWidget {
               // Numbered steps card
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Theme.of(context).dividerColor),
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
                 child: Column(
                   children: [
                     _StepRow(number: 1, text: l10n.emailVerifStep1, active: true),
-                    Divider(height: 1, color: Theme.of(context).dividerColor),
+                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
                     _StepRow(number: 2, text: l10n.emailVerifStep2),
-                    Divider(height: 1, color: Theme.of(context).dividerColor),
+                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
                     _StepRow(number: 3, text: l10n.emailVerifStep3),
                   ],
                 ),

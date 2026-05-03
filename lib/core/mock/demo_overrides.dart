@@ -9,8 +9,12 @@ import '../../features/education/education_screen.dart';
 import '../../features/goals/goals_screen.dart';
 import '../../features/predictions/predictions_screen.dart';
 import '../../features/profile/profile_screen.dart';
+import '../../features/progress/progress_screen.dart';
 import '../../features/reports/reports_screen.dart';
 import '../../features/dashboard/dashboard_providers.dart';
+import '../../features/surveys/sus_screen.dart';
+import '../../features/surveys/survey_screen.dart';
+import '../../features/transactions/transaction_list_screen.dart';
 import 'demo_data.dart';
 import 'mock_services.dart';
 
@@ -30,6 +34,9 @@ buildDemoOverrides() {
     ),
     transactionsProvider.overrideWith(
       (ref) async => DemoData.transactions,
+    ),
+    transactionListProvider.overrideWith(
+      (ref) async => DemoData.apiTransactions,
     ),
     streakStateProvider.overrideWith(
       (ref) async => DemoData.streak,
@@ -62,6 +69,9 @@ buildDemoOverrides() {
     reportsInsightsServiceProvider.overrideWithValue(MockInsightsApiService()),
     quizServiceProvider.overrideWithValue(MockQuizApiService()),
     aiChatServiceProvider.overrideWithValue(MockAiChatApiService()),
+    progressServiceProvider.overrideWithValue(MockProgressApiService()),
+    surveysServiceProvider.overrideWithValue(MockSurveysApiService()),
+    susSurveyServiceProvider.overrideWithValue(MockSurveysApiService()),
   ];
 }
 

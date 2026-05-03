@@ -18,39 +18,32 @@ class _ConsentScreenState extends State<ConsentScreen> {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final onSurface = isDark ? Colors.white : const Color(0xFF1F2937);
-    final muted = isDark ? Colors.grey[400] : Colors.grey[600];
+    final muted = isDark ? Colors.grey[400]! : const Color(0xFF6B7280);
+    final surface = isDark ? const Color(0xFF1E293B) : Colors.white;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: onSurface),
-          onPressed: () => context.go('/auth/register'),
-        ),
-      ),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF34D399).withValues(alpha: 0.15),
-                        ),
-                        child: const Icon(
-                          Icons.shield_outlined,
-                          size: 36,
-                          color: Color(0xFF34D399),
-                        ),
+                    // Shield icon in rounded square
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.lock_outline_rounded,
+                        size: 32,
+                        color: Color(0xFF34D399),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -60,103 +53,89 @@ class _ConsentScreenState extends State<ConsentScreen> {
                             fontWeight: FontWeight.bold,
                             color: onSurface,
                           ),
-                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.consentSubtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: muted),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.info_outline, size: 18, color: Color(0xFF34D399)),
-                              const SizedBox(width: 8),
-                              Text(
-                                l10n.consentBodyTitle,
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: onSurface,
-                                    ),
-                              ),
-                            ],
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: muted,
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            l10n.consentBodyText,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: muted,
-                                  height: 1.6,
-                                ),
-                          ),
-                        ],
-                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF34D399).withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.gavel_outlined, size: 16, color: Color(0xFF34D399)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              l10n.consentLawNote,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: const Color(0xFF34D399),
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 28),
+
+                    // Three bullet points
+                    _BulletPoint(text: l10n.consentBullet1, isDark: isDark),
+                    const SizedBox(height: 12),
+                    _BulletPoint(text: l10n.consentBullet2, isDark: isDark),
+                    const SizedBox(height: 12),
+                    _BulletPoint(text: l10n.consentBullet3, isDark: isDark),
+
                     const SizedBox(height: 24),
+
+                    // Checkbox agreement area
                     GestureDetector(
                       onTap: () => setState(() => _accepted = !_accepted),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Checkbox(
-                            value: _accepted,
-                            onChanged: (v) => setState(() => _accepted = v ?? false),
-                            activeColor: const Color(0xFF34D399),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: _accepted
+                              ? const Color(0xFF34D399).withValues(alpha: 0.08)
+                              : surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _accepted
+                                ? const Color(0xFF34D399)
+                                : (isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB)),
+                            width: _accepted ? 1.5 : 1.0,
                           ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 14),
-                              child: Text(
-                                l10n.consentCheckbox,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: onSurface),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Checkbox(
+                              value: _accepted,
+                              onChanged: (v) => setState(() => _accepted = v ?? false),
+                              activeColor: const Color(0xFF34D399),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  l10n.consentCheckbox,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: onSurface,
+                                        height: 1.5,
+                                      ),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Law note
+                    Text(
+                      l10n.consentLawNote,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: muted,
+                            fontSize: 11,
+                          ),
                     ),
                   ],
                 ),
               ),
             ),
+
+            // Bottom CTA button
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
               child: SizedBox(
@@ -172,11 +151,17 @@ class _ConsentScreenState extends State<ConsentScreen> {
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF34D399),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: Text(
                     l10n.consentAcceptButton,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -184,6 +169,45 @@ class _ConsentScreenState extends State<ConsentScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BulletPoint extends StatelessWidget {
+  const _BulletPoint({required this.text, required this.isDark});
+  final String text;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 2),
+          width: 20,
+          height: 20,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF34D399),
+          ),
+          child: const Icon(
+            Icons.check_rounded,
+            size: 13,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: isDark ? Colors.white : const Color(0xFF1F2937),
+                  height: 1.5,
+                ),
+          ),
+        ),
+      ],
     );
   }
 }

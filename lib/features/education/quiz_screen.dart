@@ -72,9 +72,10 @@ class _QuizState {
 // ─────────────────────────────────────────────────────────────────
 
 class QuizScreen extends ConsumerWidget {
-  const QuizScreen({super.key, required this.topicId});
+  const QuizScreen({super.key, required this.topicId, this.topicTitle});
 
   final String topicId;
+  final String? topicTitle;
 
   String _deviceLanguage(BuildContext context) {
     final locale = Localizations.localeOf(context);
@@ -89,7 +90,19 @@ class QuizScreen extends ConsumerWidget {
         ref.watch(_quizProvider((topicId: topicId, language: language)));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.quizTitle)),
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              topicTitle != null
+                  ? '${l10n.quizTitle}: $topicTitle'
+                  : l10n.quizTitle,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
       body: quizAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -264,19 +277,20 @@ class _ProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final m = timerSeconds ~/ 60;
     final s = (timerSeconds % 60).toString().padLeft(2, '0');
     final isLow = timerSeconds < 30;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Text(
-                '${current + 1} / $total',
+                l10n.quizQuestionOf(current + 1, total),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -288,12 +302,12 @@ class _ProgressBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isLow
                       ? Colors.red.withValues(alpha: 0.08)
-                      : const Color(0xFFF3F4F6),
+                      : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isLow
                         ? Colors.red.withValues(alpha: 0.3)
-                        : const Color(0xFFE5E7EB),
+                        : const Color(0xFFFDE68A),
                   ),
                 ),
                 child: Row(
@@ -302,7 +316,7 @@ class _ProgressBar extends StatelessWidget {
                     Icon(
                       Icons.timer_outlined,
                       size: 13,
-                      color: isLow ? Colors.red : const Color(0xFF6B7280),
+                      color: isLow ? Colors.red : const Color(0xFFD97706),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -310,7 +324,7 @@ class _ProgressBar extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isLow ? Colors.red : const Color(0xFF1F2937),
+                        color: isLow ? Colors.red : const Color(0xFFD97706),
                       ),
                     ),
                   ],
@@ -412,17 +426,19 @@ class _QuestionView extends StatelessWidget {
                   color: const Color(0xFF34D399).withValues(alpha: 0.3)),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.lock_rounded,
+                const Icon(Icons.check_circle_rounded,
                     color: Color(0xFF34D399), size: 18),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    l10n.quizAnswerRecorded,
+                    q.explanation ?? l10n.quizAnswerRecorded,
                     style: const TextStyle(
                       color: Color(0xFF065F46),
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
+                      height: 1.4,
                     ),
                   ),
                 ),
@@ -542,6 +558,14 @@ class _OptionTile extends StatelessWidget {
                   ),
                 ),
               ),
+              if (isSelected) ...[
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.check_rounded,
+                  color: Color(0xFF34D399),
+                  size: 18,
+                ),
+              ],
             ],
           ),
         ),

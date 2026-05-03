@@ -119,15 +119,15 @@ class _InicioSection extends ConsumerWidget {
 
             const SizedBox(height: 12),
 
-            // Income / Expense summary
-            _SummaryCards(income: income, expense: expense),
-
-            const SizedBox(height: 20),
-
             // 50/30/20 Budget card
             _BudgetRuleCard(),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+
+            // Income / Expense summary
+            _SummaryCards(income: income, expense: expense),
+
+            const SizedBox(height: 16),
 
             StreakCard(streakDays: streak),
 
@@ -408,11 +408,20 @@ class _BudgetRuleCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _LegendDot(color: const Color(0xFF34D399), label: '${l10n.dashboardNeeds} 50%'),
-              const SizedBox(width: 16),
-              _LegendDot(color: const Color(0xFF60A5FA), label: '${l10n.dashboardWants} 30%'),
+              GestureDetector(
+                onTap: () {},
+                child: Text(
+                  '${l10n.dashboardManageBudgets} →',
+                  style: const TextStyle(
+                    color: Color(0xFF34D399),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ],
           ),
         ],

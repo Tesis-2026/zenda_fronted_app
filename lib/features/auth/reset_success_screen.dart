@@ -10,6 +10,7 @@ class ResetSuccessScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -32,8 +33,9 @@ class ResetSuccessScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 l10n.authResetSuccessTitle,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -41,7 +43,7 @@ class ResetSuccessScreen extends StatelessWidget {
               Text(
                 l10n.authResetSuccessBody,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
+                      color: const Color(0xFF6B7280),
                       height: 1.5,
                     ),
                 textAlign: TextAlign.center,
@@ -54,6 +56,9 @@ class ResetSuccessScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF34D399).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [

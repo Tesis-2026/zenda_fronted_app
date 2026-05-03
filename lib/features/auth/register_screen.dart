@@ -87,7 +87,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1F2937),
                   ),
-                  textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 6),
@@ -95,7 +94,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(
                   l10n.authRegisterSubtitle,
                   style: TextStyle(fontSize: 15, color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 32),
@@ -203,7 +201,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       disabledBackgroundColor:
                           const Color(0xFF34D399).withValues(alpha: 0.5),

@@ -6,6 +6,7 @@ class Recommendation {
   final String title;
   final String body;
   final double? impactScore;
+  final String? actionLabel;
 
   const Recommendation({
     required this.id,
@@ -13,6 +14,7 @@ class Recommendation {
     required this.title,
     required this.body,
     this.impactScore,
+    this.actionLabel,
   });
 
   factory Recommendation.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class Recommendation {
       title: (json['message'] as String?) ?? '',
       body: (json['suggestedAction'] as String?) ?? '',
       impactScore: (json['impactScore'] as num?)?.toDouble(),
+      actionLabel: json['actionLabel'] as String?,
     );
   }
 }

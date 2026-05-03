@@ -128,51 +128,100 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   Widget _buildHeader(AppLocalizations l10n, bool isDark) {
     if (_page == 4) return const SizedBox.shrink();
     final onSurface = isDark ? Colors.white : const Color(0xFF1F2937);
+    final mutedColor = isDark ? Colors.grey[400]! : const Color(0xFF6B7280);
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Step label row: "Step X of 4" + Skip
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: List.generate(4, (i) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.only(right: 6),
-                  width: _page == i ? 24 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: _page >= i ? _green : (isDark ? Colors.grey[700] : Colors.grey[300]),
-                    borderRadius: BorderRadius.circular(4),
+              Text(
+                l10n.profileSetupStep(_page + 1, 4),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: mutedColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+              TextButton(
+                onPressed: () => context.go('/dashboard'),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  l10n.profileSetupSkip,
+                  style: TextStyle(
+                    color: const Color(0xFF34D399),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
-                )),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              l10n.profileSetupTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: onSurface,
+          // Progress bar row: 4 segments
+          Row(
+            children: List.generate(4, (i) {
+              final filled = i <= _page;
+              return Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: EdgeInsets.only(right: i < 3 ? 4 : 0),
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: filled
+                        ? _green
+                        : (isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _pageTitleFor(_page, l10n),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: onSurface,
+                  height: 1.15,
+                ),
+          ),
+          if (_pageSubtitleFor(_page, l10n).isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              _pageSubtitleFor(_page, l10n),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: mutedColor,
                   ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              l10n.profileSetupSubtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
-            ),
-          ),
+          ],
           const SizedBox(height: 16),
         ],
       ),
     );
   }
+
+  String _pageTitleFor(int page, AppLocalizations l10n) => switch (page) {
+        0 => l10n.profileSetupAge,
+        1 => l10n.profileSetupUniversity,
+        2 => l10n.profileSetupIncomeType,
+        3 => l10n.profileSetupMonthlyIncome,
+        _ => '',
+      };
+
+  String _pageSubtitleFor(int page, AppLocalizations l10n) => switch (page) {
+        0 => l10n.profileSetupAgeHint,
+        1 => l10n.profileSetupUniversitySubtitle,
+        2 => l10n.profileSetupIncomeTypeSubtitle,
+        3 => l10n.profileSetupMonthlyIncomeHint,
+        _ => '',
+      };
 
   Widget _buildFooter(AppLocalizations l10n, bool isDark) {
     final isLast = _page == 3;
@@ -191,7 +240,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
               : Text(
                   isLast ? l10n.profileSetupSave : l10n.profileSetupNext,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
         ),
       ),
@@ -254,71 +303,74 @@ class _AgePageState extends State<_AgePage> {
     final l10n = widget.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.profileSetupAge,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Text(l10n.profileSetupAgeHint,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
-          const SizedBox(height: 48),
-          Center(
-            child: Row(
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _StepperButton(
+              icon: Icons.remove_rounded,
+              onTap: () => _adjust(-1),
+              filled: false,
+            ),
+            const SizedBox(width: 32),
+            Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _StepperButton(
-                  icon: Icons.remove_rounded,
-                  onTap: () => _adjust(-1),
+                Text(
+                  '$_age',
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1F2937),
+                        fontSize: 64,
+                      ),
                 ),
-                const SizedBox(width: 32),
-                Column(
-                  children: [
-                    Text(
-                      '$_age',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF34D399),
-                          ),
-                    ),
-                    Text(
-                      l10n.profileSetupAgeStepperLabel,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 32),
-                _StepperButton(
-                  icon: Icons.add_rounded,
-                  onTap: () => _adjust(1),
+                Text(
+                  l10n.profileSetupAgeStepperLabel,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(width: 32),
+            _StepperButton(
+              icon: Icons.add_rounded,
+              onTap: () => _adjust(1),
+              filled: true,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _StepperButton extends StatelessWidget {
-  const _StepperButton({required this.icon, required this.onTap});
+  const _StepperButton({
+    required this.icon,
+    required this.onTap,
+    this.filled = false,
+  });
   final IconData icon;
   final VoidCallback onTap;
+  final bool filled;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 52,
-        height: 52,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: const Color(0xFF34D399).withValues(alpha: 0.15),
-          border: Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.4)),
+          color: filled
+              ? const Color(0xFF34D399)
+              : const Color(0xFFF3F4F6),
         ),
-        child: Icon(icon, color: const Color(0xFF34D399), size: 24),
+        child: Icon(
+          icon,
+          color: filled ? Colors.white : const Color(0xFF6B7280),
+          size: 22,
+        ),
       ),
     );
   }
@@ -331,61 +383,86 @@ class _UniversityPage extends StatelessWidget {
   final bool isDark;
 
   static const _popular = [
-    'UPC', 'PUCP', 'UNMSM', 'UL', 'USMP', 'UNFV', 'UNI', 'UTEC',
+    ('UPC', 'Universidad Peruana de Ciencias Aplicadas'),
+    ('PUCP', 'Pontificia Universidad Católica del Perú'),
+    ('UNMSM', 'Universidad Nacional Mayor de San Marcos'),
+    ('UL', 'Universidad de Lima'),
+    ('USMP', 'Universidad de San Martín de Porres'),
+    ('UNFV', 'Universidad Nacional Federico Villarreal'),
+    ('UNI', 'Universidad Nacional de Ingeniería'),
+    ('UTEC', 'Universidad de Tecnología e Ingeniería'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.profileSetupUniversity,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 20),
           TextField(
             controller: controller,
             textCapitalization: TextCapitalization.words,
             autofocus: true,
             decoration: InputDecoration(
               hintText: l10n.profileSetupUniversityHint,
-              prefixIcon: const Icon(Icons.search_rounded),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB),
+                ),
+              ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
               ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Text(
             l10n.profileSetupPopularUniversities,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: const Color(0xFF6B7280),
+                  fontWeight: FontWeight.w600,
+                ),
           ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _popular
-                .map((u) => GestureDetector(
-                      onTap: () => controller.text = u,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                          border: Border.all(
-                            color: isDark ? Colors.white24 : Colors.black12,
-                          ),
-                        ),
-                        child: Text(u,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                )),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: _popular.length,
+              itemBuilder: (context, index) {
+                final (abbr, name) = _popular[index];
+                return GestureDetector(
+                  onTap: () => controller.text = abbr,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
                       ),
-                    ))
-                .toList(),
+                    ),
+                    child: Text(
+                      '$abbr — $name',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: isDark ? Colors.white : const Color(0xFF1F2937),
+                            fontWeight: FontWeight.w400,
+                          ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -412,38 +489,81 @@ class _IncomeTypePage extends StatelessWidget {
         IncomeType.mixed => l10n.incomeTypeMixed,
       };
 
+  String _subtitleFor(IncomeType t, AppLocalizations l10n) => switch (t) {
+        IncomeType.scholarship => l10n.incomeTypeScholarshipSub,
+        IncomeType.partTime => l10n.incomeTypePartTimeSub,
+        IncomeType.family => l10n.incomeTypeFamilySub,
+        IncomeType.mixed => l10n.incomeTypeMixedSub,
+      };
+
   IconData _iconFor(IncomeType t) => switch (t) {
         IncomeType.scholarship => Icons.school_outlined,
-        IncomeType.partTime => Icons.access_time_outlined,
-        IncomeType.family => Icons.family_restroom_outlined,
-        IncomeType.mixed => Icons.merge_outlined,
+        IncomeType.partTime => Icons.work_outline_rounded,
+        IncomeType.family => Icons.people_outline_rounded,
+        IncomeType.mixed => Icons.shuffle_rounded,
       };
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.profileSetupIncomeType,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 16),
           ...IncomeType.values.map((t) {
             final isSelected = selected == t;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              child: ListTile(
-                onTap: () => onSelect(t),
-                leading: Icon(_iconFor(t), color: isSelected ? const Color(0xFF34D399) : Colors.grey),
-                title: Text(_labelFor(t, l10n)),
-                trailing: isSelected
-                    ? const Icon(Icons.check_circle_rounded, color: Color(0xFF34D399))
-                    : null,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                tileColor: isSelected
-                    ? const Color(0xFF34D399).withValues(alpha: 0.1)
-                    : (isDark ? const Color(0xFF1E293B) : Colors.white),
+            return GestureDetector(
+              onTap: () => onSelect(t),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF34D399).withValues(alpha: 0.08)
+                      : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF34D399)
+                        : (isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _iconFor(t),
+                      color: isSelected ? const Color(0xFF34D399) : const Color(0xFF6B7280),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _labelFor(t, l10n),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: isSelected
+                                  ? const Color(0xFF34D399)
+                                  : (isDark ? Colors.white : const Color(0xFF1F2937)),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _subtitleFor(t, l10n),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }),
@@ -491,28 +611,58 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
     final l10n = widget.l10n;
     final isDark = widget.isDark;
     final displayVal = double.tryParse(widget.controller.text.trim()) ?? 0.0;
+    final displayText = displayVal == 0.0
+        ? '0'
+        : _formatNumber(displayVal.toStringAsFixed(0));
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.profileSetupMonthlyIncome,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Text(l10n.profileSetupMonthlyIncomeHint,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
-          const SizedBox(height: 32),
-          Center(
-            child: Text(
-              'S/ ${displayVal == 0.0 ? '0' : displayVal.toStringAsFixed(0)}',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+          // Large display card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 28),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'S/',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                     color: const Color(0xFF34D399),
                   ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  displayText,
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF1F2937),
+                        fontSize: 56,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.profileSetupMonthlyIncomePerMonth,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+          // Quick pick chips
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: _quickValues.map((v) {
@@ -522,7 +672,7 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                 child: GestureDetector(
                   onTap: () => _pickQuick(v),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF34D399)
@@ -531,13 +681,14 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                       border: Border.all(
                         color: isSelected
                             ? const Color(0xFF34D399)
-                            : (isDark ? Colors.white24 : Colors.black12),
+                            : (isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB)),
                       ),
                     ),
                     child: Text(
                       _formatQuick(v),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
+                        fontSize: 13,
                         color: isSelected
                             ? Colors.white
                             : (isDark ? Colors.white70 : const Color(0xFF1F2937)),
@@ -548,24 +699,21 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: widget.controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: (_) => setState(() => _selected = null),
-            decoration: InputDecoration(
-              hintText: l10n.profileSetupMonthlyIncomeHint,
-              prefixText: 'S/ ',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
-              ),
-            ),
-          ),
         ],
       ),
     );
+  }
+
+  String _formatNumber(String raw) {
+    final n = int.tryParse(raw);
+    if (n == null) return raw;
+    final s = n.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(s[i]);
+    }
+    return buffer.toString();
   }
 }
 
@@ -589,6 +737,7 @@ class _CompletePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Party icon in white circle
               Container(
                 width: 96,
                 height: 96,
@@ -597,7 +746,11 @@ class _CompletePage extends StatelessWidget {
                   color: Colors.white,
                 ),
                 child: const Center(
-                  child: Text('🎉', style: TextStyle(fontSize: 46)),
+                  child: Icon(
+                    Icons.celebration_outlined,
+                    size: 48,
+                    color: Color(0xFF1F2937),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -621,15 +774,27 @@ class _CompletePage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
+              // Stat card: white background matching design
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.trending_up_rounded, color: Colors.white, size: 28),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE5E7EB),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.bar_chart_rounded,
+                        color: Color(0xFF1F2937),
+                        size: 24,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -638,17 +803,17 @@ class _CompletePage extends StatelessWidget {
                           Text(
                             l10n.profileSetupComplete40pct,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF1F2937),
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             l10n.profileSetupCompleteImproves,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.8),
-                              fontSize: 13,
+                            style: const TextStyle(
+                              color: Color(0xFF6B7280),
+                              fontSize: 12,
                             ),
                           ),
                         ],

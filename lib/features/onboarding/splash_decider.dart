@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'onboarding_prefs.dart';
+import '../../l10n/l10n_extension.dart';
 
 class SplashDecider extends StatefulWidget {
   const SplashDecider({super.key});
@@ -9,88 +10,117 @@ class SplashDecider extends StatefulWidget {
   State<SplashDecider> createState() => _SplashDeciderState();
 }
 
-class _SplashDeciderState extends State<SplashDecider> {
+class _SplashDeciderState extends State<SplashDecider>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _dotController;
+
   @override
   void initState() {
     super.initState();
+    _dotController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
     _checkOnboardingStatus();
   }
 
+  @override
+  void dispose() {
+    _dotController.dispose();
+    super.dispose();
+  }
+
   Future<void> _checkOnboardingStatus() async {
-    // Small delay for smooth transition
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    final isCompleted = await OnboardingPrefs.isOnboardingCompleted();
-    
+    await Future.delayed(const Duration(milliseconds: 1800));
     if (mounted) {
-      if (isCompleted) {
-        context.go('/auth/login');
-      } else {
-        context.go('/onboarding');
+      final isCompleted = await OnboardingPrefs.isOnboardingCompleted();
+      if (mounted) {
+        context.go(isCompleted ? '/auth/login' : '/onboarding');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final l10n = context.l10n;
+
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: const Color(0xFF34D399),
+      body: SafeArea(
+        child: Stack(
           children: [
-            // Zenda logo placeholder
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF34D399),
-                    Color(0xFF10B981),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF34D399).withValues(alpha: 0.3),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // App icon — white rounded square with "Z"
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Z',
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF34D399),
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Zenda',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.splashTagline,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.85),
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+                  // Pulsing dot loader
+                  FadeTransition(
+                    opacity: Tween<double>(begin: 0.35, end: 1.0)
+                        .animate(_dotController),
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.account_balance_wallet_rounded,
-                size: 50,
-                color: Colors.white,
-              ),
             ),
-            
-            const SizedBox(height: 24),
-            
-            Text(
-              'Zenda',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
-              ),
-            ),
-            
-            const SizedBox(height: 40),
-            
-            // Loading indicator
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isDark ? const Color(0xFF34D399) : const Color(0xFF34D399),
+            // Footer
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Text(
+                l10n.splashFooter,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.75),
+                  letterSpacing: 0.1,
                 ),
               ),
             ),

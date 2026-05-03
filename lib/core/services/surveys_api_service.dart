@@ -55,14 +55,24 @@ class SurveyResult {
   final double score;
   final String? level;
   final double? improvement;
+  final int? xpEarned;
+  final String? badgeUnlocked;
 
-  const SurveyResult({required this.score, this.level, this.improvement});
+  const SurveyResult({
+    required this.score,
+    this.level,
+    this.improvement,
+    this.xpEarned,
+    this.badgeUnlocked,
+  });
 
   factory SurveyResult.fromJson(Map<String, dynamic> json) {
     return SurveyResult(
       score: (json['score'] as num).toDouble(),
       level: json['level'] as String?,
       improvement: (json['improvement'] as num?)?.toDouble(),
+      xpEarned: (json['xpEarned'] as num?)?.toInt(),
+      badgeUnlocked: json['badgeUnlocked'] as String?,
     );
   }
 }

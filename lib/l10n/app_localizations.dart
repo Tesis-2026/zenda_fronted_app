@@ -497,14 +497,32 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingStart.
   ///
   /// In en, this message translates to:
-  /// **'Get started'**
+  /// **'Get Started'**
   String get onboardingStart;
 
   /// No description provided for @onboardingHaveAccount.
   ///
   /// In en, this message translates to:
-  /// **'I already have an account'**
+  /// **'Already have an account? Sign in'**
   String get onboardingHaveAccount;
+
+  /// No description provided for @onboardingFeature1.
+  ///
+  /// In en, this message translates to:
+  /// **'Track spending with the 50/30/20 rule'**
+  String get onboardingFeature1;
+
+  /// No description provided for @onboardingFeature2.
+  ///
+  /// In en, this message translates to:
+  /// **'Set and achieve your savings goals'**
+  String get onboardingFeature2;
+
+  /// No description provided for @onboardingFeature3.
+  ///
+  /// In en, this message translates to:
+  /// **'AI insights tailored for students'**
+  String get onboardingFeature3;
 
   /// No description provided for @dashboardGreeting.
   ///
@@ -2009,7 +2027,7 @@ abstract class AppLocalizations {
   /// No description provided for @recommendationsReject.
   ///
   /// In en, this message translates to:
-  /// **'Not helpful'**
+  /// **'Not relevant'**
   String get recommendationsReject;
 
   /// No description provided for @educationTitle.
@@ -2507,14 +2525,32 @@ abstract class AppLocalizations {
   /// No description provided for @consentTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your data, your control'**
+  /// **'Your privacy matters'**
   String get consentTitle;
 
   /// No description provided for @consentSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Before you start, please review how Zenda handles your information.'**
+  /// **'Before you start, please read how Zenda handles your financial data.'**
   String get consentSubtitle;
+
+  /// No description provided for @consentBullet1.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is encrypted and stored securely on Azure servers.'**
+  String get consentBullet1;
+
+  /// No description provided for @consentBullet2.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is used only to generate personalized reports and AI predictions.'**
+  String get consentBullet2;
+
+  /// No description provided for @consentBullet3.
+  ///
+  /// In en, this message translates to:
+  /// **'It is never shared with third parties. You can request deletion at any time.'**
+  String get consentBullet3;
 
   /// No description provided for @consentBodyTitle.
   ///
@@ -2531,19 +2567,19 @@ abstract class AppLocalizations {
   /// No description provided for @consentLawNote.
   ///
   /// In en, this message translates to:
-  /// **'In compliance with Law 29733 — Peruvian Personal Data Protection Law'**
+  /// **'This app complies with Peru\'s Personal Data Protection Law (Law 29733).'**
   String get consentLawNote;
 
   /// No description provided for @consentCheckbox.
   ///
   /// In en, this message translates to:
-  /// **'I agree that my financial data will be processed to generate personalized reports and predictions'**
+  /// **'I agree that my financial data will be processed to generate personalized reports and AI predictions.'**
   String get consentCheckbox;
 
   /// No description provided for @consentAcceptButton.
   ///
   /// In en, this message translates to:
-  /// **'Accept and continue'**
+  /// **'I agree — Let\'s get started'**
   String get consentAcceptButton;
 
   /// No description provided for @consentMustAccept.
@@ -2594,6 +2630,18 @@ abstract class AppLocalizations {
   /// **'Help Zenda personalize your experience. You can edit this anytime.'**
   String get profileSetupSubtitle;
 
+  /// No description provided for @profileSetupStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String profileSetupStep(int step, int total);
+
+  /// No description provided for @profileSetupSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get profileSetupSkip;
+
   /// No description provided for @profileSetupAge.
   ///
   /// In en, this message translates to:
@@ -2603,49 +2651,67 @@ abstract class AppLocalizations {
   /// No description provided for @profileSetupAgeHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 21'**
+  /// **'This helps us understand your financial stage and tailor insights for you.'**
   String get profileSetupAgeHint;
 
   /// No description provided for @profileSetupUniversity.
   ///
   /// In en, this message translates to:
-  /// **'Where do you study?'**
+  /// **'Which university do you attend?'**
   String get profileSetupUniversity;
 
   /// No description provided for @profileSetupUniversityHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. PUCP, UNMSM'**
+  /// **'e.g. PUCP, ULima, UNMSM...'**
   String get profileSetupUniversityHint;
+
+  /// No description provided for @profileSetupUniversitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your campus location helps us suggest local financial resources.'**
+  String get profileSetupUniversitySubtitle;
 
   /// No description provided for @profileSetupIncomeType.
   ///
   /// In en, this message translates to:
-  /// **'How do you mainly get income?'**
+  /// **'What is your main income source?'**
   String get profileSetupIncomeType;
+
+  /// No description provided for @profileSetupIncomeTypeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We use this to personalize your 50/30/20 budget recommendations.'**
+  String get profileSetupIncomeTypeSubtitle;
 
   /// No description provided for @profileSetupMonthlyIncome.
   ///
   /// In en, this message translates to:
-  /// **'Average monthly income (S/)'**
+  /// **'What is your average monthly income?'**
   String get profileSetupMonthlyIncome;
 
   /// No description provided for @profileSetupMonthlyIncomeHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 1500'**
+  /// **'An estimate is fine. This calibrates your 50/30/20 budget targets.'**
   String get profileSetupMonthlyIncomeHint;
+
+  /// No description provided for @profileSetupMonthlyIncomePerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'per month'**
+  String get profileSetupMonthlyIncomePerMonth;
 
   /// No description provided for @profileSetupNext.
   ///
   /// In en, this message translates to:
-  /// **'Next'**
+  /// **'Continue →'**
   String get profileSetupNext;
 
   /// No description provided for @profileSetupSave.
   ///
   /// In en, this message translates to:
-  /// **'Finish'**
+  /// **'Finish setup →'**
   String get profileSetupSave;
 
   /// No description provided for @profileSetupCompleteTitle.
@@ -2675,26 +2741,50 @@ abstract class AppLocalizations {
   /// No description provided for @incomeTypeScholarship.
   ///
   /// In en, this message translates to:
-  /// **'Scholarship'**
+  /// **'Scholarship / Grant'**
   String get incomeTypeScholarship;
+
+  /// No description provided for @incomeTypeScholarshipSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Scholarship, PRONABEC, university funding'**
+  String get incomeTypeScholarshipSub;
 
   /// No description provided for @incomeTypePartTime.
   ///
   /// In en, this message translates to:
-  /// **'Part-time job'**
+  /// **'Part-time / Freelance'**
   String get incomeTypePartTime;
+
+  /// No description provided for @incomeTypePartTimeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Job, gig work, side projects'**
+  String get incomeTypePartTimeSub;
 
   /// No description provided for @incomeTypeFamily.
   ///
   /// In en, this message translates to:
-  /// **'Family support'**
+  /// **'Family Support'**
   String get incomeTypeFamily;
+
+  /// No description provided for @incomeTypeFamilySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly allowance from family'**
+  String get incomeTypeFamilySub;
 
   /// No description provided for @incomeTypeMixed.
   ///
   /// In en, this message translates to:
-  /// **'Mixed (job + support)'**
+  /// **'Mixed'**
   String get incomeTypeMixed;
+
+  /// No description provided for @incomeTypeMixedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Combination of the above'**
+  String get incomeTypeMixedSub;
 
   /// No description provided for @aiChatTitle.
   ///
@@ -2702,10 +2792,16 @@ abstract class AppLocalizations {
   /// **'Zenda AI'**
   String get aiChatTitle;
 
+  /// No description provided for @aiChatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Powered by your financial data'**
+  String get aiChatSubtitle;
+
   /// No description provided for @aiChatInputHint.
   ///
   /// In en, this message translates to:
-  /// **'Ask anything about your finances...'**
+  /// **'Ask Zenda AI anything...'**
   String get aiChatInputHint;
 
   /// No description provided for @aiChatSend.
@@ -2737,6 +2833,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quiz'**
   String get quizTitle;
+
+  /// No description provided for @quizQuestionOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String quizQuestionOf(int current, int total);
 
   /// No description provided for @quizEmpty.
   ///
@@ -3360,6 +3462,30 @@ abstract class AppLocalizations {
   /// **'Search topics...'**
   String get educationSearchHint;
 
+  /// No description provided for @educationTabLearn.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn'**
+  String get educationTabLearn;
+
+  /// No description provided for @educationTabChallenges.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenges'**
+  String get educationTabChallenges;
+
+  /// No description provided for @educationTabBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges'**
+  String get educationTabBadges;
+
+  /// No description provided for @educationTabProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get educationTabProgress;
+
   /// No description provided for @educationFilterAll.
   ///
   /// In en, this message translates to:
@@ -3432,6 +3558,18 @@ abstract class AppLocalizations {
   /// **'{minutes} min read'**
   String educationMinRead(int minutes);
 
+  /// No description provided for @educationQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} questions'**
+  String educationQuestions(int count);
+
+  /// No description provided for @educationLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete previous topics first'**
+  String get educationLocked;
+
   /// No description provided for @quizAnswerRecorded.
   ///
   /// In en, this message translates to:
@@ -3497,6 +3635,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'USD — US Dollar (\$)'**
   String get profileCurrencyUSD;
+
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your AI-powered finance companion'**
+  String get splashTagline;
+
+  /// No description provided for @splashFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Made for Peruvian university students'**
+  String get splashFooter;
+
+  /// No description provided for @dashboardManageBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to manage budgets'**
+  String get dashboardManageBudgets;
+
+  /// No description provided for @streakTapToView.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view progress'**
+  String get streakTapToView;
+
+  /// No description provided for @aiCardPredictionsChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictions & AI Chat'**
+  String get aiCardPredictionsChat;
+
+  /// No description provided for @aiCardViewForecast.
+  ///
+  /// In en, this message translates to:
+  /// **'View forecast'**
+  String get aiCardViewForecast;
+
+  /// No description provided for @reportsVsLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last month'**
+  String get reportsVsLastMonth;
+
+  /// No description provided for @reportsAiInsightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Insights'**
+  String get reportsAiInsightsTitle;
+
+  /// No description provided for @reportsAiInsightsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'You saved more than last month. Great work!'**
+  String get reportsAiInsightsSaved;
+
+  /// No description provided for @reportsAiInsightsExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'category exceeded limit.'**
+  String get reportsAiInsightsExceeded;
+
+  /// No description provided for @progressOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Month Overview'**
+  String get progressOverviewTitle;
+
+  /// No description provided for @progressTotalExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Expenses'**
+  String get progressTotalExpenses;
+
+  /// No description provided for @progressTotalSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Savings'**
+  String get progressTotalSavings;
+
+  /// No description provided for @progressNetBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Balance'**
+  String get progressNetBalance;
+
+  /// No description provided for @progressTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Trend'**
+  String get progressTrendTitle;
+
+  /// No description provided for @progressVsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'vs'**
+  String get progressVsLabel;
+
+  /// No description provided for @progressSavingsLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get progressSavingsLegend;
+
+  /// No description provided for @badgesSectionEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get badgesSectionEarned;
+
+  /// No description provided for @badgesSectionLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get badgesSectionLocked;
+
+  /// No description provided for @badgesEarnedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'earned'**
+  String get badgesEarnedLabel;
+
+  /// No description provided for @predictionsProjectedBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected Balance'**
+  String get predictionsProjectedBalance;
+
+  /// No description provided for @predictionsConfident.
+  ///
+  /// In en, this message translates to:
+  /// **'confident'**
+  String get predictionsConfident;
+
+  /// No description provided for @predictionsBasedOnMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on last 3 months'**
+  String get predictionsBasedOnMonths;
+
+  /// No description provided for @predictionsProjectedExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected expenses'**
+  String get predictionsProjectedExpenses;
+
+  /// No description provided for @predictionsTopCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Expense Categories'**
+  String get predictionsTopCategories;
+
+  /// No description provided for @predictionsVsLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'8% vs last month'**
+  String get predictionsVsLastMonth;
+
+  /// No description provided for @recommendationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3 personalized tips for you this week'**
+  String get recommendationsSubtitle;
+
+  /// No description provided for @recommendationsRateExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate experience →'**
+  String get recommendationsRateExperience;
+
+  /// No description provided for @notificationsMasterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications'**
+  String get notificationsMasterTitle;
+
+  /// No description provided for @notificationsMasterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive alerts and reminders'**
+  String get notificationsMasterSubtitle;
+
+  /// No description provided for @notificationsCategoriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get notificationsCategoriesLabel;
+
+  /// No description provided for @notificationSubtypeBudgetAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'When you reach 80% of your budget'**
+  String get notificationSubtypeBudgetAlert;
+
+  /// No description provided for @notificationSubtypeAnomalyAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Unusual spending patterns detected'**
+  String get notificationSubtypeAnomalyAlert;
+
+  /// No description provided for @notificationSubtypePredictionReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly prediction is ready'**
+  String get notificationSubtypePredictionReady;
+
+  /// No description provided for @notificationSubtypeChallengeReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'New challenges and badge earned'**
+  String get notificationSubtypeChallengeReminder;
+
+  /// No description provided for @notificationSubtypeDailyReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me to log transactions'**
+  String get notificationSubtypeDailyReminder;
+
+  /// No description provided for @notificationSubtypeBadgeEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'New badge earned'**
+  String get notificationSubtypeBadgeEarned;
+
+  /// No description provided for @surveySkipButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get surveySkipButton;
+
+  /// No description provided for @surveyProgressOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get surveyProgressOf;
+
+  /// No description provided for @surveyCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey Complete!'**
+  String get surveyCompleteTitle;
+
+  /// No description provided for @surveyCompleteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for sharing! We\'ll use your answers to personalize Zenda for you.'**
+  String get surveyCompleteSubtitle;
+
+  /// No description provided for @surveyBadgeUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'badge unlocked!'**
+  String get surveyBadgeUnlocked;
+
+  /// No description provided for @surveyFinancialProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Financial Profile'**
+  String get surveyFinancialProfileTitle;
+
+  /// No description provided for @surveyFinancialProfileBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your answers, Zenda has personalized your dashboard and recommendations to help you build better saving habits.'**
+  String get surveyFinancialProfileBody;
 }
 
 class _AppLocalizationsDelegate

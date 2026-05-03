@@ -219,10 +219,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingRegister => 'Sign up';
 
   @override
-  String get onboardingStart => 'Get started';
+  String get onboardingStart => 'Get Started';
 
   @override
-  String get onboardingHaveAccount => 'I already have an account';
+  String get onboardingHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get onboardingFeature1 => 'Track spending with the 50/30/20 rule';
+
+  @override
+  String get onboardingFeature2 => 'Set and achieve your savings goals';
+
+  @override
+  String get onboardingFeature3 => 'AI insights tailored for students';
 
   @override
   String dashboardGreeting(String name) {
@@ -1067,7 +1076,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recommendationsAccept => 'Helpful';
 
   @override
-  String get recommendationsReject => 'Not helpful';
+  String get recommendationsReject => 'Not relevant';
 
   @override
   String get educationTitle => 'Financial Education';
@@ -1333,11 +1342,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationTypeBadgeEarned => 'Badge earned';
 
   @override
-  String get consentTitle => 'Your data, your control';
+  String get consentTitle => 'Your privacy matters';
 
   @override
   String get consentSubtitle =>
-      'Before you start, please review how Zenda handles your information.';
+      'Before you start, please read how Zenda handles your financial data.';
+
+  @override
+  String get consentBullet1 =>
+      'Your data is encrypted and stored securely on Azure servers.';
+
+  @override
+  String get consentBullet2 =>
+      'Your data is used only to generate personalized reports and AI predictions.';
+
+  @override
+  String get consentBullet3 =>
+      'It is never shared with third parties. You can request deletion at any time.';
 
   @override
   String get consentBodyTitle => 'What data do we collect?';
@@ -1348,14 +1369,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get consentLawNote =>
-      'In compliance with Law 29733 — Peruvian Personal Data Protection Law';
+      'This app complies with Peru\'s Personal Data Protection Law (Law 29733).';
 
   @override
   String get consentCheckbox =>
-      'I agree that my financial data will be processed to generate personalized reports and predictions';
+      'I agree that my financial data will be processed to generate personalized reports and AI predictions.';
 
   @override
-  String get consentAcceptButton => 'Accept and continue';
+  String get consentAcceptButton => 'I agree — Let\'s get started';
 
   @override
   String get consentMustAccept => 'You must accept to continue';
@@ -1387,31 +1408,53 @@ class AppLocalizationsEn extends AppLocalizations {
       'Help Zenda personalize your experience. You can edit this anytime.';
 
   @override
+  String profileSetupStep(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String get profileSetupSkip => 'Skip';
+
+  @override
   String get profileSetupAge => 'How old are you?';
 
   @override
-  String get profileSetupAgeHint => 'e.g. 21';
+  String get profileSetupAgeHint =>
+      'This helps us understand your financial stage and tailor insights for you.';
 
   @override
-  String get profileSetupUniversity => 'Where do you study?';
+  String get profileSetupUniversity => 'Which university do you attend?';
 
   @override
-  String get profileSetupUniversityHint => 'e.g. PUCP, UNMSM';
+  String get profileSetupUniversityHint => 'e.g. PUCP, ULima, UNMSM...';
 
   @override
-  String get profileSetupIncomeType => 'How do you mainly get income?';
+  String get profileSetupUniversitySubtitle =>
+      'Your campus location helps us suggest local financial resources.';
 
   @override
-  String get profileSetupMonthlyIncome => 'Average monthly income (S/)';
+  String get profileSetupIncomeType => 'What is your main income source?';
 
   @override
-  String get profileSetupMonthlyIncomeHint => 'e.g. 1500';
+  String get profileSetupIncomeTypeSubtitle =>
+      'We use this to personalize your 50/30/20 budget recommendations.';
 
   @override
-  String get profileSetupNext => 'Next';
+  String get profileSetupMonthlyIncome =>
+      'What is your average monthly income?';
 
   @override
-  String get profileSetupSave => 'Finish';
+  String get profileSetupMonthlyIncomeHint =>
+      'An estimate is fine. This calibrates your 50/30/20 budget targets.';
+
+  @override
+  String get profileSetupMonthlyIncomePerMonth => 'per month';
+
+  @override
+  String get profileSetupNext => 'Continue →';
+
+  @override
+  String get profileSetupSave => 'Finish setup →';
 
   @override
   String get profileSetupCompleteTitle => 'All set!';
@@ -1429,22 +1472,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetupGoToDashboard => 'Start using Zenda';
 
   @override
-  String get incomeTypeScholarship => 'Scholarship';
+  String get incomeTypeScholarship => 'Scholarship / Grant';
 
   @override
-  String get incomeTypePartTime => 'Part-time job';
+  String get incomeTypeScholarshipSub =>
+      'Scholarship, PRONABEC, university funding';
 
   @override
-  String get incomeTypeFamily => 'Family support';
+  String get incomeTypePartTime => 'Part-time / Freelance';
 
   @override
-  String get incomeTypeMixed => 'Mixed (job + support)';
+  String get incomeTypePartTimeSub => 'Job, gig work, side projects';
+
+  @override
+  String get incomeTypeFamily => 'Family Support';
+
+  @override
+  String get incomeTypeFamilySub => 'Monthly allowance from family';
+
+  @override
+  String get incomeTypeMixed => 'Mixed';
+
+  @override
+  String get incomeTypeMixedSub => 'Combination of the above';
 
   @override
   String get aiChatTitle => 'Zenda AI';
 
   @override
-  String get aiChatInputHint => 'Ask anything about your finances...';
+  String get aiChatSubtitle => 'Powered by your financial data';
+
+  @override
+  String get aiChatInputHint => 'Ask Zenda AI anything...';
 
   @override
   String get aiChatSend => 'Send';
@@ -1461,6 +1520,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quizTitle => 'Quiz';
+
+  @override
+  String quizQuestionOf(int current, int total) {
+    return 'Question $current of $total';
+  }
 
   @override
   String get quizEmpty => 'No quiz available for this topic yet.';
@@ -1824,6 +1888,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get educationSearchHint => 'Search topics...';
 
   @override
+  String get educationTabLearn => 'Learn';
+
+  @override
+  String get educationTabChallenges => 'Challenges';
+
+  @override
+  String get educationTabBadges => 'Badges';
+
+  @override
+  String get educationTabProgress => 'Progress';
+
+  @override
   String get educationFilterAll => 'All';
 
   @override
@@ -1862,6 +1938,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String educationQuestions(int count) {
+    return '$count questions';
+  }
+
+  @override
+  String get educationLocked => 'Complete previous topics first';
+
+  @override
   String get quizAnswerRecorded => 'Answer locked in. Tap Next to continue.';
 
   @override
@@ -1895,4 +1979,144 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileCurrencyUSD => 'USD — US Dollar (\$)';
+
+  @override
+  String get splashTagline => 'Your AI-powered finance companion';
+
+  @override
+  String get splashFooter => 'Made for Peruvian university students';
+
+  @override
+  String get dashboardManageBudgets => 'Tap to manage budgets';
+
+  @override
+  String get streakTapToView => 'Tap to view progress';
+
+  @override
+  String get aiCardPredictionsChat => 'Predictions & AI Chat';
+
+  @override
+  String get aiCardViewForecast => 'View forecast';
+
+  @override
+  String get reportsVsLastMonth => 'vs last month';
+
+  @override
+  String get reportsAiInsightsTitle => 'AI Insights';
+
+  @override
+  String get reportsAiInsightsSaved =>
+      'You saved more than last month. Great work!';
+
+  @override
+  String get reportsAiInsightsExceeded => 'category exceeded limit.';
+
+  @override
+  String get progressOverviewTitle => 'Month Overview';
+
+  @override
+  String get progressTotalExpenses => 'Total Expenses';
+
+  @override
+  String get progressTotalSavings => 'Total Savings';
+
+  @override
+  String get progressNetBalance => 'Net Balance';
+
+  @override
+  String get progressTrendTitle => 'Monthly Trend';
+
+  @override
+  String get progressVsLabel => 'vs';
+
+  @override
+  String get progressSavingsLegend => 'Savings';
+
+  @override
+  String get badgesSectionEarned => 'Earned';
+
+  @override
+  String get badgesSectionLocked => 'Locked';
+
+  @override
+  String get badgesEarnedLabel => 'earned';
+
+  @override
+  String get predictionsProjectedBalance => 'Projected Balance';
+
+  @override
+  String get predictionsConfident => 'confident';
+
+  @override
+  String get predictionsBasedOnMonths => 'Based on last 3 months';
+
+  @override
+  String get predictionsProjectedExpenses => 'Projected expenses';
+
+  @override
+  String get predictionsTopCategories => 'Top Expense Categories';
+
+  @override
+  String get predictionsVsLastMonth => '8% vs last month';
+
+  @override
+  String get recommendationsSubtitle => '3 personalized tips for you this week';
+
+  @override
+  String get recommendationsRateExperience => 'Rate experience →';
+
+  @override
+  String get notificationsMasterTitle => 'Enable Notifications';
+
+  @override
+  String get notificationsMasterSubtitle => 'Receive alerts and reminders';
+
+  @override
+  String get notificationsCategoriesLabel => 'Categories';
+
+  @override
+  String get notificationSubtypeBudgetAlert =>
+      'When you reach 80% of your budget';
+
+  @override
+  String get notificationSubtypeAnomalyAlert =>
+      'Unusual spending patterns detected';
+
+  @override
+  String get notificationSubtypePredictionReady =>
+      'Monthly prediction is ready';
+
+  @override
+  String get notificationSubtypeChallengeReminder =>
+      'New challenges and badge earned';
+
+  @override
+  String get notificationSubtypeDailyReminder =>
+      'Remind me to log transactions';
+
+  @override
+  String get notificationSubtypeBadgeEarned => 'New badge earned';
+
+  @override
+  String get surveySkipButton => 'Skip';
+
+  @override
+  String get surveyProgressOf => 'of';
+
+  @override
+  String get surveyCompleteTitle => 'Survey Complete!';
+
+  @override
+  String get surveyCompleteSubtitle =>
+      'Thanks for sharing! We\'ll use your answers to personalize Zenda for you.';
+
+  @override
+  String get surveyBadgeUnlocked => 'badge unlocked!';
+
+  @override
+  String get surveyFinancialProfileTitle => 'Your Financial Profile';
+
+  @override
+  String get surveyFinancialProfileBody =>
+      'Based on your answers, Zenda has personalized your dashboard and recommendations to help you build better saving habits.';
 }

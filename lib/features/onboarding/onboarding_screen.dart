@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'onboarding_page.dart';
 import 'onboarding_prefs.dart';
 import '../../l10n/l10n_extension.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends StatelessWidget {
   final bool redirectToRegister;
 
   const OnboardingScreen({
@@ -12,239 +11,189 @@ class OnboardingScreen extends StatefulWidget {
     this.redirectToRegister = false,
   });
 
-  @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
-}
-
-class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _onPageChanged(int page) {
-    setState(() {
-      _currentPage = page;
-    });
-  }
-
-  Future<void> _completeOnboarding() async {
+  Future<void> _completeOnboarding(BuildContext context) async {
     await OnboardingPrefs.setOnboardingCompleted();
-    if (mounted) {
-      // Always show consent before registration; login users skip onboarding entirely.
-      if (widget.redirectToRegister) {
-        context.go('/consent');
-      } else {
-        context.go('/consent');
-      }
-    }
-  }
-
-  void _skipOnboarding() {
-    _completeOnboarding();
-  }
-
-  void _nextPage(int pageCount) {
-    if (_currentPage < pageCount - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      _completeOnboarding();
+    if (context.mounted) {
+      context.go('/consent');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
-
-    final pages = [
-      {
-        'icon': Icons.receipt_long_rounded,
-        'gradientColors': [
-          const Color(0xFF34D399),
-          const Color(0xFF10B981),
-        ],
-        'title': l10n.onboardingPage1Title,
-        'subtitle': l10n.onboardingPage1Subtitle,
-        'microcopy': l10n.onboardingPage1Micro,
-      },
-      {
-        'icon': Icons.pie_chart_rounded,
-        'gradientColors': [
-          const Color(0xFF60A5FA),
-          const Color(0xFF3B82F6),
-        ],
-        'title': l10n.onboardingPage2Title,
-        'subtitle': l10n.onboardingPage2Subtitle,
-        'microcopy': l10n.onboardingPage2Micro,
-      },
-      {
-        'icon': Icons.local_fire_department_rounded,
-        'gradientColors': [
-          const Color(0xFFFCD34D),
-          const Color(0xFFF59E0B),
-        ],
-        'title': l10n.onboardingPage3Title,
-        'subtitle': l10n.onboardingPage3Subtitle,
-        'microcopy': l10n.onboardingPage3Micro,
-      },
-    ];
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF34D399),
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            // PageView
-            PageView.builder(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              itemCount: pages.length,
-              itemBuilder: (context, index) {
-                final page = pages[index];
-                return OnboardingPage(
-                  icon: page['icon'] as IconData,
-                  gradientColors: page['gradientColors'] as List<Color>,
-                  title: page['title'] as String,
-                  subtitle: page['subtitle'] as String,
-                  microcopy: page['microcopy'] as String,
-                );
-              },
-            ),
-
-            // Skip button (top right)
-            Positioned(
-              top: 16,
-              right: 16,
-              child: TextButton(
-                onPressed: _skipOnboarding,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  backgroundColor: isDark
-                      ? const Color(0xFF1E293B).withValues(alpha: 0.6)
-                      : Colors.white.withValues(alpha: 0.9),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            // Top green hero section
+            SizedBox(
+              height: size.height * 0.42,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Z logo circle
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Z',
+                        style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF34D399),
+                          height: 1,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: Text(
-                  l10n.onboardingSkip,
-                  style: TextStyle(
-                    color: isDark ? const Color(0xFF34D399) : const Color(0xFF1F2937),
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Zenda',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.splashTagline,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.white70,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
 
-            // Bottom controls
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
+            // Bottom white card
+            Expanded(
               child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: isDark
-                        ? [
-                            const Color(0xFF0F172A).withValues(alpha: 0),
-                            const Color(0xFF0F172A),
-                          ]
-                        : [
-                            const Color(0xFFF9FAFB).withValues(alpha: 0),
-                            const Color(0xFFF9FAFB),
-                          ],
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Page indicators
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        pages.length,
-                        (index) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _currentPage == index ? 32 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: _currentPage == index
-                                ? const Color(0xFF34D399)
-                                : (isDark
-                                    ? const Color(0xFF6B7280)
-                                    : const Color(0xFFD1D5DB)),
-                            borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                  child: Column(
+                    children: [
+                      // Feature rows
+                      _FeatureRow(
+                        icon: Icons.bar_chart_rounded,
+                        iconColor: const Color(0xFF34D399),
+                        text: l10n.onboardingFeature1,
+                      ),
+                      const SizedBox(height: 20),
+                      _FeatureRow(
+                        icon: Icons.track_changes_rounded,
+                        iconColor: const Color(0xFF34D399),
+                        text: l10n.onboardingFeature2,
+                      ),
+                      const SizedBox(height: 20),
+                      _FeatureRow(
+                        icon: Icons.lightbulb_outline_rounded,
+                        iconColor: const Color(0xFFF59E0B),
+                        text: l10n.onboardingFeature3,
+                      ),
+                      const Spacer(),
+                      // Get Started button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () => _completeOnboarding(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF34D399),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(
+                            l10n.onboardingStart,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Primary button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: () => _nextPage(pages.length),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF34D399),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shadowColor: const Color(0xFF34D399).withValues(alpha: 0.4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
+                      const SizedBox(height: 16),
+                      // Already have account link
+                      TextButton(
+                        onPressed: () => context.go('/auth/login'),
                         child: Text(
-                          _currentPage == pages.length - 1
-                              ? (widget.redirectToRegister ? l10n.onboardingRegister : l10n.onboardingStart)
-                              : l10n.onboardingNext,
+                          l10n.onboardingHaveAccount,
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            color: Color(0xFF6B7280),
+                            fontSize: 14,
                           ),
                         ),
                       ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // "Already have account" link
-                    // Solo mostramos esto si NO estamos en el flujo de "redirectToRegister"
-                    // porque si venimos de Crear Cuenta, ya sabemos que no tenemos cuenta (o queremos crear una).
-                    // Aunque por consistencia, si redirige a Register, el botón "Ya tengo cuenta" debería ir a Login.
-                    TextButton(
-                      onPressed: () {
-                        context.go('/auth/login');
-                      },
-                      child: Text(
-                        l10n.onboardingHaveAccount,
-                        style: TextStyle(
-                          color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF60A5FA),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _FeatureRow extends StatelessWidget {
+  const _FeatureRow({
+    required this.icon,
+    required this.iconColor,
+    required this.text,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: iconColor, size: 22),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Color(0xFF1F2937),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

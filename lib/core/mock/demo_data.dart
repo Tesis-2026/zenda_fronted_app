@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../models/account.dart';
 import '../models/budget.dart';
 import '../models/savings_goal.dart';
@@ -8,8 +10,10 @@ import '../services/badges_api_service.dart';
 import '../services/challenges_api_service.dart';
 import '../services/education_api_service.dart';
 import '../services/predictions_api_service.dart';
+import '../services/progress_api_service.dart';
 import '../services/recommendations_api_service.dart';
 import '../services/streak_repository.dart';
+import '../services/surveys_api_service.dart';
 
 abstract final class DemoData {
   // ── User ───────────────────────────────────────────────────────────────────
@@ -399,20 +403,22 @@ abstract final class DemoData {
 
   // ── Recommendations ────────────────────────────────────────────────────────
 
-  static final recommendations = <Recommendation>[
-    const Recommendation(
+  static const recommendations = <Recommendation>[
+    Recommendation(
       id: 'rec-1',
-      type: 'SPENDING',
+      type: 'BUDGET',
       title: 'Reduce food spending',
-      body: 'Your food budget is at 77%. Try cooking at home twice this week to stay under budget.',
+      body: 'Your food budget is at 77% with S/ 116 spent of S/ 150. Try cooking at home twice this week to stay under budget.',
       impactScore: 0.85,
+      actionLabel: 'Set food budget',
     ),
-    const Recommendation(
+    Recommendation(
       id: 'rec-2',
-      type: 'SAVINGS',
+      type: 'SAVING',
       title: 'Build your emergency fund',
-      body: 'No savings transactions this month. Set aside S/ 50 today to start your emergency fund.',
+      body: 'No savings transactions this month. Set aside S/ 50 today to start building your emergency fund.',
       impactScore: 0.90,
+      actionLabel: 'Create emergency fund goal',
     ),
   ];
 
@@ -487,8 +493,8 @@ abstract final class DemoData {
 
   // ── Education topics ───────────────────────────────────────────────────────
 
-  static final educationTopics = <EducationTopic>[
-    const EducationTopic(
+  static const educationTopics = <EducationTopic>[
+    EducationTopic(
       id: 'topic-1',
       title: 'What is the 50/30/20 rule?',
       content: 'The 50/30/20 rule divides your after-tax income into three buckets: 50% for needs, 30% for wants, and 20% for savings. Needs include rent, groceries, and utilities. Wants include dining out, subscriptions, and entertainment. The remaining 20% goes toward savings and debt repayment.\n\nThis framework helps you build financial balance without tracking every expense in detail.',
@@ -496,8 +502,10 @@ abstract final class DemoData {
       category: 'budgeting',
       order: 1,
       isCompleted: true,
+      questionCount: 4,
+      isLocked: false,
     ),
-    const EducationTopic(
+    EducationTopic(
       id: 'topic-2',
       title: 'How to set a realistic budget',
       content: 'A realistic budget starts by knowing your actual income and fixed expenses. List every recurring cost first—rent, utilities, subscriptions—then calculate what remains. Allocate a fixed amount for variable spending (food, transport) based on last month\'s data.\n\nReview your budget weekly for the first month to catch gaps early. Adjust category limits rather than abandoning the budget entirely when you overspend.',
@@ -505,8 +513,10 @@ abstract final class DemoData {
       category: 'budgeting',
       order: 2,
       isCompleted: true,
+      questionCount: 4,
+      isLocked: false,
     ),
-    const EducationTopic(
+    EducationTopic(
       id: 'topic-3',
       title: 'Emergency fund basics',
       content: 'An emergency fund is 3–6 months of essential expenses saved in a liquid account. It covers unexpected events—job loss, medical costs, urgent repairs—without forcing you to take on debt.\n\nStart small: S/ 50 per month builds S/ 600 in a year. Keep the fund separate from your main account to reduce the temptation to spend it.',
@@ -514,8 +524,10 @@ abstract final class DemoData {
       category: 'saving',
       order: 3,
       isCompleted: false,
+      questionCount: 4,
+      isLocked: false,
     ),
-    const EducationTopic(
+    EducationTopic(
       id: 'topic-4',
       title: 'How to save consistently',
       content: 'Consistency beats large infrequent deposits. Automate a transfer to savings on payday—even S/ 20—before you can spend it. This "pay yourself first" habit removes willpower from the equation.\n\nTrack your savings rate (savings ÷ income × 100) monthly. A 10% rate is a solid starting point for university students.',
@@ -523,8 +535,10 @@ abstract final class DemoData {
       category: 'saving',
       order: 4,
       isCompleted: false,
+      questionCount: 4,
+      isLocked: false,
     ),
-    const EducationTopic(
+    EducationTopic(
       id: 'topic-5',
       title: 'Understanding credit cards',
       content: 'Credit cards charge interest only on unpaid balances. Paying the full statement balance every month costs you nothing in interest and builds a credit history.\n\nThe minimum payment traps you in a debt cycle—a S/ 500 balance paid in minimums can take years to clear. Always aim to pay more than the minimum, ideally the full amount.',
@@ -532,8 +546,10 @@ abstract final class DemoData {
       category: 'budgeting',
       order: 5,
       isCompleted: false,
+      questionCount: 4,
+      isLocked: true,
     ),
-    const EducationTopic(
+    EducationTopic(
       id: 'topic-6',
       title: 'Investment for beginners',
       content: 'Investing means putting money to work so it grows over time. Start with low-risk options: savings accounts, CDs, or government bonds. As you learn, consider index funds—they spread risk across many companies at low cost.\n\nTime in the market matters more than timing the market. Starting with S/ 100/month at age 22 outperforms S/ 500/month at age 35 in the long run.',
@@ -541,6 +557,8 @@ abstract final class DemoData {
       category: 'investing',
       order: 6,
       isCompleted: false,
+      questionCount: 4,
+      isLocked: true,
     ),
   ];
 
@@ -555,6 +573,7 @@ abstract final class DemoData {
         text: 'In the 50/30/20 rule, what percentage goes to needs?',
         options: ['30%', '50%', '20%', '40%'],
         correctIndex: 1,
+        explanation: 'The 50 in 50/30/20 allocates half your after-tax income to essential needs like rent, food, and utilities.',
       ),
       _QuizEntry(
         id: 't1-q2',
@@ -562,6 +581,7 @@ abstract final class DemoData {
         text: 'Which of the following is a "want" in the 50/30/20 rule?',
         options: ['Rent', 'Groceries', 'Streaming subscription', 'Utilities'],
         correctIndex: 2,
+        explanation: 'A streaming subscription is discretionary (a want) — you could cancel it without affecting your basic living needs.',
       ),
       _QuizEntry(
         id: 't1-q3',
@@ -569,6 +589,7 @@ abstract final class DemoData {
         text: 'What does the "20" in 50/30/20 represent?',
         options: ['Entertainment', 'Taxes', 'Savings and debt repayment', 'Housing'],
         correctIndex: 2,
+        explanation: 'The 20% bucket is reserved for building savings and paying down debt, helping you grow your net worth over time.',
       ),
       _QuizEntry(
         id: 't1-q4',
@@ -576,6 +597,7 @@ abstract final class DemoData {
         text: 'With a monthly income of S/ 2000, how much should go to savings using the 50/30/20 rule?',
         options: ['S/ 1000', 'S/ 600', 'S/ 400', 'S/ 200'],
         correctIndex: 2,
+        explanation: '20% of S/ 2000 = S/ 400; this is your target monthly savings amount under the 50/30/20 framework.',
       ),
     ],
     'topic-2': [
@@ -585,6 +607,7 @@ abstract final class DemoData {
         text: 'What should you list first when building a realistic budget?',
         options: ['Variable spending', 'Entertainment', 'Fixed recurring costs', 'Savings goals'],
         correctIndex: 2,
+        explanation: 'Fixed costs like rent, utilities, and subscriptions are predictable and must be covered every month, so they anchor your budget.',
       ),
       _QuizEntry(
         id: 't2-q2',
@@ -592,6 +615,7 @@ abstract final class DemoData {
         text: 'How often should you review your budget in the first month?',
         options: ['Daily', 'Weekly', 'Monthly', 'Quarterly'],
         correctIndex: 1,
+        explanation: 'Weekly reviews in the first month help you catch overspending early and adjust before the month ends.',
       ),
       _QuizEntry(
         id: 't2-q3',
@@ -599,6 +623,7 @@ abstract final class DemoData {
         text: 'When you overspend in a category, the best response is to:',
         options: ['Abandon the budget', 'Borrow from next month', 'Adjust the category limit', 'Ignore it'],
         correctIndex: 2,
+        explanation: 'Adjusting the limit based on real spending data makes your budget more accurate and sustainable over time.',
       ),
       _QuizEntry(
         id: 't2-q4',
@@ -606,6 +631,7 @@ abstract final class DemoData {
         text: 'Which data source is most useful for allocating variable spending?',
         options: ["A friend's expenses", 'Online calculators', "Last month's actual spending", 'Your income tax rate'],
         correctIndex: 2,
+        explanation: "Your own past spending is the most accurate baseline because it reflects your personal habits and cost of living.",
       ),
     ],
     'topic-3': [
@@ -615,6 +641,7 @@ abstract final class DemoData {
         text: 'How many months of expenses should an emergency fund cover?',
         options: ['1–2 months', '3–6 months', '7–9 months', '1 year'],
         correctIndex: 1,
+        explanation: '3–6 months provides enough runway to handle job loss or medical emergencies without going into debt.',
       ),
       _QuizEntry(
         id: 't3-q2',
@@ -622,6 +649,7 @@ abstract final class DemoData {
         text: 'What type of account is best for an emergency fund?',
         options: ['Long-term investment', 'High-risk stocks', 'Liquid savings account', 'Fixed-term deposit'],
         correctIndex: 2,
+        explanation: 'A liquid account lets you access the money immediately in an emergency without penalties or waiting periods.',
       ),
       _QuizEntry(
         id: 't3-q3',
@@ -629,6 +657,7 @@ abstract final class DemoData {
         text: 'The main purpose of an emergency fund is:',
         options: ['Invest in stocks', 'Cover unexpected costs without debt', 'Pay regular bills', 'Fund vacation travel'],
         correctIndex: 1,
+        explanation: 'An emergency fund acts as a financial buffer so unexpected events do not force you into high-interest debt.',
       ),
       _QuizEntry(
         id: 't3-q4',
@@ -636,6 +665,7 @@ abstract final class DemoData {
         text: 'Saving S/ 50/month, how long does it take to reach S/ 600?',
         options: ['6 months', '1 year', '2 years', '18 months'],
         correctIndex: 1,
+        explanation: 'S/ 50 × 12 months = S/ 600; consistent small deposits accumulate meaningfully over a full year.',
       ),
     ],
     'topic-4': [
@@ -645,6 +675,7 @@ abstract final class DemoData {
         text: 'What does "pay yourself first" mean?',
         options: ['Spend on yourself before bills', 'Save before spending', 'Invest 50% of income', 'Pay debts first'],
         correctIndex: 1,
+        explanation: 'Saving before spending removes willpower from the equation — your savings transfer happens automatically on payday.',
       ),
       _QuizEntry(
         id: 't4-q2',
@@ -652,6 +683,7 @@ abstract final class DemoData {
         text: 'When is the ideal time to transfer money to savings?',
         options: ['End of month', 'On payday', 'After all expenses', 'Randomly'],
         correctIndex: 1,
+        explanation: 'Transferring on payday means savings happen before discretionary spending, ensuring you always set aside something.',
       ),
       _QuizEntry(
         id: 't4-q3',
@@ -659,6 +691,7 @@ abstract final class DemoData {
         text: 'A solid starting savings rate for university students is:',
         options: ['5%', '20%', '10%', '30%'],
         correctIndex: 2,
+        explanation: 'A 10% rate is achievable on a student income and builds the habit of saving consistently without over-restricting spending.',
       ),
       _QuizEntry(
         id: 't4-q4',
@@ -666,6 +699,7 @@ abstract final class DemoData {
         text: 'How do you calculate your savings rate?',
         options: ['Savings × 100', 'Savings ÷ expenses × 100', 'Savings ÷ income × 100', 'Savings ÷ 12'],
         correctIndex: 2,
+        explanation: 'Savings rate = (amount saved ÷ total income) × 100; dividing by income shows what fraction of earnings you keep.',
       ),
     ],
     'topic-5': [
@@ -675,6 +709,7 @@ abstract final class DemoData {
         text: 'When do credit cards charge interest?',
         options: ['On every purchase', 'Only on cash advances', 'On unpaid balances', 'Every month regardless'],
         correctIndex: 2,
+        explanation: 'Interest is charged only on the balance you carry past the due date; paying in full every month means zero interest cost.',
       ),
       _QuizEntry(
         id: 't5-q2',
@@ -682,6 +717,7 @@ abstract final class DemoData {
         text: 'The best credit card payment strategy is:',
         options: ['Pay the minimum', 'Pay the full statement balance', 'Pay half the balance', 'Skip one month'],
         correctIndex: 1,
+        explanation: 'Paying the full statement balance eliminates interest charges and builds a positive credit history at no extra cost.',
       ),
       _QuizEntry(
         id: 't5-q3',
@@ -689,6 +725,7 @@ abstract final class DemoData {
         text: 'Paying only the minimum on a credit card results in:',
         options: ['Better credit score', 'Interest stops', 'A debt cycle', 'Fee waivers'],
         correctIndex: 2,
+        explanation: 'Minimum payments barely cover interest, so the principal barely shrinks, trapping you in a slow and expensive debt cycle.',
       ),
       _QuizEntry(
         id: 't5-q4',
@@ -696,6 +733,7 @@ abstract final class DemoData {
         text: 'Paying the full credit card balance each month gives you:',
         options: ['Higher credit limit', 'Cash rewards', 'Zero interest and builds credit', 'Lower minimums'],
         correctIndex: 2,
+        explanation: 'Full payment avoids interest entirely while on-time payments build your credit score over time.',
       ),
     ],
     'topic-6': [
@@ -705,6 +743,7 @@ abstract final class DemoData {
         text: 'Which investment is lowest risk for a beginner?',
         options: ['Individual stocks', 'Government bonds', 'Cryptocurrency', 'Commodities'],
         correctIndex: 1,
+        explanation: 'Government bonds are backed by the state and offer predictable returns, making them the safest starting point for new investors.',
       ),
       _QuizEntry(
         id: 't6-q2',
@@ -712,6 +751,7 @@ abstract final class DemoData {
         text: 'The main advantage of index funds is:',
         options: ['Guaranteed returns', 'Diversified risk at low cost', 'No taxes on gains', 'Exclusive access'],
         correctIndex: 1,
+        explanation: 'Index funds spread risk across hundreds of companies automatically and charge very low fees compared to active funds.',
       ),
       _QuizEntry(
         id: 't6-q3',
@@ -719,6 +759,7 @@ abstract final class DemoData {
         text: '"Time in the market" refers to:',
         options: ['Trading at the right time', 'Day trading', 'Holding investments long-term', 'Timing market dips'],
         correctIndex: 2,
+        explanation: 'Holding investments long-term allows compound growth to work, which consistently outperforms trying to time market movements.',
       ),
       _QuizEntry(
         id: 't6-q4',
@@ -726,6 +767,7 @@ abstract final class DemoData {
         text: 'Why does starting to invest at age 22 beat starting at 35 (even with less per month)?',
         options: ['Higher contributions', 'More years of compound growth', 'Lower taxes', 'Higher risk tolerance'],
         correctIndex: 1,
+        explanation: 'More years of compounding means each early contribution grows exponentially longer, creating a much larger final balance.',
       ),
     ],
   };
@@ -748,31 +790,44 @@ abstract final class DemoData {
   static final challenges = <Challenge>[
     const Challenge(
       id: 'challenge-1',
-      title: 'Record 7 consecutive days',
-      description: 'Log at least one transaction every day for 7 days in a row.',
-      pointsReward: 50,
-      status: 'COMPLETED',
+      title: 'No-Coffee Week',
+      description: 'Skip coffee purchases for 5 days in a row and save that S/ 8.50/day.',
+      pointsReward: 75,
+      status: 'ACTIVE',
+      progressCurrent: 3,
+      progressTotal: 5,
+      daysLeft: '4',
+      badgeReward: 'Saver',
     ),
     const Challenge(
       id: 'challenge-2',
-      title: 'Stay under food budget for a week',
-      description: 'Keep your food spending below your weekly food budget for 7 days.',
-      pointsReward: 30,
+      title: 'Budget Master',
+      description: 'Keep all active budget categories on track for the full month.',
+      pointsReward: 100,
       status: 'ACTIVE',
+      progressCurrent: 2,
+      progressTotal: 3,
+      daysLeft: '8',
     ),
     const Challenge(
       id: 'challenge-3',
-      title: 'Save 10% of your income',
-      description: 'Allocate at least 10% of this month\'s income to a savings goal.',
-      pointsReward: 100,
-      status: 'AVAILABLE',
+      title: 'Save S/ 100',
+      description: 'Transfer at least S/ 100 to a savings goal this month.',
+      pointsReward: 50,
+      status: 'COMPLETED',
+      progressCurrent: 5,
+      progressTotal: 5,
+      daysLeft: '0',
     ),
     const Challenge(
       id: 'challenge-4',
-      title: 'No impulse spending for 5 days',
-      description: 'Avoid unplanned purchases in the "wants" category for 5 days.',
-      pointsReward: 40,
+      title: 'Track 7 Days',
+      description: 'Log at least one transaction every day for 7 consecutive days.',
+      pointsReward: 60,
       status: 'AVAILABLE',
+      progressCurrent: 0,
+      progressTotal: 7,
+      daysLeft: '14',
     ),
   ];
 
@@ -782,44 +837,144 @@ abstract final class DemoData {
     ZendaBadge(
       id: 'badge-1',
       name: 'First Step',
-      description: 'Record your first transaction.',
+      description: 'Recorded your first transaction.',
       isEarned: true,
       earnedAt: DateTime(2026, 1, 20),
     ),
     ZendaBadge(
       id: 'badge-2',
       name: '7-Day Streak',
-      description: 'Log transactions for 7 consecutive days.',
+      description: 'Logged transactions for 7 consecutive days.',
       isEarned: true,
-      earnedAt: DateTime(2026, 5, 2),
+      earnedAt: DateTime(2026, 2, 14),
     ),
     ZendaBadge(
       id: 'badge-3',
+      name: 'First Survey',
+      description: 'Completed your first financial literacy survey.',
+      isEarned: true,
+      earnedAt: DateTime(2026, 3, 5),
+    ),
+    ZendaBadge(
+      id: 'badge-4',
       name: 'Budget Master',
       description: 'Stay under all your budgets for a full month.',
       isEarned: false,
     ),
     ZendaBadge(
-      id: 'badge-4',
-      name: 'Savings Champion',
-      description: 'Reach 50% progress on any savings goal.',
+      id: 'badge-5',
+      name: 'Goal Crusher',
+      description: 'Complete any savings goal before its due date.',
       isEarned: false,
     ),
     ZendaBadge(
-      id: 'badge-5',
-      name: 'Education Explorer',
-      description: 'Complete all education topics.',
+      id: 'badge-6',
+      name: 'Investment Starter',
+      description: 'Complete the investing topic and quiz.',
+      isEarned: false,
+    ),
+    ZendaBadge(
+      id: 'badge-7',
+      name: '30-Day Streak',
+      description: 'Log transactions for 30 consecutive days.',
       isEarned: false,
     ),
   ];
 
+  // ── Financial progress (for ProgressScreen) ──────────────────────────────
+
+  // May 2026 vs April 2026
+  static const financialProgress = FinancialProgress(
+    currentMonth: MonthFinancials(
+      income: 1200.0,
+      expenses: 480.8,
+      balance: 719.2,
+      savings: 300.0,
+    ),
+    previousMonth: MonthFinancials(
+      income: 1000.0,
+      expenses: 620.5,
+      balance: 379.5,
+      savings: 220.0,
+    ),
+    expensesChangePercent: -22.5,
+    savingsChangePercent: 36.4,
+    balanceChangePercent: 89.5,
+  );
+
+  // ── Survey result (mock for demo mode) ───────────────────────────────────
+
+  static const mockSurveyResult = SurveyResult(
+    score: 72.0,
+    level: 'intermediate',
+    xpEarned: 50,
+    badgeUnlocked: 'First Survey',
+  );
+
+  static final mockPreSurvey = Survey(
+    id: 'survey-pre-demo',
+    type: 'PRE',
+    questions: [
+      const SurveyQuestion(
+        id: 'sq-1',
+        order: 1,
+        text: 'How often do you track your daily expenses?',
+        options: ['Never', 'Rarely', 'Sometimes', 'Always'],
+      ),
+      const SurveyQuestion(
+        id: 'sq-2',
+        order: 2,
+        text: 'Do you have a monthly budget you follow?',
+        options: ['No', 'I try but often fail', 'Most of the time', 'Yes, strictly'],
+      ),
+      const SurveyQuestion(
+        id: 'sq-3',
+        order: 3,
+        text: 'How much do you save from your monthly income?',
+        options: ['Nothing', 'Less than 10%', '10–20%', 'More than 20%'],
+      ),
+      const SurveyQuestion(
+        id: 'sq-4',
+        order: 4,
+        text: 'Do you know what the 50/30/20 budgeting rule is?',
+        options: ['No', "I've heard of it", 'I know it roughly', 'I apply it regularly'],
+      ),
+      const SurveyQuestion(
+        id: 'sq-5',
+        order: 5,
+        text: 'How confident are you in your ability to reach a savings goal?',
+        options: ['Not at all', 'Slightly confident', 'Fairly confident', 'Very confident'],
+      ),
+    ],
+  );
+
   // ── AI prediction ──────────────────────────────────────────────────────────
 
-  static const expensePrediction = PredictionResult(
+  static final expensePrediction = PredictionResult(
     period: '2026-06',
     predictedAmount: 460.00,
     confidenceLevel: 0.78,
     narrative: 'Based on your last 3 months, we estimate your June expenses at S/ 460. Your food and transport costs are stable. Reducing subscriptions by one service could bring this below S/ 430.',
+    projectedBalance: 780.00,
+    budgetUsageFraction: 0.73,
+    vsLastMonthLabel: '+8% vs April',
+    topCategories: [
+      PredictionCategory(
+        name: 'Food',
+        amount: 320.00,
+        color: Color(0xFFFEF3C7),
+      ),
+      PredictionCategory(
+        name: 'Transport',
+        amount: 180.00,
+        color: Color(0xFFDBEAFE),
+      ),
+      PredictionCategory(
+        name: 'Entertainment',
+        amount: 95.00,
+        color: Color(0xFFFEE2E2),
+      ),
+    ],
   );
 
   // ── API transaction rows (for TransactionListScreen) ──────────────────────
@@ -861,6 +1016,7 @@ class _QuizEntry {
   final String text;
   final List<String> options;
   final int correctIndex;
+  final String? explanation;
 
   const _QuizEntry({
     required this.id,
@@ -868,5 +1024,6 @@ class _QuizEntry {
     required this.text,
     required this.options,
     required this.correctIndex,
+    this.explanation,
   });
 }

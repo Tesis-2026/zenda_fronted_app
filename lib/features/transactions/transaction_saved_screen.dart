@@ -8,6 +8,8 @@ class TransactionSavedScreen extends StatelessWidget {
   final String categoryName;
   final DateTime date;
   final TransactionKind kind;
+  final double? budgetSpent;
+  final double? budgetLimit;
 
   const TransactionSavedScreen({
     super.key,
@@ -15,6 +17,8 @@ class TransactionSavedScreen extends StatelessWidget {
     required this.categoryName,
     required this.date,
     required this.kind,
+    this.budgetSpent,
+    this.budgetLimit,
   });
 
   static const _months = [
@@ -32,7 +36,7 @@ class TransactionSavedScreen extends StatelessWidget {
 
   Color _amountColor() =>
       kind == TransactionKind.income
-          ? const Color(0xFF34D399)
+          ? const Color(0xFF059669)
           : const Color(0xFFEF4444);
 
   @override
@@ -100,6 +104,17 @@ class TransactionSavedScreen extends StatelessWidget {
                       label: l10n.txSavedLabelDate,
                       value: _formattedDate(),
                     ),
+                    if (budgetSpent != null && budgetLimit != null) ...[
+                      Divider(height: 1, color: Theme.of(context).dividerColor),
+                      _SummaryRow(
+                        label: l10n.txSavedLabelBudget,
+                        value: 'S/ ${budgetSpent!.toStringAsFixed(0)} / S/ ${budgetLimit!.toStringAsFixed(0)}',
+                        valueColor: budgetSpent! >= budgetLimit!
+                            ? const Color(0xFFEF4444)
+                            : const Color(0xFF34D399),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -108,11 +123,11 @@ class TransactionSavedScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: FilledButton(
-                  onPressed: () => context.go('/dashboard'),
+                  onPressed: () => context.go('/transactions'),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF34D399),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                        borderRadius: BorderRadius.circular(28)),
                   ),
                   child: Text(
                     l10n.txSavedBackButton,
@@ -126,9 +141,10 @@ class TransactionSavedScreen extends StatelessWidget {
                 onPressed: () => context.go('/add-transaction'),
                 child: Text(
                   l10n.txSavedAddAnother,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline,
+                  style: const TextStyle(
+                    color: Color(0xFF1F2937),
                     fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

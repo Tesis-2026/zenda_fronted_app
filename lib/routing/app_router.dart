@@ -270,6 +270,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'quiz',
                 builder: (context, state) => QuizScreen(
                   topicId: state.pathParameters['id']!,
+                  topicTitle: state.extra as String?,
                 ),
               ),
             ],

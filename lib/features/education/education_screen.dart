@@ -25,7 +25,6 @@ class EducationScreen extends ConsumerStatefulWidget {
 class _EducationScreenState extends ConsumerState<EducationScreen> {
   final _searchController = TextEditingController();
   String _query = '';
-  String _filter = 'all';
 
   @override
   void dispose() {
@@ -34,16 +33,10 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
   }
 
   List<EducationTopic> _applyFilters(List<EducationTopic> topics) {
-    var result = topics;
-    if (_query.isNotEmpty) {
-      result = result
-          .where((t) => t.title.toLowerCase().contains(_query.toLowerCase()))
-          .toList();
-    }
-    if (_filter != 'all') {
-      result = result.where((t) => t.category.toLowerCase() == _filter).toList();
-    }
-    return result;
+    if (_query.isEmpty) return topics;
+    return topics
+        .where((t) => t.title.toLowerCase().contains(_query.toLowerCase()))
+        .toList();
   }
 
   @override
@@ -149,10 +142,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: _CategoryFilterChips(
-                    selected: _filter,
-                    onSelect: (v) => setState(() => _filter = v),
-                  ),
+                  child: _SectionTabs(),
                 ),
                 if (featured != null) ...[
                   SliverToBoxAdapter(
@@ -194,50 +184,50 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Category filter chips
+// Section tabs (Learn / Challenges / Badges / Progress)
 // ─────────────────────────────────────────────────────────────────
 
-class _CategoryFilterChips extends StatelessWidget {
-  const _CategoryFilterChips(
-      {required this.selected, required this.onSelect});
-  final String selected;
-  final void Function(String) onSelect;
-
+class _SectionTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final chips = {
-      'all': l10n.educationFilterAll,
-      'budgeting': l10n.educationFilterBudgeting,
-      'saving': l10n.educationFilterSaving,
-      'investing': l10n.educationFilterInvesting,
-    };
+    final tabs = [
+      (label: l10n.educationTabLearn, route: null),
+      (label: l10n.educationTabChallenges, route: '/challenges'),
+      (label: l10n.educationTabBadges, route: '/badges'),
+      (label: l10n.educationTabProgress, route: '/progress'),
+    ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
-        children: chips.entries.map((e) {
-          final isSelected = selected == e.key;
+        children: tabs.map((tab) {
+          final isActive = tab.route == null;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
-              onTap: () => onSelect(e.key),
+              onTap: tab.route != null
+                  ? () => context.push(tab.route!)
+                  : null,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected
+                  color: isActive
                       ? const Color(0xFF34D399)
-                      : const Color(0xFFF3F4F6),
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
+                  border: isActive
+                      ? null
+                      : Border.all(color: const Color(0xFFE5E7EB)),
                 ),
                 child: Text(
-                  e.value,
+                  tab.label,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isSelected
+                    color: isActive
                         ? Colors.white
                         : const Color(0xFF6B7280),
                   ),
@@ -276,9 +266,11 @@ class _FeaturedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final excerpt = topic.content.length > 100
-        ? '${topic.content.substring(0, 100)}...'
-        : topic.content;
+    // Use first sentence as the subtitle excerpt (up to 80 chars)
+    final firstSentence = topic.content.split(RegExp(r'[.!?\n]')).first.trim();
+    final excerpt = firstSentence.length > 80
+        ? '${firstSentence.substring(0, 80)}...'
+        : firstSentence;
 
     return GestureDetector(
       onTap: onTap,
@@ -366,30 +358,29 @@ class _FeaturedCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34D399),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    l10n.educationStartLabel,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
+                Icon(Icons.access_time_rounded,
+                    color: Colors.white.withValues(alpha: 0.55), size: 14),
+                const SizedBox(width: 4),
                 Text(
                   l10n.educationMinRead(topic.readingTimeMinutes),
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.45),
+                    color: Colors.white.withValues(alpha: 0.55),
                     fontSize: 12,
                   ),
                 ),
+                if (topic.questionCount > 0) ...[
+                  const SizedBox(width: 14),
+                  Icon(Icons.edit_outlined,
+                      color: Colors.white.withValues(alpha: 0.55), size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.educationQuestions(topic.questionCount),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.55),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
@@ -439,97 +430,125 @@ class _TopicCard extends StatelessWidget {
     final l10n = context.l10n;
     final color = _color(topic.category);
     final icon = _icon(topic.category);
+    final isLocked = topic.isLocked;
 
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF3F4F6)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+      onTap: isLocked ? null : onTap,
+      child: Opacity(
+        opacity: isLocked ? 0.65 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFF3F4F6)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              child: Icon(icon, color: color, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            ],
+          ),
+          child: Row(
+            children: [
+              Stack(
                 children: [
-                  Text(
-                    topic.title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1F2937),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Icon(icon, color: color, size: 22),
                   ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
+                  if (isLocked)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF6B7280),
+                          shape: BoxShape.circle,
                         ),
-                        child: Text(
-                          topic.category.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: color,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
+                        child: const Icon(Icons.lock_rounded,
+                            color: Colors.white, size: 10),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.educationMinRead(topic.readingTimeMinutes),
-                        style: const TextStyle(
-                            fontSize: 11, color: Color(0xFF9CA3AF)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
-                    child: LinearProgressIndicator(
-                      value: topic.isCompleted ? 1.0 : 0.0,
-                      minHeight: 3,
-                      backgroundColor: const Color(0xFFF3F4F6),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF34D399)),
                     ),
-                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            topic.isCompleted
-                ? const Icon(Icons.check_circle_rounded,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      topic.title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Text(
+                          l10n.educationMinRead(topic.readingTimeMinutes),
+                          style: const TextStyle(
+                              fontSize: 11, color: Color(0xFF9CA3AF)),
+                        ),
+                        if (topic.questionCount > 0) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.educationQuestions(topic.questionCount),
+                            style: const TextStyle(
+                                fontSize: 11, color: Color(0xFF9CA3AF)),
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (isLocked) ...[
+                      const SizedBox(height: 5),
+                      Text(
+                        l10n.educationLocked,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF9CA3AF),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(2),
+                        child: LinearProgressIndicator(
+                          value: topic.isCompleted ? 1.0 : 0.0,
+                          minHeight: 3,
+                          backgroundColor: const Color(0xFFF3F4F6),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xFF34D399)),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (isLocked)
+                const Icon(Icons.lock_outline_rounded,
+                    color: Color(0xFF9CA3AF), size: 18)
+              else if (topic.isCompleted)
+                const Icon(Icons.check_circle_rounded,
                     color: Color(0xFF34D399), size: 20)
-                : const Icon(Icons.chevron_right,
+              else
+                const Icon(Icons.chevron_right,
                     color: Color(0xFF9CA3AF), size: 20),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -72,7 +72,10 @@
   "onboardingNext": "Siguiente",
   "onboardingRegister": "Registrarse",
   "onboardingStart": "Comenzar",
-  "onboardingHaveAccount": "Ya tengo una cuenta",
+  "onboardingHaveAccount": "¿Ya tienes cuenta? Inicia sesión",
+  "onboardingFeature1": "Registra gastos con la regla 50/30/20",
+  "onboardingFeature2": "Establece y logra tus metas de ahorro",
+  "onboardingFeature3": "Insights de IA adaptados para estudiantes",
 
   "dashboardGreeting": "Hola, {name}",
   "@dashboardGreeting": {
@@ -482,7 +485,7 @@
   "recommendationsEmpty": "Aún no hay recomendaciones. Agrega más transacciones para obtener consejos personalizados.",
   "recommendationsErrorLoad": "No se pudieron cargar las recomendaciones",
   "recommendationsAccept": "Útil",
-  "recommendationsReject": "No útil",
+  "recommendationsReject": "No es relevante",
 
   "educationTitle": "Educación financiera",
   "educationErrorLoad": "No se pudieron cargar los temas",
@@ -605,13 +608,16 @@
   "notificationTypeDailyReminder": "Recordatorio diario",
   "notificationTypeBadgeEarned": "Insignia obtenida",
 
-  "consentTitle": "Tus datos, tu control",
-  "consentSubtitle": "Antes de empezar, revisa cómo Zenda maneja tu información.",
+  "consentTitle": "Tu privacidad importa",
+  "consentSubtitle": "Antes de empezar, lee cómo Zenda maneja tus datos financieros.",
+  "consentBullet1": "Tus datos están cifrados y almacenados de forma segura en servidores Azure.",
+  "consentBullet2": "Tus datos se usan solo para generar reportes personalizados y predicciones de IA.",
+  "consentBullet3": "Nunca se comparten con terceros. Puedes solicitar su eliminación en cualquier momento.",
   "consentBodyTitle": "¿Qué datos recopilamos?",
   "consentBodyText": "Zenda recopila tus registros de ingresos y gastos, perfil financiero (edad, universidad, tipo de ingreso) y datos de uso de la app para generar predicciones y recomendaciones personalizadas. Tus datos nunca se comparten con terceros y se almacenan de forma segura.",
-  "consentLawNote": "En cumplimiento con la Ley 29733 — Ley de Protección de Datos Personales del Perú",
-  "consentCheckbox": "Acepto que mis datos financieros sean procesados para generar reportes y predicciones personalizadas",
-  "consentAcceptButton": "Aceptar y continuar",
+  "consentLawNote": "Esta app cumple con la Ley de Protección de Datos Personales del Perú (Ley 29733).",
+  "consentCheckbox": "Acepto que mis datos financieros sean procesados para generar reportes personalizados y predicciones de IA.",
+  "consentAcceptButton": "Acepto — Comencemos",
   "consentMustAccept": "Debes aceptar para continuar",
 
   "emailSentTitle": "¡Cuenta creada!",
@@ -632,15 +638,26 @@
 
   "profileSetupTitle": "Cuéntanos sobre ti",
   "profileSetupSubtitle": "Ayuda a Zenda a personalizar tu experiencia. Puedes editar esto en cualquier momento.",
+  "profileSetupStep": "Paso {step} de {total}",
+  "@profileSetupStep": {
+    "placeholders": {
+      "step": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "profileSetupSkip": "Omitir",
   "profileSetupAge": "¿Cuántos años tienes?",
-  "profileSetupAgeHint": "ej. 21",
-  "profileSetupUniversity": "¿Dónde estudias?",
-  "profileSetupUniversityHint": "ej. PUCP, UNMSM",
-  "profileSetupIncomeType": "¿Cómo obtienes ingresos principalmente?",
-  "profileSetupMonthlyIncome": "Ingreso mensual promedio (S/)",
-  "profileSetupMonthlyIncomeHint": "ej. 1500",
-  "profileSetupNext": "Siguiente",
-  "profileSetupSave": "Terminar",
+  "profileSetupAgeHint": "Esto nos ayuda a entender tu etapa financiera y personalizar tus insights.",
+  "profileSetupUniversity": "¿En qué universidad estudias?",
+  "profileSetupUniversityHint": "ej. PUCP, ULima, UNMSM...",
+  "profileSetupUniversitySubtitle": "Tu campus nos ayuda a sugerir recursos financieros locales.",
+  "profileSetupIncomeType": "¿Cuál es tu principal fuente de ingresos?",
+  "profileSetupIncomeTypeSubtitle": "Usamos esto para personalizar tus recomendaciones de presupuesto 50/30/20.",
+  "profileSetupMonthlyIncome": "¿Cuál es tu ingreso mensual promedio?",
+  "profileSetupMonthlyIncomeHint": "Un estimado está bien. Esto calibra tus objetivos de presupuesto 50/30/20.",
+  "profileSetupMonthlyIncomePerMonth": "por mes",
+  "profileSetupNext": "Continuar →",
+  "profileSetupSave": "Finalizar →",
   "profileSetupCompleteTitle": "¡Listo!",
   "profileSetupCompleteTitleNamed": "¡Todo listo, {name}!",
   "@profileSetupCompleteTitleNamed": {
@@ -650,19 +667,31 @@
   },
   "profileSetupCompleteBody": "Tu perfil está listo. Toma el control de tus finanzas.",
   "profileSetupGoToDashboard": "Comenzar a usar Zenda",
-  "incomeTypeScholarship": "Beca",
-  "incomeTypePartTime": "Trabajo a tiempo parcial",
-  "incomeTypeFamily": "Apoyo familiar",
-  "incomeTypeMixed": "Mixto (trabajo + apoyo)",
+  "incomeTypeScholarship": "Beca / Subvención",
+  "incomeTypeScholarshipSub": "Beca, PRONABEC, financiamiento universitario",
+  "incomeTypePartTime": "Medio tiempo / Freelance",
+  "incomeTypePartTimeSub": "Trabajo, gigs, proyectos paralelos",
+  "incomeTypeFamily": "Apoyo Familiar",
+  "incomeTypeFamilySub": "Mensualidad de la familia",
+  "incomeTypeMixed": "Mixto",
+  "incomeTypeMixedSub": "Combinación de los anteriores",
 
-  "aiChatTitle": "Zenda IA",
-  "aiChatInputHint": "Pregunta lo que quieras sobre tus finanzas...",
+  "aiChatTitle": "Zenda AI",
+  "aiChatSubtitle": "Basado en tus datos financieros",
+  "aiChatInputHint": "Pregúntale a Zenda AI lo que quieras...",
   "aiChatSend": "Enviar",
   "aiChatWelcome": "¡Hola! Soy Zenda, tu asistente financiero. Pregúntame sobre presupuestos, ahorros o gastos.",
   "aiChatError": "No pude obtener una respuesta. Inténtalo de nuevo.",
   "aiChatNavLabel": "Zenda IA",
 
   "quizTitle": "Quiz",
+  "quizQuestionOf": "Pregunta {current} de {total}",
+  "@quizQuestionOf": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "quizEmpty": "Aún no hay quiz disponible para este tema.",
   "quizSubmit": "Enviar",
   "quizCorrect": "¡Correcto!",
@@ -858,6 +887,10 @@
   "profileSetupIncomeQuick2000": "S/ 2,000",
 
   "educationSearchHint": "Buscar temas...",
+  "educationTabLearn": "Aprender",
+  "educationTabChallenges": "Retos",
+  "educationTabBadges": "Insignias",
+  "educationTabProgress": "Progreso",
   "educationFilterAll": "Todos",
   "educationFilterBeginner": "Básico",
   "educationFilterIntermediate": "Intermedio",
@@ -875,6 +908,13 @@
       "minutes": { "type": "int" }
     }
   },
+  "educationQuestions": "{count} preguntas",
+  "@educationQuestions": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "educationLocked": "Completa los temas anteriores primero",
   "quizAnswerRecorded": "Respuesta guardada. Toca Siguiente para continuar.",
 
   "authSignUpLink": "Regístrate",
@@ -886,5 +926,57 @@
   "budgetSelectPeriod": "Seleccionar período",
   "commonDone": "Listo",
   "profileCurrencyPEN": "PEN — Sol peruano (S/)",
-  "profileCurrencyUSD": "USD — Dólar americano ($)"
+  "profileCurrencyUSD": "USD — Dólar americano ($)",
+  "splashTagline": "Tu compañero de finanzas con IA",
+  "splashFooter": "Hecho para universitarios peruanos",
+
+  "dashboardManageBudgets": "Toca para gestionar presupuestos",
+  "streakTapToView": "Toca para ver el progreso",
+  "aiCardPredictionsChat": "Predicciones y Chat IA",
+  "aiCardViewForecast": "Ver pronóstico",
+
+  "reportsVsLastMonth": "vs mes anterior",
+  "reportsAiInsightsTitle": "Insights de IA",
+  "reportsAiInsightsSaved": "Ahorraste más que el mes pasado. ¡Excelente!",
+  "reportsAiInsightsExceeded": "categoría superó el límite.",
+
+  "progressOverviewTitle": "Resumen del Mes",
+  "progressTotalExpenses": "Gastos Totales",
+  "progressTotalSavings": "Ahorros Totales",
+  "progressNetBalance": "Balance Neto",
+  "progressTrendTitle": "Tendencia Mensual",
+  "progressVsLabel": "vs",
+  "progressSavingsLegend": "Ahorros",
+
+  "badgesSectionEarned": "Ganadas",
+  "badgesSectionLocked": "Bloqueadas",
+  "badgesEarnedLabel": "ganadas",
+
+  "predictionsProjectedBalance": "Balance Proyectado",
+  "predictionsConfident": "confianza",
+  "predictionsBasedOnMonths": "Basado en los últimos 3 meses",
+  "predictionsProjectedExpenses": "Gastos proyectados",
+  "predictionsTopCategories": "Principales categorías de gastos",
+  "predictionsVsLastMonth": "8% vs mes anterior",
+
+  "recommendationsSubtitle": "3 consejos personalizados para ti esta semana",
+  "recommendationsRateExperience": "Valorar experiencia →",
+
+  "notificationsMasterTitle": "Activar Notificaciones",
+  "notificationsMasterSubtitle": "Recibe alertas y recordatorios",
+  "notificationsCategoriesLabel": "Categorías",
+  "notificationSubtypeBudgetAlert": "Cuando alcances el 80% de tu presupuesto",
+  "notificationSubtypeAnomalyAlert": "Patrones de gasto inusual detectados",
+  "notificationSubtypePredictionReady": "Predicción mensual lista",
+  "notificationSubtypeChallengeReminder": "Nuevos desafíos e insignia ganada",
+  "notificationSubtypeDailyReminder": "Recuérdame registrar transacciones",
+  "notificationSubtypeBadgeEarned": "Nueva insignia ganada",
+
+  "surveySkipButton": "Omitir",
+  "surveyProgressOf": "de",
+  "surveyCompleteTitle": "¡Encuesta Completada!",
+  "surveyCompleteSubtitle": "¡Gracias por compartir! Usaremos tus respuestas para personalizar Zenda para ti.",
+  "surveyBadgeUnlocked": "insignia desbloqueada!",
+  "surveyFinancialProfileTitle": "Tu Perfil Financiero",
+  "surveyFinancialProfileBody": "Basándonos en tus respuestas, Zenda ha personalizado tu panel y recomendaciones para ayudarte a construir mejores hábitos de ahorro."
 }

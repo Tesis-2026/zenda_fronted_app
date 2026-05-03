@@ -21,7 +21,35 @@ class BadgesScreen extends ConsumerWidget {
     final badgesAsync = ref.watch(_badgesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.badgesTitle)),
+      appBar: AppBar(
+        title: Text(l10n.badgesTitle),
+        actions: [
+          badgesAsync.whenOrNull(
+            data: (badges) {
+              final earned = badges.where((b) => b.isEarned).length;
+              return Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '$earned ${l10n.badgesEarnedLabel}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF10B981),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ) ?? const SizedBox.shrink(),
+        ],
+      ),
       body: badgesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -38,34 +66,73 @@ class BadgesScreen extends ConsumerWidget {
           ),
         ),
         data: (badges) {
-          final earned = badges.where((b) => b.isEarned).length;
+          final earnedBadges = badges.where((b) => b.isEarned).toList();
+          final lockedBadges = badges.where((b) => !b.isEarned).toList();
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(_badgesProvider),
             child: CustomScrollView(
               slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      l10n.badgesEarnedCount(earned, badges.length),
-                      style: Theme.of(context).textTheme.titleSmall,
+                // AppBar action: "N earned" chip is handled below as inline header
+                // Earned section header
+                if (earnedBadges.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Text(
+                        l10n.badgesSectionEarned,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverGrid.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
+                if (earnedBadges.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverGrid.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: earnedBadges.length,
+                      itemBuilder: (context, index) =>
+                          _BadgeTile(badge: earnedBadges[index]),
                     ),
-                    itemCount: badges.length,
-                    itemBuilder: (context, index) =>
-                        _BadgeTile(badge: badges[index]),
                   ),
-                ),
+                // Locked section header
+                if (lockedBadges.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                      child: Text(
+                        l10n.badgesSectionLocked,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                if (lockedBadges.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverGrid.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: lockedBadges.length,
+                      itemBuilder: (context, index) =>
+                          _BadgeTile(badge: lockedBadges[index]),
+                    ),
+                  ),
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
               ],
             ),
@@ -82,24 +149,35 @@ class _BadgeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Tooltip(
-      message: badge.isEarned ? badge.description : '???',
+      message: badge.description,
       child: Container(
         decoration: BoxDecoration(
-          color: badge.isEarned
-              ? colorScheme.primaryContainer
-              : colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-          border: badge.isEarned
-              ? Border.all(color: colorScheme.primary, width: 2)
-              : null,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: badge.isEarned
+                ? const Color(0xFF34D399).withValues(alpha: 0.0)
+                : const Color(0xFFE5E7EB),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (!badge.isEarned)
+            if (badge.isEarned)
+              Icon(
+                Icons.military_tech_rounded,
+                size: 40,
+                color: const Color(0xFF1F2937),
+              )
+            else
               ColorFiltered(
                 colorFilter: const ColorFilter.matrix([
                   0.2126, 0.7152, 0.0722, 0, 0,
@@ -107,36 +185,45 @@ class _BadgeTile extends StatelessWidget {
                   0.2126, 0.7152, 0.0722, 0, 0,
                   0,      0,      0,      1, 0,
                 ]),
-                child: Icon(
-                  Icons.military_tech,
-                  size: 36,
-                  color: colorScheme.onSurfaceVariant,
+                child: const Icon(
+                  Icons.military_tech_rounded,
+                  size: 40,
+                  color: Color(0xFF9CA3AF),
                 ),
-              )
-            else
-              Icon(
-                Icons.military_tech,
-                size: 36,
-                color: colorScheme.onPrimaryContainer,
               ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                badge.isEarned ? badge.name : '???',
+                // Always show the badge name (locked names are visible in design)
+                badge.name,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: badge.isEarned
-                          ? colorScheme.onPrimaryContainer
-                          : colorScheme.onSurfaceVariant,
+                          ? const Color(0xFF1F2937)
+                          : const Color(0xFF9CA3AF),
                       fontWeight: badge.isEarned
                           ? FontWeight.w600
                           : FontWeight.normal,
                     ),
               ),
             ),
+            if (badge.isEarned && badge.description.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  badge.description,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 9,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

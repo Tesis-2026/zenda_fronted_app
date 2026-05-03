@@ -25,7 +25,36 @@ class ChallengesScreen extends ConsumerWidget {
     final challengesAsync = ref.watch(_challengesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.challengesTitle)),
+      appBar: AppBar(
+        title: Text(l10n.challengesTitle),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🔥', style: TextStyle(fontSize: 14)),
+                  SizedBox(width: 4),
+                  Text(
+                    '12 day streak',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFF59E0B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
       body: challengesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -234,78 +263,170 @@ class _ChallengeCard extends StatelessWidget {
   final Future<void> Function() onAccept;
   final Future<void> Function() onComplete;
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'COMPLETED':
-        return const Color(0xFF43A047);
-      case 'ACTIVE':
-        return const Color(0xFF1E88E5);
-      default:
-        return const Color(0xFF757575);
-    }
-  }
-
-  IconData _statusIcon(String status) {
-    switch (status) {
-      case 'COMPLETED':
-        return Icons.check_circle;
-      case 'ACTIVE':
-        return Icons.flag;
-      default:
-        return Icons.flag_outlined;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final color = _statusColor(challenge.status);
+    final isCompleted = challenge.status == 'COMPLETED';
+    final isActive = challenge.status == 'ACTIVE';
+
+    // Progress values: use challenge fields if available, fall back to 0/1.
+    final int current = challenge.progressCurrent ?? 0;
+    final int total = challenge.progressTotal ?? 1;
+    final double progress = total > 0 ? (current / total).clamp(0.0, 1.0) : 0.0;
+    final String? daysLeft = challenge.daysLeft;
+    final String? badgeReward = challenge.badgeReward;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title row: icon + title + progress count or status chip
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(_statusIcon(challenge.status), color: color, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    challenge.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                // Category icon circle
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isCompleted
+                        ? Icons.check_rounded
+                        : Icons.emoji_events_outlined,
+                    size: 20,
+                    color: const Color(0xFF10B981),
                   ),
                 ),
-                Chip(
-                  avatar: const Icon(Icons.star, size: 14),
-                  label: Text('${challenge.pointsReward}'),
-                  padding: EdgeInsets.zero,
-                  labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-                  visualDensity: VisualDensity.compact,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        challenge.title,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1F2937),
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        challenge.description,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: const Color(0xFF6B7280),
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
+                if (isActive && total > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF34D399).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$current/$total',
+                      style: const TextStyle(
+                        color: Color(0xFF10B981),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  )
+                else if (isCompleted)
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF10B981),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check, color: Colors.white, size: 16),
+                  ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              challenge.description,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            // Progress bar (active challenges only)
+            if (isActive && total > 0) ...[
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: const Color(0xFFE5E7EB),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
+                ),
+              ),
+            ],
+            // Reward row
+            if (challenge.pointsReward > 0 || badgeReward != null || daysLeft != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  if (challenge.pointsReward > 0) ...[
+                    const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF59E0B)),
+                    const SizedBox(width: 3),
+                    Text(
+                      'Reward: +${challenge.pointsReward} XP',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
+                    if (badgeReward != null) ...[
+                      const SizedBox(width: 4),
+                      const Text('•', style: TextStyle(color: Color(0xFF6B7280))),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.military_tech_rounded,
+                          size: 14, color: Color(0xFF6B7280)),
+                      const SizedBox(width: 2),
+                      Text(
+                        badgeReward,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ],
+                  const Spacer(),
+                  if (daysLeft != null && !isCompleted)
+                    Text(
+                      '$daysLeft days left',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFF59E0B),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+            // Action buttons
             if (challenge.status == 'AVAILABLE') ...[
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
                 child: FilledButton(
                   onPressed: onAccept,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF34D399),
+                  ),
                   child: Text(l10n.challengesAcceptButton),
                 ),
               ),
             ],
-            if (challenge.status == 'ACTIVE') ...[
+            if (isActive) ...[
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,

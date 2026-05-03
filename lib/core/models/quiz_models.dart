@@ -5,12 +5,14 @@ class QuizQuestion {
   final String difficulty;
   final String text;
   final List<String> options;
+  final String? explanation;
 
   const QuizQuestion({
     required this.id,
     required this.difficulty,
     required this.text,
     required this.options,
+    this.explanation,
   });
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) => QuizQuestion(
@@ -18,6 +20,7 @@ class QuizQuestion {
         difficulty: json['difficulty'] as String,
         text: json['text'] as String,
         options: (json['options'] as List<dynamic>).cast<String>(),
+        explanation: json['explanation'] as String?,
       );
 }
 

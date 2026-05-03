@@ -83,6 +83,32 @@ class UserMenuButton extends ConsumerWidget {
         ),
         const PopupMenuDivider(height: 1),
         PopupMenuItem<String>(
+          value: 'reports',
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.bar_chart_rounded, size: 18, color: Color(0xFF374151)),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                l10n.reportsTitle,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        PopupMenuItem<String>(
           value: 'signout',
           child: Row(
             children: [
@@ -112,6 +138,8 @@ class UserMenuButton extends ConsumerWidget {
 
     if (result == 'profile' && context.mounted) {
       context.push('/profile');
+    } else if (result == 'reports' && context.mounted) {
+      context.push('/reports');
     } else if (result == 'signout' && context.mounted) {
       final confirmed = await showDialog<bool>(
         context: context,

@@ -70,9 +70,18 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     child: Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        TextButton.icon(
                           onPressed: () => context.pop(),
+                          icon: const Icon(Icons.arrow_back,
+                              color: Colors.white, size: 18),
+                          label: const Text(
+                            'Back',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                          ),
                         ),
                       ],
                     ),
@@ -264,10 +273,10 @@ class _ContributeSheetState extends State<_ContributeSheet> {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: pct / 100,
-                minHeight: 6,
+                minHeight: 8,
                 backgroundColor: isDark
                     ? Colors.white.withValues(alpha: 0.1)
-                    : const Color(0xFFF3F4F6),
+                    : const Color(0xFFE5E7EB),
                 valueColor:
                     const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
               ),
@@ -471,7 +480,7 @@ class _Body extends StatelessWidget {
             minHeight: 8,
             backgroundColor: isDark
                 ? Colors.white.withValues(alpha: 0.1)
-                : const Color(0xFFF3F4F6),
+                : const Color(0xFFE5E7EB),
             valueColor:
                 const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
           ),
@@ -601,7 +610,7 @@ class _ContributionTile extends StatelessWidget {
             ),
           ),
           Text(
-            '+ S/ ${contribution.amount.toStringAsFixed(2)}',
+            '+ S/ ${contribution.amount.toStringAsFixed(0)}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: const Color(0xFF34D399),
                   fontWeight: FontWeight.w600,

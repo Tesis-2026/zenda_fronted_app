@@ -301,11 +301,11 @@ class _GoalCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.white10 : _bgColor(),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
                   child: Text(_emoji(), style: const TextStyle(fontSize: 22)),
@@ -355,10 +355,10 @@ class _GoalCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
                         value: pct / 100,
-                        minHeight: 6,
+                        minHeight: 8,
                         backgroundColor: isDark
                             ? Colors.white.withValues(alpha: 0.1)
-                            : const Color(0xFFF3F4F6),
+                            : const Color(0xFFE5E7EB),
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                       ),
                     ),

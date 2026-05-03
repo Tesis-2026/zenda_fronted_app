@@ -120,41 +120,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final budgetsAsync = ref.watch(_budgetsProvider(_filter));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.budgetTitle),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: InkWell(
-              onTap: () => _showMonthPicker(context),
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                      color: Theme.of(context).colorScheme.outlineVariant),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${_monthNames[_month - 1]} $_year',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.calendar_today_outlined, size: 14),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: budgetsAsync.when(
+      backgroundColor: const Color(0xFFF9FAFB),
+      body: SafeArea(
+        child: budgetsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
           child: Column(
@@ -171,39 +139,62 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         ),
         data: (budgets) {
           if (budgets.isEmpty) {
-            return _EmptyState(
-              title: l10n.budgetEmptyTitle,
-              subtitle: l10n.budgetEmptySubtitle,
+            return Column(
+              children: [
+                _BudgetHeader(
+                  month: _monthNames[_month - 1],
+                  year: _year,
+                  onTap: () => _showMonthPicker(context),
+                  onAdd: _showCreateDialog,
+                ),
+                Expanded(
+                  child: _EmptyState(
+                    title: l10n.budgetEmptyTitle,
+                    subtitle: l10n.budgetEmptySubtitle,
+                  ),
+                ),
+              ],
             );
           }
           final summary = _computeSummary(budgets);
-          return ListView(
-            padding: const EdgeInsets.all(16),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 3-column summary
-              _BucketSummaryRow(summary: summary),
-              const SizedBox(height: 20),
-              // By Category header
-              Text(
-                l10n.budgetByCategory,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              _BudgetHeader(
+                month: _monthNames[_month - 1],
+                year: _year,
+                onTap: () => _showMonthPicker(context),
+                onAdd: _showCreateDialog,
               ),
-              const SizedBox(height: 12),
-              ...budgets.map((b) => _BudgetCard(
-                    budget: b,
-                    onDelete: () => _deleteBudget(b.id),
-                    onEdit: () => _showEditDialog(b),
-                  )),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                  children: [
+                    // 3-column summary
+                    _BucketSummaryRow(summary: summary),
+                    const SizedBox(height: 24),
+                    // By Category header
+                    Text(
+                      l10n.budgetByCategory,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...budgets.map((b) => _BudgetCard(
+                          budget: b,
+                          onDelete: () => _deleteBudget(b.id),
+                          onEdit: () => _showEditDialog(b),
+                        )),
+                  ],
+                ),
+              ),
             ],
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showCreateDialog,
-        backgroundColor: const Color(0xFF34D399),
-        child: const Icon(Icons.add, color: Colors.white),
       ),
       bottomNavigationBar: const AppBottomNav(activeIndex: 0),
     );
@@ -464,6 +455,78 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   }
 }
 
+class _BudgetHeader extends StatelessWidget {
+  final String month;
+  final int year;
+  final VoidCallback onTap;
+  final VoidCallback onAdd;
+
+  const _BudgetHeader({
+    required this.month,
+    required this.year,
+    required this.onTap,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+      child: Row(
+        children: [
+          const Text(
+            'Budget',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1F2937),
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$month $year',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF374151),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.calendar_today_outlined, size: 13, color: Color(0xFF6B7280)),
+                ],
+              ),
+            ),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: onAdd,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.more_vert_rounded, size: 20, color: Color(0xFF6B7280)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _BucketSummary {
   final double needsSpent;
   final double needsLimit;
@@ -540,33 +603,36 @@ class _BucketCell extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'S/ ${spent.toStringAsFixed(0)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
           ),
           if (limit > 0)
             Text(
               'of S/ ${limit.toStringAsFixed(0)}',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0xFF9CA3AF),
+              ),
             ),
         ],
       ),
@@ -614,6 +680,22 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+IconData _iconForBudgetCategory(String? name) {
+  if (name == null) return Icons.account_balance_wallet_outlined;
+  return switch (name.toLowerCase()) {
+    'food' || 'comida' => Icons.restaurant_rounded,
+    'transportation' || 'transporte' => Icons.directions_bus_rounded,
+    'housing' || 'vivienda' => Icons.home_rounded,
+    'utilities' || 'servicios' => Icons.bolt_rounded,
+    'health' || 'salud' => Icons.favorite_rounded,
+    'entertainment' || 'entretenimiento' => Icons.sports_esports_rounded,
+    'shopping' || 'compras' => Icons.shopping_bag_rounded,
+    'subscriptions' || 'suscripciones' => Icons.subscriptions_rounded,
+    'savings' || 'ahorro' => Icons.savings_rounded,
+    _ => Icons.category_rounded,
+  };
+}
+
 class _BudgetCard extends StatelessWidget {
   final Budget budget;
   final VoidCallback onDelete;
@@ -626,81 +708,98 @@ class _BudgetCard extends StatelessWidget {
   });
 
   Color _progressColor(double pct) {
-    if (pct > 80) return const Color(0xFFEF4444); // red
-    if (pct >= 60) return const Color(0xFFF59E0B); // yellow
-    return const Color(0xFF10B981); // green
+    if (pct > 100) return const Color(0xFFEF4444); // red — over budget
+    if (pct > 80) return const Color(0xFFF59E0B); // amber — warning
+    return const Color(0xFF10B981); // green — healthy
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final pct = budget.percentageUsed.clamp(0, 100).toDouble();
+    final pct = (budget.amountLimit > 0
+            ? (budget.currentSpent / budget.amountLimit) * 100
+            : 0)
+        .clamp(0, 200)
+        .toDouble();
     final color = _progressColor(pct);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isOverBudget = budget.currentSpent > budget.amountLimit && budget.amountLimit > 0;
+    final categoryName = budget.categoryName ?? l10n.budgetCategoryAll;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    budget.categoryName ?? l10n.budgetCategoryAll,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF3F4F6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                IconButton(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit_outlined, size: 20),
+                child: Icon(
+                  _iconForBudgetCategory(budget.categoryName),
+                  size: 18,
+                  color: const Color(0xFF6B7280),
                 ),
-                IconButton(
-                  onPressed: onDelete,
-                  icon: Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: pct / 100,
-                minHeight: 8,
-                backgroundColor: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.black.withValues(alpha: 0.08),
-                valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
-            ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.budgetSpentOf(
-                    budget.currentSpent.toStringAsFixed(2),
-                    budget.amountLimit.toStringAsFixed(2),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  categoryName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1F2937),
                   ),
-                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-                Text(
-                  l10n.budgetPercentUsed(pct.toStringAsFixed(0)),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.w600,
-                      ),
+              ),
+              if (isOverBudget)
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 18,
                 ),
-              ],
+              const SizedBox(width: 4),
+              Text(
+                'S/ ${budget.currentSpent.toStringAsFixed(0)} / S/ ${budget.amountLimit.toStringAsFixed(0)}',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isOverBudget ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onEdit,
+                child: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF9CA3AF)),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onDelete,
+                child: const Icon(Icons.delete_outline, size: 16, color: Color(0xFF9CA3AF)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (pct / 100).clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: const Color(0xFFF3F4F6),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

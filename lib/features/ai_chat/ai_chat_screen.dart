@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/ai_chat_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
-import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
 class _ChatBubble {
@@ -24,12 +23,18 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   final _messages = <_ChatBubble>[];
   bool _loading = false;
 
+  // Hardcoded personalized welcome message shown when chat history is empty
+  static const _demoWelcome =
+      "Hi Paolo! 👋 I'm Zenda AI, your personal finance assistant. "
+      "I can see your spending this month totals S/ 1,240 across 20 transactions. "
+      "Your biggest expense category is Food at S/ 320. "
+      "How can I help you today?";
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final l10n = context.l10n;
-      setState(() => _messages.add(_ChatBubble(text: l10n.aiChatWelcome, isUser: false)));
+      setState(() => _messages.add(_ChatBubble(text: _demoWelcome, isUser: false)));
     });
   }
 
@@ -53,7 +58,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
     try {
       final history = _messages
-          .where((m) => m.text != context.l10n.aiChatWelcome || !m.isUser == false)
+          .where((m) => m.text != _demoWelcome || m.isUser)
           .map((m) => ChatMessage(role: m.isUser ? 'user' : 'assistant', content: m.text))
           .toList();
 
@@ -90,28 +95,90 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 12,
         title: Row(
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 40,
+              height: 40,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [Color(0xFF34D399), Color(0xFF10B981)],
-                ),
+                color: Color(0xFF34D399),
               ),
-              child: const Icon(Icons.psychology_rounded, size: 18, color: Colors.white),
+              child: const Icon(Icons.psychology_rounded, size: 22, color: Colors.white),
             ),
             const SizedBox(width: 10),
-            Text(l10n.aiChatTitle),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.aiChatTitle,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                  Text(
+                    l10n.aiChatSubtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF34D399),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'Online',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF059669),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         elevation: 0,
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: UserMenuButton(),
+            padding: const EdgeInsets.only(right: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.more_horiz_rounded, color: Color(0xFF6B7280), size: 20),
+                onPressed: () {},
+                padding: const EdgeInsets.all(8),
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              ),
+            ),
           ),
         ],
       ),
@@ -166,37 +233,77 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = bubble.isUser;
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isUser
-              ? const Color(0xFF34D399)
-              : (isDark ? const Color(0xFF1E293B) : Colors.white),
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: isUser ? const Radius.circular(18) : const Radius.circular(4),
-            bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(18),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+
+    if (isUser) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: const BoxDecoration(
+            color: Color(0xFF34D399),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(18),
+              topRight: Radius.circular(18),
+              bottomLeft: Radius.circular(18),
+              bottomRight: Radius.circular(4),
             ),
-          ],
-        ),
-        child: Text(
-          bubble.text,
-          style: TextStyle(
-            color: isUser ? Colors.white : (isDark ? Colors.white : const Color(0xFF1F2937)),
-            height: 1.5,
+          ),
+          child: Text(
+            bubble.text,
+            style: const TextStyle(color: Colors.white, height: 1.5),
           ),
         ),
+      );
+    }
+
+    // AI message with avatar on the left
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF34D399),
+            ),
+            child: const Icon(Icons.psychology_rounded, size: 18, color: Colors.white),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(4),
+                  topRight: Radius.circular(18),
+                  bottomLeft: Radius.circular(18),
+                  bottomRight: Radius.circular(18),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                bubble.text,
+                style: TextStyle(
+                  color: isDark ? Colors.white : const Color(0xFF1F2937),
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -168,20 +168,51 @@ class _TopicDetailBody extends StatelessWidget {
             ),
           ),
         ),
-        // Thin reading progress bar
+        // Reading progress bar with label
         SliverToBoxAdapter(
-          child: LinearProgressIndicator(
-            value: topic.isCompleted ? 1.0 : 0.0,
-            minHeight: 3,
-            backgroundColor: const Color(0xFFE5E7EB),
-            valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFF34D399)),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Row(
+              children: [
+                Text(
+                  'Reading progress',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF6B7280),
+                        fontSize: 12,
+                      ),
+                ),
+                const Spacer(),
+                Text(
+                  topic.isCompleted ? '100%' : '0%',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF34D399),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: topic.isCompleted ? 1.0 : 0.0,
+                minHeight: 6,
+                backgroundColor: const Color(0xFFE5E7EB),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color(0xFF34D399)),
+              ),
+            ),
           ),
         ),
         // Content
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             child: Text(
               topic.content,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -242,13 +273,17 @@ class _TopicDetailBody extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    icon:
-                        const Icon(Icons.quiz_outlined, size: 18),
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                    iconAlignment: IconAlignment.end,
                     label: Text(l10n.educationTakeQuiz),
                     onPressed: () =>
-                        context.push('/education/${topic.id}/quiz'),
+                        context.push(
+                          '/education/${topic.id}/quiz',
+                          extra: topic.title,
+                        ),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF1F2937),
+                      backgroundColor: const Color(0xFF34D399),
+                      foregroundColor: Colors.white,
                       padding:
                           const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(

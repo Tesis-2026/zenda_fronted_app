@@ -12,8 +12,10 @@ import '../services/education_api_service.dart';
 import '../services/goals_api_service.dart';
 import '../services/insights_api_service.dart';
 import '../services/predictions_api_service.dart';
+import '../services/progress_api_service.dart';
 import '../services/quiz_api_service.dart';
 import '../services/recommendations_api_service.dart';
+import '../services/surveys_api_service.dart';
 import '../services/transaction_api_service.dart';
 import '../services/user_api_service.dart';
 import 'demo_data.dart';
@@ -215,6 +217,7 @@ class MockQuizApiService extends QuizApiService {
               difficulty: e.difficulty,
               text: e.text,
               options: List<String>.from(e.options),
+              explanation: e.explanation,
             ))
         .toList();
   }
@@ -249,6 +252,114 @@ class MockQuizApiService extends QuizApiService {
       feedback: feedback,
     );
   }
+}
+
+class MockProgressApiService extends ProgressApiService {
+  @override
+  Future<FinancialProgress> getProgress() async => DemoData.financialProgress;
+}
+
+class MockSurveysApiService extends SurveysApiService {
+  @override
+  Future<Survey> getPreSurvey() async => DemoData.mockPreSurvey;
+
+  @override
+  Future<Survey> getPostSurvey() async => DemoData.mockPreSurvey;
+
+  @override
+  Future<SurveyResult> submitPre(Map<String, String> answers) async =>
+      DemoData.mockSurveyResult;
+
+  @override
+  Future<SurveyResult> submitPost(Map<String, String> answers) async =>
+      const SurveyResult(
+        score: 85.0,
+        level: 'advanced',
+        improvement: 13.0,
+        xpEarned: 75,
+        badgeUnlocked: 'Budget Master',
+      );
+
+  @override
+  Future<Survey> getSusSurvey() async {
+    return Survey(
+      id: 'survey-sus-demo',
+      type: 'SUS',
+      questions: [
+        const SurveyQuestion(
+          id: 'sus-1',
+          order: 1,
+          text: 'I think that I would like to use this app frequently.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-2',
+          order: 2,
+          text: 'I found the app unnecessarily complex.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-3',
+          order: 3,
+          text: 'I thought the app was easy to use.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-4',
+          order: 4,
+          text: 'I would need the support of a technical person to use this app.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-5',
+          order: 5,
+          text: 'I found the various functions in this app well integrated.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-6',
+          order: 6,
+          text: 'I thought there was too much inconsistency in this app.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-7',
+          order: 7,
+          text: 'I imagine that most people would learn to use this app quickly.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-8',
+          order: 8,
+          text: 'I found the app very cumbersome to use.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-9',
+          order: 9,
+          text: 'I felt very confident using the app.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+        const SurveyQuestion(
+          id: 'sus-10',
+          order: 10,
+          text: 'I needed to learn a lot of things before I could use this app.',
+          options: ['1', '2', '3', '4', '5'],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Future<SusResult> submitSus(Map<String, String> answers) async =>
+      const SusResult(susScore: 82, grade: 'B');
+
+  @override
+  Future<SurveyComparison> getComparison() async => const SurveyComparison(
+        preScore: 72.0,
+        postScore: 85.0,
+        improvementPercentage: 18.1,
+      );
 }
 
 class MockAiChatApiService extends AiChatApiService {

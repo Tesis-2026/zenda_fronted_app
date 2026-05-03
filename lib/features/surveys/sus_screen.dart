@@ -5,12 +5,12 @@ import '../../core/services/surveys_api_service.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
-final _susSurveyServiceProvider = Provider<SurveysApiService>(
+final susSurveyServiceProvider = Provider<SurveysApiService>(
   (_) => SurveysApiService(),
 );
 
 final _susSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
-  return ref.read(_susSurveyServiceProvider).getSusSurvey();
+  return ref.read(susSurveyServiceProvider).getSusSurvey();
 });
 
 class SusScreen extends ConsumerStatefulWidget {
@@ -35,7 +35,7 @@ class _SusScreenState extends ConsumerState<SusScreen> {
       final answers = {
         for (final q in questions) q.id: _ratings[q.id]!.toString(),
       };
-      final result = await ref.read(_susSurveyServiceProvider).submitSus(answers);
+      final result = await ref.read(susSurveyServiceProvider).submitSus(answers);
       if (mounted) setState(() => _result = result);
     } catch (e) {
       if (mounted) {
@@ -59,19 +59,34 @@ class _SusScreenState extends ConsumerState<SusScreen> {
       appBar: AppBar(title: Text(l10n.susSurveyTitle)),
       body: surveyAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(l10n.susSurveyErrorLoad),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(_susSurveyProvider),
-                child: Text(l10n.commonRetry),
-              ),
+        error: (_, _) {
+          // Hardcoded fallback with the 10 standard SUS questions
+          const fallbackSurvey = Survey(
+            id: 'sus-fallback',
+            type: 'SUS',
+            questions: [
+              SurveyQuestion(id: 'sus-1', order: 1, text: 'I think that I would like to use this system frequently.', options: []),
+              SurveyQuestion(id: 'sus-2', order: 2, text: 'I found the system unnecessarily complex.', options: []),
+              SurveyQuestion(id: 'sus-3', order: 3, text: 'I thought the system was easy to use.', options: []),
+              SurveyQuestion(id: 'sus-4', order: 4, text: 'I think that I would need the support of a technical person to be able to use this system.', options: []),
+              SurveyQuestion(id: 'sus-5', order: 5, text: 'I found the various functions in this system were well integrated.', options: []),
+              SurveyQuestion(id: 'sus-6', order: 6, text: 'I thought there was too much inconsistency in this system.', options: []),
+              SurveyQuestion(id: 'sus-7', order: 7, text: 'I would imagine that most people would learn to use this system very quickly.', options: []),
+              SurveyQuestion(id: 'sus-8', order: 8, text: 'I found the system very cumbersome to use.', options: []),
+              SurveyQuestion(id: 'sus-9', order: 9, text: 'I felt very confident using the system.', options: []),
+              SurveyQuestion(id: 'sus-10', order: 10, text: 'I needed to learn a lot of things before I could get going with this system.', options: []),
             ],
-          ),
-        ),
+          );
+          if (_result != null) return _ResultView(result: _result!);
+          return _SurveyForm(
+            survey: fallbackSurvey,
+            ratings: _ratings,
+            submitting: _submitting,
+            onRatingChanged: (questionId, value) =>
+                setState(() => _ratings[questionId] = value),
+            onSubmit: () => _submit(fallbackSurvey.questions),
+          );
+        },
         data: (survey) {
           if (_result != null) return _ResultView(result: _result!);
           return _SurveyForm(

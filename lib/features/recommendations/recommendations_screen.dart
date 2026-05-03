@@ -43,17 +43,51 @@ class RecommendationsScreen extends ConsumerWidget {
             : RefreshIndicator(
                 onRefresh: () async => ref.invalidate(_recsProvider),
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: recs.length,
-                  itemBuilder: (context, index) => _RecommendationCard(
-                    rec: recs[index],
-                    onFeedback: (accepted) async {
-                      await ref
-                          .read(_recsServiceProvider)
-                          .submitFeedback(recs[index].id, accepted: accepted);
-                      ref.invalidate(_recsProvider);
-                    },
-                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  itemCount: recs.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      // Subtitle row
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l10n.recommendationsSubtitle,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                        color: const Color(0xFF6B7280)),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {},
+                              child: Text(
+                                l10n.recommendationsRateExperience,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF6B7280),
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    final recIndex = index - 1;
+                    return _RecommendationCard(
+                      rec: recs[recIndex],
+                      onFeedback: (accepted) async {
+                        await ref
+                            .read(_recsServiceProvider)
+                            .submitFeedback(recs[recIndex].id, accepted: accepted);
+                        ref.invalidate(_recsProvider);
+                      },
+                    );
+                  },
                 ),
               ),
       ),
@@ -70,6 +104,35 @@ class _RecommendationCard extends StatelessWidget {
   final Recommendation rec;
   final Future<void> Function(bool accepted) onFeedback;
 
+  // Design shows colored category chip labels
+  String _labelForType(String type) {
+    switch (type.toUpperCase()) {
+      case 'SAVING':
+        return 'SAVINGS';
+      case 'BUDGET':
+        return 'BUDGET';
+      case 'GOAL':
+        return 'GOAL';
+      case 'SPENDING':
+        return 'SPENDING';
+      default:
+        return type.toUpperCase();
+    }
+  }
+
+  Color _colorForType(String type) {
+    switch (type.toUpperCase()) {
+      case 'SAVING':
+        return const Color(0xFF10B981);
+      case 'BUDGET':
+        return const Color(0xFFF59E0B);
+      case 'GOAL':
+        return const Color(0xFF8B5CF6);
+      default:
+        return const Color(0xFF6B7280);
+    }
+  }
+
   IconData _iconForType(String type) {
     switch (type.toUpperCase()) {
       case 'SPENDING':
@@ -79,7 +142,9 @@ class _RecommendationCard extends StatelessWidget {
       case 'INCOME':
         return Icons.trending_up;
       case 'BUDGET':
-        return Icons.pie_chart_outline;
+        return Icons.bar_chart_rounded;
+      case 'GOAL':
+        return Icons.flag_outlined;
       default:
         return Icons.lightbulb_outline;
     }
@@ -88,84 +153,102 @@ class _RecommendationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = Theme.of(context).colorScheme;
+    final typeColor = _colorForType(rec.type);
+    final actionLink = rec.actionLabel;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Category chip + icon row
             Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: colorScheme.primaryContainer,
-                  child: Icon(
-                    _iconForType(rec.type),
-                    color: colorScheme.onPrimaryContainer,
-                    size: 20,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: typeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
                   child: Text(
-                    rec.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    _labelForType(rec.type),
+                    style: TextStyle(
+                      color: typeColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-                if (rec.impactScore != null)
-                  _ImpactChip(score: rec.impactScore!),
+                const Spacer(),
+                Icon(_iconForType(rec.type),
+                    size: 20, color: const Color(0xFF9CA3AF)),
               ],
             ),
             const SizedBox(height: 10),
+            // Body text
             Text(
               rec.body,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF1F2937),
+                    height: 1.5,
+                  ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  icon: const Icon(Icons.thumb_down_outlined, size: 18),
-                  label: Text(l10n.recommendationsReject),
-                  onPressed: () => onFeedback(false),
-                  style: TextButton.styleFrom(
-                    foregroundColor: colorScheme.error,
+            // Action link (green arrow text)
+            if (actionLink != null && actionLink.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {},
+                child: Text(
+                  '→ $actionLink',
+                  style: const TextStyle(
+                    color: Color(0xFF10B981),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
                 ),
-                const SizedBox(width: 8),
-                FilledButton.icon(
-                  icon: const Icon(Icons.thumb_up_outlined, size: 18),
-                  label: Text(l10n.recommendationsAccept),
-                  onPressed: () => onFeedback(true),
+              ),
+            ],
+            const SizedBox(height: 14),
+            // Feedback buttons: outlined style matching design
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.thumb_up_outlined, size: 16),
+                    label: Text(l10n.recommendationsAccept),
+                    onPressed: () => onFeedback(true),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF6B7280),
+                      side: const BorderSide(color: Color(0xFFE5E7EB)),
+                      textStyle: const TextStyle(fontSize: 13),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.thumb_down_outlined, size: 16),
+                    label: Text(l10n.recommendationsReject),
+                    onPressed: () => onFeedback(false),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF6B7280),
+                      side: const BorderSide(color: Color(0xFFE5E7EB)),
+                      textStyle: const TextStyle(fontSize: 13),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ),
                 ),
               ],
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _ImpactChip extends StatelessWidget {
-  const _ImpactChip({required this.score});
-  final double score;
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = (score * 100).toStringAsFixed(0);
-    return Chip(
-      label: Text('$pct%'),
-      avatar: const Icon(Icons.bolt, size: 14),
-      padding: EdgeInsets.zero,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-      visualDensity: VisualDensity.compact,
     );
   }
 }
