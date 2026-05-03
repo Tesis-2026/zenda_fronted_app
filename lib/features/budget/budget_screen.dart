@@ -290,11 +290,21 @@ class _BudgetHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+      padding: const EdgeInsets.fromLTRB(8, 16, 20, 16),
       child: Row(
         children: [
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: Color(0xFF374151),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          ),
           Text(
-            'Budget',
+            l10n.budgetTitle,
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,

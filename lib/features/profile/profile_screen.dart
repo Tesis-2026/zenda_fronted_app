@@ -145,6 +145,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.profileTitle),
+        leading: _isEditing
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                onPressed: () => setState(() => _isEditing = false),
+              )
+            : null,
         actions: [
           if (!_isEditing)
             Padding(
