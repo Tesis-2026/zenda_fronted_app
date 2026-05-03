@@ -4,7 +4,12 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart';
+import '../../core/widgets/amount_input_field.dart';
+import '../../core/widgets/app_primary_button.dart';
+import '../../core/widgets/app_sheet_container.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/field_label.dart';
+import '../../core/widgets/kind_toggle.dart';
 import '../../l10n/l10n_extension.dart';
 
 class EditTransactionScreen extends ConsumerStatefulWidget {
@@ -123,345 +128,181 @@ class _EditTransactionScreenState
     final l10n = context.l10n;
     final busy = _saving || _deleting;
 
-    return Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE5E7EB),
-                    borderRadius: BorderRadius.circular(2),
+    return AppSheetContainer(
+      topRadius: 28,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.txEditTitle,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1F2937),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              // Header row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.txEditTitle,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1F2937),
+                GestureDetector(
+                  onTap: busy ? null : _confirmDelete,
+                  child: Container(
+                    height: 34,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF2F2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFFCA5A5)),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: busy ? null : _confirmDelete,
-                    child: Container(
-                      height: 34,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEF2F2),
-                        borderRadius: BorderRadius.circular(20),
-                        border:
-                            Border.all(color: const Color(0xFFFCA5A5)),
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.delete_outline_rounded,
-                                size: 14, color: Color(0xFFEF4444)),
-                            const SizedBox(width: 4),
-                            Text(
-                              l10n.txDeleteAction,
-                              style: const TextStyle(
-                                color: Color(0xFFEF4444),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Expense / Income toggle
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () =>
-                          setState(() => _kind = TransactionKind.expense),
-                      child: Container(
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: _kind == TransactionKind.expense
-                              ? const Color(0xFFEF4444)
-                              : const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Center(
-                          child: Text(
-                            l10n.txExpense,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: _kind == TransactionKind.expense
-                                  ? FontWeight.w700
-                                  : FontWeight.normal,
-                              color: _kind == TransactionKind.expense
-                                  ? Colors.white
-                                  : const Color(0xFF9CA3AF),
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.delete_outline_rounded,
+                              size: 14, color: Color(0xFFEF4444)),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.txDeleteAction,
+                            style: const TextStyle(
+                              color: Color(0xFFEF4444),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () =>
-                          setState(() => _kind = TransactionKind.income),
-                      child: Container(
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: _kind == TransactionKind.income
-                              ? const Color(0xFF34D399)
-                              : const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Center(
-                          child: Text(
-                            l10n.txIncome,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: _kind == TransactionKind.income
-                                  ? FontWeight.w700
-                                  : FontWeight.normal,
-                              color: _kind == TransactionKind.income
-                                  ? Colors.white
-                                  : const Color(0xFF9CA3AF),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            KindToggle(
+              selected: _kind,
+              onChanged: (k) => setState(() => _kind = k),
+              expenseLabel: l10n.txExpense,
+              incomeLabel: l10n.txIncome,
+            ),
+            const SizedBox(height: 16),
+            AmountInputField(
+              controller: _amountController,
+              label: l10n.txAmountLabel,
+            ),
+            const SizedBox(height: 16),
+            FieldLabel(l10n.txNoteLabel),
+            const SizedBox(height: 6),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
               ),
-              const SizedBox(height: 16),
-
-              // Amount input — budget style
-              Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _noteController,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            FieldLabel(l10n.txDateLabel),
+            const SizedBox(height: 6),
+            GestureDetector(
+              onTap: () => _pickDate(context),
+              child: Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
-                  borderRadius: BorderRadius.circular(12),
-                  border:
-                      Border.all(color: const Color(0xFF34D399), width: 2),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.txAmountLabel,
-                      style: const TextStyle(
-                        color: Color(0xFF6B7280),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      style: const TextStyle(
-                        color: Color(0xFF1F2937),
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      decoration: const InputDecoration(
-                        filled: false,
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                        prefixText: 'S/ ',
-                        prefixStyle: TextStyle(
-                          color: Color(0xFF34D399),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Note
-              _FieldLabel(label: l10n.txNoteLabel),
-              const SizedBox(height: 6),
-              Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: _noteController,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Date
-              _FieldLabel(label: l10n.txDateLabel),
-              const SizedBox(height: 6),
-              GestureDetector(
-                onTap: () => _pickDate(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat('MMMM d, yyyy').format(_date),
-                        style: const TextStyle(
-                          color: Color(0xFF1F2937),
-                          fontSize: 14,
-                        ),
-                      ),
-                      const Icon(
-                        Icons.calendar_today_rounded,
-                        size: 16,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Category
-              _FieldLabel(label: l10n.txCategoryLabel),
-              const SizedBox(height: 8),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: TransactionCategory.values.map((cat) {
-                    final isSelected = cat == _category;
-                    return GestureDetector(
-                      onTap: () => setState(() => _category = cat),
-                      child: Container(
-                        width: 72,
-                        height: 68,
-                        margin: const EdgeInsets.only(right: 10),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFECFDF5)
-                              : const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(16),
-                          border: isSelected
-                              ? Border.all(
-                                  color: const Color(0xFF34D399), width: 2)
-                              : null,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _categoryIcons[cat] ?? Icons.more_horiz_rounded,
-                              size: 24,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DateFormat('MMMM d, yyyy').format(_date),
+                      style: const TextStyle(
+                        color: Color(0xFF1F2937),
+                        fontSize: 14,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.calendar_today_rounded,
+                      size: 16,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            FieldLabel(l10n.txCategoryLabel),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: TransactionCategory.values.map((cat) {
+                  final isSelected = cat == _category;
+                  return GestureDetector(
+                    onTap: () => setState(() => _category = cat),
+                    child: Container(
+                      width: 72,
+                      height: 68,
+                      margin: const EdgeInsets.only(right: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFFECFDF5)
+                            : const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(16),
+                        border: isSelected
+                            ? Border.all(
+                                color: const Color(0xFF34D399), width: 2)
+                            : null,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _categoryIcons[cat] ?? Icons.more_horiz_rounded,
+                            size: 24,
+                            color: isSelected
+                                ? const Color(0xFF065F46)
+                                : const Color(0xFF6B7280),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _categoryLabel(context, cat),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
                               color: isSelected
                                   ? const Color(0xFF065F46)
                                   : const Color(0xFF6B7280),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _categoryLabel(context, cat),
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                                color: isSelected
-                                    ? const Color(0xFF065F46)
-                                    : const Color(0xFF6B7280),
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Save button
-              GestureDetector(
-                onTap: busy ? null : _save,
-                child: Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: busy
-                        ? const Color(0xFF34D399).withValues(alpha: 0.5)
-                        : const Color(0xFF34D399),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: _saving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            l10n.txUpdateButton,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                  ),
-                ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            AppPrimaryButton(
+              label: l10n.txUpdateButton,
+              onPressed: busy ? null : _save,
+              isLoading: _saving,
+            ),
+          ],
         ),
       ),
     );
@@ -553,22 +394,5 @@ class _EditTransactionScreenState
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  final String label;
-  const _FieldLabel({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: const TextStyle(
-        color: Color(0xFF6B7280),
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-      ),
-    );
   }
 }

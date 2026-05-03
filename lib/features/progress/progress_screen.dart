@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/services/progress_api_service.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/month_navigator.dart';
 import '../../l10n/l10n_extension.dart';
 
 final progressServiceProvider = Provider<ProgressApiService>(
@@ -116,46 +118,20 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         // Month navigator
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: _prevMonth,
-                child: const Icon(Icons.chevron_left_rounded, color: Color(0xFF6B7280), size: 22),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                monthLabel,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-              const SizedBox(width: 4),
-              GestureDetector(
-                onTap: _nextMonth,
-                child: const Icon(Icons.chevron_right_rounded, color: Color(0xFF6B7280), size: 22),
-              ),
-              const Spacer(),
-              Text(
-                '${l10n.progressVsLabel} ${_prevMonthLabel(context)}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF9CA3AF),
-                ),
-              ),
-            ],
+          child: MonthNavigator(
+            label: monthLabel,
+            onPrev: _prevMonth,
+            onNext: _nextMonth,
+            trailing: Text(
+              '${l10n.progressVsLabel} ${_prevMonthLabel(context)}',
+              style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
+            ),
           ),
         ),
         const SizedBox(height: 12),
         // Month Overview card
-        Container(
+        AppCard(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -193,13 +169,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         ),
         const SizedBox(height: 16),
         // Monthly Trend chart
-        Container(
+        AppCard(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

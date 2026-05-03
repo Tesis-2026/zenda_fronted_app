@@ -7,7 +7,9 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/models/summary_models.dart';
 import '../../core/services/amount_formatter.dart';
 import '../../core/services/insights_api_service.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/month_navigator.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -230,10 +232,13 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
       children: [
         Column(
           children: [
-            _PeriodSelector(
-              label: l10n.reportsMonthLabel(_monthNames[_month - 1], _year),
-              onPrev: _prev,
-              onNext: _next,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: MonthNavigator(
+                label: l10n.reportsMonthLabel(_monthNames[_month - 1], _year),
+                onPrev: _prev,
+                onNext: _next,
+              ),
             ),
             Expanded(
               child: summary.when(
@@ -308,10 +313,13 @@ class _WeekTabState extends ConsumerState<_WeekTab> {
     final summary = ref.watch(_weekSummaryProvider((year: _year, week: _week)));
     return Column(
       children: [
-        _PeriodSelector(
-          label: l10n.reportsWeekLabel(_week, _year),
-          onPrev: _prev,
-          onNext: _next,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: MonthNavigator(
+            label: l10n.reportsWeekLabel(_week, _year),
+            onPrev: _prev,
+            onNext: _next,
+          ),
         ),
         Expanded(
           child: summary.when(
@@ -459,10 +467,13 @@ class _DayTabState extends ConsumerState<_DayTab> {
 
     return Column(
       children: [
-        _PeriodSelector(
-          label: '${_monthNames[_viewMonth.month - 1]} ${_viewMonth.year}',
-          onPrev: _prevMonth,
-          onNext: _nextMonth,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: MonthNavigator(
+            label: '${_monthNames[_viewMonth.month - 1]} ${_viewMonth.year}',
+            onPrev: _prevMonth,
+            onNext: _nextMonth,
+          ),
         ),
         _CalendarGrid(
           viewMonth: _viewMonth,
@@ -635,33 +646,6 @@ class _CalendarGrid extends StatelessWidget {
 
 // ── Shared Widgets ─────────────────────────────────────────────────────────
 
-class _PeriodSelector extends StatelessWidget {
-  final String label;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
-
-  const _PeriodSelector({
-    required this.label,
-    required this.onPrev,
-    required this.onNext,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(icon: const Icon(Icons.chevron_left), onPressed: onPrev),
-          Text(label, style: Theme.of(context).textTheme.titleMedium),
-          IconButton(icon: const Icon(Icons.chevron_right), onPressed: onNext),
-        ],
-      ),
-    );
-  }
-}
-
 class _ErrorView extends StatelessWidget {
   final String message;
   const _ErrorView({required this.message});
@@ -687,13 +671,7 @@ class _SummaryView extends StatelessWidget {
       children: [
         _IncomExpenseSummaryRow(summary: summary),
         const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
-          ),
+        AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -733,13 +711,7 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFF3F4F6)),
-            ),
+          child: AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -769,13 +741,7 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFF3F4F6)),
-            ),
+          child: AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -932,7 +898,6 @@ class _TotalsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final fmtAsync = ref.watch(amountFormatterProvider);
     final fmt = fmtAsync.asData?.value ?? (double v) => v.toStringAsFixed(2);
 
@@ -943,7 +908,7 @@ class _TotalsRow extends ConsumerWidget {
             label: l10n.reportsIncome,
             value: 'S/ ${fmt(summary.totalIncome)}',
             color: const Color(0xFF34D399),
-            cardColor: cardColor,
+            isDark: isDark,
           ),
         ),
         const SizedBox(width: 8),
@@ -952,7 +917,7 @@ class _TotalsRow extends ConsumerWidget {
             label: l10n.reportsExpense,
             value: 'S/ ${fmt(summary.totalExpense)}',
             color: const Color(0xFFFC8181),
-            cardColor: cardColor,
+            isDark: isDark,
           ),
         ),
         const SizedBox(width: 8),
@@ -963,7 +928,7 @@ class _TotalsRow extends ConsumerWidget {
             color: summary.netBalance >= 0
                 ? const Color(0xFF60A5FA)
                 : const Color(0xFFF87171),
-            cardColor: cardColor,
+            isDark: isDark,
           ),
         ),
       ],
@@ -975,30 +940,21 @@ class _StatCard extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-  final Color cardColor;
+  final bool isDark;
 
   const _StatCard({
     required this.label,
     required this.value,
     required this.color,
-    required this.cardColor,
+    this.isDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
+      isDark: isDark,
+      hasShadow: true,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1203,28 +1159,16 @@ class _EvolutionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
 
     final hasAnyData = summary.expensesChangePercent != null ||
         summary.savingsChangePercent != null ||
         summary.balanceChangePercent != null;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
+    return AppCard(
+      isDark: isDark,
+      hasShadow: true,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -1273,7 +1217,6 @@ class _EvolutionCard extends StatelessWidget {
                 ],
               ),
           ],
-        ),
       ),
     );
   }

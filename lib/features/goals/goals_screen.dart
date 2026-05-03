@@ -5,6 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/app_primary_button.dart';
+import '../../core/widgets/app_progress_bar.dart';
+import '../../core/widgets/app_sheet_container.dart';
+import '../../core/widgets/sheet_header.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -283,26 +288,12 @@ class _GoalCard extends StatelessWidget {
     final isComplete = pct >= 100;
     final color = _progressColor(pct);
     final dueDateStr = _dueDateLabel(context);
-    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
 
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.white10 : const Color(0xFFF3F4F6),
-        ),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
+      isDark: isDark,
+      hasShadow: true,
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -362,16 +353,12 @@ class _GoalCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: pct / 100,
-                        minHeight: 8,
-                        backgroundColor: isDark
-                            ? Colors.white.withValues(alpha: 0.1)
-                            : const Color(0xFFE5E7EB),
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
-                      ),
+                    AppProgressBar(
+                      value: pct / 100,
+                      height: 8,
+                      color: color,
+                      backgroundColor: const Color(0xFFE5E7EB),
+                      isDark: isDark,
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -457,38 +444,16 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : const Color(0xFFE5E7EB),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.goalsAddTitle,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
+    return AppSheetContainer(
+      isDark: isDark,
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(title: l10n.goalsAddTitle),
+          const SizedBox(height: 20),
             TextField(
               controller: _nameCtrl,
               autofocus: true,
@@ -552,30 +517,13 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
               ),
             ),
             const SizedBox(height: 24),
-            FilledButton(
+            AppPrimaryButton(
+              label: l10n.goalsCreateButton,
               onPressed: _saving || !_valid ? null : _save,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF34D399),
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-              ),
-              child: _saving
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(
-                      l10n.goalsCreateButton,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
+              isLoading: _saving,
             ),
           ],
         ),
-      ),
     );
   }
 }

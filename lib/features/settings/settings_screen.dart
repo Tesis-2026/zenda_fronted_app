@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/app_sheet_container.dart';
+import '../../core/widgets/section_label.dart';
+import '../../core/widgets/sheet_header.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/locale_provider.dart';
@@ -47,7 +51,7 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          _SectionLabel(label: l10n.settingsSectionGeneral, muted: muted!),
+          SectionLabel(l10n.settingsSectionGeneral, color: muted!),
           const SizedBox(height: 8),
           _SettingsCard(
             isDark: isDark,
@@ -87,7 +91,7 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _SectionLabel(label: l10n.settingsSectionResearch, muted: muted),
+          SectionLabel(l10n.settingsSectionResearch, color: muted),
           const SizedBox(height: 8),
           _SettingsCard(
             isDark: isDark,
@@ -194,49 +198,15 @@ class _SurveysSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    return AppSheetContainer(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE5E7EB),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Text(
-                l10n.settingsSurveysSheetTitle,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1F2937),
-                ),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.close_rounded,
-                      size: 18, color: Color(0xFF6B7280)),
-                ),
-              ),
-            ],
+          SheetHeader(
+            title: l10n.settingsSurveysSheetTitle,
+            onClose: () => Navigator.pop(context),
+            fontSize: 17,
           ),
           const SizedBox(height: 16),
           _SurveyTile(
@@ -347,27 +317,6 @@ class _SurveyTile extends StatelessWidget {
   }
 }
 
-// ── Reusable components ───────────────────────────────────────────────────────
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.label, required this.muted});
-  final String label;
-  final Color muted;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label.toUpperCase(),
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: muted,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-}
-
 class _SettingsCard extends StatelessWidget {
   const _SettingsCard({
     required this.isDark,
@@ -381,20 +330,10 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
+    return AppCard(
+      isDark: isDark,
+      hasShadow: true,
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           for (int i = 0; i < items.length; i++) ...[

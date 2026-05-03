@@ -4,6 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/models/account.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_primary_button.dart';
+import '../../core/widgets/app_sheet_container.dart';
+import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/field_label.dart';
+import '../../core/widgets/sheet_header.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../providers/repositories_providers.dart';
 import 'dashboard_providers.dart';
@@ -534,169 +539,77 @@ class _AddAccountSheetState extends State<_AddAccountSheet> {
     final l10n = context.l10n;
     final isCredit = _selectedType == AccountType.credit;
 
-    return Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD1D5DB),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+    return AppSheetContainer(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SheetHeader(title: l10n.accountAddTitle),
+          const SizedBox(height: 20),
+          FieldLabel(l10n.accountNameLabel),
+          const SizedBox(height: 6),
+          AppTextField(
+            controller: _nameController,
+            hintText: l10n.accountNameHint,
+            textCapitalization: TextCapitalization.words,
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 16),
+          FieldLabel(l10n.accountTypeLabel),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _TypeChip(
+                label: l10n.accountTypeCash,
+                selected: _selectedType == AccountType.cash,
+                onTap: () => setState(() => _selectedType = AccountType.cash),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.accountAddTitle,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1F2937),
+              const SizedBox(width: 8),
+              _TypeChip(
+                label: l10n.accountTypeDebit,
+                selected: _selectedType == AccountType.debit,
+                onTap: () =>
+                    setState(() => _selectedType = AccountType.debit),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.accountNameLabel,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF374151),
-              ),
-            ),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _nameController,
-              onChanged: (_) => setState(() {}),
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                hintText: l10n.accountNameHint,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 12),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.accountTypeLabel,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF374151),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _TypeChip(
-                  label: l10n.accountTypeCash,
-                  selected: _selectedType == AccountType.cash,
-                  onTap: () =>
-                      setState(() => _selectedType = AccountType.cash),
-                ),
-                const SizedBox(width: 8),
-                _TypeChip(
-                  label: l10n.accountTypeDebit,
-                  selected: _selectedType == AccountType.debit,
-                  onTap: () =>
-                      setState(() => _selectedType = AccountType.debit),
-                ),
-                const SizedBox(width: 8),
-                _TypeChip(
-                  label: l10n.accountTypeCredit,
-                  selected: _selectedType == AccountType.credit,
-                  onTap: () =>
-                      setState(() => _selectedType = AccountType.credit),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (isCredit) ...[
-              Text(
-                l10n.accountCreditLimit,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF374151),
-                ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _creditLimitController,
-                onChanged: (_) => setState(() {}),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  prefixText: 'S/ ',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
-                ),
-              ),
-            ] else ...[
-              Text(
-                l10n.accountInitialBalance,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF374151),
-                ),
-              ),
-              const SizedBox(height: 6),
-              TextField(
-                controller: _balanceController,
-                onChanged: (_) => setState(() {}),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  prefixText: 'S/ ',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
-                ),
+              const SizedBox(width: 8),
+              _TypeChip(
+                label: l10n.accountTypeCredit,
+                selected: _selectedType == AccountType.credit,
+                onTap: () =>
+                    setState(() => _selectedType = AccountType.credit),
               ),
             ],
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _isValid && !_isSaving ? _submit : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF34D399),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
-                      )
-                    : Text(
-                        l10n.accountAddButton,
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-              ),
+          ),
+          const SizedBox(height: 16),
+          if (isCredit) ...[
+            FieldLabel(l10n.accountCreditLimit),
+            const SizedBox(height: 6),
+            AppTextField(
+              controller: _creditLimitController,
+              prefixText: 'S/ ',
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (_) => setState(() {}),
+            ),
+          ] else ...[
+            FieldLabel(l10n.accountInitialBalance),
+            const SizedBox(height: 6),
+            AppTextField(
+              controller: _balanceController,
+              prefixText: 'S/ ',
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (_) => setState(() {}),
             ),
           ],
-        ),
+          const SizedBox(height: 24),
+          AppPrimaryButton(
+            label: l10n.accountAddButton,
+            onPressed: _isValid && !_isSaving ? _submit : null,
+            isLoading: _isSaving,
+            borderRadius: 12,
+          ),
+        ],
       ),
     );
   }

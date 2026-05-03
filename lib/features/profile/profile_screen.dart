@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
+import '../../core/widgets/app_card.dart';
+import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/section_label.dart';
 import '../auth/auth_controller.dart';
 import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
@@ -219,12 +222,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         const SizedBox(height: 32),
         // Info card
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
-          ),
+        AppCard(
+          borderRadius: 20.0,
+          padding: EdgeInsets.zero,
           child: Column(
             children: [
               _InfoRow(
@@ -337,32 +337,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        TextField(
+        AppTextField(
           controller: _nameController,
-          decoration: InputDecoration(
-            labelText: l10n.profileFullNameLabel,
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+          labelText: l10n.profileFullNameLabel,
+          textCapitalization: TextCapitalization.words,
         ),
         const SizedBox(height: 16),
-        TextField(
+        AppTextField(
           controller: _ageController,
+          labelText: l10n.profileAgeLabel,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: l10n.profileAgeLabel,
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
         ),
         const SizedBox(height: 16),
-        TextField(
+        AppTextField(
           controller: _universityController,
-          decoration: InputDecoration(
-            labelText: l10n.profileUniversityLabel,
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+          labelText: l10n.profileUniversityLabel,
+          textCapitalization: TextCapitalization.words,
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
@@ -479,22 +469,10 @@ class _NavSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF9CA3AF),
-            letterSpacing: 0.8,
-          ),
-        ),
+        SectionLabel(label),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
-          ),
+        AppCard(
+          padding: EdgeInsets.zero,
           child: Column(
             children: [
               for (int i = 0; i < items.length; i++) ...[

@@ -7,7 +7,11 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart';
+import '../../core/widgets/amount_input_field.dart';
+import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/kind_toggle.dart';
+import '../../core/widgets/sheet_header.dart';
 import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -160,125 +164,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Expense / Income 2-tab toggle
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => controller.setKind(TransactionKind.expense),
-                            child: Container(
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: state.kind == TransactionKind.expense
-                                    ? const Color(0xFFEF4444)
-                                    : const Color(0xFFF3F4F6),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  l10n.txExpense,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: state.kind == TransactionKind.expense
-                                        ? FontWeight.w700
-                                        : FontWeight.normal,
-                                    color: state.kind == TransactionKind.expense
-                                        ? Colors.white
-                                        : const Color(0xFF9CA3AF),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => controller.setKind(TransactionKind.income),
-                            child: Container(
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: state.kind == TransactionKind.income
-                                    ? const Color(0xFF34D399)
-                                    : const Color(0xFFF3F4F6),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  l10n.txIncome,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: state.kind == TransactionKind.income
-                                        ? FontWeight.w700
-                                        : FontWeight.normal,
-                                    color: state.kind == TransactionKind.income
-                                        ? Colors.white
-                                        : const Color(0xFF9CA3AF),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    KindToggle(
+                      selected: state.kind,
+                      onChanged: controller.setKind,
+                      expenseLabel: l10n.txExpense,
+                      incomeLabel: l10n.txIncome,
                     ),
                     const SizedBox(height: 16),
 
-                    // Amount input — budget style
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFB),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: const Color(0xFF34D399), width: 2),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.txAmountLabel,
-                            style: const TextStyle(
-                              color: Color(0xFF6B7280),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            textInputAction: TextInputAction.next,
-                            style: const TextStyle(
-                              color: Color(0xFF1F2937),
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                            ),
-                            decoration: const InputDecoration(
-                              filled: false,
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.zero,
-                              prefixText: 'S/ ',
-                              prefixStyle: TextStyle(
-                                color: Color(0xFF34D399),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              hintText: '0.00',
-                              hintStyle: TextStyle(
-                                color: Color(0xFF9CA3AF),
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            onChanged: controller.setAmountFromText,
-                          ),
-                        ],
-                      ),
+                    // Amount input
+                    AmountInputField(
+                      controller: _amountController,
+                      label: l10n.txAmountLabel,
+                      onChanged: controller.setAmountFromText,
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 18),
 
@@ -291,28 +190,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    TextField(
+                    AppTextField(
                       controller: _noteController,
+                      hintText: l10n.txNoteHint,
                       textInputAction: TextInputAction.done,
-                      decoration: InputDecoration(
-                        hintText: l10n.txNoteHint,
-                        filled: true,
-                        fillColor: isDark
-                            ? const Color(0xFF1E293B)
-                            : Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF34D399)),
-                        ),
-                      ),
                       onChanged: (val) {
                         controller.setNote(val);
                         _onNoteChanged(val, state.amount);
@@ -409,15 +290,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 child: SizedBox(
                   width: double.infinity,
                   height: 52,
-                  child: ElevatedButton(
-                    onPressed: state.isSaving
-                        ? null
-                        : () async {
-                            await controller.save();
-                          },
-                    style: ElevatedButton.styleFrom(
+                  child: FilledButton(
+                    onPressed: state.isSaving ? null : () async { await controller.save(); },
+                    style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF34D399),
-                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: const Color(0xFF34D399).withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(28),
                       ),
@@ -426,22 +303,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         ? const SizedBox(
                             height: 22,
                             width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                           )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                l10n.txSaveButton,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                ),
-                              ),
+                              Text(l10n.txSaveButton, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                               const SizedBox(width: 8),
                               const Icon(Icons.arrow_forward_rounded, size: 18),
                             ],
@@ -474,34 +342,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             const SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Text(
-                    l10n.txNewTitle,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1F2937),
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.close_rounded,
-                        size: 18,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
-                  ),
-                ],
+              child: SheetHeader(
+                title: l10n.txNewTitle,
+                onClose: () => Navigator.of(context).pop(),
               ),
             ),
             const SizedBox(height: 8),

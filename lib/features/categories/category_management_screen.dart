@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/category.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/green_pill_button.dart';
+import '../../core/widgets/icon_action_button.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -154,25 +157,9 @@ class _CategoryList extends ConsumerWidget {
               Expanded(
                 child: _SectionHeader(title: l10n.catMgmtCustomSection),
               ),
-              GestureDetector(
+              GreenPillButton(
+                label: l10n.catMgmtAddButton,
                 onTap: onAddTap,
-                child: Container(
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34D399),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    l10n.catMgmtAddButton,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -244,12 +231,7 @@ class _SystemCategoryGrid extends StatelessWidget {
       itemCount: categories.length,
       itemBuilder: (context, index) {
         final c = categories[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
-          ),
+        return AppCard(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -287,14 +269,9 @@ class _CustomCategoryTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
 
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-      ),
       child: Row(
         children: [
           Container(
@@ -317,30 +294,22 @@ class _CustomCategoryTile extends ConsumerWidget {
               ),
             ),
           ),
-          GestureDetector(
+          IconActionButton(
+            icon: Icons.edit_outlined,
             onTap: () => _showRenameDialog(context, ref),
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF9CA3AF)),
-            ),
+            backgroundColor: const Color(0xFFF3F4F6),
+            iconColor: const Color(0xFF9CA3AF),
+            size: 32,
+            iconSize: 16,
           ),
           const SizedBox(width: 8),
-          GestureDetector(
+          IconActionButton(
+            icon: Icons.delete_outline,
             onTap: () => _confirmDelete(context, ref, l10n),
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEE2E2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.delete_outline, size: 16, color: Color(0xFFEF4444)),
-            ),
+            backgroundColor: const Color(0xFFFEE2E2),
+            iconColor: const Color(0xFFEF4444),
+            size: 32,
+            iconSize: 16,
           ),
         ],
       ),
