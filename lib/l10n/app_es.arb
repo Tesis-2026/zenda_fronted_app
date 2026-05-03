@@ -864,6 +864,18 @@
   "educationFilterAdvanced": "Avanzado",
   "educationFeaturedLabel": "Destacado",
   "educationStartLabel": "Comenzar",
+  "educationLearnGrow": "Aprende & Crece",
+  "educationFilterBudgeting": "Presupuesto",
+  "educationFilterSaving": "Ahorro",
+  "educationFilterInvesting": "Inversión",
+  "educationTakeQuiz": "Tomar el quiz",
+  "educationMinRead": "{minutes} min de lectura",
+  "@educationMinRead": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "quizAnswerRecorded": "Respuesta guardada. Toca Siguiente para continuar.",
 
   "authSignUpLink": "Regístrate",
   "goalManualContribution": "Contribución manual",

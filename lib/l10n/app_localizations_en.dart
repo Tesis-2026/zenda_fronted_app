@@ -1842,6 +1842,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get educationStartLabel => 'Start';
 
   @override
+  String get educationLearnGrow => 'Learn & Grow';
+
+  @override
+  String get educationFilterBudgeting => 'Budgeting';
+
+  @override
+  String get educationFilterSaving => 'Saving';
+
+  @override
+  String get educationFilterInvesting => 'Investing';
+
+  @override
+  String get educationTakeQuiz => 'Take the Quiz';
+
+  @override
+  String educationMinRead(int minutes) {
+    return '$minutes min read';
+  }
+
+  @override
+  String get quizAnswerRecorded => 'Answer locked in. Tap Next to continue.';
+
+  @override
   String get authSignUpLink => 'Sign up';
 
   @override

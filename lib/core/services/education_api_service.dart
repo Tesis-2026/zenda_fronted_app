@@ -6,6 +6,7 @@ class EducationTopic {
   final String title;
   final String content;
   final String difficulty;
+  final String category;
   final int order;
   final bool isCompleted;
   final DateTime? completedAt;
@@ -15,10 +16,13 @@ class EducationTopic {
     required this.title,
     required this.content,
     required this.difficulty,
+    this.category = 'budgeting',
     required this.order,
     required this.isCompleted,
     this.completedAt,
   });
+
+  int get readingTimeMinutes => (content.split(' ').length / 200).ceil().clamp(1, 30);
 
   factory EducationTopic.fromJson(Map<String, dynamic> json) {
     return EducationTopic(
@@ -26,6 +30,7 @@ class EducationTopic {
       title: json['title'] as String,
       content: json['content'] as String,
       difficulty: json['difficulty'] as String,
+      category: json['category'] as String? ?? 'budgeting',
       order: json['order'] as int,
       isCompleted: json['isCompleted'] as bool? ?? false,
       completedAt: json['completedAt'] != null

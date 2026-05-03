@@ -3396,6 +3396,48 @@ abstract class AppLocalizations {
   /// **'Start'**
   String get educationStartLabel;
 
+  /// No description provided for @educationLearnGrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn & Grow'**
+  String get educationLearnGrow;
+
+  /// No description provided for @educationFilterBudgeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeting'**
+  String get educationFilterBudgeting;
+
+  /// No description provided for @educationFilterSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving'**
+  String get educationFilterSaving;
+
+  /// No description provided for @educationFilterInvesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Investing'**
+  String get educationFilterInvesting;
+
+  /// No description provided for @educationTakeQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the Quiz'**
+  String get educationTakeQuiz;
+
+  /// No description provided for @educationMinRead.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min read'**
+  String educationMinRead(int minutes);
+
+  /// No description provided for @quizAnswerRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer locked in. Tap Next to continue.'**
+  String get quizAnswerRecorded;
+
   /// No description provided for @authSignUpLink.
   ///
   /// In en, this message translates to:

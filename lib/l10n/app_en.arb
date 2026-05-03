@@ -864,6 +864,18 @@
   "educationFilterAdvanced": "Advanced",
   "educationFeaturedLabel": "Featured",
   "educationStartLabel": "Start",
+  "educationLearnGrow": "Learn & Grow",
+  "educationFilterBudgeting": "Budgeting",
+  "educationFilterSaving": "Saving",
+  "educationFilterInvesting": "Investing",
+  "educationTakeQuiz": "Take the Quiz",
+  "educationMinRead": "{minutes} min read",
+  "@educationMinRead": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "quizAnswerRecorded": "Answer locked in. Tap Next to continue.",
 
   "authSignUpLink": "Sign up",
   "goalManualContribution": "Manual contribution",

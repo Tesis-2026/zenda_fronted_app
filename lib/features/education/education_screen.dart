@@ -7,13 +7,11 @@ import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
-
 final educationServiceProvider = Provider<EducationApiService>(
   (_) => EducationApiService(),
 );
 
-final _topicsProvider =
-    FutureProvider.autoDispose<List<EducationTopic>>((ref) {
+final _topicsProvider = FutureProvider.autoDispose<List<EducationTopic>>((ref) {
   return ref.read(educationServiceProvider).listTopics();
 });
 
@@ -43,7 +41,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
           .toList();
     }
     if (_filter != 'all') {
-      result = result.where((t) => t.difficulty.toLowerCase() == _filter).toList();
+      result = result.where((t) => t.category.toLowerCase() == _filter).toList();
     }
     return result;
   }
@@ -55,10 +53,33 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.educationTitle),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12),
+        title: Text(l10n.educationLearnGrow),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('🔥', style: TextStyle(fontSize: 14)),
+                SizedBox(width: 2),
+                Text(
+                  '12',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFD97706),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 8),
             child: UserMenuButton(),
           ),
         ],
@@ -80,7 +101,6 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
           ),
         ),
         data: (topics) {
-          final completed = topics.where((t) => t.isCompleted).length;
           final filtered = _applyFilters(topics);
           final featured = filtered.firstOrNull;
           final rest = filtered.length > 1 ? filtered.sublist(1) : <EducationTopic>[];
@@ -90,26 +110,31 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: _ProgressHeader(
-                    completed: completed,
-                    total: topics.length,
-                  ),
-                ),
-                SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                     child: TextField(
                       controller: _searchController,
                       onChanged: (v) => setState(() => _query = v),
                       decoration: InputDecoration(
                         hintText: l10n.educationSearchHint,
                         prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        filled: true,
+                        fillColor: const Color(0xFFF3F4F6),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
-                        filled: true,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF34D399), width: 1.5),
+                        ),
                         suffixIcon: _query.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.clear_rounded, size: 18),
@@ -124,7 +149,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: _FilterChips(
+                  child: _CategoryFilterChips(
                     selected: _filter,
                     onSelect: (v) => setState(() => _filter = v),
                   ),
@@ -138,64 +163,27 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
                   ),
                   SliverList.builder(
                     itemCount: rest.length,
-                    itemBuilder: (context, index) => _TopicTile(
-                      topic: rest[index],
-                      isRecommended: false,
-                      onTap: () => context.push('/education/${rest[index].id}'),
+                    itemBuilder: (_, i) => _TopicCard(
+                      topic: rest[i],
+                      onTap: () => context.push('/education/${rest[i].id}'),
                     ),
                   ),
                 ] else
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Center(child: Text(l10n.educationErrorLoad)),
+                      padding: const EdgeInsets.all(48),
+                      child: Center(
+                        child: Text(
+                          l10n.educationErrorLoad,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
                     ),
                   ),
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              l10n.educationPersonalized,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(width: 6),
-                            const Text('✨', style: TextStyle(fontSize: 14)),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.educationPersonalizedSubtitle,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () =>
-                                context.push('/education/quiz/personalized'),
-                            icon: const Icon(Icons.auto_awesome, size: 18),
-                            label: Text(l10n.quizPersonalizedButton),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF818CF8),
-                              side:
-                                  const BorderSide(color: Color(0xFF818CF8)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: _PersonalizedSection(),
                 ),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
               ],
             ),
           );
@@ -205,8 +193,13 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
   }
 }
 
-class _FilterChips extends StatelessWidget {
-  const _FilterChips({required this.selected, required this.onSelect});
+// ─────────────────────────────────────────────────────────────────
+// Category filter chips
+// ─────────────────────────────────────────────────────────────────
+
+class _CategoryFilterChips extends StatelessWidget {
+  const _CategoryFilterChips(
+      {required this.selected, required this.onSelect});
   final String selected;
   final void Function(String) onSelect;
 
@@ -215,27 +208,40 @@ class _FilterChips extends StatelessWidget {
     final l10n = context.l10n;
     final chips = {
       'all': l10n.educationFilterAll,
-      'beginner': l10n.educationFilterBeginner,
-      'intermediate': l10n.educationFilterIntermediate,
-      'advanced': l10n.educationFilterAdvanced,
+      'budgeting': l10n.educationFilterBudgeting,
+      'saving': l10n.educationFilterSaving,
+      'investing': l10n.educationFilterInvesting,
     };
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: chips.entries.map((e) {
           final isSelected = selected == e.key;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(e.value),
-              selected: isSelected,
-              onSelected: (_) => onSelect(e.key),
-              selectedColor: const Color(0xFF34D399).withValues(alpha: 0.2),
-              checkmarkColor: const Color(0xFF10B981),
-              labelStyle: TextStyle(
-                color: isSelected ? const Color(0xFF065F46) : null,
-                fontWeight: isSelected ? FontWeight.w600 : null,
+            child: GestureDetector(
+              onTap: () => onSelect(e.key),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF34D399)
+                      : const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  e.value,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? Colors.white
+                        : const Color(0xFF6B7280),
+                  ),
+                ),
               ),
             ),
           );
@@ -245,23 +251,43 @@ class _FilterChips extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────
+// Featured dark card
+// ─────────────────────────────────────────────────────────────────
+
 class _FeaturedCard extends StatelessWidget {
   const _FeaturedCard({required this.topic, required this.onTap});
   final EducationTopic topic;
   final VoidCallback onTap;
 
+  String _emoji(String category) {
+    switch (category.toLowerCase()) {
+      case 'budgeting':
+        return '💡';
+      case 'saving':
+        return '🐷';
+      case 'investing':
+        return '📈';
+      default:
+        return '📚';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final excerpt = topic.content.length > 100
+        ? '${topic.content.substring(0, 100)}...'
+        : topic.content;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFF1F2937),
-          borderRadius: BorderRadius.circular(16),
+          color: const Color(0xFF1F2937),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,17 +295,19 @@ class _FeaturedCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF34D399).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    l10n.educationFeaturedLabel,
+                    l10n.educationFeaturedLabel.toUpperCase(),
                     style: const TextStyle(
                       color: Color(0xFF34D399),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
@@ -289,29 +317,80 @@ class _FeaturedCard extends StatelessWidget {
                       color: Color(0xFF34D399), size: 18),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              topic.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            const SizedBox(height: 14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(_emoji(topic.category),
+                        style: const TextStyle(fontSize: 24)),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        topic.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        excerpt,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              child: ElevatedButton(
-                onPressed: onTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF34D399),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    l10n.educationStartLabel,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
-                child: Text(l10n.educationStartLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
+                const SizedBox(width: 12),
+                Text(
+                  l10n.educationMinRead(topic.readingTimeMinutes),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.45),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -320,117 +399,202 @@ class _FeaturedCard extends StatelessWidget {
   }
 }
 
-class _ProgressHeader extends StatelessWidget {
-  const _ProgressHeader({required this.completed, required this.total});
-  final int completed;
-  final int total;
+// ─────────────────────────────────────────────────────────────────
+// Topic card
+// ─────────────────────────────────────────────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final progress = total == 0 ? 0.0 : completed / total;
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.educationProgressLabel(completed, total),
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 10,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TopicTile extends StatelessWidget {
-  const _TopicTile({
-    required this.topic,
-    required this.onTap,
-    this.isRecommended = false,
-  });
+class _TopicCard extends StatelessWidget {
+  const _TopicCard({required this.topic, required this.onTap});
   final EducationTopic topic;
   final VoidCallback onTap;
-  final bool isRecommended;
 
-  Color _difficultyColor(String difficulty) {
-    switch (difficulty.toUpperCase()) {
-      case 'BEGINNER':
-        return const Color(0xFF43A047);
-      case 'INTERMEDIATE':
-        return const Color(0xFFFB8C00);
-      case 'ADVANCED':
-        return const Color(0xFFE53935);
+  IconData _icon(String category) {
+    switch (category.toLowerCase()) {
+      case 'budgeting':
+        return Icons.account_balance_wallet_outlined;
+      case 'saving':
+        return Icons.savings_outlined;
+      case 'investing':
+        return Icons.trending_up_rounded;
       default:
-        return const Color(0xFF757575);
+        return Icons.menu_book_outlined;
+    }
+  }
+
+  Color _color(String category) {
+    switch (category.toLowerCase()) {
+      case 'budgeting':
+        return const Color(0xFF34D399);
+      case 'saving':
+        return const Color(0xFF60A5FA);
+      case 'investing':
+        return const Color(0xFF818CF8);
+      default:
+        return const Color(0xFF9CA3AF);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: topic.isCompleted
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.surfaceContainerHighest,
-        child: Icon(
-          topic.isCompleted ? Icons.check : Icons.menu_book_outlined,
-          color: topic.isCompleted
-              ? Theme.of(context).colorScheme.onPrimaryContainer
-              : Theme.of(context).colorScheme.onSurfaceVariant,
-          size: 20,
-        ),
-      ),
-      title: Row(
-        children: [
-          Expanded(child: Text(topic.title)),
-          if (isRecommended) ...[
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFF818CF8).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                context.l10n.educationRecommended,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF818CF8),
-                ),
-              ),
+    final l10n = context.l10n;
+    final color = _color(topic.category);
+    final icon = _icon(topic.category);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFF3F4F6)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    topic.title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          topic.category.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: color,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.educationMinRead(topic.readingTimeMinutes),
+                        style: const TextStyle(
+                            fontSize: 11, color: Color(0xFF9CA3AF)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: LinearProgressIndicator(
+                      value: topic.isCompleted ? 1.0 : 0.0,
+                      minHeight: 3,
+                      backgroundColor: const Color(0xFFF3F4F6),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF34D399)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            topic.isCompleted
+                ? const Icon(Icons.check_circle_rounded,
+                    color: Color(0xFF34D399), size: 20)
+                : const Icon(Icons.chevron_right,
+                    color: Color(0xFF9CA3AF), size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Personalized quiz CTA
+// ─────────────────────────────────────────────────────────────────
+
+class _PersonalizedSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F3FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+            color: const Color(0xFF818CF8).withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                l10n.educationPersonalized,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Text('✨', style: TextStyle(fontSize: 14)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.educationPersonalizedSubtitle,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  context.push('/education/quiz/personalized'),
+              icon: const Icon(Icons.auto_awesome, size: 16),
+              label: Text(l10n.quizPersonalizedButton),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF818CF8),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
         ],
       ),
-      subtitle: Chip(
-        label: Text(topic.difficulty),
-        backgroundColor: _difficultyColor(topic.difficulty).withValues(alpha: 0.12),
-        labelStyle: TextStyle(
-          color: _difficultyColor(topic.difficulty),
-          fontSize: 11,
-        ),
-        padding: EdgeInsets.zero,
-        visualDensity: VisualDensity.compact,
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 }

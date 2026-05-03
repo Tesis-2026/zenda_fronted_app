@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -228,11 +230,29 @@ class _QuizBody extends StatefulWidget {
 
 class _QuizBodyState extends State<_QuizBody> {
   late _QuizState _state;
+  int _timerSeconds = 120;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _state = _QuizState(questions: widget.questions);
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timerSeconds = 120;
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      if (_timerSeconds > 0) setState(() => _timerSeconds--);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   void _selectOption(String option) {
@@ -245,6 +265,7 @@ class _QuizBodyState extends State<_QuizBody> {
   void _confirmAnswer() {
     final selected = _state.selectedOption;
     if (selected == null) return;
+    _timer?.cancel();
 
     final newAnswers = Map<String, String>.from(_state.answers)
       ..[_state.current.id] = selected;
@@ -268,16 +289,20 @@ class _QuizBodyState extends State<_QuizBody> {
           clearSelection: true,
         );
       });
+      _startTimer();
     }
   }
 
   Future<void> _submit() async {
-    setState(() => _state = _state.copyWith(submitting: true, phase: _QuizPhase.results));
+    setState(() =>
+        _state = _state.copyWith(submitting: true, phase: _QuizPhase.results));
     try {
       final result = await submitQuiz(widget.topicId, _state.answers);
-      setState(() => _state = _state.copyWith(result: result, submitting: false));
+      setState(
+          () => _state = _state.copyWith(result: result, submitting: false));
     } catch (_) {
-      setState(() => _state = _state.copyWith(submitting: false, phase: _QuizPhase.reviewing));
+      setState(() => _state =
+          _state.copyWith(submitting: false, phase: _QuizPhase.reviewing));
     }
   }
 
@@ -289,7 +314,11 @@ class _QuizBodyState extends State<_QuizBody> {
 
     return Column(
       children: [
-        _ProgressBar(current: _state.currentIndex, total: _state.questions.length),
+        _ProgressBar(
+          current: _state.currentIndex,
+          total: _state.questions.length,
+          timerSeconds: _timerSeconds,
+        ),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -311,28 +340,79 @@ class _QuizBodyState extends State<_QuizBody> {
 // ─────────────────────────────────────────────────────────────────
 
 class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.current, required this.total});
+  const _ProgressBar({
+    required this.current,
+    required this.total,
+    required this.timerSeconds,
+  });
 
   final int current;
   final int total;
+  final int timerSeconds;
 
   @override
   Widget build(BuildContext context) {
+    final m = timerSeconds ~/ 60;
+    final s = (timerSeconds % 60).toString().padLeft(2, '0');
+    final isLow = timerSeconds < 30;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${current + 1} / $total',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+          Row(
+            children: [
+              Text(
+                '${current + 1} / $total',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isLow
+                      ? Colors.red.withValues(alpha: 0.08)
+                      : const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isLow
+                        ? Colors.red.withValues(alpha: 0.3)
+                        : const Color(0xFFE5E7EB),
+                  ),
                 ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.timer_outlined,
+                      size: 13,
+                      color: isLow ? Colors.red : const Color(0xFF6B7280),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$m:$s',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isLow ? Colors.red : const Color(0xFF1F2937),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           LinearProgressIndicator(
             value: (current + 1) / total,
             borderRadius: BorderRadius.circular(4),
+            minHeight: 3,
+            backgroundColor: const Color(0xFFF3F4F6),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
           ),
         ],
       ),
@@ -398,20 +478,55 @@ class _QuestionView extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium?.copyWith(height: 1.5),
         ),
         const SizedBox(height: 24),
-        ...q.options.map(
-          (option) => _OptionTile(
-            option: option,
-            isSelected: state.selectedOption == option,
+        ...q.options.asMap().entries.map(
+          (entry) => _OptionTile(
+            option: entry.value,
+            index: entry.key,
+            isSelected: state.selectedOption == entry.value,
             isReviewing: reviewing,
-            onTap: reviewing ? null : () => onSelectOption(option),
+            onTap: reviewing ? null : () => onSelectOption(entry.value),
           ),
         ),
-        const SizedBox(height: 28),
+        if (reviewing) ...[
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                  color: const Color(0xFF34D399).withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lock_rounded,
+                    color: Color(0xFF34D399), size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.quizAnswerRecorded,
+                    style: const TextStyle(
+                      color: Color(0xFF065F46),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 20),
         if (!reviewing)
           SizedBox(
             width: double.infinity,
             child: FilledButton(
               onPressed: state.selectedOption != null ? onConfirm : null,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
               child: Text(l10n.quizSubmit),
             ),
           )
@@ -419,7 +534,12 @@ class _QuestionView extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: state.isLast ? () => onNext() : () => onNext(),
+              onPressed: () => onNext(),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
               child: Text(state.isLast ? l10n.quizFinish : l10n.quizNext),
             ),
           ),
@@ -436,24 +556,27 @@ class _QuestionView extends StatelessWidget {
 class _OptionTile extends StatelessWidget {
   const _OptionTile({
     required this.option,
+    required this.index,
     required this.isSelected,
     required this.isReviewing,
     required this.onTap,
   });
 
   final String option;
+  final int index;
   final bool isSelected;
   final bool isReviewing;
   final VoidCallback? onTap;
 
+  static const _labels = ['A', 'B', 'C', 'D', 'E'];
+
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = isSelected
-        ? const Color(0xFFECFDF5)
-        : Colors.white;
-    final Color borderColor = isSelected
-        ? const Color(0xFF34D399)
-        : const Color(0xFFE5E7EB);
+    final label = index < _labels.length ? _labels[index] : '${index + 1}';
+    final Color bgColor =
+        isSelected ? const Color(0xFFECFDF5) : Colors.white;
+    final Color borderColor =
+        isSelected ? const Color(0xFF34D399) : const Color(0xFFE5E7EB);
     final double borderWidth = isSelected ? 1.5 : 1.0;
 
     return Padding(
@@ -463,19 +586,51 @@ class _OptionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: borderColor, width: borderWidth),
           ),
-          child: Text(
-            option,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              color: const Color(0xFF1F2937),
-            ),
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF34D399)
+                      : const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF6B7280),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  option,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
