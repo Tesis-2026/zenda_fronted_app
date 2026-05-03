@@ -256,6 +256,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 fontWeight: FontWeight.w800,
                               ),
                               decoration: const InputDecoration(
+                                filled: false,
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: EdgeInsets.zero,
@@ -267,7 +268,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                 ),
                                 hintText: '0.00',
                                 hintStyle: TextStyle(
-                                  color: Color(0xFF6B7280),
+                                  color: Colors.white54,
                                   fontSize: 40,
                                   fontWeight: FontWeight.w800,
                                 ),

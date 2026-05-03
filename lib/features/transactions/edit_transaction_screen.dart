@@ -294,6 +294,7 @@ class _EditTransactionScreenState
                         fontWeight: FontWeight.w800,
                       ),
                       decoration: const InputDecoration(
+                        filled: false,
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
