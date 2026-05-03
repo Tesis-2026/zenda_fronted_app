@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/services/predictions_api_service.dart';
 import '../../l10n/l10n_extension.dart';
@@ -24,14 +25,12 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen> {
   // Month offset from current month (0 = current, -1 = previous, +1 = next)
   int _monthOffset = 0;
 
-  String _monthLabel(int offset) {
+  String _monthLabel(BuildContext context, int offset) {
     final now = DateTime.now();
     final target = DateTime(now.year, now.month + offset);
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return '${months[target.month - 1]} ${target.year}';
+    final locale = Localizations.localeOf(context).toString();
+    final monthName = DateFormat('MMMM', locale).format(target);
+    return context.l10n.reportsMonthLabel(monthName, target.year);
   }
 
   @override
@@ -48,7 +47,7 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen> {
           children: [
             // Month navigator
             _MonthNavigator(
-              label: _monthLabel(_monthOffset),
+              label: _monthLabel(context, _monthOffset),
               onPrevious: () => setState(() => _monthOffset--),
               onNext: () => setState(() => _monthOffset++),
             ),

@@ -2156,6 +2156,18 @@ abstract class AppLocalizations {
   /// **'Great!'**
   String get challengeAutoCompletedDismiss;
 
+  /// No description provided for @challengeRewardBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward: {badge} badge'**
+  String challengeRewardBadge(String badge);
+
+  /// No description provided for @challengeDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String challengeDaysLeft(String days);
+
   /// No description provided for @badgesTitle.
   ///
   /// In en, this message translates to:
@@ -3995,6 +4007,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Compare your pre and post survey scores'**
   String get settingsSurveyComparisonSubtitle;
+
+  /// No description provided for @settingsLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguageLabel;
+
+  /// No description provided for @settingsLanguageDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get settingsLanguageDialogTitle;
+
+  /// No description provided for @settingsLanguageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEnglish;
+
+  /// No description provided for @settingsLanguageSpanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get settingsLanguageSpanish;
 
   /// No description provided for @aiChatOnline.
   ///

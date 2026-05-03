@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
+import 'providers/locale_provider.dart';
 import 'providers/repositories_providers.dart';
 import 'routing/app_router.dart';
 
@@ -15,9 +16,12 @@ class App extends ConsumerWidget {
     // Start the offline sync service once on app launch.
     ref.read(syncServiceProvider);
     final router = ref.watch(routerProvider);
+    final localeAsync = ref.watch(localeProvider);
+    final locale = localeAsync.asData?.value ?? const Locale('en');
 
     return MaterialApp.router(
       title: 'Zenda',
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

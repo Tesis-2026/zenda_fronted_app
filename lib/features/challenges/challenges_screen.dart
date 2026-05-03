@@ -380,7 +380,7 @@ class _ChallengeCard extends StatelessWidget {
                         size: 14, color: Color(0xFF6B7280)),
                     const SizedBox(width: 4),
                     Text(
-                      'Reward: $badgeReward badge',
+                      l10n.challengeRewardBadge(badgeReward),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF6B7280),
@@ -390,7 +390,7 @@ class _ChallengeCard extends StatelessWidget {
                   const Spacer(),
                   if (daysLeft != null && !isCompleted)
                     Text(
-                      '$daysLeft days left',
+                      l10n.challengeDaysLeft(daysLeft),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,

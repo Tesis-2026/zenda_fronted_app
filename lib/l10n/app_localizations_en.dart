@@ -1146,6 +1146,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get challengeAutoCompletedDismiss => 'Great!';
 
   @override
+  String challengeRewardBadge(String badge) {
+    return 'Reward: $badge badge';
+  }
+
+  @override
+  String challengeDaysLeft(String days) {
+    return '$days days left';
+  }
+
+  @override
   String get badgesTitle => 'Badges';
 
   @override
@@ -2170,6 +2180,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsSurveyComparisonSubtitle =>
       'Compare your pre and post survey scores';
+
+  @override
+  String get settingsLanguageLabel => 'Language';
+
+  @override
+  String get settingsLanguageDialogTitle => 'Select Language';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsLanguageSpanish => 'Spanish';
 
   @override
   String get aiChatOnline => 'Online';

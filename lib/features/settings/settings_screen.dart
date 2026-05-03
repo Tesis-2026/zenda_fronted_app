@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
+import '../../providers/locale_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -11,6 +12,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final locale = ref.watch(localeProvider).asData?.value ?? const Locale('en');
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB);
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
@@ -51,6 +53,16 @@ class SettingsScreen extends ConsumerWidget {
             isDark: isDark,
             cardBg: cardBg,
             items: [
+              _SettingsItem(
+                icon: Icons.language_rounded,
+                iconBg: const Color(0xFFECFDF5),
+                iconColor: const Color(0xFF059669),
+                title: l10n.settingsLanguageLabel,
+                subtitle: locale.languageCode == 'es'
+                    ? l10n.settingsLanguageSpanish
+                    : l10n.settingsLanguageEnglish,
+                onTap: () => _showLanguageDialog(context, ref, l10n, locale),
+              ),
               _SettingsItem(
                 icon: Icons.category_rounded,
                 iconBg: const Color(0xFFF3F4F6),
@@ -104,6 +116,34 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => _confirmSignOut(context, ref, l10n),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog(
+      BuildContext context, WidgetRef ref, dynamic l10n, Locale current) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.settingsLanguageDialogTitle),
+        children: [
+          _LanguageOption(
+            label: l10n.settingsLanguageEnglish,
+            selected: current.languageCode == 'en',
+            onTap: () {
+              Navigator.pop(ctx);
+              ref.read(localeProvider.notifier).setLocale('en');
+            },
+          ),
+          _LanguageOption(
+            label: l10n.settingsLanguageSpanish,
+            selected: current.languageCode == 'es',
+            onTap: () {
+              Navigator.pop(ctx);
+              ref.read(localeProvider.notifier).setLocale('es');
+            },
           ),
         ],
       ),
@@ -380,6 +420,7 @@ class _SettingsItem {
     required this.title,
     required this.onTap,
     this.titleColor,
+    this.subtitle,
   });
 
   final IconData icon;
@@ -388,6 +429,7 @@ class _SettingsItem {
   final String title;
   final VoidCallback onTap;
   final Color? titleColor;
+  final String? subtitle;
 }
 
 class _SettingsRow extends StatelessWidget {
@@ -415,14 +457,29 @@ class _SettingsRow extends StatelessWidget {
             ),
             const SizedBox(width: 14),
             Expanded(
-              child: Text(
-                item.title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: item.titleColor ??
-                      (isDark ? Colors.white : const Color(0xFF1F2937)),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: item.titleColor ??
+                          (isDark ? Colors.white : const Color(0xFF1F2937)),
+                    ),
+                  ),
+                  if (item.subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      item.subtitle!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             if (item.titleColor == null)
@@ -433,6 +490,43 @@ class _SettingsRow extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SimpleDialogOption(
+      onPressed: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                color: selected
+                    ? const Color(0xFF059669)
+                    : const Color(0xFF1F2937),
+              ),
+            ),
+          ),
+          if (selected)
+            const Icon(Icons.check_rounded, size: 18, color: Color(0xFF059669)),
+        ],
       ),
     );
   }

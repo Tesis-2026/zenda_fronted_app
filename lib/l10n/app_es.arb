@@ -520,6 +520,18 @@
     }
   },
   "challengeAutoCompletedDismiss": "¡Genial!",
+  "challengeRewardBadge": "Recompensa: insignia {badge}",
+  "@challengeRewardBadge": {
+    "placeholders": {
+      "badge": { "type": "String" }
+    }
+  },
+  "challengeDaysLeft": "{days} días restantes",
+  "@challengeDaysLeft": {
+    "placeholders": {
+      "days": { "type": "String" }
+    }
+  },
 
   "badgesTitle": "Insignias",
   "badgesErrorLoad": "No se pudieron cargar las insignias",
@@ -996,6 +1008,10 @@
   "settingsSurveySusSubtitle": "Evalúa tu experiencia con la app",
   "settingsSurveyComparisonLabel": "Progreso de Conocimiento",
   "settingsSurveyComparisonSubtitle": "Compara tus puntajes de encuesta pre y post",
+  "settingsLanguageLabel": "Idioma",
+  "settingsLanguageDialogTitle": "Seleccionar idioma",
+  "settingsLanguageEnglish": "Inglés",
+  "settingsLanguageSpanish": "Español",
 
   "aiChatOnline": "En línea",
 

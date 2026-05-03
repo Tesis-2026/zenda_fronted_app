@@ -520,6 +520,18 @@
     }
   },
   "challengeAutoCompletedDismiss": "Great!",
+  "challengeRewardBadge": "Reward: {badge} badge",
+  "@challengeRewardBadge": {
+    "placeholders": {
+      "badge": { "type": "String" }
+    }
+  },
+  "challengeDaysLeft": "{days} days left",
+  "@challengeDaysLeft": {
+    "placeholders": {
+      "days": { "type": "String" }
+    }
+  },
 
   "badgesTitle": "Badges",
   "badgesErrorLoad": "Could not load badges",
@@ -996,6 +1008,10 @@
   "settingsSurveySusSubtitle": "Rate your experience with the app",
   "settingsSurveyComparisonLabel": "Knowledge Progress",
   "settingsSurveyComparisonSubtitle": "Compare your pre and post survey scores",
+  "settingsLanguageLabel": "Language",
+  "settingsLanguageDialogTitle": "Select Language",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageSpanish": "Spanish",
 
   "aiChatOnline": "Online",
 

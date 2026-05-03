@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/user_menu_button.dart';
+import '../../features/dashboard/dashboard_providers.dart';
 import '../../l10n/l10n_extension.dart';
 
 final educationServiceProvider = Provider<EducationApiService>(
@@ -43,6 +44,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final topicsAsync = ref.watch(_topicsProvider);
+    final streakDays = ref.watch(streakProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -55,14 +57,14 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
               color: const Color(0xFFFEF3C7),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
-                SizedBox(width: 2),
+                const Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
+                const SizedBox(width: 2),
                 Text(
-                  '12',
-                  style: TextStyle(
+                  l10n.streakLabel(streakDays),
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFD97706),
