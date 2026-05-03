@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/category.dart';
-import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
@@ -86,7 +85,6 @@ class CategoryManagementScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const AppBottomNav(activeIndex: 4),
     );
   }
 

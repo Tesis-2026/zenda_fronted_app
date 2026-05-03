@@ -5,7 +5,6 @@ import '../../core/models/budget.dart';
 import '../../core/models/category.dart';
 import '../../core/services/budget_api_service.dart';
 import '../../core/services/category_api_service.dart';
-import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -168,7 +167,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               ),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                   children: [
                     // 3-column summary
                     _BucketSummaryRow(summary: summary),
@@ -196,7 +195,6 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         },
       ),
       ),
-      bottomNavigationBar: const AppBottomNav(activeIndex: 0),
     );
   }
 

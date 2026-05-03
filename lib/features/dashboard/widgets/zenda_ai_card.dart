@@ -71,7 +71,7 @@ class ZendaAiCard extends StatelessWidget {
                 ),
               ),
               GestureDetector(
-                onTap: () => context.push('/recommendations'),
+                onTap: () => context.push('/predictions'),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(

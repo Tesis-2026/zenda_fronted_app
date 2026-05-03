@@ -369,35 +369,21 @@ class _ChallengeCard extends StatelessWidget {
               ),
             ],
             // Reward row
-            if (challenge.pointsReward > 0 || badgeReward != null || daysLeft != null) ...[
+            if (badgeReward != null || daysLeft != null) ...[
               const SizedBox(height: 10),
               Row(
                 children: [
-                  if (challenge.pointsReward > 0) ...[
-                    const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF59E0B)),
-                    const SizedBox(width: 3),
+                  if (badgeReward != null) ...[
+                    const Icon(Icons.military_tech_rounded,
+                        size: 14, color: Color(0xFF6B7280)),
+                    const SizedBox(width: 4),
                     Text(
-                      'Reward: +${challenge.pointsReward} XP',
+                      'Reward: $badgeReward badge',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF6B7280),
                       ),
                     ),
-                    if (badgeReward != null) ...[
-                      const SizedBox(width: 4),
-                      const Text('•', style: TextStyle(color: Color(0xFF6B7280))),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.military_tech_rounded,
-                          size: 14, color: Color(0xFF6B7280)),
-                      const SizedBox(width: 2),
-                      Text(
-                        badgeReward,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                    ],
                   ],
                   const Spacer(),
                   if (daysLeft != null && !isCompleted)

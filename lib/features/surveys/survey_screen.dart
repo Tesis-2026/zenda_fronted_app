@@ -440,8 +440,6 @@ class _ResultView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    // XP reward from result or default
-    final int xpEarned = result.xpEarned ?? 50;
     final String? badgeUnlocked = result.badgeUnlocked;
 
     return SingleChildScrollView(
@@ -469,62 +467,33 @@ class _ResultView extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 28),
-          // XP earned card
-          Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
+          if (badgeUnlocked != null) ...[
+            const SizedBox(height: 28),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'You earned',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF6B7280),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  const Icon(Icons.military_tech_rounded,
+                      size: 16, color: Color(0xFF10B981)),
+                  const SizedBox(width: 6),
                   Text(
-                    '+$xpEarned XP',
+                    '$badgeUnlocked ${l10n.surveyBadgeUnlocked}',
                     style: const TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF34D399),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF10B981),
                     ),
                   ),
-                  if (badgeUnlocked != null) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF34D399).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.military_tech_rounded,
-                              size: 16, color: Color(0xFF10B981)),
-                          const SizedBox(width: 6),
-                          Text(
-                            '$badgeUnlocked ${l10n.surveyBadgeUnlocked}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF10B981),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
-          ),
+          ],
           const SizedBox(height: 16),
           // Financial profile card
           Container(

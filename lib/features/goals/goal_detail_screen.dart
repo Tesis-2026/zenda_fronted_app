@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
-import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 import 'goals_screen.dart';
 
@@ -141,7 +140,6 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const AppBottomNav(activeIndex: 3),
     );
   }
 

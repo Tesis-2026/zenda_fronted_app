@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
-import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_toast.dart';
 import '../auth/auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
@@ -162,7 +161,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: const AppBottomNav(activeIndex: 4),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(

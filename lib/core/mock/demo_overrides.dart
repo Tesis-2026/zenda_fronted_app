@@ -14,7 +14,7 @@ import '../../features/reports/reports_screen.dart';
 import '../../features/dashboard/dashboard_providers.dart';
 import '../../features/surveys/sus_screen.dart';
 import '../../features/surveys/survey_screen.dart';
-import '../../features/transactions/transaction_list_screen.dart';
+import '../../providers/repositories_providers.dart';
 import 'demo_data.dart';
 import 'mock_services.dart';
 
@@ -35,9 +35,7 @@ buildDemoOverrides() {
     transactionsProvider.overrideWith(
       (ref) async => DemoData.transactions,
     ),
-    transactionListProvider.overrideWith(
-      (ref) async => DemoData.apiTransactions,
-    ),
+    transactionApiServiceProvider.overrideWithValue(MockTransactionApiService()),
     streakStateProvider.overrideWith(
       (ref) async => DemoData.streak,
     ),
