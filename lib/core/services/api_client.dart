@@ -107,7 +107,11 @@ class ApiClient {
   static void _throwIfError(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) return;
     final body = _parseBody(response);
-    final message = (body['message'] as String?) ?? 'Unexpected error';
+    // NestJS class-validator returns message as List<String>; other errors return String.
+    final raw = body['message'];
+    final message = raw is List
+        ? raw.cast<Object>().join('; ')
+        : (raw as String?) ?? 'Unexpected error';
     throw ApiException(statusCode: response.statusCode, message: message);
   }
 

@@ -129,7 +129,7 @@ class TransactionApiService {
         {'description': description, 'amount': amount},
         authenticated: true,
       );
-      final name = json['category'] as String?;
+      final name = json['categoryName'] as String?;
       if (name == null) return null;
       return categoryFromApiName(name);
     } catch (_) {
