@@ -266,12 +266,15 @@ class _EditTransactionScreenState
               ),
               const SizedBox(height: 16),
 
-              // Amount dark card
+              // Amount input — budget style
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1F2937),
-                  borderRadius: BorderRadius.circular(20),
+                  color: const Color(0xFFF9FAFB),
+                  borderRadius: BorderRadius.circular(12),
+                  border:
+                      Border.all(color: const Color(0xFF34D399), width: 2),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,16 +284,17 @@ class _EditTransactionScreenState
                       style: const TextStyle(
                         color: Color(0xFF6B7280),
                         fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: _amountController,
                       keyboardType: const TextInputType.numberWithOptions(
                           decimal: true),
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
+                        color: Color(0xFF1F2937),
+                        fontSize: 24,
                         fontWeight: FontWeight.w800,
                       ),
                       decoration: const InputDecoration(
@@ -300,9 +304,9 @@ class _EditTransactionScreenState
                         contentPadding: EdgeInsets.zero,
                         prefixText: 'S/ ',
                         prefixStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF34D399),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),

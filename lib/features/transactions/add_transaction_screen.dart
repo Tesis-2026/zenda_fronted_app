@@ -223,58 +223,59 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Amount dark card
+                    // Amount input — budget style
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1F2937),
-                        borderRadius: BorderRadius.circular(20),
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: const Color(0xFF34D399), width: 2),
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             l10n.txAmountLabel,
                             style: const TextStyle(
                               color: Color(0xFF6B7280),
                               fontSize: 13,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          IntrinsicWidth(
-                            child: TextField(
-                              controller: _amountController,
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: _amountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textInputAction: TextInputAction.next,
+                            style: const TextStyle(
+                              color: Color(0xFF1F2937),
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            decoration: const InputDecoration(
+                              filled: false,
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                              prefixText: 'S/ ',
+                              prefixStyle: TextStyle(
+                                color: Color(0xFF34D399),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
                               ),
-                              textInputAction: TextInputAction.next,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 40,
+                              hintText: '0.00',
+                              hintStyle: TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 24,
                                 fontWeight: FontWeight.w800,
                               ),
-                              decoration: const InputDecoration(
-                                filled: false,
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.zero,
-                                prefixText: 'S/ ',
-                                prefixStyle: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                                hintText: '0.00',
-                                hintStyle: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              onChanged: controller.setAmountFromText,
                             ),
+                            onChanged: controller.setAmountFromText,
                           ),
                         ],
                       ),
