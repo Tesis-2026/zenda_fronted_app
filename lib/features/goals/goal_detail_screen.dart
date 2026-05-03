@@ -7,10 +7,11 @@ import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
+import 'goals_screen.dart';
 
 final _contributionsProvider =
     FutureProvider.autoDispose.family<List<GoalContribution>, String>(
-  (ref, goalId) => GoalsApiService().getContributions(goalId),
+  (ref, goalId) => ref.read(goalsServiceProvider).getContributions(goalId),
 );
 
 class GoalDetailScreen extends ConsumerStatefulWidget {
@@ -31,24 +32,101 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
     _goal = widget.goal;
   }
 
+  String? _dueDateLabel(BuildContext context) {
+    if (_goal.dueDate == null) return null;
+    final due = DateTime.tryParse(_goal.dueDate!);
+    if (due == null) return null;
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return context.l10n.goalsDueDate('${months[due.month - 1]} ${due.year}');
+  }
+
+  static const _emojis = ['🎯', '✈️', '🎓', '🏠', '💻', '🎸', '📱', '🏋️', '🌎', '💰'];
+  String _emoji() => _emojis[_goal.name.codeUnitAt(0) % _emojis.length];
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final contributionsAsync = ref.watch(_contributionsProvider(_goal.id));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final dueLabel = _dueDateLabel(context);
 
     return Scaffold(
       body: contributionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(child: Text(l10n.goalsErrorLoad)),
-        data: (contributions) => Column(
+        data: (contributions) => Stack(
           children: [
-            _GreenHeader(goal: _goal),
-            Expanded(
-              child: _Body(
-                goal: _goal,
-                contributions: contributions,
-                onContribute: () => _showContributeDialog(context),
-                onDelete: () => _deleteGoal(context),
+            Container(color: const Color(0xFF34D399)),
+            SafeArea(
+              bottom: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => context.pop(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      _emoji(),
+                      style: const TextStyle(fontSize: 52),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      _goal.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  if (dueLabel != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      dueLabel,
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  const SizedBox(height: 32),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(28),
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(28),
+                        ),
+                        child: _Body(
+                          goal: _goal,
+                          contributions: contributions,
+                          onContribute: () => _showContributeSheet(context),
+                          onDelete: () => _deleteGoal(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -58,168 +136,282 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
     );
   }
 
-  Future<void> _showContributeDialog(BuildContext context) async {
-    final l10n = context.l10n;
-    final controller = TextEditingController();
-
-    final confirmed = await showDialog<bool>(
+  Future<void> _showContributeSheet(BuildContext context) async {
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.goalsContributeTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType:
-              const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
-            labelText: l10n.goalsContributeLabel,
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.commonSave),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _ContributeSheet(
+        goal: _goal,
+        onContribute: (amount) async {
+          final updated =
+              await ref.read(goalsServiceProvider).contribute(_goal.id, amount: amount);
+          if (!context.mounted) return;
+          setState(() => _goal = updated);
+          ref.invalidate(_contributionsProvider(_goal.id));
+        },
       ),
     );
-
-    if (confirmed != true || !context.mounted) return;
-    final amount = double.tryParse(controller.text.trim());
-    if (amount == null || amount <= 0) return;
-
-    final updated = await GoalsApiService().contribute(_goal.id, amount: amount);
-    if (!context.mounted) return;
-    setState(() => _goal = updated);
-    ref.invalidate(_contributionsProvider(_goal.id));
   }
 
   Future<void> _deleteGoal(BuildContext context) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        content: Text(l10n.goalsDeleteConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.goalsDeleteLabel),
-          ),
-        ],
-      ),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _ConfirmDeleteSheet(l10n: l10n),
     );
     if (confirmed != true || !context.mounted) return;
-    await GoalsApiService().delete(_goal.id);
+    await ref.read(goalsServiceProvider).delete(_goal.id);
     if (!context.mounted) return;
     context.pop();
   }
 }
 
-class _GreenHeader extends StatelessWidget {
-  final SavingsGoal goal;
-  const _GreenHeader({required this.goal});
+// ── Contribute bottom sheet ──────────────────────────────────────────────────
 
-  IconData _iconFor(String name) {
-    final lower = name.toLowerCase();
-    if (lower.contains('trip') ||
-        lower.contains('travel') ||
-        lower.contains('vacation') ||
-        lower.contains('flight')) {
-      return Icons.flight;
-    }
-    if (lower.contains('laptop') ||
-        lower.contains('computer') ||
-        lower.contains('tech')) {
-      return Icons.laptop_outlined;
-    }
-    if (lower.contains('emergency') ||
-        lower.contains('safety') ||
-        lower.contains('shield')) {
-      return Icons.security_outlined;
-    }
-    if (lower.contains('car') || lower.contains('auto')) {
-      return Icons.directions_car_outlined;
-    }
-    if (lower.contains('home') || lower.contains('house')) {
-      return Icons.home_outlined;
-    }
-    if (lower.contains('education') ||
-        lower.contains('study') ||
-        lower.contains('school')) {
-      return Icons.school_outlined;
-    }
-    return Icons.savings_outlined;
+class _ContributeSheet extends StatefulWidget {
+  final SavingsGoal goal;
+  final Future<void> Function(double) onContribute;
+
+  const _ContributeSheet({required this.goal, required this.onContribute});
+
+  @override
+  State<_ContributeSheet> createState() => _ContributeSheetState();
+}
+
+class _ContributeSheetState extends State<_ContributeSheet> {
+  final _ctrl = TextEditingController();
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
   }
 
-  String? _dueDateMonthYear(String? dueDateStr) {
-    if (dueDateStr == null) return null;
-    final due = DateTime.tryParse(dueDateStr);
-    if (due == null) return null;
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[due.month - 1]} ${due.year}';
+  double? get _amount => double.tryParse(_ctrl.text.trim());
+
+  void _quickPick(double value) {
+    setState(() {
+      _ctrl.text = value.toStringAsFixed(0);
+      _ctrl.selection =
+          TextSelection.fromPosition(TextPosition(offset: _ctrl.text.length));
+    });
+  }
+
+  Future<void> _save() async {
+    final amount = _amount;
+    if (amount == null || amount <= 0) return;
+    setState(() => _saving = true);
+    try {
+      await widget.onContribute(amount);
+      if (mounted) Navigator.pop(context);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final monthYear = _dueDateMonthYear(goal.dueDate);
-    final dueLabel = monthYear != null ? context.l10n.goalsDueDate(monthYear) : null;
+    final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final pct = widget.goal.progressPercent.clamp(0.0, 100.0);
+    final amountLabel = _amount != null && _amount! > 0
+        ? l10n.goalsContributeAddAction(_amount!.toStringAsFixed(0))
+        : l10n.goalsContributeTitle;
 
-    return Container(
-      color: const Color(0xFF34D399),
-      child: SafeArea(
-        bottom: false,
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => context.pop(),
-                  ),
-                ],
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : const Color(0xFFE5E7EB),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-            Icon(_iconFor(goal.name), size: 56, color: Colors.white),
-            const SizedBox(height: 8),
-            Text(
-              goal.name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (dueLabel != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                dueLabel,
-                style: const TextStyle(
-                    color: Colors.white70, fontSize: 14),
-              ),
-            ],
             const SizedBox(height: 20),
+            Text(
+              l10n.goalsContributeTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              widget.goal.name,
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: pct / 100,
+                minHeight: 6,
+                backgroundColor: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : const Color(0xFFF3F4F6),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _ctrl,
+              autofocus: true,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              style: const TextStyle(
+                  fontSize: 24, fontWeight: FontWeight.bold),
+              decoration: InputDecoration(
+                prefixText: 'S/ ',
+                hintText: '0',
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [50.0, 100.0, 200.0].map((v) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: OutlinedButton(
+                    onPressed: () => _quickPick(v),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      side: const BorderSide(color: Color(0xFF34D399)),
+                      foregroundColor: const Color(0xFF34D399),
+                    ),
+                    child: Text('S/ ${v.toStringAsFixed(0)}'),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _saving || (_amount == null || _amount! <= 0)
+                  ? null
+                  : _save,
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF34D399),
+                minimumSize: const Size(double.infinity, 52),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+              child: _saving
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(
+                      amountLabel,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+// ── Confirm delete sheet ─────────────────────────────────────────────────────
+
+class _ConfirmDeleteSheet extends StatelessWidget {
+  final dynamic l10n;
+  const _ConfirmDeleteSheet({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white24 : const Color(0xFFE5E7EB),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            l10n.goalsDeleteConfirm as String,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: Text(l10n.commonCancel as String),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    minimumSize: const Size(0, 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: Text(l10n.goalsDeleteLabel as String),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Body ─────────────────────────────────────────────────────────────────────
 
 class _Body extends StatelessWidget {
   final SavingsGoal goal;
@@ -243,9 +435,8 @@ class _Body extends StatelessWidget {
     final isComplete = pct >= 100;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
       children: [
-        // Stats row: S/ X | Y% | S/ Z
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -273,7 +464,6 @@ class _Body extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        // Progress bar
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -281,7 +471,7 @@ class _Body extends StatelessWidget {
             minHeight: 8,
             backgroundColor: isDark
                 ? Colors.white.withValues(alpha: 0.1)
-                : Colors.black.withValues(alpha: 0.08),
+                : const Color(0xFFF3F4F6),
             valueColor:
                 const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
           ),
@@ -295,7 +485,6 @@ class _Body extends StatelessWidget {
                 ),
           ),
         const SizedBox(height: 28),
-        // Contributions header + add button
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -343,7 +532,6 @@ class _Body extends StatelessWidget {
             (c) => _ContributionTile(contribution: c),
           ),
         const SizedBox(height: 32),
-        // Delete button
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -352,8 +540,7 @@ class _Body extends StatelessWidget {
                 size: 18, color: Theme.of(context).colorScheme.error),
             label: Text(
               l10n.goalsDetailDelete,
-              style:
-                  TextStyle(color: Theme.of(context).colorScheme.error),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -370,6 +557,8 @@ class _Body extends StatelessWidget {
     );
   }
 }
+
+// ── Contribution tile ─────────────────────────────────────────────────────────
 
 class _ContributionTile extends StatelessWidget {
   final GoalContribution contribution;

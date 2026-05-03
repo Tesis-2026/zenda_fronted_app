@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/badges_api_service.dart';
 import '../../l10n/l10n_extension.dart';
 
-final _badgesServiceProvider = Provider<BadgesApiService>(
+final badgesServiceProvider = Provider<BadgesApiService>(
   (_) => BadgesApiService(),
 );
 
 final _badgesProvider = FutureProvider.autoDispose<List<ZendaBadge>>((ref) {
-  return ref.read(_badgesServiceProvider).getAll();
+  return ref.read(badgesServiceProvider).getAll();
 });
 
 class BadgesScreen extends ConsumerWidget {

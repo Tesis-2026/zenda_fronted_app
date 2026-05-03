@@ -4,14 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
 import '../../l10n/l10n_extension.dart';
-
-final _educationServiceProvider = Provider<EducationApiService>(
-  (_) => EducationApiService(),
-);
+import 'education_screen.dart';
 
 final _topicDetailProvider =
     FutureProvider.autoDispose.family<EducationTopic, String>((ref, id) {
-  return ref.read(_educationServiceProvider).getTopic(id);
+  return ref.read(educationServiceProvider).getTopic(id);
 });
 
 class TopicDetailScreen extends ConsumerWidget {
@@ -32,7 +29,7 @@ class TopicDetailScreen extends ConsumerWidget {
           topic: topic,
           onComplete: () async {
             await ref
-                .read(_educationServiceProvider)
+                .read(educationServiceProvider)
                 .completeTopic(topic.id);
             ref.invalidate(_topicDetailProvider(topicId));
             if (context.mounted) {

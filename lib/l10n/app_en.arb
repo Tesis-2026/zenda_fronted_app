@@ -88,8 +88,23 @@
   "dashboardNavAi": "AI",
   "dashboardNavGoals": "GOALS",
   "dashboardNavProfile": "PROFILE",
+  "dashboardNavEducation": "EDUC.",
   "dashboardRecord": "Record",
   "dashboardMyAccounts": "My Accounts",
+  "dashboardNoAccounts": "No accounts yet",
+  "dashboardAddFirstAccount": "Add your first account",
+  "accountAddTitle": "Add Account",
+  "accountNameLabel": "Account name",
+  "accountNameHint": "e.g. BCP Savings",
+  "accountTypeLabel": "Account type",
+  "accountTypeCash": "Cash",
+  "accountTypeDebit": "Debit",
+  "accountTypeCredit": "Credit card",
+  "accountInitialBalance": "Initial balance (S/)",
+  "accountCreditLimit": "Credit limit (S/)",
+  "accountAddButton": "Add account",
+  "accountDebt": "Debt:",
+  "accountAvail": "Avail:",
   "dashboardBudgetTitle": "Your 50/30/20 Budget",
   "dashboardBudgetSubtitle": "Based on your spending in the last 30 days",
   "dashboardTransactions": "Transactions",
@@ -627,8 +642,14 @@
   "profileSetupNext": "Next",
   "profileSetupSave": "Finish",
   "profileSetupCompleteTitle": "All set!",
+  "profileSetupCompleteTitleNamed": "All set, {name}!",
+  "@profileSetupCompleteTitleNamed": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "profileSetupCompleteBody": "Your profile is ready. Let's take control of your finances.",
-  "profileSetupGoToDashboard": "Go to dashboard",
+  "profileSetupGoToDashboard": "Start using Zenda",
   "incomeTypeScholarship": "Scholarship",
   "incomeTypePartTime": "Part-time job",
   "incomeTypeFamily": "Family support",
@@ -771,6 +792,13 @@
   "dashboardCashDebitCredit": "Cash · Debit · Credit",
 
   "goalsNewButton": "+ New",
+  "goalsCreateButton": "Create goal",
+  "goalsContributeAddAction": "Add S/ {amount} to goal",
+  "@goalsContributeAddAction": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
 
   "emailVerifTitle": "Check your email",
   "emailVerifSubtitle": "We sent a verification link to {email}",

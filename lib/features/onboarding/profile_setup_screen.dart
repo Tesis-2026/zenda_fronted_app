@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
-import '../../core/services/user_api_service.dart';
 import '../auth/auth_controller.dart';
+import '../profile/profile_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -55,7 +55,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           ? null
           : _universityController.text.trim();
 
-      await UserApiService().updateProfile(
+      await ref.read(profileUserServiceProvider).updateProfile(
         age: age,
         university: university,
         incomeType: _selectedIncomeType,
@@ -110,7 +110,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     isDark: isDark,
                   ),
                   _MonthlyIncomePage(controller: _incomeController, l10n: l10n, isDark: isDark),
-                  _CompletePage(l10n: l10n, isDark: isDark),
+                  _CompletePage(
+                    l10n: l10n,
+                    isDark: isDark,
+                    userName: ref.watch(authNotifierProvider).user?.name.split(' ').first ?? '',
+                  ),
                 ],
               ),
             ),
@@ -567,25 +571,39 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
 }
 
 class _CompletePage extends StatelessWidget {
-  const _CompletePage({required this.l10n, required this.isDark});
+  const _CompletePage({required this.l10n, required this.isDark, required this.userName});
   final AppLocalizations l10n;
   final bool isDark;
+  final String userName;
 
   @override
   Widget build(BuildContext context) {
+    final title = userName.isNotEmpty
+        ? l10n.profileSetupCompleteTitleNamed(userName)
+        : l10n.profileSetupCompleteTitle;
     return Container(
       width: double.infinity,
       color: const Color(0xFF34D399),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.celebration_rounded, size: 80, color: Colors.white),
+              Container(
+                width: 96,
+                height: 96,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: const Center(
+                  child: Text('🎉', style: TextStyle(fontSize: 46)),
+                ),
+              ),
               const SizedBox(height: 24),
               Text(
-                l10n.profileSetupCompleteTitle,
+                title,
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,

@@ -88,8 +88,23 @@
   "dashboardNavAi": "IA",
   "dashboardNavGoals": "METAS",
   "dashboardNavProfile": "PERFIL",
+  "dashboardNavEducation": "EDUC.",
   "dashboardRecord": "Registrar",
   "dashboardMyAccounts": "Mis Cuentas",
+  "dashboardNoAccounts": "Sin cuentas aún",
+  "dashboardAddFirstAccount": "Agrega tu primera cuenta",
+  "accountAddTitle": "Agregar cuenta",
+  "accountNameLabel": "Nombre de cuenta",
+  "accountNameHint": "ej. BCP Ahorros",
+  "accountTypeLabel": "Tipo de cuenta",
+  "accountTypeCash": "Efectivo",
+  "accountTypeDebit": "Débito",
+  "accountTypeCredit": "Tarjeta de crédito",
+  "accountInitialBalance": "Saldo inicial (S/)",
+  "accountCreditLimit": "Límite de crédito (S/)",
+  "accountAddButton": "Agregar cuenta",
+  "accountDebt": "Deuda:",
+  "accountAvail": "Disp:",
   "dashboardBudgetTitle": "Tu Presupuesto 50/30/20",
   "dashboardBudgetSubtitle": "Basado en tus gastos de los últimos 30 días",
   "dashboardTransactions": "Transacciones",
@@ -627,8 +642,14 @@
   "profileSetupNext": "Siguiente",
   "profileSetupSave": "Terminar",
   "profileSetupCompleteTitle": "¡Listo!",
-  "profileSetupCompleteBody": "Tu perfil está configurado. Tomemos el control de tus finanzas.",
-  "profileSetupGoToDashboard": "Ir al inicio",
+  "profileSetupCompleteTitleNamed": "¡Todo listo, {name}!",
+  "@profileSetupCompleteTitleNamed": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "profileSetupCompleteBody": "Tu perfil está listo. Toma el control de tus finanzas.",
+  "profileSetupGoToDashboard": "Comenzar a usar Zenda",
   "incomeTypeScholarship": "Beca",
   "incomeTypePartTime": "Trabajo a tiempo parcial",
   "incomeTypeFamily": "Apoyo familiar",
@@ -771,6 +792,13 @@
   "dashboardCashDebitCredit": "Efectivo · Débito · Crédito",
 
   "goalsNewButton": "+ Nuevo",
+  "goalsCreateButton": "Crear meta",
+  "goalsContributeAddAction": "Agregar S/ {amount} a la meta",
+  "@goalsContributeAddAction": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
 
   "emailVerifTitle": "Revisa tu correo",
   "emailVerifSubtitle": "Enviamos un enlace de verificación a {email}",

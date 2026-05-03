@@ -8,7 +8,7 @@ import '../../core/services/category_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 
-final _budgetServiceProvider = Provider<BudgetApiService>((ref) {
+final budgetServiceProvider = Provider<BudgetApiService>((ref) {
   return BudgetApiService();
 });
 
@@ -22,7 +22,7 @@ final _budgetsProvider =
     FutureProvider.autoDispose.family<List<Budget>, _BudgetFilter>(
   (ref, filter) async {
     return ref
-        .read(_budgetServiceProvider)
+        .read(budgetServiceProvider)
         .getAll(month: filter.month, year: filter.year);
   },
 );
@@ -382,7 +382,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     if (amount == null || amount <= 0) return;
 
     try {
-      await ref.read(_budgetServiceProvider).create(
+      await ref.read(budgetServiceProvider).create(
             categoryId: selectedCategoryId,
             amountLimit: amount,
             month: selectedMonth,
@@ -437,7 +437,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final amount = double.tryParse(controller.text.trim());
     if (amount == null || amount <= 0) return;
 
-    await ref.read(_budgetServiceProvider).update(budget.id, amountLimit: amount);
+    await ref.read(budgetServiceProvider).update(budget.id, amountLimit: amount);
     ref.invalidate(_budgetsProvider(_filter));
   }
 
@@ -460,7 +460,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    await ref.read(_budgetServiceProvider).delete(id);
+    await ref.read(budgetServiceProvider).delete(id);
     ref.invalidate(_budgetsProvider(_filter));
   }
 }

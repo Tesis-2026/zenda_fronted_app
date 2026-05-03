@@ -7,8 +7,10 @@ import '../../core/widgets/app_bottom_nav.dart';
 import '../auth/auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
+final profileUserServiceProvider = Provider<UserApiService>((_) => UserApiService());
+
 final _profileProvider = FutureProvider<User>((ref) async {
-  return UserApiService().getProfile();
+  return ref.read(profileUserServiceProvider).getProfile();
 });
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -54,7 +56,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _saveEdit() async {
     setState(() => _isSaving = true);
     try {
-      await UserApiService().updateProfile(
+      await ref.read(profileUserServiceProvider).updateProfile(
         fullName: _nameController.text.trim().isEmpty
             ? null
             : _nameController.text.trim(),

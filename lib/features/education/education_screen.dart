@@ -3,16 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
 
-final _educationServiceProvider = Provider<EducationApiService>(
+final educationServiceProvider = Provider<EducationApiService>(
   (_) => EducationApiService(),
 );
 
 final _topicsProvider =
     FutureProvider.autoDispose<List<EducationTopic>>((ref) {
-  return ref.read(_educationServiceProvider).listTopics();
+  return ref.read(educationServiceProvider).listTopics();
 });
 
 class EducationScreen extends ConsumerStatefulWidget {
@@ -52,7 +54,16 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
     final topicsAsync = ref.watch(_topicsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.educationTitle)),
+      appBar: AppBar(
+        title: Text(l10n.educationTitle),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: UserMenuButton(),
+          ),
+        ],
+      ),
+      bottomNavigationBar: const AppBottomNav(activeIndex: 4),
       body: topicsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(

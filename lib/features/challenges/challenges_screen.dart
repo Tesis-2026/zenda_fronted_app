@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/challenges_api_service.dart';
 import '../../l10n/l10n_extension.dart';
 
-final _challengesServiceProvider = Provider<ChallengesApiService>(
+final challengesServiceProvider = Provider<ChallengesApiService>(
   (_) => ChallengesApiService(),
 );
 
 final _challengesProvider =
     FutureProvider.autoDispose<List<Challenge>>((ref) {
-  return ref.read(_challengesServiceProvider).getAll();
+  return ref.read(challengesServiceProvider).getAll();
 });
 
 const _statusOrder = ['ACTIVE', 'AVAILABLE', 'COMPLETED', 'EXPIRED'];
@@ -72,7 +72,7 @@ class ChallengesScreen extends ConsumerWidget {
                   challenge: challenge,
                   onAccept: () async {
                     await ref
-                        .read(_challengesServiceProvider)
+                        .read(challengesServiceProvider)
                         .accept(challenge.id);
                     ref.invalidate(_challengesProvider);
                     if (context.mounted) {
@@ -83,7 +83,7 @@ class ChallengesScreen extends ConsumerWidget {
                   },
                   onComplete: () async {
                     await ref
-                        .read(_challengesServiceProvider)
+                        .read(challengesServiceProvider)
                         .complete(challenge.id);
                     ref.invalidate(_challengesProvider);
                     if (context.mounted) {

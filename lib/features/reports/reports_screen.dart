@@ -13,26 +13,26 @@ import '../../providers/repositories_providers.dart';
 
 // ── Providers ──────────────────────────────────────────────────────────────
 
-final _insightsServiceProvider = Provider<InsightsApiService>((_) => InsightsApiService());
+final reportsInsightsServiceProvider = Provider<InsightsApiService>((_) => InsightsApiService());
 
 final _monthSummaryProvider = FutureProvider.family<PeriodSummary, ({int year, int month})>(
-  (ref, args) => ref.read(_insightsServiceProvider).getMonthSummary(year: args.year, month: args.month),
+  (ref, args) => ref.read(reportsInsightsServiceProvider).getMonthSummary(year: args.year, month: args.month),
 );
 
 final _weekSummaryProvider = FutureProvider.family<PeriodSummary, ({int year, int week})>(
-  (ref, args) => ref.read(_insightsServiceProvider).getWeekSummary(year: args.year, week: args.week),
+  (ref, args) => ref.read(reportsInsightsServiceProvider).getWeekSummary(year: args.year, week: args.week),
 );
 
 final _comparisonProvider = FutureProvider.family<List<MonthComparisonEntry>, int>(
-  (ref, months) => ref.read(_insightsServiceProvider).getComparison(months: months),
+  (ref, months) => ref.read(reportsInsightsServiceProvider).getComparison(months: months),
 );
 
 final _progressProvider = FutureProvider<ProgressSummary>(
-  (ref) => ref.read(_insightsServiceProvider).getProgress(),
+  (ref) => ref.read(reportsInsightsServiceProvider).getProgress(),
 );
 
 final _daySummaryProvider = FutureProvider.family<PeriodSummary, String>(
-  (ref, date) => ref.read(_insightsServiceProvider).getDaySummary(date: date),
+  (ref, date) => ref.read(reportsInsightsServiceProvider).getDaySummary(date: date),
 );
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -150,7 +150,7 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
     if (_exporting) return;
     setState(() => _exporting = true);
     try {
-      final service = ref.read(_insightsServiceProvider);
+      final service = ref.read(reportsInsightsServiceProvider);
       final bytes = await service.downloadPdfReport(year: _year, month: _month);
 
       final dir = await getTemporaryDirectory();

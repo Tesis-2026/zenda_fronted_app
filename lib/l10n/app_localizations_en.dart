@@ -255,10 +255,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardNavProfile => 'PROFILE';
 
   @override
+  String get dashboardNavEducation => 'EDUC.';
+
+  @override
   String get dashboardRecord => 'Record';
 
   @override
   String get dashboardMyAccounts => 'My Accounts';
+
+  @override
+  String get dashboardNoAccounts => 'No accounts yet';
+
+  @override
+  String get dashboardAddFirstAccount => 'Add your first account';
+
+  @override
+  String get accountAddTitle => 'Add Account';
+
+  @override
+  String get accountNameLabel => 'Account name';
+
+  @override
+  String get accountNameHint => 'e.g. BCP Savings';
+
+  @override
+  String get accountTypeLabel => 'Account type';
+
+  @override
+  String get accountTypeCash => 'Cash';
+
+  @override
+  String get accountTypeDebit => 'Debit';
+
+  @override
+  String get accountTypeCredit => 'Credit card';
+
+  @override
+  String get accountInitialBalance => 'Initial balance (S/)';
+
+  @override
+  String get accountCreditLimit => 'Credit limit (S/)';
+
+  @override
+  String get accountAddButton => 'Add account';
+
+  @override
+  String get accountDebt => 'Debt:';
+
+  @override
+  String get accountAvail => 'Avail:';
 
   @override
   String get dashboardBudgetTitle => 'Your 50/30/20 Budget';
@@ -1372,11 +1417,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetupCompleteTitle => 'All set!';
 
   @override
+  String profileSetupCompleteTitleNamed(String name) {
+    return 'All set, $name!';
+  }
+
+  @override
   String get profileSetupCompleteBody =>
       'Your profile is ready. Let\'s take control of your finances.';
 
   @override
-  String get profileSetupGoToDashboard => 'Go to dashboard';
+  String get profileSetupGoToDashboard => 'Start using Zenda';
 
   @override
   String get incomeTypeScholarship => 'Scholarship';
@@ -1638,6 +1688,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsNewButton => '+ New';
+
+  @override
+  String get goalsCreateButton => 'Create goal';
+
+  @override
+  String goalsContributeAddAction(String amount) {
+    return 'Add S/ $amount to goal';
+  }
 
   @override
   String get emailVerifTitle => 'Check your email';

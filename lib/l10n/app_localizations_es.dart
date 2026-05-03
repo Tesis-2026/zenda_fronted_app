@@ -254,10 +254,55 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboardNavProfile => 'PERFIL';
 
   @override
+  String get dashboardNavEducation => 'EDUC.';
+
+  @override
   String get dashboardRecord => 'Registrar';
 
   @override
   String get dashboardMyAccounts => 'Mis Cuentas';
+
+  @override
+  String get dashboardNoAccounts => 'Sin cuentas aún';
+
+  @override
+  String get dashboardAddFirstAccount => 'Agrega tu primera cuenta';
+
+  @override
+  String get accountAddTitle => 'Agregar cuenta';
+
+  @override
+  String get accountNameLabel => 'Nombre de cuenta';
+
+  @override
+  String get accountNameHint => 'ej. BCP Ahorros';
+
+  @override
+  String get accountTypeLabel => 'Tipo de cuenta';
+
+  @override
+  String get accountTypeCash => 'Efectivo';
+
+  @override
+  String get accountTypeDebit => 'Débito';
+
+  @override
+  String get accountTypeCredit => 'Tarjeta de crédito';
+
+  @override
+  String get accountInitialBalance => 'Saldo inicial (S/)';
+
+  @override
+  String get accountCreditLimit => 'Límite de crédito (S/)';
+
+  @override
+  String get accountAddButton => 'Agregar cuenta';
+
+  @override
+  String get accountDebt => 'Deuda:';
+
+  @override
+  String get accountAvail => 'Disp:';
 
   @override
   String get dashboardBudgetTitle => 'Tu Presupuesto 50/30/20';
@@ -1377,11 +1422,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileSetupCompleteTitle => '¡Listo!';
 
   @override
-  String get profileSetupCompleteBody =>
-      'Tu perfil está configurado. Tomemos el control de tus finanzas.';
+  String profileSetupCompleteTitleNamed(String name) {
+    return '¡Todo listo, $name!';
+  }
 
   @override
-  String get profileSetupGoToDashboard => 'Ir al inicio';
+  String get profileSetupCompleteBody =>
+      'Tu perfil está listo. Toma el control de tus finanzas.';
+
+  @override
+  String get profileSetupGoToDashboard => 'Comenzar a usar Zenda';
 
   @override
   String get incomeTypeScholarship => 'Beca';
@@ -1647,6 +1697,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get goalsNewButton => '+ Nuevo';
+
+  @override
+  String get goalsCreateButton => 'Crear meta';
+
+  @override
+  String goalsContributeAddAction(String amount) {
+    return 'Agregar S/ $amount a la meta';
+  }
 
   @override
   String get emailVerifTitle => 'Revisa tu correo';

@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/predictions_api_service.dart';
 import '../../l10n/l10n_extension.dart';
 
-final _predictionsServiceProvider = Provider<PredictionsApiService>(
+final predictionsServiceProvider = Provider<PredictionsApiService>(
   (_) => PredictionsApiService(),
 );
 
 final _expensePredictionProvider =
     FutureProvider.autoDispose<PredictionResult>((ref) {
-  return ref.read(_predictionsServiceProvider).getExpensePrediction();
+  return ref.read(predictionsServiceProvider).getExpensePrediction();
 });
 
 class PredictionsScreen extends ConsumerWidget {

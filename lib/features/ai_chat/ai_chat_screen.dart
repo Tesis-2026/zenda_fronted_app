@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/ai_chat_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
 class _ChatBubble {
@@ -108,6 +109,12 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           ],
         ),
         elevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: UserMenuButton(),
+          ),
+        ],
       ),
       body: Column(
         children: [

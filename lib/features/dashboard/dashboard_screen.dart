@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/models/account.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../providers/pre_survey_provider.dart';
+import '../../providers/repositories_providers.dart';
 import 'dashboard_providers.dart';
 import 'widgets/streak_card.dart';
 import 'widgets/zenda_ai_card.dart';
+import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -76,7 +79,7 @@ class _InicioSection extends ConsumerWidget {
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 130),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -107,21 +110,7 @@ class _InicioSection extends ConsumerWidget {
                   ],
                 ),
                 const Spacer(),
-                GestureDetector(
-                  onTap: () => context.go('/notifications'),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
-                    ),
-                    child: const Center(
-                      child: Text('🔔', style: TextStyle(fontSize: 18)),
-                    ),
-                  ),
-                ),
+                const UserMenuButton(),
               ],
             ),
 
@@ -144,7 +133,11 @@ class _InicioSection extends ConsumerWidget {
               ),
 
             // Balance card
-            _TotalBalanceCard(totalBalance: totalBalance),
+            _TotalBalanceCard(
+              totalBalance: totalBalance,
+              accounts: accountsAsync.asData?.value ?? [],
+              onAddAccount: () => _showAddAccountSheet(context, ref),
+            ),
 
             const SizedBox(height: 12),
 
@@ -168,16 +161,68 @@ class _InicioSection extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _showAddAccountSheet(BuildContext context, WidgetRef ref) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AddAccountSheet(
+        onSave: (account) async {
+          await ref.read(accountsRepositoryProvider).upsert(account);
+          ref.invalidate(accountsProvider);
+        },
+      ),
+    );
+  }
 }
 
 class _TotalBalanceCard extends StatelessWidget {
   final double totalBalance;
+  final List<Account> accounts;
+  final VoidCallback onAddAccount;
 
-  const _TotalBalanceCard({required this.totalBalance});
+  const _TotalBalanceCard({
+    required this.totalBalance,
+    required this.accounts,
+    required this.onAddAccount,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
+    if (accounts.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1F2937),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.account_balance_wallet_outlined,
+                color: Color(0xFF6B7280), size: 36),
+            const SizedBox(height: 10),
+            Text(
+              l10n.dashboardNoAccounts,
+              style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 15),
+            ),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: onAddAccount,
+              icon: const Icon(Icons.add_circle_outline,
+                  color: Color(0xFF34D399), size: 18),
+              label: Text(
+                l10n.dashboardAddFirstAccount,
+                style: const TextStyle(color: Color(0xFF34D399), fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       width: double.infinity,
@@ -189,9 +234,19 @@ class _TotalBalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.dashboardTotalBalance,
-            style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.dashboardTotalBalance,
+                style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
+              ),
+              GestureDetector(
+                onTap: onAddAccount,
+                child: const Icon(Icons.add_circle_outline,
+                    color: Color(0xFF34D399), size: 20),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
@@ -503,6 +558,276 @@ class _PostSurveyBannerState extends State<_PostSurveyBanner> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AddAccountSheet extends StatefulWidget {
+  final Future<void> Function(Account) onSave;
+
+  const _AddAccountSheet({required this.onSave});
+
+  @override
+  State<_AddAccountSheet> createState() => _AddAccountSheetState();
+}
+
+class _AddAccountSheetState extends State<_AddAccountSheet> {
+  final _nameController = TextEditingController();
+  final _balanceController = TextEditingController();
+  final _creditLimitController = TextEditingController();
+  AccountType _selectedType = AccountType.cash;
+  bool _isSaving = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _balanceController.dispose();
+    _creditLimitController.dispose();
+    super.dispose();
+  }
+
+  bool get _isValid {
+    if (_nameController.text.trim().isEmpty) return false;
+    if (_selectedType == AccountType.credit) {
+      final limit = double.tryParse(
+          _creditLimitController.text.replaceAll(',', '.'));
+      return limit != null && limit > 0;
+    }
+    return true;
+  }
+
+  Future<void> _submit() async {
+    if (!_isValid || _isSaving) return;
+    setState(() => _isSaving = true);
+
+    final balance =
+        double.tryParse(_balanceController.text.replaceAll(',', '.')) ?? 0.0;
+    final creditLimit =
+        double.tryParse(_creditLimitController.text.replaceAll(',', '.')) ??
+            0.0;
+
+    final account = Account(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      name: _nameController.text.trim(),
+      type: _selectedType,
+      balance: _selectedType != AccountType.credit ? balance : 0.0,
+      creditLimit: _selectedType == AccountType.credit ? creditLimit : 0.0,
+      creditAvailable:
+          _selectedType == AccountType.credit ? creditLimit : 0.0,
+    );
+
+    await widget.onSave(account);
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isCredit = _selectedType == AccountType.credit;
+
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D5DB),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.accountAddTitle,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1F2937),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.accountNameLabel,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF374151),
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _nameController,
+              onChanged: (_) => setState(() {}),
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                hintText: l10n.accountNameHint,
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 12),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.accountTypeLabel,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF374151),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                _TypeChip(
+                  label: l10n.accountTypeCash,
+                  selected: _selectedType == AccountType.cash,
+                  onTap: () =>
+                      setState(() => _selectedType = AccountType.cash),
+                ),
+                const SizedBox(width: 8),
+                _TypeChip(
+                  label: l10n.accountTypeDebit,
+                  selected: _selectedType == AccountType.debit,
+                  onTap: () =>
+                      setState(() => _selectedType = AccountType.debit),
+                ),
+                const SizedBox(width: 8),
+                _TypeChip(
+                  label: l10n.accountTypeCredit,
+                  selected: _selectedType == AccountType.credit,
+                  onTap: () =>
+                      setState(() => _selectedType = AccountType.credit),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (isCredit) ...[
+              Text(
+                l10n.accountCreditLimit,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: _creditLimitController,
+                onChanged: (_) => setState(() {}),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  prefixText: 'S/ ',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12),
+                ),
+              ),
+            ] else ...[
+              Text(
+                l10n.accountInitialBalance,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: _balanceController,
+                onChanged: (_) => setState(() {}),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  prefixText: 'S/ ',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12),
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _isValid && !_isSaving ? _submit : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF34D399),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : Text(
+                        l10n.accountAddButton,
+                        style: const TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TypeChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected
+                ? const Color(0xFF34D399)
+                : const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : const Color(0xFF6B7280),
+            ),
+          ),
+        ),
       ),
     );
   }

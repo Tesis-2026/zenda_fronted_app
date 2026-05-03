@@ -560,6 +560,12 @@ abstract class AppLocalizations {
   /// **'PROFILE'**
   String get dashboardNavProfile;
 
+  /// No description provided for @dashboardNavEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'EDUC.'**
+  String get dashboardNavEducation;
+
   /// No description provided for @dashboardRecord.
   ///
   /// In en, this message translates to:
@@ -571,6 +577,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Accounts'**
   String get dashboardMyAccounts;
+
+  /// No description provided for @dashboardNoAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts yet'**
+  String get dashboardNoAccounts;
+
+  /// No description provided for @dashboardAddFirstAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first account'**
+  String get dashboardAddFirstAccount;
+
+  /// No description provided for @accountAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get accountAddTitle;
+
+  /// No description provided for @accountNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account name'**
+  String get accountNameLabel;
+
+  /// No description provided for @accountNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. BCP Savings'**
+  String get accountNameHint;
+
+  /// No description provided for @accountTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account type'**
+  String get accountTypeLabel;
+
+  /// No description provided for @accountTypeCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get accountTypeCash;
+
+  /// No description provided for @accountTypeDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit'**
+  String get accountTypeDebit;
+
+  /// No description provided for @accountTypeCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit card'**
+  String get accountTypeCredit;
+
+  /// No description provided for @accountInitialBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial balance (S/)'**
+  String get accountInitialBalance;
+
+  /// No description provided for @accountCreditLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit limit (S/)'**
+  String get accountCreditLimit;
+
+  /// No description provided for @accountAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add account'**
+  String get accountAddButton;
+
+  /// No description provided for @accountDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt:'**
+  String get accountDebt;
+
+  /// No description provided for @accountAvail.
+  ///
+  /// In en, this message translates to:
+  /// **'Avail:'**
+  String get accountAvail;
 
   /// No description provided for @dashboardBudgetTitle.
   ///
@@ -2564,6 +2654,12 @@ abstract class AppLocalizations {
   /// **'All set!'**
   String get profileSetupCompleteTitle;
 
+  /// No description provided for @profileSetupCompleteTitleNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'All set, {name}!'**
+  String profileSetupCompleteTitleNamed(String name);
+
   /// No description provided for @profileSetupCompleteBody.
   ///
   /// In en, this message translates to:
@@ -2573,7 +2669,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileSetupGoToDashboard.
   ///
   /// In en, this message translates to:
-  /// **'Go to dashboard'**
+  /// **'Start using Zenda'**
   String get profileSetupGoToDashboard;
 
   /// No description provided for @incomeTypeScholarship.
@@ -3017,6 +3113,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'+ New'**
   String get goalsNewButton;
+
+  /// No description provided for @goalsCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create goal'**
+  String get goalsCreateButton;
+
+  /// No description provided for @goalsContributeAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add S/ {amount} to goal'**
+  String goalsContributeAddAction(String amount);
 
   /// No description provided for @emailVerifTitle.
   ///
