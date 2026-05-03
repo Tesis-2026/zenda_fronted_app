@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/models/budget.dart';
 import '../../core/models/category.dart';
@@ -53,32 +54,29 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
   _BudgetFilter get _filter => (month: _month, year: _year);
 
-  void _prevMonth() {
-    setState(() {
-      if (_month == 1) {
-        _month = 12;
-        _year -= 1;
-      } else {
-        _month -= 1;
-      }
-    });
-  }
+  void _prevMonth() => setState(() {
+        if (_month == 1) {
+          _month = 12;
+          _year -= 1;
+        } else {
+          _month -= 1;
+        }
+      });
 
-  void _nextMonth() {
-    setState(() {
-      if (_month == 12) {
-        _month = 1;
-        _year += 1;
-      } else {
-        _month += 1;
-      }
-    });
-  }
+  void _nextMonth() => setState(() {
+        if (_month == 12) {
+          _month = 1;
+          _year += 1;
+        } else {
+          _month += 1;
+        }
+      });
 
-  static const _monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
+  String _monthLabel(BuildContext context) {
+    final locale = Localizations.localeOf(context).toString();
+    final date = DateTime(_year, _month);
+    return DateFormat('MMMM yyyy', locale).format(date);
+  }
 
   static const _needsCategories = {
     'food', 'transportation', 'housing', 'utilities', 'health'
@@ -122,312 +120,121 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
         child: budgetsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(l10n.budgetErrorLoad),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(_budgetsProvider(_filter)),
-                child: Text(l10n.commonRetry),
-              ),
-            ],
-          ),
-        ),
-        data: (budgets) {
-          if (budgets.isEmpty) {
-            return Column(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _BudgetHeader(
-                  month: _monthNames[_month - 1],
-                  year: _year,
-                  onTap: () => _showMonthPicker(context),
-                  onAdd: _showCreateDialog,
+                Text(l10n.budgetErrorLoad),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => ref.invalidate(_budgetsProvider(_filter)),
+                  child: Text(l10n.commonRetry),
                 ),
+              ],
+            ),
+          ),
+          data: (budgets) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _BudgetHeader(
+                label: _monthLabel(context),
+                onPrevious: _prevMonth,
+                onNext: _nextMonth,
+                onAdd: () => _showCreateSheet(context),
+              ),
+              if (budgets.isEmpty)
                 Expanded(
                   child: _EmptyState(
                     title: l10n.budgetEmptyTitle,
                     subtitle: l10n.budgetEmptySubtitle,
                   ),
-                ),
-              ],
-            );
-          }
-          final summary = _computeSummary(budgets);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _BudgetHeader(
-                month: _monthNames[_month - 1],
-                year: _year,
-                onTap: () => _showMonthPicker(context),
-                onAdd: _showCreateDialog,
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                  children: [
-                    // 3-column summary
-                    _BucketSummaryRow(summary: summary),
-                    const SizedBox(height: 24),
-                    // By Category header
-                    Text(
-                      l10n.budgetByCategory,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1F2937),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...budgets.map((b) => _BudgetCard(
-                          budget: b,
-                          onDelete: () => _deleteBudget(b.id),
-                          onEdit: () => _showEditDialog(b),
-                        )),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      ),
-    );
-  }
-
-  Future<void> _showMonthPicker(BuildContext context) async {
-    // Simple prev/next dialog for month navigation
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.budgetSelectPeriod),
-        content: StatefulBuilder(
-          builder: (ctx, setDlg) => Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {
-                  _prevMonth();
-                  setDlg(() {});
-                },
-                icon: const Icon(Icons.chevron_left),
-              ),
-              SizedBox(
-                width: 110,
-                child: Text(
-                  '${_monthNames[_month - 1]} $_year',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  _nextMonth();
-                  setDlg(() {});
-                },
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(context.l10n.commonDone),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showCreateDialog() async {
-    final l10n = context.l10n;
-    final categoriesAsync = ref.read(_categoriesProvider.future);
-
-    final amountController = TextEditingController();
-    String? selectedCategoryId;
-    int selectedMonth = _month;
-    int selectedYear = _year;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDlgState) => AlertDialog(
-          title: Text(l10n.budgetAddTitle),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: FutureBuilder<List<CategoryModel>>(
-              future: categoriesAsync,
-              builder: (ctx, snap) {
-                final categories = snap.data ?? [];
-                return SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                )
+              else
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                     children: [
-                      DropdownButtonFormField<String?>(
-                        initialValue: selectedCategoryId,
-                        decoration: InputDecoration(
-                          labelText: l10n.budgetCategoryAll,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        items: [
-                          DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text(l10n.budgetCategoryAll),
-                          ),
-                          ...categories.map(
-                            (c) => DropdownMenuItem<String?>(
-                              value: c.id,
-                              child: Text(c.name),
-                            ),
-                          ),
-                        ],
-                        onChanged: (v) =>
-                            setDlgState(() => selectedCategoryId = v),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: amountController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        decoration: InputDecoration(
-                          labelText: l10n.budgetAmountLabel,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                      _BucketSummaryRow(summary: _computeSummary(budgets)),
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.budgetByCategory,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1F2937),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<int>(
-                              initialValue: selectedMonth,
-                              decoration: InputDecoration(
-                                labelText: l10n.budgetMonthLabel,
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                              items: List.generate(
-                                12,
-                                (i) => DropdownMenuItem(
-                                  value: i + 1,
-                                  child: Text(_monthNames[i]),
-                                ),
-                              ),
-                              onChanged: (v) =>
-                                  setDlgState(() => selectedMonth = v!),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: DropdownButtonFormField<int>(
-                              initialValue: selectedYear,
-                              decoration: InputDecoration(
-                                labelText: l10n.budgetYearLabel,
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                              items: List.generate(
-                                5,
-                                (i) {
-                                  final y = DateTime.now().year + i - 1;
-                                  return DropdownMenuItem(
-                                    value: y,
-                                    child: Text('$y'),
-                                  );
-                                },
-                              ),
-                              onChanged: (v) =>
-                                  setDlgState(() => selectedYear = v!),
-                            ),
-                          ),
-                        ],
-                      ),
+                      ...budgets.map((b) => _BudgetCard(
+                            budget: b,
+                            onDelete: () => _deleteBudget(b.id),
+                            onEdit: () => _showEditSheet(context, b),
+                          )),
                     ],
                   ),
-                );
-              },
-            ),
+                ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.commonCancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.commonSave),
-            ),
-          ],
         ),
       ),
     );
-
-    if (confirmed != true || !mounted) return;
-    final amount = double.tryParse(amountController.text.trim());
-    if (amount == null || amount <= 0) return;
-
-    try {
-      await ref.read(budgetServiceProvider).create(
-            categoryId: selectedCategoryId,
-            amountLimit: amount,
-            month: selectedMonth,
-            year: selectedYear,
-          );
-      ref.invalidate(_budgetsProvider(_filter));
-    } on Exception catch (e) {
-      if (!mounted) return;
-      final msg = e.toString().contains('409') || e.toString().contains('already exists')
-          ? l10n.budgetDuplicate
-          : l10n.commonUnknownError;
-      showAppToast(context, msg, type: ToastType.error);
-    }
   }
 
-  Future<void> _showEditDialog(Budget budget) async {
-    final l10n = context.l10n;
-    final controller =
-        TextEditingController(text: budget.amountLimit.toStringAsFixed(2));
+  // ── Create bottom sheet ────────────────────────────────────────────────────
 
-    final confirmed = await showDialog<bool>(
+  Future<void> _showCreateSheet(BuildContext context) async {
+    await showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.budgetEditTitle),
-        content: TextField(
-          controller: controller,
-          keyboardType:
-              const TextInputType.numberWithOptions(decimal: true),
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: l10n.budgetAmountLabel,
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.commonSave),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CreateBudgetSheet(
+        initialMonth: _month,
+        initialYear: _year,
+        onSave: (categoryId, amount, month, year) async {
+          final l10n = context.l10n;
+          try {
+            await ref.read(budgetServiceProvider).create(
+                  categoryId: categoryId,
+                  amountLimit: amount,
+                  month: month,
+                  year: year,
+                );
+            ref.invalidate(_budgetsProvider(_filter));
+          } on Exception catch (e) {
+            if (!context.mounted) return;
+            final msg = e.toString().contains('409') ||
+                    e.toString().contains('already exists')
+                ? l10n.budgetDuplicate
+                : l10n.commonUnknownError;
+            showAppToast(context, msg, type: ToastType.error);
+          }
+        },
+        categoriesFuture: ref.read(_categoriesProvider.future),
       ),
     );
-
-    if (confirmed != true || !mounted) return;
-    final amount = double.tryParse(controller.text.trim());
-    if (amount == null || amount <= 0) return;
-
-    await ref.read(budgetServiceProvider).update(budget.id, amountLimit: amount);
-    ref.invalidate(_budgetsProvider(_filter));
   }
+
+  // ── Edit bottom sheet ──────────────────────────────────────────────────────
+
+  Future<void> _showEditSheet(BuildContext context, Budget budget) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditBudgetSheet(
+        budget: budget,
+        onSave: (amount) async {
+          await ref
+              .read(budgetServiceProvider)
+              .update(budget.id, amountLimit: amount);
+          ref.invalidate(_budgetsProvider(_filter));
+        },
+      ),
+    );
+  }
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
 
   Future<void> _deleteBudget(String id) async {
     final l10n = context.l10n;
@@ -442,6 +249,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.commonDelete),
           ),
         ],
@@ -453,70 +261,90 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   }
 }
 
-class _BudgetHeader extends StatelessWidget {
-  final String month;
-  final int year;
-  final VoidCallback onTap;
-  final VoidCallback onAdd;
+// ── Header ─────────────────────────────────────────────────────────────────
 
+class _BudgetHeader extends StatelessWidget {
   const _BudgetHeader({
-    required this.month,
-    required this.year,
-    required this.onTap,
+    required this.label,
+    required this.onPrevious,
+    required this.onNext,
     required this.onAdd,
   });
 
+  final String label;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+  final VoidCallback onAdd;
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       child: Row(
         children: [
-          const Text(
-            'Budget',
-            style: TextStyle(
+          Text(
+            l10n.budgetByCategory.split(' ').first == 'By'
+                ? 'Budget'
+                : 'Budget',
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1F2937),
             ),
           ),
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: onTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$month $year',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF374151),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.calendar_today_outlined, size: 13, color: Color(0xFF6B7280)),
-                ],
+          const SizedBox(width: 4),
+          // Inline ← month → navigator — consistent with predictions/progress
+          IconButton(
+            onPressed: onPrevious,
+            icon: const Icon(Icons.chevron_left_rounded, size: 20),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: const Color(0xFF6B7280),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: const Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF1F2937),
               ),
             ),
           ),
+          IconButton(
+            onPressed: onNext,
+            icon: const Icon(Icons.chevron_right_rounded, size: 20),
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            color: const Color(0xFF6B7280),
+          ),
           const Spacer(),
+          // Visible "+ Add" pill — matches Pencil design
           GestureDetector(
             onTap: onAdd,
             child: Container(
-              width: 36,
-              height: 36,
+              height: 32,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFF34D399),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.more_vert_rounded, size: 20, color: Color(0xFF6B7280)),
+              alignment: Alignment.center,
+              child: Text(
+                l10n.catMgmtAddButton,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -525,14 +353,513 @@ class _BudgetHeader extends StatelessWidget {
   }
 }
 
-class _BucketSummary {
-  final double needsSpent;
-  final double needsLimit;
-  final double wantsSpent;
-  final double wantsLimit;
-  final double savingsSpent;
-  final double savingsLimit;
+// ── Create Budget bottom sheet ─────────────────────────────────────────────
 
+class _CreateBudgetSheet extends StatefulWidget {
+  const _CreateBudgetSheet({
+    required this.initialMonth,
+    required this.initialYear,
+    required this.onSave,
+    required this.categoriesFuture,
+  });
+
+  final int initialMonth;
+  final int initialYear;
+  final Future<void> Function(
+      String? categoryId, double amount, int month, int year) onSave;
+  final Future<List<CategoryModel>> categoriesFuture;
+
+  @override
+  State<_CreateBudgetSheet> createState() => _CreateBudgetSheetState();
+}
+
+class _CreateBudgetSheetState extends State<_CreateBudgetSheet> {
+  final _amountController = TextEditingController();
+  String? _selectedCategoryId;
+  late int _month;
+  late int _year;
+  bool _saving = false;
+
+  static const _monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _month = widget.initialMonth;
+    _year = widget.initialYear;
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5E7EB),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.budgetAddTitle,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1F2937),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Category dropdown
+            Text(
+              l10n.budgetCategoryAll,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(height: 8),
+            FutureBuilder<List<CategoryModel>>(
+              future: widget.categoriesFuture,
+              builder: (ctx, snap) {
+                final categories = snap.data ?? [];
+                return DropdownButtonFormField<String?>(
+                  // ignore: deprecated_member_use
+                  value: _selectedCategoryId,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color(0xFFF9FAFB),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    ),
+                  ),
+                  items: [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text(l10n.budgetCategoryAll),
+                    ),
+                    ...categories.map((c) => DropdownMenuItem<String?>(
+                          value: c.id,
+                          child: Text(c.name),
+                        )),
+                  ],
+                  onChanged: (v) => setState(() => _selectedCategoryId = v),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            // Monthly limit — styled like the amount field in add transaction
+            Text(
+              l10n.budgetAmountLabel,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF34D399), width: 2),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  const Text(
+                    'S/',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF34D399),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1F2937),
+                      ),
+                      decoration: const InputDecoration(
+                        filled: false,
+                        border: InputBorder.none,
+                        hintText: '0.00',
+                        hintStyle: TextStyle(
+                          color: Color(0xFF9CA3AF),
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Period (month + year) row
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    // ignore: deprecated_member_use
+                    value: _month,
+                    decoration: InputDecoration(
+                      labelText: l10n.budgetMonthLabel,
+                      filled: true,
+                      fillColor: const Color(0xFFF9FAFB),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                    ),
+                    items: List.generate(
+                      12,
+                      (i) => DropdownMenuItem(
+                        value: i + 1,
+                        child: Text(_monthNames[i]),
+                      ),
+                    ),
+                    onChanged: (v) => setState(() => _month = v!),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<int>(
+                    // ignore: deprecated_member_use
+                    value: _year,
+                    decoration: InputDecoration(
+                      labelText: l10n.budgetYearLabel,
+                      filled: true,
+                      fillColor: const Color(0xFFF9FAFB),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                    ),
+                    items: List.generate(5, (i) {
+                      final y = DateTime.now().year + i - 1;
+                      return DropdownMenuItem(
+                          value: y, child: Text('$y'));
+                    }),
+                    onChanged: (v) => setState(() => _year = v!),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Save button
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton(
+                onPressed: _saving ? null : _submit,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF34D399),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : Text(
+                        l10n.commonSave,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    final amount = double.tryParse(_amountController.text.trim());
+    if (amount == null || amount <= 0) return;
+    setState(() => _saving = true);
+    await widget.onSave(_selectedCategoryId, amount, _month, _year);
+    if (mounted) Navigator.pop(context);
+  }
+}
+
+// ── Edit Budget bottom sheet ───────────────────────────────────────────────
+
+class _EditBudgetSheet extends StatefulWidget {
+  const _EditBudgetSheet({required this.budget, required this.onSave});
+
+  final Budget budget;
+  final Future<void> Function(double amount) onSave;
+
+  @override
+  State<_EditBudgetSheet> createState() => _EditBudgetSheetState();
+}
+
+class _EditBudgetSheetState extends State<_EditBudgetSheet> {
+  late final TextEditingController _controller;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+        text: widget.budget.amountLimit.toStringAsFixed(2));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final categoryName =
+        widget.budget.categoryName ?? l10n.budgetCategoryAll;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5E7EB),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Title row
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.budgetEditTitle,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.close_rounded,
+                        size: 16, color: Color(0xFF6B7280)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            // Category (read-only)
+            Text(
+              l10n.budgetCategoryAll.split(' ').first == 'All'
+                  ? 'Category'
+                  : 'Categoría',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _iconForBudgetCategory(widget.budget.categoryName),
+                    size: 16,
+                    color: const Color(0xFF6B7280),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    categoryName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Monthly limit
+            Text(
+              l10n.budgetAmountLabel,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF34D399), width: 2),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  const Text(
+                    'S/',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF34D399),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      autofocus: true,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1F2937),
+                      ),
+                      decoration: const InputDecoration(
+                        filled: false,
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton(
+                onPressed: _saving ? null : _submit,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF34D399),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : Text(
+                        l10n.commonSave,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    final amount = double.tryParse(_controller.text.trim());
+    if (amount == null || amount <= 0) return;
+    setState(() => _saving = true);
+    await widget.onSave(amount);
+    if (mounted) Navigator.pop(context);
+  }
+}
+
+// ── Bucket summary ─────────────────────────────────────────────────────────
+
+class _BucketSummary {
   const _BucketSummary({
     required this.needsSpent,
     required this.needsLimit,
@@ -541,11 +868,18 @@ class _BucketSummary {
     required this.savingsSpent,
     required this.savingsLimit,
   });
+
+  final double needsSpent;
+  final double needsLimit;
+  final double wantsSpent;
+  final double wantsLimit;
+  final double savingsSpent;
+  final double savingsLimit;
 }
 
 class _BucketSummaryRow extends StatelessWidget {
-  final _BucketSummary summary;
   const _BucketSummaryRow({required this.summary});
+  final _BucketSummary summary;
 
   @override
   Widget build(BuildContext context) {
@@ -584,17 +918,17 @@ class _BucketSummaryRow extends StatelessWidget {
 }
 
 class _BucketCell extends StatelessWidget {
-  final String label;
-  final double spent;
-  final double limit;
-  final Color color;
-
   const _BucketCell({
     required this.label,
     required this.spent,
     required this.limit,
     required this.color,
   });
+
+  final String label;
+  final double spent;
+  final double limit;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -627,10 +961,7 @@ class _BucketCell extends StatelessWidget {
           if (limit > 0)
             Text(
               'of S/ ${limit.toStringAsFixed(0)}',
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF9CA3AF),
-              ),
+              style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
             ),
         ],
       ),
@@ -638,11 +969,13 @@ class _BucketCell extends StatelessWidget {
   }
 }
 
+// ── Empty state ────────────────────────────────────────────────────────────
+
 class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.title, required this.subtitle});
+
   final String title;
   final String subtitle;
-
-  const _EmptyState({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -678,6 +1011,8 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+// ── Budget card ────────────────────────────────────────────────────────────
+
 IconData _iconForBudgetCategory(String? name) {
   if (name == null) return Icons.account_balance_wallet_outlined;
   return switch (name.toLowerCase()) {
@@ -695,20 +1030,20 @@ IconData _iconForBudgetCategory(String? name) {
 }
 
 class _BudgetCard extends StatelessWidget {
-  final Budget budget;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
-
   const _BudgetCard({
     required this.budget,
     required this.onDelete,
     required this.onEdit,
   });
 
+  final Budget budget;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
+
   Color _progressColor(double pct) {
-    if (pct > 100) return const Color(0xFFEF4444); // red — over budget
-    if (pct > 80) return const Color(0xFFF59E0B); // amber — warning
-    return const Color(0xFF10B981); // green — healthy
+    if (pct > 100) return const Color(0xFFEF4444);
+    if (pct > 80) return const Color(0xFFF59E0B);
+    return const Color(0xFF10B981);
   }
 
   @override
@@ -720,7 +1055,8 @@ class _BudgetCard extends StatelessWidget {
         .clamp(0, 200)
         .toDouble();
     final color = _progressColor(pct);
-    final isOverBudget = budget.currentSpent > budget.amountLimit && budget.amountLimit > 0;
+    final isOver =
+        budget.currentSpent > budget.amountLimit && budget.amountLimit > 0;
     final categoryName = budget.categoryName ?? l10n.budgetCategoryAll;
 
     return Container(
@@ -760,30 +1096,47 @@ class _BudgetCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (isOverBudget)
-                const Icon(
-                  Icons.warning_amber_rounded,
-                  color: Color(0xFFEF4444),
-                  size: 18,
-                ),
-              const SizedBox(width: 4),
+              if (isOver) ...[
+                const Icon(Icons.warning_amber_rounded,
+                    color: Color(0xFFEF4444), size: 18),
+                const SizedBox(width: 4),
+              ],
               Text(
                 'S/ ${budget.currentSpent.toStringAsFixed(0)} / S/ ${budget.amountLimit.toStringAsFixed(0)}',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isOverBudget ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
+                  color:
+                      isOver ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
                 ),
               ),
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: onEdit,
-                child: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF9CA3AF)),
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.edit_outlined,
+                      size: 15, color: Color(0xFF9CA3AF)),
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               GestureDetector(
                 onTap: onDelete,
-                child: const Icon(Icons.delete_outline, size: 16, color: Color(0xFFEF4444)),
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.delete_outline,
+                      size: 15, color: Color(0xFFEF4444)),
+                ),
               ),
             ],
           ),
