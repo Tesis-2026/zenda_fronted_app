@@ -335,7 +335,7 @@ class _TransactionRow extends ConsumerWidget {
       parsedDate = DateTime.tryParse(occurredAt)?.toLocal();
     }
 
-    final isIncome = type.toUpperCase() == 'INCOME';
+    final isIncome = type.toLowerCase() == 'income';
     final amountColor =
         isIncome ? AppColors.income : AppColors.danger;
     final amountSign = isIncome ? '+' : '-';

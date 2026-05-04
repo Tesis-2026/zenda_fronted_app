@@ -62,9 +62,9 @@ class _EditTransactionScreenState
   void initState() {
     super.initState();
     final tx = widget.transaction;
-    final typeStr = (tx['type'] as String? ?? 'EXPENSE').toUpperCase();
+    final typeStr = (tx['type'] as String? ?? 'expense').toLowerCase();
     _kind =
-        typeStr == 'INCOME' ? TransactionKind.income : TransactionKind.expense;
+        typeStr == 'income' ? TransactionKind.income : TransactionKind.expense;
 
     final catName =
         (tx['category'] as Map<String, dynamic>?)?['name'] as String?;
