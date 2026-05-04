@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @validationMinPassword.
   ///
   /// In en, this message translates to:
-  /// **'At least 8 characters'**
+  /// **'At least 12 characters'**
   String get validationMinPassword;
 
   /// No description provided for @validationEnterName.
@@ -1783,6 +1783,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resend in {seconds}s'**
   String authVerifyResendCooldown(int seconds);
+
+  /// No description provided for @authBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get authBack;
+
+  /// No description provided for @authCodeNotReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive a code?'**
+  String get authCodeNotReceived;
+
+  /// No description provided for @authVerifyResendAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend available in {time}'**
+  String authVerifyResendAvailable(String time);
 
   /// No description provided for @authVerifyButton.
   ///
@@ -3459,7 +3477,7 @@ abstract class AppLocalizations {
   /// No description provided for @authSetNewPasswordSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Your new password must be at least 8 characters with 1 uppercase, 1 number.'**
+  /// **'Your new password must be at least 12 characters with 1 uppercase, 1 number.'**
   String get authSetNewPasswordSubtitle;
 
   /// No description provided for @authConfirmPasswordLabel.

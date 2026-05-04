@@ -123,7 +123,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
             size: 22,
           ),
           label: Text(
-            'Back',
+            l10n.authBack,
             style: TextStyle(
               color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
               fontSize: 15,
@@ -217,9 +217,9 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
 
               const SizedBox(height: 12),
 
-              // Code expiry countdown
+              // Resend cooldown countdown
               Text(
-                'Code expires in ${_formatCountdown(_resendCooldown)}',
+                l10n.authVerifyResendAvailable(_formatCountdown(_resendCooldown)),
                 style: TextStyle(
                   fontSize: 13,
                   color: isDark
@@ -236,7 +236,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Didn't receive a code? ",
+                    '${l10n.authCodeNotReceived} ',
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark
@@ -247,7 +247,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                   GestureDetector(
                     onTap: _resendCooldown == 0 ? _resend : null,
                     child: Text(
-                      'Resend',
+                      l10n.authVerifyResend,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

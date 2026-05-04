@@ -54,7 +54,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get validationEnterPassword => 'Ingresa tu contraseña';
 
   @override
-  String get validationMinPassword => 'Al menos 8 caracteres';
+  String get validationMinPassword => 'Al menos 12 caracteres';
 
   @override
   String get validationEnterName => 'Ingresa tu nombre';
@@ -922,6 +922,17 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String authVerifyResendCooldown(int seconds) {
     return 'Reenviar en ${seconds}s';
+  }
+
+  @override
+  String get authBack => 'Atrás';
+
+  @override
+  String get authCodeNotReceived => '¿No recibiste un código?';
+
+  @override
+  String authVerifyResendAvailable(String time) {
+    return 'Reenvío disponible en $time';
   }
 
   @override
@@ -1900,7 +1911,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authSetNewPasswordSubtitle =>
-      'Tu nueva contraseña debe tener al menos 8 caracteres, 1 mayúscula y 1 número.';
+      'Tu nueva contraseña debe tener al menos 12 caracteres, 1 mayúscula y 1 número.';
 
   @override
   String get authConfirmPasswordLabel => 'Confirmar contraseña';

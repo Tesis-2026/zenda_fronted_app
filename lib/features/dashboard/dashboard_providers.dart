@@ -11,24 +11,23 @@ import '../../providers/repositories_providers.dart';
 import '../../l10n/app_localizations.dart';
 
 // ─── ISO week helper ───────────────────────────────────────────────────────
+// Standard ISO 8601: W = floor((dayOfYear - weekday + 10) / 7)
+// Matches the algorithm used in reports_screen.dart and the backend.
 
 int _isoWeekNumber(DateTime date) {
-  // ISO 8601: week starts on Monday; week 1 contains the first Thursday.
-  final ordinal = date.difference(DateTime(date.year, 1, 1)).inDays + 1;
-  final jan1Weekday = DateTime(date.year, 1, 1).weekday; // Mon=1, Sun=7
-  // Shift so Monday-based numbering starts at 0.
-  final weekday = date.weekday; // Mon=1 … Sun=7
-  // ISO week = floor((ordinal + jan1Weekday - 2) / 7) + 1
-  final week = ((ordinal + jan1Weekday - 2) ~/ 7) + 1;
-  // Edge cases: week 0 means last week of previous year; week 53 may not exist.
-  if (week < 1) {
+  final dayOfYear = date.difference(DateTime(date.year, 1, 1)).inDays + 1;
+  final woy = ((dayOfYear - date.weekday + 10) / 7).floor();
+  if (woy < 1) {
+    // Late Dec/early Jan boundary: belongs to last week of previous year.
     return _isoWeekNumber(DateTime(date.year - 1, 12, 28));
   }
-  if (week > 52) {
+  if (woy > 52) {
+    // Check whether week 53 is valid for this year (Dec 28 is always in last week).
     final dec28 = DateTime(date.year, 12, 28);
-    if (dec28.weekday < weekday) return 1;
+    final dec28Woy = ((dec28.difference(DateTime(dec28.year, 1, 1)).inDays + 1 - dec28.weekday + 10) / 7).floor();
+    if (woy > dec28Woy) return 1; // Beyond last valid week → week 1 of next year.
   }
-  return week;
+  return woy;
 }
 
 // ─── API-backed summary providers ─────────────────────────────────────────
@@ -57,17 +56,15 @@ final monthSummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
 
 // ─── Existing providers ────────────────────────────────────────────────────
 
-final accountsProvider = FutureProvider<List<Account>>((ref) async {
+final accountsProvider = FutureProvider.autoDispose<List<Account>>((ref) async {
   return ref.watch(accountsRepositoryProvider).getAccounts();
 });
 
-final transactionsProvider = FutureProvider<List<TransactionModel>>((
-  ref,
-) async {
+final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>((ref) async {
   return ref.watch(transactionsRepositoryProvider).getTransactions();
 });
 
-final streakStateProvider = FutureProvider<StreakState>((ref) async {
+final streakStateProvider = FutureProvider.autoDispose<StreakState>((ref) async {
   return ref.watch(streakRepositoryProvider).getStreak();
 });
 

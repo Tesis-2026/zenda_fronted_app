@@ -18,7 +18,7 @@
   "validationEnterEmail": "Enter your email",
   "validationInvalidEmail": "Invalid email",
   "validationEnterPassword": "Enter your password",
-  "validationMinPassword": "At least 8 characters",
+  "validationMinPassword": "At least 12 characters",
   "validationEnterName": "Enter your name",
   "validationEnterCode": "Enter the code",
   "validationEnterNewPassword": "Enter your new password",
@@ -394,6 +394,14 @@
   "@authVerifyResendCooldown": {
     "placeholders": {
       "seconds": { "type": "int" }
+    }
+  },
+  "authBack": "Back",
+  "authCodeNotReceived": "Didn't receive a code?",
+  "authVerifyResendAvailable": "Resend available in {time}",
+  "@authVerifyResendAvailable": {
+    "placeholders": {
+      "time": { "type": "String" }
     }
   },
   "authVerifyButton": "Verify code",
@@ -885,7 +893,7 @@
   "authResetSuccessButton": "Sign In Now",
 
   "authSetNewPasswordTitle": "Set new password",
-  "authSetNewPasswordSubtitle": "Your new password must be at least 8 characters with 1 uppercase, 1 number.",
+  "authSetNewPasswordSubtitle": "Your new password must be at least 12 characters with 1 uppercase, 1 number.",
   "authConfirmPasswordLabel": "Confirm password",
   "authPasswordStrengthWeak": "Weak",
   "authPasswordStrengthFair": "Fair",

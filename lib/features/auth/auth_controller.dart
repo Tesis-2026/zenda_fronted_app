@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/user.dart';
+import '../../core/services/api_client.dart';
 import '../../core/services/auth_api_service.dart';
+import '../../features/dashboard/dashboard_providers.dart';
 
 // Auth service provider
 final authServiceProvider = Provider<AuthApiService>((ref) {
@@ -12,10 +14,10 @@ class AuthNotifier extends Notifier<AuthState> {
 
   @override
   AuthState build() {
-    // Kick off the async status check without microtask indirection.
-    // The provider returns AuthState.initial() (isLoading: true) immediately,
-    // then transitions once _checkAuthStatus() completes.
     _checkAuthStatus();
+    // Redirect to login whenever a token refresh fails mid-session.
+    final sub = ApiClient.onSessionExpired.listen((_) => _forceLogout());
+    ref.onDispose(sub.cancel);
     return const AuthState.initial();
   }
 
@@ -71,7 +73,21 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> logout() async {
     final authService = ref.read(authServiceProvider);
     await authService.logout();
+    _clearDataProviders();
     state = const AuthState.unauthenticated();
+  }
+
+  // Called when the API layer detects a non-recoverable 401 (refresh failed).
+  void _forceLogout() {
+    _clearDataProviders();
+    state = const AuthState.unauthenticated();
+  }
+
+  void _clearDataProviders() {
+    // Invalidate non-autoDispose providers so the next login gets fresh data.
+    ref.invalidate(accountsProvider);
+    ref.invalidate(transactionsProvider);
+    ref.invalidate(streakStateProvider);
   }
 
   void clearError() {

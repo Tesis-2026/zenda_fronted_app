@@ -8,6 +8,7 @@ class SavingsGoal {
   final String createdAt;
   final String updatedAt;
   final String? deletedAt;
+  final bool isCompleted;
 
   const SavingsGoal({
     required this.id,
@@ -19,6 +20,7 @@ class SavingsGoal {
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
+    this.isCompleted = false,
   });
 
   double get progressPercent {
@@ -26,7 +28,7 @@ class SavingsGoal {
     return (currentAmount / targetAmount * 100).clamp(0, 100);
   }
 
-  bool get isComplete => progressPercent >= 100;
+  bool get isComplete => isCompleted || progressPercent >= 100;
 
   factory SavingsGoal.fromJson(Map<String, dynamic> json) {
     return SavingsGoal(
@@ -39,6 +41,7 @@ class SavingsGoal {
       createdAt: json['createdAt'] as String,
       updatedAt: json['updatedAt'] as String,
       deletedAt: json['deletedAt'] as String?,
+      isCompleted: json['isCompleted'] as bool? ?? false,
     );
   }
 }

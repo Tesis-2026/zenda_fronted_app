@@ -36,12 +36,34 @@ class DailyBreakdownItem {
   }
 }
 
+class GoalProgressItem {
+  final String name;
+  final double currentAmount;
+  final double targetAmount;
+  final double progressPercent;
+
+  const GoalProgressItem({
+    required this.name,
+    required this.currentAmount,
+    required this.targetAmount,
+    required this.progressPercent,
+  });
+
+  factory GoalProgressItem.fromJson(Map<String, dynamic> json) => GoalProgressItem(
+        name: json['name'] as String,
+        currentAmount: (json['currentAmount'] as num).toDouble(),
+        targetAmount: (json['targetAmount'] as num).toDouble(),
+        progressPercent: (json['progressPercent'] as num).toDouble(),
+      );
+}
+
 class PeriodSummary {
   final double totalIncome;
   final double totalExpense;
   final double netBalance;
   final List<TopCategoryItem> topCategories;
   final List<DailyBreakdownItem> dailyBreakdown;
+  final List<GoalProgressItem> goalsProgress;
 
   const PeriodSummary({
     required this.totalIncome,
@@ -49,6 +71,7 @@ class PeriodSummary {
     required this.netBalance,
     required this.topCategories,
     this.dailyBreakdown = const [],
+    this.goalsProgress = const [],
   });
 
   factory PeriodSummary.fromJson(Map<String, dynamic> json) => PeriodSummary(
@@ -64,6 +87,12 @@ class PeriodSummary {
             : (json['dailyBreakdown'] as List<dynamic>)
                 .cast<Map<String, dynamic>>()
                 .map(DailyBreakdownItem.fromJson)
+                .toList(),
+        goalsProgress: json['goalsProgress'] == null
+            ? []
+            : (json['goalsProgress'] as List<dynamic>)
+                .cast<Map<String, dynamic>>()
+                .map(GoalProgressItem.fromJson)
                 .toList(),
       );
 }

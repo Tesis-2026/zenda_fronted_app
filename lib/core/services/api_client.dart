@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-const String _kBaseUrl = 'https://5af7-181-65-1-2.ngrok-free.app/api';
+/// Change this to your backend URL.
+/// Local dev (iOS simulator): http://localhost:3000/api
+/// Local dev (Android emulator): http://10.0.2.2:3000/api
+/// ngrok tunnel: https://<your-subdomain>.ngrok-free.app/api
+const String _kBaseUrl = 'http://localhost:3000/api';
 
 const String _kAccessTokenKey = 'zenda.access_token';
 const String _kRefreshTokenKey = 'zenda.refresh_token';
+const Duration _kRequestTimeout = Duration(seconds: 30);
 
 class ApiException implements Exception {
   final int statusCode;
@@ -22,6 +27,12 @@ class ApiException implements Exception {
 
 class ApiClient {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  // ── Session expired signal ────────────────────────────────────────
+  // Emits when a token refresh fails so the auth notifier can force logout.
+  static final StreamController<void> _sessionExpiredController =
+      StreamController<void>.broadcast();
+  static Stream<void> get onSessionExpired => _sessionExpiredController.stream;
 
   // ── Token helpers ────────────────────────────────────────────────
 
@@ -55,18 +66,27 @@ class ApiClient {
 
   // ── Token refresh ────────────────────────────────────────────────
 
+  static bool _refreshInProgress = false;
+
   /// Attempts to exchange the stored refresh token for a new token pair.
   /// Returns true and saves new tokens on success; returns false on failure.
   static Future<bool> _tryRefresh() async {
+    if (_refreshInProgress) return false;
     final refreshToken = await getRefreshToken();
-    if (refreshToken == null) return false;
+    if (refreshToken == null) {
+      _sessionExpiredController.add(null);
+      return false;
+    }
 
+    _refreshInProgress = true;
     try {
-      final response = await http.post(
-        Uri.parse('$_kBaseUrl/auth/refresh'),
-        headers: {HttpHeaders.contentTypeHeader: 'application/json'},
-        body: jsonEncode({'refreshToken': refreshToken}),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$_kBaseUrl/auth/refresh'),
+            headers: {HttpHeaders.contentTypeHeader: 'application/json'},
+            body: jsonEncode({'refreshToken': refreshToken}),
+          )
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -78,10 +98,13 @@ class ApiClient {
       }
     } catch (_) {
       // Network error during refresh — treat as failure
+    } finally {
+      _refreshInProgress = false;
     }
 
-    // Refresh failed: clear all tokens to force re-login
+    // Refresh failed: clear tokens and notify listeners to redirect to login.
     await deleteTokens();
+    _sessionExpiredController.add(null);
     return false;
   }
 
@@ -100,6 +123,7 @@ class ApiClient {
     try {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } catch (_) {
+      developer.log('Non-JSON response body: ${response.body}', name: 'ApiClient', level: 800);
       return {};
     }
   }
@@ -143,21 +167,16 @@ class ApiClient {
         : {HttpHeaders.contentTypeHeader: 'application/json'};
 
     try {
-      var response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      var response = await http
+          .post(Uri.parse(url), headers: headers, body: jsonEncode(body))
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401 && authenticated) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
-          final retryHeaders = await _authHeaders();
-          response = await http.post(
-            Uri.parse(url),
-            headers: retryHeaders,
-            body: jsonEncode(body),
-          );
+          response = await http
+              .post(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+              .timeout(_kRequestTimeout);
         }
       }
 
@@ -174,18 +193,16 @@ class ApiClient {
   static Future<Map<String, dynamic>> get(String path) async {
     final url = '$_kBaseUrl$path';
     try {
-      var response = await http.get(
-        Uri.parse(url),
-        headers: await _authHeaders(),
-      );
+      var response = await http
+          .get(Uri.parse(url), headers: await _authHeaders())
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
-          response = await http.get(
-            Uri.parse(url),
-            headers: await _authHeaders(),
-          );
+          response = await http
+              .get(Uri.parse(url), headers: await _authHeaders())
+              .timeout(_kRequestTimeout);
         }
       }
 
@@ -205,20 +222,16 @@ class ApiClient {
   ) async {
     final url = '$_kBaseUrl$path';
     try {
-      var response = await http.put(
-        Uri.parse(url),
-        headers: await _authHeaders(),
-        body: jsonEncode(body),
-      );
+      var response = await http
+          .put(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
-          response = await http.put(
-            Uri.parse(url),
-            headers: await _authHeaders(),
-            body: jsonEncode(body),
-          );
+          response = await http
+              .put(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+              .timeout(_kRequestTimeout);
         }
       }
 
@@ -238,20 +251,16 @@ class ApiClient {
   ) async {
     final url = '$_kBaseUrl$path';
     try {
-      var response = await http.patch(
-        Uri.parse(url),
-        headers: await _authHeaders(),
-        body: jsonEncode(body),
-      );
+      var response = await http
+          .patch(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
-          response = await http.patch(
-            Uri.parse(url),
-            headers: await _authHeaders(),
-            body: jsonEncode(body),
-          );
+          response = await http
+              .patch(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+              .timeout(_kRequestTimeout);
         }
       }
 
@@ -268,18 +277,16 @@ class ApiClient {
   static Future<List<dynamic>> getList(String path) async {
     final url = '$_kBaseUrl$path';
     try {
-      var response = await http.get(
-        Uri.parse(url),
-        headers: await _authHeaders(),
-      );
+      var response = await http
+          .get(Uri.parse(url), headers: await _authHeaders())
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
-          response = await http.get(
-            Uri.parse(url),
-            headers: await _authHeaders(),
-          );
+          response = await http
+              .get(Uri.parse(url), headers: await _authHeaders())
+              .timeout(_kRequestTimeout);
         }
       }
 
@@ -301,18 +308,16 @@ class ApiClient {
   static Future<void> delete(String path) async {
     final url = '$_kBaseUrl$path';
     try {
-      var response = await http.delete(
-        Uri.parse(url),
-        headers: await _authHeaders(),
-      );
+      var response = await http
+          .delete(Uri.parse(url), headers: await _authHeaders())
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
-          response = await http.delete(
-            Uri.parse(url),
-            headers: await _authHeaders(),
-          );
+          response = await http
+              .delete(Uri.parse(url), headers: await _authHeaders())
+              .timeout(_kRequestTimeout);
         }
       }
 
@@ -328,18 +333,16 @@ class ApiClient {
   static Future<List<int>> getBytes(String path) async {
     final url = '$_kBaseUrl$path';
     try {
-      var response = await http.get(
-        Uri.parse(url),
-        headers: await _authHeaders(),
-      );
+      var response = await http
+          .get(Uri.parse(url), headers: await _authHeaders())
+          .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
-          response = await http.get(
-            Uri.parse(url),
-            headers: await _authHeaders(),
-          );
+          response = await http
+              .get(Uri.parse(url), headers: await _authHeaders())
+              .timeout(_kRequestTimeout);
         }
       }
 

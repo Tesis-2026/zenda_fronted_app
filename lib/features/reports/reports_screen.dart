@@ -40,14 +40,15 @@ final _daySummaryProvider = FutureProvider.family<PeriodSummary, String>(
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 int _isoWeekNumber(DateTime date) {
-  final dayOfYear = int.parse(
-    '${date.difference(DateTime(date.year, 1, 1)).inDays + 1}',
-  );
+  final dayOfYear = date.difference(DateTime(date.year, 1, 1)).inDays + 1;
   final woy = ((dayOfYear - date.weekday + 10) / 7).floor();
-  if (woy < 1) return _isoWeekNumber(DateTime(date.year - 1, 12, 31));
+  if (woy < 1) {
+    return _isoWeekNumber(DateTime(date.year - 1, 12, 28));
+  }
   if (woy > 52) {
-    final dec31 = DateTime(date.year, 12, 31);
-    if (((dec31.difference(DateTime(dec31.year, 1, 1)).inDays + 1) - dec31.weekday + 10) ~/ 7 < 1) return 1;
+    final dec28 = DateTime(date.year, 12, 28);
+    final dec28Woy = ((dec28.difference(DateTime(dec28.year, 1, 1)).inDays + 1 - dec28.weekday + 10) / 7).floor();
+    if (woy > dec28Woy) return 1;
   }
   return woy;
 }

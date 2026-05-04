@@ -18,7 +18,7 @@
   "validationEnterEmail": "Ingresa tu correo",
   "validationInvalidEmail": "Correo inválido",
   "validationEnterPassword": "Ingresa tu contraseña",
-  "validationMinPassword": "Al menos 8 caracteres",
+  "validationMinPassword": "Al menos 12 caracteres",
   "validationEnterName": "Ingresa tu nombre",
   "validationEnterCode": "Ingresa el código",
   "validationEnterNewPassword": "Ingresa tu nueva contraseña",
@@ -394,6 +394,14 @@
   "@authVerifyResendCooldown": {
     "placeholders": {
       "seconds": { "type": "int" }
+    }
+  },
+  "authBack": "Atrás",
+  "authCodeNotReceived": "¿No recibiste un código?",
+  "authVerifyResendAvailable": "Reenvío disponible en {time}",
+  "@authVerifyResendAvailable": {
+    "placeholders": {
+      "time": { "type": "String" }
     }
   },
   "authVerifyButton": "Verificar código",
@@ -885,7 +893,7 @@
   "authResetSuccessButton": "Iniciar sesión",
 
   "authSetNewPasswordTitle": "Nueva contraseña",
-  "authSetNewPasswordSubtitle": "Tu nueva contraseña debe tener al menos 8 caracteres, 1 mayúscula y 1 número.",
+  "authSetNewPasswordSubtitle": "Tu nueva contraseña debe tener al menos 12 caracteres, 1 mayúscula y 1 número.",
   "authConfirmPasswordLabel": "Confirmar contraseña",
   "authPasswordStrengthWeak": "Débil",
   "authPasswordStrengthFair": "Regular",

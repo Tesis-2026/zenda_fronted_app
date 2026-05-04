@@ -18,7 +18,8 @@ String categoryToApiName(TransactionCategory c) {
   };
 }
 
-TransactionCategory? categoryFromApiName(String name) {
+TransactionCategory? categoryFromApiName(String? name) {
+  if (name == null) return null;
   return switch (name.toLowerCase()) {
     'food' => TransactionCategory.comida,
     'transportation' => TransactionCategory.transporte,
@@ -40,6 +41,25 @@ typedef CreateTransactionResult = ({
 });
 
 class TransactionApiService {
+  // Cache of lowercase category name → category UUID from the backend.
+  // Populated once per app session; prevents a name-based DB lookup on every
+  // transaction write by sending categoryId directly.
+  static Map<String, String>? _categoryIdCache;
+
+  static Future<Map<String, String>> _getCategoryCache() async {
+    if (_categoryIdCache != null) return _categoryIdCache!;
+    try {
+      final list = await ApiClient.getList('/categories');
+      _categoryIdCache = {
+        for (final item in list.cast<Map<String, dynamic>>())
+          (item['name'] as String).toLowerCase(): item['id'] as String,
+      };
+    } catch (_) {
+      _categoryIdCache = {};
+    }
+    return _categoryIdCache!;
+  }
+
   Future<CreateTransactionResult> create({
     required TransactionKind kind,
     required double amount,
@@ -48,21 +68,29 @@ class TransactionApiService {
     String? description,
     String? customCategoryName,
   }) async {
-    // Only EXPENSE and INCOME map to the backend (transfers are local-only).
+    // Transfers are local-only; no backend call needed.
     if (kind == TransactionKind.transfer) {
       return (completedChallenges: <String>[], anomalyAlert: null);
     }
-    final json = await ApiClient.post(
-      '/transactions',
-      {
-        'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
-        'amount': amount,
-        'newCategoryName': customCategoryName ?? categoryToApiName(category),
-        'description': description ?? '',
-        'occurredAt': occurredAt.toUtc().toIso8601String(),
-      },
-      authenticated: true,
-    );
+
+    final apiName = customCategoryName ?? categoryToApiName(category);
+    final cache = await _getCategoryCache();
+    final categoryId = cache[apiName.toLowerCase()];
+
+    final body = <String, dynamic>{
+      'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
+      'amount': amount,
+      'description': description ?? '',
+      'occurredAt': occurredAt.toUtc().toIso8601String(),
+    };
+    if (categoryId != null) {
+      body['categoryId'] = categoryId;
+    } else {
+      body['newCategoryName'] = apiName;
+    }
+
+    final json = await ApiClient.post('/transactions', body, authenticated: true);
+
     final rawChallenges = json['newlyCompletedChallenges'];
     final completedChallenges =
         rawChallenges is List ? rawChallenges.cast<String>() : <String>[];
@@ -103,16 +131,24 @@ class TransactionApiService {
     String? description,
   }) async {
     if (kind == TransactionKind.transfer) return;
-    await ApiClient.put(
-      '/transactions/$id',
-      {
-        'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
-        'amount': amount,
-        'newCategoryName': categoryToApiName(category),
-        'description': description ?? '',
-        'occurredAt': occurredAt.toUtc().toIso8601String(),
-      },
-    );
+
+    final apiName = categoryToApiName(category);
+    final cache = await _getCategoryCache();
+    final categoryId = cache[apiName.toLowerCase()];
+
+    final body = <String, dynamic>{
+      'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
+      'amount': amount,
+      'description': description ?? '',
+      'occurredAt': occurredAt.toUtc().toIso8601String(),
+    };
+    if (categoryId != null) {
+      body['categoryId'] = categoryId;
+    } else {
+      body['newCategoryName'] = apiName;
+    }
+
+    await ApiClient.put('/transactions/$id', body);
   }
 
   Future<void> deleteTransaction(String id) async {
