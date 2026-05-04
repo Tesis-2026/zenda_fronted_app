@@ -41,6 +41,7 @@ class User {
   final FinancialLiteracyLevel? financialLiteracyLevel;
   final bool profileCompleted;
   final String currency;
+  final String? createdAt;
 
   User({
     required this.id,
@@ -53,6 +54,7 @@ class User {
     this.financialLiteracyLevel,
     this.profileCompleted = false,
     this.currency = 'PEN',
+    this.createdAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -83,6 +85,7 @@ class User {
       financialLiteracyLevel: _literacyLevelFromString(json['financialLiteracyLevel'] as String?),
       profileCompleted: (json['profileCompleted'] as bool?) ?? false,
       currency: (json['currency'] as String?) ?? 'PEN',
+      createdAt: json['createdAt'] as String?,
     );
   }
 
@@ -97,6 +100,7 @@ class User {
     FinancialLiteracyLevel? financialLiteracyLevel,
     bool? profileCompleted,
     String? currency,
+    String? createdAt,
   }) {
     return User(
       id: id ?? this.id,
@@ -109,6 +113,7 @@ class User {
       financialLiteracyLevel: financialLiteracyLevel ?? this.financialLiteracyLevel,
       profileCompleted: profileCompleted ?? this.profileCompleted,
       currency: currency ?? this.currency,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

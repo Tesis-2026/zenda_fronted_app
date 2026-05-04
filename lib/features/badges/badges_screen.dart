@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/badges_api_service.dart';
+import '../../core/services/education_api_service.dart';
 import '../../l10n/l10n_extension.dart';
 
 final badgesServiceProvider = Provider<BadgesApiService>(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/services/feedback_api_service.dart';
+import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 

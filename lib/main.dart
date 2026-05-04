@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/mock/demo_overrides.dart';
 
-const bool _kDemoMode = false;
+const bool _kDemoMode = true;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

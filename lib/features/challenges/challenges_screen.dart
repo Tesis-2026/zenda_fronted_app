@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/challenges_api_service.dart';
+import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../features/dashboard/dashboard_providers.dart';

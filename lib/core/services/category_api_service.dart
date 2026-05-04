@@ -14,6 +14,7 @@ class CategoryApiService {
     final json = await ApiClient.post(
       '/categories',
       {'name': name},
+      authenticated: true,
     );
     return CategoryModel.fromJson(json);
   }
