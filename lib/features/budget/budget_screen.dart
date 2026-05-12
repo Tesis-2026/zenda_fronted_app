@@ -7,6 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/budget.dart';
 import '../../core/models/category.dart';
 import '../../core/services/budget_api_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
+import '../../core/utils/category_utils.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/app_card.dart';
@@ -126,7 +129,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final budgetsAsync = ref.watch(_budgetsProvider(_filter));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       body: SafeArea(
         child: budgetsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -168,10 +171,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                       const SizedBox(height: 24),
                       Text(
                         l10n.budgetByCategory,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1F2937),
+                          color: context.colors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -295,7 +298,7 @@ class _BudgetHeader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1F2937),
+              color: AppColors.textDark,
             ),
           ),
           const SizedBox(width: 8),
@@ -563,9 +566,9 @@ class _EditBudgetSheetState extends State<_EditBudgetSheet> {
             child: Row(
               children: [
                 Icon(
-                  _iconForBudgetCategory(widget.budget.categoryName),
+                  CategoryUtils.iconForCategory(widget.budget.categoryName),
                   size: 16,
-                  color: const Color(0xFF6B7280),
+                  color: AppColors.textMuted,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -573,7 +576,7 @@ class _EditBudgetSheetState extends State<_EditBudgetSheet> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF1F2937),
+                    color: AppColors.textDark,
                   ),
                 ),
               ],
@@ -711,7 +714,7 @@ class _BucketCell extends StatelessWidget {
           if (limit > 0)
             Text(
               'of S/ ${limit.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
+              style: const TextStyle(fontSize: 11, color: AppColors.textSubtle),
             ),
         ],
       ),
@@ -763,22 +766,6 @@ class _EmptyState extends StatelessWidget {
 
 // ── Budget card ────────────────────────────────────────────────────────────
 
-IconData _iconForBudgetCategory(String? name) {
-  if (name == null) return Icons.account_balance_wallet_outlined;
-  return switch (name.toLowerCase()) {
-    'food' || 'comida' => Icons.restaurant_rounded,
-    'transportation' || 'transporte' => Icons.directions_bus_rounded,
-    'housing' || 'vivienda' => Icons.home_rounded,
-    'utilities' || 'servicios' => Icons.bolt_rounded,
-    'health' || 'salud' => Icons.favorite_rounded,
-    'entertainment' || 'entretenimiento' => Icons.sports_esports_rounded,
-    'shopping' || 'compras' => Icons.shopping_bag_rounded,
-    'subscriptions' || 'suscripciones' => Icons.subscriptions_rounded,
-    'savings' || 'ahorro' => Icons.savings_rounded,
-    _ => Icons.category_rounded,
-  };
-}
-
 class _BudgetCard extends StatelessWidget {
   const _BudgetCard({
     required this.budget,
@@ -820,13 +807,13 @@ class _BudgetCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color: AppColors.fillLight,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  _iconForBudgetCategory(budget.categoryName),
+                  CategoryUtils.iconForCategory(budget.categoryName),
                   size: 18,
-                  color: const Color(0xFF6B7280),
+                  color: AppColors.textMuted,
                 ),
               ),
               const SizedBox(width: 10),
@@ -836,7 +823,7 @@ class _BudgetCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F2937),
+                    color: AppColors.textDark,
                   ),
                 ),
               ),
@@ -858,8 +845,8 @@ class _BudgetCard extends StatelessWidget {
               IconActionButton(
                 icon: Icons.edit_outlined,
                 onTap: onEdit,
-                backgroundColor: const Color(0xFFF3F4F6),
-                iconColor: const Color(0xFF9CA3AF),
+                backgroundColor: AppColors.fillLight,
+                iconColor: AppColors.textSubtle,
               ),
               const SizedBox(width: 6),
               IconActionButton(

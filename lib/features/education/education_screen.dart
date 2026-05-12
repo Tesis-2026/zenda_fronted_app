@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/user_menu_button.dart';
@@ -233,7 +234,7 @@ class _SectionTabs extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: isActive
                         ? Colors.white
-                        : const Color(0xFF6B7280),
+                        : AppColors.textMuted,
                   ),
                 ),
               ),
@@ -283,7 +284,7 @@ class _FeaturedCard extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1F2937),
+          color: AppColors.textDark,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -476,7 +477,7 @@ class _TopicCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(3),
                         decoration: const BoxDecoration(
-                          color: Color(0xFF6B7280),
+                          color: AppColors.textMuted,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.lock_rounded,
@@ -495,7 +496,7 @@ class _TopicCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1F2937),
+                        color: AppColors.textDark,
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -582,7 +583,7 @@ class _PersonalizedSection extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1F2937),
+                  color: AppColors.textDark,
                 ),
               ),
               const SizedBox(width: 6),
@@ -592,7 +593,7 @@ class _PersonalizedSection extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             l10n.educationPersonalizedSubtitle,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: 12),
           SizedBox(

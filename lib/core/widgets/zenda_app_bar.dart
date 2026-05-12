@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_colors.dart';
 
-/// Consistent sub-screen AppBar matching the Pencil design:
-/// white bg · dark title · back arrow · 1 px bottom divider.
-///
-/// Use on every screen that is NOT a bottom-nav root (Dashboard,
-/// Transactions, AI Chat, Goals, Education).
+/// Consistent sub-screen AppBar matching the Pencil design.
+/// Auto-detects dark mode — no manual isDark needed by callers.
 class ZendaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
+
   /// Override the back button's tap handler. Defaults to [context.pop()].
   final VoidCallback? onLeadingPressed;
 
@@ -22,9 +21,9 @@ class ZendaAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final onBg = isDark ? Colors.white : const Color(0xFF1F2937);
-    final divider = isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB);
+    final bg = isDark ? AppColors.darkCard : AppColors.cardBackground;
+    final onBg = isDark ? AppColors.darkTextPrimary : AppColors.textDark;
+    final divider = isDark ? AppColors.darkBorder : AppColors.border;
 
     return AppBar(
       backgroundColor: bg,

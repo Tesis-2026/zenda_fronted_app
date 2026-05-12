@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart';
+import '../../core/utils/category_utils.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_sheet_container.dart';
@@ -44,19 +45,6 @@ class _EditTransactionScreenState
   late DateTime _date;
   bool _saving = false;
 
-  static const _categoryIcons = {
-    TransactionCategory.comida: Icons.restaurant_rounded,
-    TransactionCategory.transporte: Icons.directions_bus_rounded,
-    TransactionCategory.vivienda: Icons.home_rounded,
-    TransactionCategory.servicios: Icons.bolt_rounded,
-    TransactionCategory.salud: Icons.local_pharmacy_rounded,
-    TransactionCategory.ocio: Icons.sports_esports_rounded,
-    TransactionCategory.compras: Icons.shopping_cart_rounded,
-    TransactionCategory.suscripciones: Icons.smartphone_rounded,
-    TransactionCategory.antojos: Icons.icecream_rounded,
-    TransactionCategory.ahorro: Icons.savings_rounded,
-    TransactionCategory.otros: Icons.more_horiz_rounded,
-  };
 
   @override
   void initState() {
@@ -228,7 +216,7 @@ class _EditTransactionScreenState
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            _categoryIcons[cat] ?? Icons.more_horiz_rounded,
+                            CategoryUtils.iconForCategory(cat.name),
                             size: 24,
                             color: isSelected
                                 ? const Color(0xFF065F46)

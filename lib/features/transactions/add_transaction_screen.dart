@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart';
+import '../../core/utils/category_utils.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
@@ -650,21 +651,8 @@ class _CategoryGrid extends StatelessWidget {
     );
   }
 
-  IconData _categoryIcon(TransactionCategory c) {
-    return switch (c) {
-      TransactionCategory.comida => Icons.restaurant_rounded,
-      TransactionCategory.transporte => Icons.directions_car_rounded,
-      TransactionCategory.vivienda => Icons.home_rounded,
-      TransactionCategory.servicios => Icons.lightbulb_rounded,
-      TransactionCategory.salud => Icons.health_and_safety_rounded,
-      TransactionCategory.ocio => Icons.movie_rounded,
-      TransactionCategory.compras => Icons.shopping_bag_rounded,
-      TransactionCategory.suscripciones => Icons.subscriptions_rounded,
-      TransactionCategory.antojos => Icons.icecream_rounded,
-      TransactionCategory.ahorro => Icons.savings_rounded,
-      TransactionCategory.otros => Icons.category_rounded,
-    };
-  }
+  IconData _categoryIcon(TransactionCategory c) =>
+      CategoryUtils.iconForCategory(c.name);
 
   String _categoryLabel(TransactionCategory c, dynamic l10n) {
     return switch (c) {

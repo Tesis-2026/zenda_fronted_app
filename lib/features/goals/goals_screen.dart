@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_card.dart';
@@ -279,14 +280,13 @@ class _GoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final pct = goal.progressPercent.clamp(0.0, 100.0);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     final isComplete = pct >= 100;
     final color = _progressColor(pct);
     final dueDateStr = _dueDateLabel(context);
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
-      isDark: isDark,
       hasShadow: true,
       padding: EdgeInsets.zero,
       child: InkWell(
@@ -301,7 +301,7 @@ class _GoalCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white10 : _bgColor(),
+                  color: colors.isDark ? Colors.white10 : _bgColor(),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
@@ -318,9 +318,10 @@ class _GoalCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             goal.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -343,7 +344,7 @@ class _GoalCard extends StatelessWidget {
                         dueDateStr,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? Colors.grey[400] : const Color(0xFF9CA3AF),
+                          color: colors.textSubtle,
                         ),
                       ),
                     ],
@@ -352,8 +353,7 @@ class _GoalCard extends StatelessWidget {
                       value: pct / 100,
                       height: 8,
                       color: color,
-                      backgroundColor: const Color(0xFFE5E7EB),
-                      isDark: isDark,
+                      backgroundColor: colors.border,
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -363,14 +363,14 @@ class _GoalCard extends StatelessWidget {
                           'S/ ${goal.currentAmount.toStringAsFixed(0)} ${l10n.txSaved.toLowerCase()}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                            color: colors.textMuted,
                           ),
                         ),
                         Text(
                           'S/ ${goal.targetAmount.toStringAsFixed(0)} ${l10n.goalTargetSuffix}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                            color: colors.textMuted,
                           ),
                         ),
                       ],

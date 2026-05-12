@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
 import '../../core/services/user_api_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
@@ -153,11 +155,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: const EdgeInsets.only(right: 8),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color: context.colors.fill,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: Color(0xFF6B7280), size: 20),
+                  icon: Icon(Icons.edit_outlined, color: context.colors.icon, size: 20),
                   onPressed: () => profileAsync.whenData((user) => _startEdit(user)),
                   tooltip: l10n.profileEdit,
                   padding: const EdgeInsets.all(8),
@@ -196,7 +198,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Center(
           child: CircleAvatar(
             radius: 40,
-            backgroundColor: const Color(0xFF34D399),
+            backgroundColor: AppColors.primary,
             child: Text(
               _initials(user.name),
               style: const TextStyle(
@@ -234,19 +236,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 label: l10n.profileUniversity,
                 value: user.university ?? l10n.commonNotSet,
               ),
-              Container(height: 1, color: const Color(0xFFF3F4F6)),
+              const Divider(height: 1, indent: 16, endIndent: 16),
               _InfoRow(
                 icon: Icons.work_outline_rounded,
                 label: l10n.profileIncomeType,
                 value: _incomeTypeLabel(context, user.incomeType),
               ),
-              Container(height: 1, color: const Color(0xFFF3F4F6)),
+              const Divider(height: 1, indent: 16, endIndent: 16),
               _InfoRow(
                 icon: Icons.bar_chart_rounded,
                 label: l10n.profileFinancialLiteracy,
                 value: _literacyLabel(user.financialLiteracyLevel),
               ),
-              Container(height: 1, color: const Color(0xFFF3F4F6)),
+              const Divider(height: 1, indent: 16, endIndent: 16),
               _InfoRow(
                 icon: Icons.monetization_on_outlined,
                 label: l10n.profileCurrency,
@@ -274,7 +276,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             _NavItem(
               icon: Icons.trending_up_rounded,
-              iconColor: const Color(0xFF34D399),
+              iconColor: AppColors.primary,
               title: l10n.progressTitle,
               onTap: () => context.push('/progress'),
             ),
@@ -287,7 +289,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           items: [
             _NavItem(
               icon: Icons.compare_arrows_rounded,
-              iconColor: const Color(0xFF34D399),
+              iconColor: AppColors.primary,
               title: l10n.surveyComparisonNavTitle,
               onTap: () => context.push('/surveys/comparison'),
             ),
@@ -391,7 +393,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: FilledButton(
                 onPressed: _isSaving ? null : _saveEdit,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF34D399),
+                  backgroundColor: AppColors.primary,
                   minimumSize: const Size(0, 52),
                 ),
                 child: _isSaving
@@ -424,12 +426,12 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF9CA3AF)),
+          Icon(icon, size: 18, color: AppColors.textSubtle),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
             ),
           ),
           Text(
@@ -437,7 +439,7 @@ class _InfoRow extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
+              color: AppColors.textDark,
             ),
           ),
         ],
@@ -479,7 +481,7 @@ class _NavSection extends StatelessWidget {
             children: [
               for (int i = 0; i < items.length; i++) ...[
                 if (i > 0)
-                  const Divider(height: 1, indent: 56, color: Color(0xFFF3F4F6)),
+                  const Divider(height: 1, indent: 56),
                 _NavRow(item: items[i]),
               ],
             ],
@@ -519,12 +521,12 @@ class _NavRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1F2937),
+                  color: AppColors.textDark,
                 ),
               ),
             ),
             const Icon(Icons.chevron_right_rounded,
-                size: 18, color: Color(0xFF9CA3AF)),
+                size: 18, color: AppColors.textSubtle),
           ],
         ),
       ),

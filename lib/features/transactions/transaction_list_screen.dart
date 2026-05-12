@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
+import '../../core/utils/category_utils.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_empty_state.dart';
@@ -42,51 +44,6 @@ final transactionListProvider =
   return apiService.getAll(type: typeParam);
 });
 
-// ── Category helpers ───────────────────────────────────────────────────────────
-
-IconData _iconForCategory(String? name) {
-  if (name == null) return Icons.swap_horiz_rounded;
-  return switch (name.toLowerCase()) {
-    'food' || 'comida' => Icons.restaurant_rounded,
-    'transportation' || 'transporte' => Icons.directions_bus_rounded,
-    'housing' || 'vivienda' => Icons.home_rounded,
-    'utilities' || 'servicios' => Icons.bolt_rounded,
-    'health' || 'salud' => Icons.favorite_rounded,
-    'entertainment' || 'entretenimiento' => Icons.sports_esports_rounded,
-    'shopping' || 'compras' => Icons.shopping_bag_rounded,
-    'subscriptions' || 'suscripciones' => Icons.subscriptions_rounded,
-    'cravings' || 'antojos' => Icons.icecream_rounded,
-    'savings' || 'ahorro' => Icons.savings_rounded,
-    _ => Icons.category_rounded,
-  };
-}
-
-Color _bgColorForCategory(String? name, bool isIncome) {
-  if (isIncome) return const Color(0xFFECFDF5);
-  if (name == null) return const Color(0xFFFEE2E2);
-  return switch (name.toLowerCase()) {
-    'food' || 'comida' => const Color(0xFFFEF3C7),
-    'transportation' || 'transporte' => const Color(0xFFDBEAFE),
-    'housing' || 'vivienda' => const Color(0xFFEDE9FE),
-    'health' || 'salud' => const Color(0xFFFCE7F3),
-    'savings' || 'ahorro' => const Color(0xFFECFDF5),
-    _ => const Color(0xFFFEE2E2),
-  };
-}
-
-Color _iconColorForCategory(String? name, bool isIncome) {
-  if (isIncome) return AppColors.income;
-  if (name == null) return AppColors.danger;
-  return switch (name.toLowerCase()) {
-    'food' || 'comida' => const Color(0xFFD97706),
-    'transportation' || 'transporte' => const Color(0xFF3B82F6),
-    'housing' || 'vivienda' => const Color(0xFF7C3AED),
-    'health' || 'salud' => const Color(0xFFEC4899),
-    'savings' || 'ahorro' => AppColors.income,
-    _ => AppColors.danger,
-  };
-}
-
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 class TransactionsScreen extends StatelessWidget {
@@ -94,10 +51,8 @@ class TransactionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0F172A) : AppColors.pageBackground,
+      backgroundColor: context.colors.bg,
       body: const SafeArea(child: TransactionListScreen()),
       bottomNavigationBar: const AppBottomNav(activeIndex: 1),
     );
@@ -112,8 +67,8 @@ class TransactionListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final onSurface = isDark ? Colors.white : AppColors.textDark;
+    final colors = context.colors;
+    final onSurface = colors.textPrimary;
 
     final filters = ref.watch(_txFiltersProvider);
     final txAsync = ref.watch(transactionListProvider);
@@ -339,8 +294,8 @@ class _TransactionRow extends ConsumerWidget {
     final amountColor =
         isIncome ? AppColors.income : AppColors.danger;
     final amountSign = isIncome ? '+' : '-';
-    final bgColor = _bgColorForCategory(categoryName, isIncome);
-    final iconColor = _iconColorForCategory(categoryName, isIncome);
+    final bgColor = CategoryUtils.bgColorForCategory(categoryName, isIncome: isIncome);
+    final iconColor = CategoryUtils.iconColorForCategory(categoryName, isIncome: isIncome);
 
     final displayLabel =
         description.isNotEmpty ? description : (categoryName ?? '');
@@ -422,7 +377,7 @@ class _TransactionRow extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
-                      _iconForCategory(categoryName),
+                      CategoryUtils.iconForCategory(categoryName),
                       color: iconColor,
                       size: 20,
                     ),

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/models/account.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_sheet_container.dart';
@@ -22,11 +24,8 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      backgroundColor: context.colors.bg,
       body: const SafeArea(child: _InicioSection()),
       bottomNavigationBar: const AppBottomNav(activeIndex: 0),
     );
@@ -40,11 +39,10 @@ class _InicioSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.user;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
-
-    final onSurface = isDark ? Colors.white : Colors.black87;
-    final onSurfaceMuted = isDark ? Colors.grey[400] : Colors.grey[600];
+    final colors = context.colors;
+    final onSurface = colors.textPrimary;
+    final onSurfaceMuted = colors.textMuted;
 
     final accountsAsync = ref.watch(accountsProvider);
     final monthSummaryAsync = ref.watch(monthSummaryProvider);
@@ -116,12 +114,12 @@ class _InicioSection extends ConsumerWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colors.card,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                      border: Border.all(color: colors.border),
                     ),
-                    child: const Icon(Icons.notifications_outlined,
-                        size: 20, color: Color(0xFF1F2937)),
+                    child: Icon(Icons.notifications_outlined,
+                        size: 20, color: colors.iconStrong),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -363,16 +361,17 @@ class _BudgetRuleCard extends StatelessWidget {
       Localizations.localeOf(context).languageCode,
     ).format(DateTime.now());
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -386,17 +385,17 @@ class _BudgetRuleCard extends StatelessWidget {
             children: [
               Text(
                 l10n.dashboardBudgetTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1F2937),
+                  color: colors.textPrimary,
                 ),
               ),
               Text(
                 month,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF6B7280),
+                  color: colors.textMuted,
                 ),
               ),
             ],
@@ -439,13 +438,13 @@ class _BudgetRuleCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _LegendDot(color: const Color(0xFF34D399), label: '${l10n.dashboardNeeds} 50%'),
+              _LegendDot(color: AppColors.primary, label: '${l10n.dashboardNeeds} 50%'),
               GestureDetector(
                 onTap: () => context.push('/budgets'),
-                child: Text(
-                  '${l10n.dashboardManageBudgets} →',
-                  style: const TextStyle(
-                    color: Color(0xFF34D399),
+                child: const Text(
+                  'Manage →',
+                  style: TextStyle(
+                    color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -477,7 +476,7 @@ class _LegendDot extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           label,
-          style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
+          style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
         ),
       ],
     );
