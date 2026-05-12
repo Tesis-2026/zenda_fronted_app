@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/app_progress_bar.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 final _comparisonProvider = FutureProvider.autoDispose<SurveyComparison>((ref) {
@@ -17,7 +19,8 @@ class SurveyComparisonScreen extends ConsumerWidget {
     final async = ref.watch(_comparisonProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.surveyComparisonNavTitle)),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(title: l10n.surveyComparisonNavTitle),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -241,14 +244,11 @@ class _GoalIndicator extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: goalMet ? 1.0 : 0.5,
-              backgroundColor: Colors.grey.withValues(alpha: 0.2),
-              color: color,
-              minHeight: 8,
-            ),
+          child: AppProgressBar(
+            value: goalMet ? 1.0 : 0.5,
+            color: color,
+            height: 8,
+            backgroundColor: Colors.grey.withValues(alpha: 0.2),
           ),
         ),
         const SizedBox(width: 12),

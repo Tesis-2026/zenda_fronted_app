@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/pre_survey_provider.dart';
 
@@ -42,10 +44,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         : ref.watch(_postSurveyProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.isPre ? l10n.surveyPreTitle : l10n.surveyPostTitle,
-        ),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(
+        title: widget.isPre ? l10n.surveyPreTitle : l10n.surveyPostTitle,
         actions: [
           TextButton(
             onPressed: () => context.go('/dashboard'),
@@ -258,12 +259,11 @@ class _SurveyForm extends StatelessWidget {
     return Column(
       children: [
         // Progress bar
-        LinearProgressIndicator(
+        AppProgressBar(
           value: (currentIndex + 1) / total,
-          minHeight: 4,
+          color: const Color(0xFF34D399),
+          height: 4,
           backgroundColor: const Color(0xFFE5E7EB),
-          valueColor:
-              const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
         ),
         // Counter label: "3 of 5" centered in AppBar-style row
         Padding(

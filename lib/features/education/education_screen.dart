@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../features/dashboard/dashboard_providers.dart';
 import '../../l10n/l10n_extension.dart';
@@ -526,15 +527,10 @@ class _TopicCard extends StatelessWidget {
                       ),
                     ] else ...[
                       const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(2),
-                        child: LinearProgressIndicator(
-                          value: topic.isCompleted ? 1.0 : 0.0,
-                          minHeight: 3,
-                          backgroundColor: const Color(0xFFF3F4F6),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                              Color(0xFF34D399)),
-                        ),
+                      AppProgressBar(
+                        value: topic.isCompleted ? 1.0 : 0.0,
+                        color: const Color(0xFF34D399),
+                        height: 3,
                       ),
                     ],
                   ],

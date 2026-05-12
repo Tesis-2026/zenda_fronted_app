@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../core/models/budget.dart';
 import '../../core/models/category.dart';
 import '../../core/services/budget_api_service.dart';
@@ -288,7 +290,7 @@ class _BudgetHeader extends StatelessWidget {
               size: 20,
               color: Color(0xFF374151),
             ),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => context.pop(),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           ),

@@ -1,12 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/services/progress_api_service.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/month_navigator.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 final progressServiceProvider = Provider<ProgressApiService>(
@@ -58,23 +58,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF9FAFB),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1F2937)),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          l10n.progressTitle,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1F2937),
-          ),
-        ),
-      ),
+      appBar: ZendaAppBar(title: l10n.progressTitle),
       body: progressAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) {

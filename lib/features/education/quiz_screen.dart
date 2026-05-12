@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/quiz_models.dart';
 import '../../core/services/quiz_api_service.dart';
+import '../../core/widgets/app_progress_bar.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 // ─────────────────────────────────────────────────────────────────
@@ -90,18 +92,11 @@ class QuizScreen extends ConsumerWidget {
         ref.watch(_quizProvider((topicId: topicId, language: language)));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              topicTitle != null
-                  ? '${l10n.quizTitle}: $topicTitle'
-                  : l10n.quizTitle,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(
+        title: topicTitle != null
+            ? '${l10n.quizTitle}: $topicTitle'
+            : l10n.quizTitle,
       ),
       body: quizAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -333,13 +328,10 @@ class _ProgressBar extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          LinearProgressIndicator(
+          AppProgressBar(
             value: (current + 1) / total,
-            borderRadius: BorderRadius.circular(4),
-            minHeight: 3,
-            backgroundColor: const Color(0xFFF3F4F6),
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
+            color: const Color(0xFF34D399),
+            height: 3,
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 final susSurveyServiceProvider = Provider<SurveysApiService>(
@@ -56,7 +57,8 @@ class _SusScreenState extends ConsumerState<SusScreen> {
     final surveyAsync = ref.watch(_susSurveyProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.susSurveyTitle)),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(title: l10n.susSurveyTitle),
       body: surveyAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) {

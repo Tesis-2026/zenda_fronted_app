@@ -7,6 +7,7 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/section_label.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../auth/auth_controller.dart';
 import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
@@ -143,14 +144,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.profileTitle),
-        leading: _isEditing
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () => setState(() => _isEditing = false),
-              )
-            : null,
+      appBar: ZendaAppBar(
+        title: l10n.profileTitle,
+        onLeadingPressed: _isEditing ? () => setState(() => _isEditing = false) : null,
         actions: [
           if (!_isEditing)
             Padding(

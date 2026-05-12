@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/recommendations_api_service.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import '../feedback/feedback_modal.dart';
 
@@ -39,7 +40,8 @@ class RecommendationsScreen extends ConsumerWidget {
     final recsAsync = ref.watch(_recsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.recommendationsTitle)),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(title: l10n.recommendationsTitle),
       body: recsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(

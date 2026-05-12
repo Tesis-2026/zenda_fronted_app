@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/quiz_models.dart';
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 // ─────────────────────────────────────────────────────────────────
@@ -27,7 +29,8 @@ class PersonalizedQuizScreen extends ConsumerWidget {
     final quizAsync = ref.watch(_personalizedQuizProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.quizPersonalizedTitle)),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(title: l10n.quizPersonalizedTitle),
       body: quizAsync.when(
         loading: () => Center(
           child: Column(
@@ -282,9 +285,10 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
                 ],
               ),
               const SizedBox(height: 6),
-              LinearProgressIndicator(
+              AppProgressBar(
                 value: (_index + 1) / widget.result.questions.length,
-                borderRadius: BorderRadius.circular(4),
+                color: const Color(0xFF34D399),
+                height: 4,
               ),
             ],
           ),

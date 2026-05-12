@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/services/predictions_api_service.dart';
+import '../../core/widgets/app_progress_bar.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 final predictionsServiceProvider = Provider<PredictionsApiService>(
@@ -39,7 +41,8 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen> {
     final expenseAsync = ref.watch(_expensePredictionProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.predictionsTitle)),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(title: l10n.predictionsTitle),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(_expensePredictionProvider),
         child: ListView(
@@ -225,15 +228,11 @@ class _ExpenseForecastCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: (result.budgetUsageFraction ?? 0.9).clamp(0.0, 1.0),
-                    minHeight: 8,
-                    backgroundColor: const Color(0xFFFEE2E2),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFFEF4444)),
-                  ),
+                AppProgressBar(
+                  value: (result.budgetUsageFraction ?? 0.9).clamp(0.0, 1.0),
+                  color: const Color(0xFFEF4444),
+                  height: 8,
+                  backgroundColor: const Color(0xFFFEE2E2),
                 ),
                 const SizedBox(height: 8),
                 Row(

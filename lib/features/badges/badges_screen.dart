@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 final badgesServiceProvider = Provider<BadgesApiService>(
@@ -21,8 +22,9 @@ class BadgesScreen extends ConsumerWidget {
     final badgesAsync = ref.watch(_badgesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.badgesTitle),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(
+        title: l10n.badgesTitle,
         actions: [
           badgesAsync.whenOrNull(
             data: (badges) {

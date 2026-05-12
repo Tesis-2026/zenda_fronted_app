@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../features/dashboard/dashboard_providers.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -28,8 +29,9 @@ class ChallengesScreen extends ConsumerWidget {
     final streakDays = ref.watch(streakProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.challengesTitle),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(
+        title: l10n.challengesTitle,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),

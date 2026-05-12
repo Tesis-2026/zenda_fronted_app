@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/services/user_api_service.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 final _notificationsServiceProvider = Provider<NotificationsApiService>(
@@ -22,7 +23,8 @@ class NotificationPreferencesScreen extends ConsumerWidget {
     final prefsAsync = ref.watch(_preferencesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.notificationsTitle)),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: ZendaAppBar(title: l10n.notificationsTitle),
       body: prefsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) {
