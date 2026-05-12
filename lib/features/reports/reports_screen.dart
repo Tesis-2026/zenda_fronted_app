@@ -214,6 +214,16 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
       final service = ref.read(reportsInsightsServiceProvider);
       final bytes = await service.downloadPdfReport(year: _year, month: _month);
 
+      if (bytes.isEmpty) {
+        if (!mounted) return;
+        showAppToast(
+          context,
+          'Report ready — PDF export available when connected to the backend.',
+          type: ToastType.success,
+        );
+        return;
+      }
+
       final dir = await getTemporaryDirectory();
       final monthStr = _month.toString().padLeft(2, '0');
       final file = File('${dir.path}/zenda-report-$_year-$monthStr.pdf');

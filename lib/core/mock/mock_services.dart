@@ -1,21 +1,19 @@
 import '../models/budget.dart';
+import '../models/category.dart';
 import '../models/quiz_models.dart';
 import '../models/savings_goal.dart';
 import '../models/summary_models.dart';
 import '../models/transaction.dart';
 import '../models/user.dart';
-import '../services/recommendations_api_service.dart';
+import '../services/category_api_service.dart';
 import '../services/education_api_service.dart';
 import '../services/budget_api_service.dart';
-// merged into education_api_service.dart
-import '../services/education_api_service.dart';
 import '../services/goals_api_service.dart';
 import '../services/insights_api_service.dart';
 import '../services/predictions_api_service.dart';
 import '../services/progress_api_service.dart';
 import '../services/quiz_api_service.dart';
 import '../services/recommendations_api_service.dart';
-// merged into education_api_service.dart
 import '../services/transaction_api_service.dart';
 import '../services/user_api_service.dart';
 import 'demo_data.dart';
@@ -514,5 +512,121 @@ class MockTransactionApiService extends TransactionApiService {
   Future<TransactionCategory?> classify({
     required String description,
     required double amount,
-  }) async => null;
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final d = description.toLowerCase();
+    if (d.contains('food') || d.contains('lunch') || d.contains('dinner') ||
+        d.contains('breakfast') || d.contains('groceries') ||
+        d.contains('supermarket') || d.contains('restaurant') ||
+        d.contains('cafe') || d.contains('comida')) {
+      return TransactionCategory.comida;
+    }
+    if (d.contains('uber') || d.contains('taxi') || d.contains('bus') ||
+        d.contains('transport') || d.contains('metro') || d.contains('ride')) {
+      return TransactionCategory.transporte;
+    }
+    if (d.contains('rent') || d.contains('housing') || d.contains('alquiler') ||
+        d.contains('apartment') || d.contains('flat')) {
+      return TransactionCategory.vivienda;
+    }
+    if (d.contains('internet') || d.contains('electricity') ||
+        d.contains('water') || d.contains('bill') ||
+        d.contains('utility') || d.contains('phone')) {
+      return TransactionCategory.servicios;
+    }
+    if (d.contains('doctor') || d.contains('gym') || d.contains('pharmacy') ||
+        d.contains('health') || d.contains('medicine') ||
+        d.contains('hospital')) {
+      return TransactionCategory.salud;
+    }
+    if (d.contains('cinema') || d.contains('movie') || d.contains('concert') ||
+        d.contains('entertainment') || d.contains('bar') ||
+        d.contains('club')) {
+      return TransactionCategory.ocio;
+    }
+    if (d.contains('clothes') || d.contains('shopping') ||
+        d.contains('amazon') || d.contains('store') || d.contains('mall')) {
+      return TransactionCategory.compras;
+    }
+    if (d.contains('netflix') || d.contains('spotify') ||
+        d.contains('subscription') || d.contains('prime') ||
+        d.contains('hbo') || d.contains('disney')) {
+      return TransactionCategory.suscripciones;
+    }
+    if (d.contains('coffee') || d.contains('snack') || d.contains('dessert') ||
+        d.contains('candy') || d.contains('ice cream')) {
+      return TransactionCategory.antojos;
+    }
+    if (d.contains('saving') || d.contains('ahorro') || d.contains('invest')) {
+      return TransactionCategory.ahorro;
+    }
+    return null;
+  }
+}
+
+class MockCategoryApiService extends CategoryApiService {
+  static final _custom = <CategoryModel>[];
+
+  static const _system = <CategoryModel>[
+    CategoryModel(id: 'cat-food', name: 'Food', type: CategoryType.system),
+    CategoryModel(id: 'cat-transport', name: 'Transportation', type: CategoryType.system),
+    CategoryModel(id: 'cat-housing', name: 'Housing', type: CategoryType.system),
+    CategoryModel(id: 'cat-utilities', name: 'Utilities', type: CategoryType.system),
+    CategoryModel(id: 'cat-health', name: 'Health', type: CategoryType.system),
+    CategoryModel(id: 'cat-entertainment', name: 'Entertainment', type: CategoryType.system),
+    CategoryModel(id: 'cat-shopping', name: 'Shopping', type: CategoryType.system),
+    CategoryModel(id: 'cat-subscriptions', name: 'Subscriptions', type: CategoryType.system),
+    CategoryModel(id: 'cat-savings', name: 'Savings', type: CategoryType.system),
+    CategoryModel(id: 'cat-other', name: 'Other', type: CategoryType.system),
+  ];
+
+  @override
+  Future<List<CategoryModel>> getAll() async => [..._system, ..._custom];
+
+  @override
+  Future<CategoryModel> create(String name) async {
+    final cat = CategoryModel(
+      id: 'cat-custom-${DateTime.now().millisecondsSinceEpoch}',
+      name: name,
+      type: CategoryType.custom,
+    );
+    _custom.add(cat);
+    return cat;
+  }
+
+  @override
+  Future<CategoryModel> rename(String id, String name) async {
+    final idx = _custom.indexWhere((c) => c.id == id);
+    if (idx != -1) {
+      _custom[idx] = CategoryModel(id: id, name: name, type: CategoryType.custom);
+      return _custom[idx];
+    }
+    return CategoryModel(id: id, name: name, type: CategoryType.custom);
+  }
+
+  @override
+  Future<void> delete(String id) async => _custom.removeWhere((c) => c.id == id);
+}
+
+class MockNotificationsApiService extends NotificationsApiService {
+  static final _prefs = <NotificationPreference>[
+    const NotificationPreference(type: 'BUDGET_ALERT', enabled: true),
+    const NotificationPreference(type: 'BADGE_EARNED', enabled: true),
+    const NotificationPreference(type: 'ANOMALY_ALERT', enabled: true),
+    const NotificationPreference(type: 'PREDICTION_READY', enabled: false),
+    const NotificationPreference(type: 'CHALLENGE_REMINDER', enabled: true),
+    const NotificationPreference(type: 'DAILY_REMINDER', enabled: false),
+  ];
+
+  @override
+  Future<List<NotificationPreference>> getPreferences() async =>
+      List.unmodifiable(_prefs);
+
+  @override
+  Future<void> updatePreference(String type, {required bool enabled}) async {
+    final idx = _prefs.indexWhere((p) => p.type == type);
+    if (idx != -1) {
+      _prefs[idx] = NotificationPreference(type: type, enabled: enabled);
+    }
+  }
 }

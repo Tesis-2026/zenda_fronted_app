@@ -7,8 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/models/budget.dart';
 import '../../core/models/category.dart';
 import '../../core/services/budget_api_service.dart';
-import '../../core/services/category_api_service.dart';
 import '../../core/widgets/amount_input_field.dart';
+import '../../providers/repositories_providers.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/app_primary_button.dart';
@@ -26,10 +26,6 @@ final budgetServiceProvider = Provider<BudgetApiService>((ref) {
   return BudgetApiService();
 });
 
-final _categoryServiceProvider = Provider<CategoryApiService>((ref) {
-  return CategoryApiService();
-});
-
 typedef _BudgetFilter = ({int month, int year});
 
 final _budgetsProvider =
@@ -43,7 +39,7 @@ final _budgetsProvider =
 
 final _categoriesProvider =
     FutureProvider.autoDispose<List<CategoryModel>>((ref) {
-  return ref.read(_categoryServiceProvider).getAll();
+  return ref.read(categoryApiServiceProvider).getAll();
 });
 
 class BudgetScreen extends ConsumerStatefulWidget {

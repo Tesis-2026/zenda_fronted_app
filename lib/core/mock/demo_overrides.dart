@@ -70,6 +70,8 @@ buildDemoOverrides() {
     progressServiceProvider.overrideWithValue(MockProgressApiService()),
     surveysServiceProvider.overrideWithValue(MockSurveysApiService()),
     susSurveyServiceProvider.overrideWithValue(MockSurveysApiService()),
+    categoryApiServiceProvider.overrideWithValue(MockCategoryApiService()),
+    notificationsServiceProvider.overrideWithValue(MockNotificationsApiService()),
   ];
 }
 

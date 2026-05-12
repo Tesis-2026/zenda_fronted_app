@@ -4,14 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/user_api_service.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
-
-final _notificationsServiceProvider = Provider<NotificationsApiService>(
-  (_) => NotificationsApiService(),
-);
+import '../../providers/repositories_providers.dart';
 
 final _preferencesProvider =
     FutureProvider.autoDispose<List<NotificationPreference>>((ref) {
-  return ref.read(_notificationsServiceProvider).getPreferences();
+  return ref.read(notificationsServiceProvider).getPreferences();
 });
 
 class NotificationPreferencesScreen extends ConsumerWidget {
@@ -92,7 +89,7 @@ class _PrefsBody extends StatelessWidget {
                 : (enabled) async {
                     for (final pref in prefs) {
                       await ref
-                          .read(_notificationsServiceProvider)
+                          .read(notificationsServiceProvider)
                           .updatePreference(pref.type, enabled: enabled);
                     }
                     ref.invalidate(_preferencesProvider);
@@ -120,7 +117,7 @@ class _PrefsBody extends StatelessWidget {
                   ? (_) async {}
                   : (enabled) async {
                       await ref
-                          .read(_notificationsServiceProvider)
+                          .read(notificationsServiceProvider)
                           .updatePreference(pref.type, enabled: enabled);
                       ref.invalidate(_preferencesProvider);
                     },
