@@ -3606,6 +3606,18 @@ abstract class AppLocalizations {
   /// **'Progress'**
   String get educationTabProgress;
 
+  /// No description provided for @educationTabPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Path'**
+  String get educationTabPath;
+
+  /// No description provided for @learningPathTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Learning Path'**
+  String get learningPathTitle;
+
   /// No description provided for @educationFilterAll.
   ///
   /// In en, this message translates to:

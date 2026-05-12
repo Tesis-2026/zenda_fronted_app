@@ -926,6 +926,8 @@
   "educationTabChallenges": "Retos",
   "educationTabBadges": "Insignias",
   "educationTabProgress": "Progreso",
+  "educationTabPath": "Ruta",
+  "learningPathTitle": "Mi Ruta de Aprendizaje",
   "educationFilterAll": "Todos",
   "educationFilterBeginner": "Básico",
   "educationFilterIntermediate": "Intermedio",

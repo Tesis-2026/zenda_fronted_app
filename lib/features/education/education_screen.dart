@@ -196,6 +196,7 @@ class _SectionTabs extends StatelessWidget {
     final l10n = context.l10n;
     final tabs = [
       (label: l10n.educationTabLearn, route: null),
+      (label: l10n.educationTabPath, route: '/education/learning-path'),
       (label: l10n.educationTabChallenges, route: '/challenges'),
       (label: l10n.educationTabBadges, route: '/badges'),
       (label: l10n.educationTabProgress, route: '/progress'),

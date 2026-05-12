@@ -1980,6 +1980,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get educationTabProgress => 'Progreso';
 
   @override
+  String get educationTabPath => 'Ruta';
+
+  @override
+  String get learningPathTitle => 'Mi Ruta de Aprendizaje';
+
+  @override
   String get educationFilterAll => 'Todos';
 
   @override

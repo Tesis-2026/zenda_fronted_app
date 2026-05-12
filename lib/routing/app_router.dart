@@ -27,6 +27,7 @@ import '../features/reports/reports_screen.dart';
 import '../features/predictions/predictions_screen.dart';
 import '../features/recommendations/recommendations_screen.dart';
 import '../features/education/education_screen.dart';
+import '../features/education/learning_path_screen.dart';
 import '../features/education/topic_detail_screen.dart';
 import '../features/education/quiz_screen.dart';
 import '../features/education/personalized_quiz_screen.dart';
@@ -260,6 +261,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'quiz/personalized',
             builder: (context, state) => const PersonalizedQuizScreen(),
+          ),
+          GoRoute(
+            path: 'learning-path',
+            builder: (context, state) => const LearningPathScreen(),
           ),
           GoRoute(
             path: ':id',

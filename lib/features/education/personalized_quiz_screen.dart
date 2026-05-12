@@ -7,13 +7,14 @@ import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
+import 'education_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // Provider
 // ─────────────────────────────────────────────────────────────────
 
 final _personalizedQuizProvider = FutureProvider.autoDispose<PersonalizedQuizResult>((ref) {
-  return EducationApiService().getPersonalizedQuiz();
+  return ref.read(educationServiceProvider).getPersonalizedQuiz();
 });
 
 // ─────────────────────────────────────────────────────────────────

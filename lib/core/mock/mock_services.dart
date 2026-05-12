@@ -45,8 +45,10 @@ class MockInsightsApiService extends InsightsApiService {
 }
 
 class MockGoalsApiService extends GoalsApiService {
+  static final _goals = List<SavingsGoal>.from(DemoData.goals);
+
   @override
-  Future<List<SavingsGoal>> getAll() async => DemoData.goals;
+  Future<List<SavingsGoal>> getAll() async => List.unmodifiable(_goals);
 
   @override
   Future<SavingsGoal> create({
@@ -54,7 +56,7 @@ class MockGoalsApiService extends GoalsApiService {
     required double targetAmount,
     String? dueDate,
   }) async {
-    return SavingsGoal(
+    final goal = SavingsGoal(
       id: 'goal-new-${DateTime.now().millisecondsSinceEpoch}',
       userId: 'demo-user-1',
       name: name,
@@ -64,6 +66,8 @@ class MockGoalsApiService extends GoalsApiService {
       createdAt: DateTime.now().toIso8601String(),
       updatedAt: DateTime.now().toIso8601String(),
     );
+    _goals.add(goal);
+    return goal;
   }
 
   @override
@@ -106,12 +110,17 @@ class MockGoalsApiService extends GoalsApiService {
   }
 
   @override
-  Future<void> delete(String id) async {}
+  Future<void> delete(String id) async {
+    _goals.removeWhere((g) => g.id == id);
+  }
 }
 
 class MockBudgetApiService extends BudgetApiService {
+  static final _budgets = List<Budget>.from(DemoData.budgets);
+
   @override
-  Future<List<Budget>> getAll({int? month, int? year}) async => DemoData.budgets;
+  Future<List<Budget>> getAll({int? month, int? year}) async =>
+      List.unmodifiable(_budgets);
 
   @override
   Future<Budget> create({
@@ -120,7 +129,7 @@ class MockBudgetApiService extends BudgetApiService {
     required int year,
     String? categoryId,
   }) async {
-    return Budget(
+    final budget = Budget(
       id: 'budget-new-${DateTime.now().millisecondsSinceEpoch}',
       userId: 'demo-user-1',
       categoryId: categoryId,
@@ -132,14 +141,32 @@ class MockBudgetApiService extends BudgetApiService {
       createdAt: DateTime.now().toIso8601String(),
       updatedAt: DateTime.now().toIso8601String(),
     );
+    _budgets.add(budget);
+    return budget;
   }
 
   @override
-  Future<Budget> update(String id, {required double amountLimit}) async =>
-      DemoData.budgets.firstWhere((b) => b.id == id, orElse: () => DemoData.budgets.first);
+  Future<Budget> update(String id, {required double amountLimit}) async {
+    final idx = _budgets.indexWhere((b) => b.id == id);
+    if (idx != -1) {
+      final b = _budgets[idx];
+      final updated = Budget(
+        id: b.id, userId: b.userId, categoryId: b.categoryId,
+        categoryName: b.categoryName, amountLimit: amountLimit,
+        month: b.month, year: b.year, currentSpent: b.currentSpent,
+        percentageUsed: (b.currentSpent / amountLimit * 100).clamp(0, 100),
+        createdAt: b.createdAt, updatedAt: DateTime.now().toIso8601String(),
+      );
+      _budgets[idx] = updated;
+      return updated;
+    }
+    return _budgets.first;
+  }
 
   @override
-  Future<void> delete(String id) async {}
+  Future<void> delete(String id) async {
+    _budgets.removeWhere((b) => b.id == id);
+  }
 }
 
 class MockEducationApiService extends EducationApiService {
@@ -156,6 +183,50 @@ class MockEducationApiService extends EducationApiService {
 
   @override
   Future<void> completeTopic(String id) async {}
+
+  @override
+  Future<PersonalizedQuizResult> getPersonalizedQuiz({String language = 'es'}) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return const PersonalizedQuizResult(
+      attemptsRemainingToday: 3,
+      questions: [
+        PersonalizedQuizQuestion(
+          id: 'pq-1',
+          difficulty: 'INTERMEDIATE',
+          text: 'Your food spending this month is S/ 116 out of a S/ 150 budget (77%). Which action is most effective for the remaining 8 days?',
+          options: [
+            'Cook at home 3 times this week',
+            'Switch to a cheaper supermarket',
+            'Cut out all restaurant meals',
+            'Track every food purchase daily',
+          ],
+        ),
+        PersonalizedQuizQuestion(
+          id: 'pq-2',
+          difficulty: 'BEGINNER',
+          text: 'Your Emergency Fund goal is at 28% (S/ 850 of S/ 3,000). At your current pace you\'ll reach it in December. What would get you there 3 months earlier?',
+          options: [
+            'Add S/ 50 extra per month',
+            'Add S/ 150 extra per month',
+            'Add S/ 200 extra per month',
+            'Do nothing — the current pace is fine',
+          ],
+        ),
+        PersonalizedQuizQuestion(
+          id: 'pq-3',
+          difficulty: 'INTERMEDIATE',
+          text: 'You have a Visa Credit card with S/ 1,150 available. Your current utilization rate is about 23%. What is the recommended maximum utilization to protect your credit score?',
+          options: ['10%', '30%', '50%', '70%'],
+        ),
+        PersonalizedQuizQuestion(
+          id: 'pq-4',
+          difficulty: 'BEGINNER',
+          text: 'Looking at your May budget: income S/ 1,200, expenses S/ 481, net S/ 719. What percentage of your income are you saving?',
+          options: ['30%', '40%', '50%', '60%'],
+        ),
+      ],
+    );
+  }
 }
 
 class MockChallengesApiService extends ChallengesApiService {

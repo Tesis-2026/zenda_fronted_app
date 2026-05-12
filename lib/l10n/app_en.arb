@@ -926,6 +926,8 @@
   "educationTabChallenges": "Challenges",
   "educationTabBadges": "Badges",
   "educationTabProgress": "Progress",
+  "educationTabPath": "Path",
+  "learningPathTitle": "My Learning Path",
   "educationFilterAll": "All",
   "educationFilterBeginner": "Beginner",
   "educationFilterIntermediate": "Intermediate",

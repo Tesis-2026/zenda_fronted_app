@@ -1971,6 +1971,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get educationTabProgress => 'Progress';
 
   @override
+  String get educationTabPath => 'Path';
+
+  @override
+  String get learningPathTitle => 'My Learning Path';
+
+  @override
   String get educationFilterAll => 'All';
 
   @override
