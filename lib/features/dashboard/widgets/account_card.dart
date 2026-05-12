@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/account.dart';
+import '../../../core/theme/zenda_theme_x.dart';
 import '../../../l10n/l10n_extension.dart';
 
 class AccountCard extends StatelessWidget {
@@ -9,7 +10,7 @@ class AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     final color = Color(account.colorValue);
 
     return Container(
@@ -17,7 +18,7 @@ class AccountCard extends StatelessWidget {
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -42,14 +43,14 @@ class AccountCard extends StatelessWidget {
               ),
               const Spacer(),
               if (account.type == AccountType.credit)
-                const Icon(Icons.info_outline, size: 16, color: Colors.grey),
+                Icon(Icons.info_outline, size: 16, color: colors.textMuted),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             account.name,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isDark ? Colors.grey[400] : Colors.grey[600],
+              color: colors.textMuted,
               fontWeight: FontWeight.w500,
               fontSize: 13,
               height: 1.1,
@@ -76,7 +77,7 @@ class AccountCard extends StatelessWidget {
               '${context.l10n.accountAvail} ${account.currency} ${account.creditAvailable.toStringAsFixed(0)}',
               style: TextStyle(
                 fontSize: 10,
-                color: isDark ? Colors.grey[400] : Colors.grey,
+                color: colors.textMuted,
                 height: 1.1,
               ),
               maxLines: 1,
@@ -90,7 +91,7 @@ class AccountCard extends StatelessWidget {
                 '${account.currency} ${account.balance.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
+                  color: colors.textPrimary,
                   height: 1.05,
                 ),
               ),

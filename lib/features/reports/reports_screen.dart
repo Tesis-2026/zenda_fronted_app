@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'dart:io';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -97,25 +98,26 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: colors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.card,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 4,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              size: 20, color: Color(0xFF1F2937)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              size: 20, color: colors.textPrimary),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
           l10n.reportsTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1F2937),
+            color: colors.textPrimary,
           ),
         ),
         actions: const [],
@@ -123,7 +125,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           preferredSize: const Size.fromHeight(52),
           child: Column(
             children: [
-              Container(height: 1, color: const Color(0xFFE5E7EB)),
+              Container(height: 1, color: colors.border),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                 child: TabBar(
@@ -697,7 +699,6 @@ class _SummaryView extends StatelessWidget {
                 l10n.reportsTopCategories,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
                 ),
               ),
               const SizedBox(height: 16),
@@ -723,6 +724,7 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final colors = context.colors;
     final fmtAsync = ref.watch(amountFormatterProvider);
     final fmt = fmtAsync.asData?.value ?? (double v) => v.toStringAsFixed(2);
 
@@ -746,7 +748,7 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
                 const SizedBox(height: 6),
                 Text(
                   'S/ ${fmt(summary.totalIncome)}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1F2937)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: colors.textPrimary),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -776,7 +778,7 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
                 const SizedBox(height: 6),
                 Text(
                   'S/ ${fmt(summary.totalExpense)}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1F2937)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: colors.textPrimary),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -915,7 +917,6 @@ class _TotalsRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final fmtAsync = ref.watch(amountFormatterProvider);
     final fmt = fmtAsync.asData?.value ?? (double v) => v.toStringAsFixed(2);
 
@@ -926,7 +927,6 @@ class _TotalsRow extends ConsumerWidget {
             label: l10n.reportsIncome,
             value: 'S/ ${fmt(summary.totalIncome)}',
             color: const Color(0xFF34D399),
-            isDark: isDark,
           ),
         ),
         const SizedBox(width: 8),
@@ -935,7 +935,6 @@ class _TotalsRow extends ConsumerWidget {
             label: l10n.reportsExpense,
             value: 'S/ ${fmt(summary.totalExpense)}',
             color: const Color(0xFFFC8181),
-            isDark: isDark,
           ),
         ),
         const SizedBox(width: 8),
@@ -946,7 +945,6 @@ class _TotalsRow extends ConsumerWidget {
             color: summary.netBalance >= 0
                 ? const Color(0xFF60A5FA)
                 : const Color(0xFFF87171),
-            isDark: isDark,
           ),
         ),
       ],
@@ -958,26 +956,23 @@ class _StatCard extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-  final bool isDark;
 
   const _StatCard({
     required this.label,
     required this.value,
     required this.color,
-    this.isDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      isDark: isDark,
       hasShadow: true,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label,
-              style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+              style: TextStyle(fontSize: 11, color: context.colors.textMuted)),
           const SizedBox(height: 4),
           Text(value,
               style: TextStyle(
@@ -998,8 +993,7 @@ class _CategoryBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white70 : Colors.black87;
+    final textColor = context.colors.textPrimary;
 
     if (categories.isEmpty) return const SizedBox.shrink();
 
@@ -1094,6 +1088,7 @@ class _DailyBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final axisLabelColor = context.colors.textMuted;
     final maxVal = breakdown
         .expand((d) => [d.totalIncome, d.totalExpense])
         .fold(0.0, (a, b) => a > b ? a : b);
@@ -1128,7 +1123,7 @@ class _DailyBarChart extends StatelessWidget {
                       breakdown[idx].dayLabel,
                       style: TextStyle(
                         fontSize: 11,
-                        color: isDark ? Colors.white70 : Colors.black54,
+                        color: axisLabelColor,
                       ),
                     ),
                   );
@@ -1176,14 +1171,12 @@ class _EvolutionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final hasAnyData = summary.expensesChangePercent != null ||
         summary.savingsChangePercent != null ||
         summary.balanceChangePercent != null;
 
     return AppCard(
-      isDark: isDark,
       hasShadow: true,
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Column(
@@ -1300,7 +1293,7 @@ class _ComparisonChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white70 : Colors.black54;
+    final textColor = context.colors.textMuted;
 
     final incomeSpots = entries.asMap().entries
         .map((e) => FlSpot(e.key.toDouble(), e.value.totalIncome))

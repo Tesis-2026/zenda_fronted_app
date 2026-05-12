@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import 'auth_controller.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
@@ -82,19 +83,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
+      backgroundColor: colors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
+            color: colors.textPrimary,
           ),
           onPressed: () => context.go('/auth/forgot-password'),
         ),
@@ -127,18 +127,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   l10n.authSetNewPasswordTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? const Color(0xFFF1F5F9)
-                            : const Color(0xFF1F2937),
+                        color: colors.textPrimary,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.authSetNewPasswordSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
-                            : const Color(0xFF6B7280),
+                        color: colors.textMuted,
                         height: 1.5,
                       ),
                 ),
@@ -149,9 +145,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: isDark
-                      ? const TextStyle(color: Colors.white)
-                      : const TextStyle(color: Color(0xFF1F2937)),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: _inputDecoration(
                     context,
                     suffixIcon: IconButton(
@@ -177,9 +171,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 TextFormField(
                   controller: _confirmController,
                   obscureText: _obscureConfirm,
-                  style: isDark
-                      ? const TextStyle(color: Colors.white)
-                      : const TextStyle(color: Color(0xFF1F2937)),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: _inputDecoration(
                     context,
                     suffixIcon: IconButton(
@@ -244,20 +236,20 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   }
 
   InputDecoration _inputDecoration(BuildContext context, {Widget? suffixIcon}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     return InputDecoration(
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      fillColor: colors.card,
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderSide: BorderSide(color: colors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderSide: BorderSide(color: colors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

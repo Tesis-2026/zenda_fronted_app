@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -41,7 +42,7 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen> {
     final expenseAsync = ref.watch(_expensePredictionProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(title: l10n.predictionsTitle),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(_expensePredictionProvider),

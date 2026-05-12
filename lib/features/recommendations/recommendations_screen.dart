@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,7 +41,7 @@ class RecommendationsScreen extends ConsumerWidget {
     final recsAsync = ref.watch(_recsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(title: l10n.recommendationsTitle),
       body: recsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

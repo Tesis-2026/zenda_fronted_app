@@ -13,6 +13,7 @@ import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/kind_toggle.dart';
 import '../../core/widgets/sheet_header.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -74,8 +75,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(newTransactionControllerProvider);
     final controller = ref.read(newTransactionControllerProvider.notifier);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final onSurface = isDark ? Colors.white : Colors.black87;
+    final colors = context.colors;
     final l10n = context.l10n;
 
     ref.listen<NewTransactionState>(newTransactionControllerProvider, (
@@ -187,7 +187,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       l10n.txNoteLabel,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: onSurface,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -220,7 +220,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       l10n.txDateLabel,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: onSurface,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -246,7 +246,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             l10n.txCategoryLabel,
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: onSurface,
+                              color: colors.textPrimary,
                             ),
                           ),
                         ),
@@ -279,7 +279,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: widget.isSheet ? Colors.white : Theme.of(context).scaffoldBackgroundColor,
+                  color: colors.card,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.06),
@@ -325,9 +325,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (widget.isSheet) {
       return Container(
         height: MediaQuery.of(context).size.height * 0.92,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: context.colors.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
@@ -336,7 +336,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFE5E7EB),
+                color: context.colors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -424,7 +424,7 @@ class _DatePickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     final text = DateFormat('EEE d MMM, yyyy', 'es').format(date);
     return InkWell(
       onTap: onPick,
@@ -432,9 +432,9 @@ class _DatePickerTile extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
+          border: Border.all(color: colors.border),
         ),
         child: Row(
           children: [
@@ -584,7 +584,7 @@ class _CategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     final l10n = context.l10n;
     final items = TransactionCategory.values;
 
@@ -600,12 +600,12 @@ class _CategoryGrid extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? const Color(0xFF34D399).withValues(alpha: 0.18)
-                : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                : colors.card,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected
                   ? const Color(0xFF34D399)
-                  : (isDark ? Colors.white10 : Colors.black12),
+                  : colors.border,
             ),
           ),
           padding: const EdgeInsets.all(10),

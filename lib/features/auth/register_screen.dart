@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,12 +61,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1F2937)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.colors.textPrimary),
           onPressed: () => context.go('/auth/login'),
         ),
       ),
@@ -82,10 +83,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 Text(
                   l10n.authRegisterTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F2937),
+                    color: context.colors.textPrimary,
                   ),
                 ),
 
@@ -93,7 +94,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 Text(
                   l10n.authRegisterSubtitle,
-                  style: TextStyle(fontSize: 15, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 15, color: context.colors.textMuted),
                 ),
 
                 const SizedBox(height: 32),
@@ -263,20 +264,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   InputDecoration _fieldDecoration(String hint, {Widget? suffix}) {
+    final colors = context.colors;
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[400]),
+      hintStyle: TextStyle(color: colors.textMuted),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: colors.card,
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderSide: BorderSide(color: colors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderSide: BorderSide(color: colors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

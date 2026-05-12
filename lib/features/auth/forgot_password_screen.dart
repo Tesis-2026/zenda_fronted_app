@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import 'auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -42,19 +43,18 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
+      backgroundColor: colors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
+            color: colors.textPrimary,
           ),
           onPressed: () => context.go('/auth/login'),
         ),
@@ -89,9 +89,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   l10n.authForgotTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? const Color(0xFFF1F5F9)
-                            : const Color(0xFF1F2937),
+                        color: colors.textPrimary,
                       ),
                 ),
 
@@ -100,9 +98,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 Text(
                   l10n.authForgotSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
-                            : const Color(0xFF6B7280),
+                        color: colors.textMuted,
                       ),
                 ),
 
@@ -113,34 +109,28 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? const Color(0xFFF1F5F9)
-                        : const Color(0xFF1F2937),
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: isDark
-                      ? const TextStyle(color: Colors.white)
-                      : const TextStyle(color: Color(0xFF1F2937)),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: InputDecoration(
                     hintText: l10n.authEmailHint,
-                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    hintStyle: TextStyle(color: colors.textMuted),
                     filled: true,
-                    fillColor: isDark
-                        ? const Color(0xFF1E293B)
-                        : Colors.white,
+                    fillColor: colors.card,
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      borderSide: BorderSide(color: colors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      borderSide: BorderSide(color: colors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -224,9 +214,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           l10n.authForgotCodeExpiry,
                           style: TextStyle(
                             fontSize: 13,
-                            color: isDark
-                                ? const Color(0xFF6EE7B7)
-                                : const Color(0xFF065F46),
+                            color: colors.primary,
                             height: 1.4,
                           ),
                         ),

@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -71,7 +72,7 @@ class LearningPathScreen extends ConsumerWidget {
     final pathAsync = ref.watch(learningPathProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(title: l10n.learningPathTitle),
       body: pathAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

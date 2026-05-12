@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../auth/auth_controller.dart';
 import '../profile/profile_screen.dart';
 import '../../core/widgets/app_toast.dart';
@@ -24,8 +26,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _incomeController = TextEditingController();
   IncomeType? _selectedIncomeType;
   bool _saving = false;
-
-  static const _green = Color(0xFF34D399);
 
   @override
   void dispose() {
@@ -84,40 +84,36 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: _page == 4
-          ? const Color(0xFF34D399)
-          : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+      backgroundColor: _page == 4 ? AppColors.primary : colors.bg,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(l10n, isDark),
+            _buildHeader(l10n, colors),
             Expanded(
               child: PageView(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (i) => setState(() => _page = i),
                 children: [
-                  _AgePage(controller: _ageController, l10n: l10n, isDark: isDark),
-                  _UniversityPage(controller: _universityController, l10n: l10n, isDark: isDark),
+                  _AgePage(controller: _ageController, l10n: l10n),
+                  _UniversityPage(controller: _universityController, l10n: l10n),
                   _IncomeTypePage(
                     selected: _selectedIncomeType,
                     onSelect: (t) => setState(() => _selectedIncomeType = t),
                     l10n: l10n,
-                    isDark: isDark,
                   ),
-                  _MonthlyIncomePage(controller: _incomeController, l10n: l10n, isDark: isDark),
+                  _MonthlyIncomePage(controller: _incomeController, l10n: l10n),
                   _CompletePage(
                     l10n: l10n,
-                    isDark: isDark,
                     userName: ref.watch(authNotifierProvider).user?.name.split(' ').first ?? '',
                   ),
                 ],
               ),
             ),
-            if (_page < 4) _buildFooter(l10n, isDark),
+            if (_page < 4) _buildFooter(l10n),
             if (_page == 4) _buildCompleteFooter(l10n),
           ],
         ),
@@ -125,23 +121,20 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     );
   }
 
-  Widget _buildHeader(AppLocalizations l10n, bool isDark) {
+  Widget _buildHeader(AppLocalizations l10n, ZendaColors colors) {
     if (_page == 4) return const SizedBox.shrink();
-    final onSurface = isDark ? Colors.white : const Color(0xFF1F2937);
-    final mutedColor = isDark ? Colors.grey[400]! : const Color(0xFF6B7280);
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Step label row: "Step X of 4" + Skip
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 l10n.profileSetupStep(_page + 1, 4),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: mutedColor,
+                      color: colors.textMuted,
                       fontWeight: FontWeight.w500,
                     ),
               ),
@@ -154,8 +147,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 ),
                 child: Text(
                   l10n.profileSetupSkip,
-                  style: TextStyle(
-                    color: const Color(0xFF34D399),
+                  style: const TextStyle(
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -164,7 +157,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          // Progress bar row: 4 segments
           Row(
             children: List.generate(4, (i) {
               final filled = i <= _page;
@@ -174,9 +166,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   margin: EdgeInsets.only(right: i < 3 ? 4 : 0),
                   height: 4,
                   decoration: BoxDecoration(
-                    color: filled
-                        ? _green
-                        : (isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+                    color: filled ? AppColors.primary : colors.fill,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -188,7 +178,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             _pageTitleFor(_page, l10n),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: onSurface,
+                  color: colors.textPrimary,
                   height: 1.15,
                 ),
           ),
@@ -197,7 +187,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             Text(
               _pageSubtitleFor(_page, l10n),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: mutedColor,
+                    color: colors.textMuted,
                   ),
             ),
           ],
@@ -223,7 +213,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         _ => '',
       };
 
-  Widget _buildFooter(AppLocalizations l10n, bool isDark) {
+  Widget _buildFooter(AppLocalizations l10n) {
     final isLast = _page == 3;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -233,7 +223,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         child: FilledButton(
           onPressed: _saving ? null : _next,
           style: FilledButton.styleFrom(
-            backgroundColor: _green,
+            backgroundColor: AppColors.primary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
           child: _saving
@@ -249,7 +239,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   Widget _buildCompleteFooter(AppLocalizations l10n) {
     return Container(
-      color: const Color(0xFF34D399),
+      color: AppColors.primary,
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
       child: SizedBox(
         width: double.infinity,
@@ -272,10 +262,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 }
 
 class _AgePage extends StatefulWidget {
-  const _AgePage({required this.controller, required this.l10n, required this.isDark});
+  const _AgePage({required this.controller, required this.l10n});
   final TextEditingController controller;
   final AppLocalizations l10n;
-  final bool isDark;
 
   @override
   State<_AgePage> createState() => _AgePageState();
@@ -301,17 +290,14 @@ class _AgePageState extends State<_AgePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       child: Center(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _StepperButton(
-              icon: Icons.remove_rounded,
-              onTap: () => _adjust(-1),
-              filled: false,
-            ),
+            _StepperButton(icon: Icons.remove_rounded, onTap: () => _adjust(-1), filled: false),
             const SizedBox(width: 32),
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -320,22 +306,18 @@ class _AgePageState extends State<_AgePage> {
                   '$_age',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1F2937),
+                        color: colors.textPrimary,
                         fontSize: 64,
                       ),
                 ),
                 Text(
                   l10n.profileSetupAgeStepperLabel,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colors.textMuted),
                 ),
               ],
             ),
             const SizedBox(width: 32),
-            _StepperButton(
-              icon: Icons.add_rounded,
-              onTap: () => _adjust(1),
-              filled: true,
-            ),
+            _StepperButton(icon: Icons.add_rounded, onTap: () => _adjust(1), filled: true),
           ],
         ),
       ),
@@ -355,6 +337,7 @@ class _StepperButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -362,13 +345,11 @@ class _StepperButton extends StatelessWidget {
         height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: filled
-              ? const Color(0xFF34D399)
-              : const Color(0xFFF3F4F6),
+          color: filled ? AppColors.primary : colors.fill,
         ),
         child: Icon(
           icon,
-          color: filled ? Colors.white : const Color(0xFF6B7280),
+          color: filled ? Colors.white : context.colors.textMuted,
           size: 22,
         ),
       ),
@@ -377,10 +358,9 @@ class _StepperButton extends StatelessWidget {
 }
 
 class _UniversityPage extends StatelessWidget {
-  const _UniversityPage({required this.controller, required this.l10n, required this.isDark});
+  const _UniversityPage({required this.controller, required this.l10n});
   final TextEditingController controller;
   final AppLocalizations l10n;
-  final bool isDark;
 
   static const _popular = [
     ('UPC', 'Universidad Peruana de Ciencias Aplicadas'),
@@ -395,6 +375,7 @@ class _UniversityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Column(
@@ -408,19 +389,15 @@ class _UniversityPage extends StatelessWidget {
               hintText: l10n.profileSetupUniversityHint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB),
-                ),
+                borderSide: BorderSide(color: colors.border),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB),
-                ),
+                borderSide: BorderSide(color: colors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF34D399), width: 2),
+                borderSide: const BorderSide(color: AppColors.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
@@ -429,7 +406,7 @@ class _UniversityPage extends StatelessWidget {
           Text(
             l10n.profileSetupPopularUniversities,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: const Color(0xFF6B7280),
+                  color: colors.textMuted,
                   fontWeight: FontWeight.w600,
                 ),
           ),
@@ -446,16 +423,14 @@ class _UniversityPage extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      color: colors.card,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-                      ),
+                      border: Border.all(color: colors.border),
                     ),
                     child: Text(
                       '$abbr — $name',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: isDark ? Colors.white : const Color(0xFF1F2937),
+                            color: colors.textPrimary,
                             fontWeight: FontWeight.w400,
                           ),
                     ),
@@ -475,12 +450,10 @@ class _IncomeTypePage extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     required this.l10n,
-    required this.isDark,
   });
   final IncomeType? selected;
   final void Function(IncomeType) onSelect;
   final AppLocalizations l10n;
-  final bool isDark;
 
   String _labelFor(IncomeType t, AppLocalizations l10n) => switch (t) {
         IncomeType.scholarship => l10n.incomeTypeScholarship,
@@ -505,6 +478,7 @@ class _IncomeTypePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Column(
@@ -519,13 +493,11 @@ class _IncomeTypePage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF34D399).withValues(alpha: 0.08)
-                      : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                      ? AppColors.primary.withValues(alpha: 0.08)
+                      : colors.card,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF34D399)
-                        : (isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB)),
+                    color: isSelected ? AppColors.primary : colors.border,
                     width: isSelected ? 1.5 : 1.0,
                   ),
                 ),
@@ -533,7 +505,7 @@ class _IncomeTypePage extends StatelessWidget {
                   children: [
                     Icon(
                       _iconFor(t),
-                      color: isSelected ? const Color(0xFF34D399) : const Color(0xFF6B7280),
+                      color: isSelected ? AppColors.primary : colors.textMuted,
                       size: 24,
                     ),
                     const SizedBox(width: 12),
@@ -546,9 +518,7 @@ class _IncomeTypePage extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
-                              color: isSelected
-                                  ? const Color(0xFF34D399)
-                                  : (isDark ? Colors.white : const Color(0xFF1F2937)),
+                              color: isSelected ? AppColors.primary : colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -556,7 +526,7 @@ class _IncomeTypePage extends StatelessWidget {
                             _subtitleFor(t, l10n),
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                              color: colors.textMuted,
                             ),
                           ),
                         ],
@@ -574,10 +544,9 @@ class _IncomeTypePage extends StatelessWidget {
 }
 
 class _MonthlyIncomePage extends StatefulWidget {
-  const _MonthlyIncomePage({required this.controller, required this.l10n, required this.isDark});
+  const _MonthlyIncomePage({required this.controller, required this.l10n});
   final TextEditingController controller;
   final AppLocalizations l10n;
-  final bool isDark;
 
   @override
   State<_MonthlyIncomePage> createState() => _MonthlyIncomePageState();
@@ -609,36 +578,31 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
-    final isDark = widget.isDark;
+    final colors = context.colors;
     final displayVal = double.tryParse(widget.controller.text.trim()) ?? 0.0;
-    final displayText = displayVal == 0.0
-        ? '0'
-        : _formatNumber(displayVal.toStringAsFixed(0));
+    final displayText = displayVal == 0.0 ? '0' : _formatNumber(displayVal.toStringAsFixed(0));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Large display card
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 28),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+              color: colors.card,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? Colors.grey[700]! : const Color(0xFFE5E7EB),
-              ),
+              border: Border.all(color: colors.border),
             ),
             child: Column(
               children: [
-                Text(
+                const Text(
                   'S/',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF34D399),
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -646,23 +610,19 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                   displayText,
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF1F2937),
+                        color: colors.textPrimary,
                         fontSize: 56,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.profileSetupMonthlyIncomePerMonth,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: const Color(0xFF6B7280),
-                  ),
+                  style: TextStyle(fontSize: 13, color: colors.textMuted),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 20),
-          // Quick pick chips
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: _quickValues.map((v) {
@@ -674,14 +634,10 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF34D399)
-                          : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                      color: isSelected ? AppColors.primary : colors.card,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF34D399)
-                            : (isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB)),
+                        color: isSelected ? AppColors.primary : colors.border,
                       ),
                     ),
                     child: Text(
@@ -689,9 +645,7 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
-                        color: isSelected
-                            ? Colors.white
-                            : (isDark ? Colors.white70 : const Color(0xFF1F2937)),
+                        color: isSelected ? Colors.white : colors.textPrimary,
                       ),
                     ),
                   ),
@@ -718,9 +672,8 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
 }
 
 class _CompletePage extends StatelessWidget {
-  const _CompletePage({required this.l10n, required this.isDark, required this.userName});
+  const _CompletePage({required this.l10n, required this.userName});
   final AppLocalizations l10n;
-  final bool isDark;
   final String userName;
 
   @override
@@ -730,14 +683,13 @@ class _CompletePage extends StatelessWidget {
         : l10n.profileSetupCompleteTitle;
     return Container(
       width: double.infinity,
-      color: const Color(0xFF34D399),
+      color: AppColors.primary,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Party icon in white circle
               Container(
                 width: 96,
                 height: 96,
@@ -774,7 +726,6 @@ class _CompletePage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              // Stat card: white background matching design
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(

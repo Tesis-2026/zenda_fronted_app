@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/zenda_theme_x.dart';
 
 class OnboardingPage extends StatelessWidget {
   final IconData icon;
@@ -18,7 +19,7 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     final screenHeight = MediaQuery.of(context).size.height;
     
     return SingleChildScrollView(
@@ -61,15 +62,11 @@ class OnboardingPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: isDark 
-                    ? const Color(0xFF1E293B).withValues(alpha: 0.6)
-                    : Colors.white,
+                color: colors.card,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: isDark 
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -83,7 +80,7 @@ class OnboardingPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
+                      color: colors.textPrimary,
                       height: 1.2,
                     ),
                   ),
@@ -95,7 +92,7 @@ class OnboardingPage extends StatelessWidget {
                     subtitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: isDark ? const Color(0xFFF1F5F9).withValues(alpha: 0.8) : const Color(0xFF6B7280),
+                      color: colors.textMuted,
                       height: 1.5,
                     ),
                   ),

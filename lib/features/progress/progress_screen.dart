@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,7 +58,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final progressAsync = ref.watch(_progressProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(title: l10n.progressTitle),
       body: progressAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

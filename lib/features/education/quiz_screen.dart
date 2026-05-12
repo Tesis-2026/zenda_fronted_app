@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class QuizScreen extends ConsumerWidget {
         ref.watch(_quizProvider((topicId: topicId, language: language)));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(
         title: topicTitle != null
             ? '${l10n.quizTitle}: $topicTitle'

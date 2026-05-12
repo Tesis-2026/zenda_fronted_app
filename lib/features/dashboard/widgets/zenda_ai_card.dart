@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../l10n/l10n_extension.dart';
 
 class ZendaAiCard extends StatelessWidget {
@@ -9,13 +10,12 @@ class ZendaAiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFF1F2937),
+        color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFF818CF8), width: 2),
       ),
@@ -28,12 +28,12 @@ class ZendaAiCard extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF34D399).withValues(alpha: 0.2),
+                  color: AppColors.primary.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.psychology_alt_rounded,
-                  color: Color(0xFF34D399),
+                  color: AppColors.primary,
                   size: 16,
                 ),
               ),
@@ -41,7 +41,7 @@ class ZendaAiCard extends StatelessWidget {
               Text(
                 l10n.aiCardTitle,
                 style: const TextStyle(
-                  color: Color(0xFF34D399),
+                  color: AppColors.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -77,7 +77,7 @@ class ZendaAiCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(

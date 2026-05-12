@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
@@ -101,6 +102,7 @@ class _TopicDetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = context.colors;
     final catColor = _categoryColor();
     final diffColor = _difficultyColor();
 
@@ -178,7 +180,7 @@ class _TopicDetailBody extends StatelessWidget {
                 Text(
                   'Reading progress',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF6B7280),
+                        color: colors.textMuted,
                         fontSize: 12,
                       ),
                 ),
@@ -201,7 +203,7 @@ class _TopicDetailBody extends StatelessWidget {
             child: AppProgressBar(
               value: topic.isCompleted ? 1.0 : 0.0,
               color: const Color(0xFF34D399),
-              backgroundColor: const Color(0xFFE5E7EB),
+              backgroundColor: colors.fill,
             ),
           ),
         ),
@@ -214,7 +216,7 @@ class _TopicDetailBody extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     height: 1.75,
                     fontSize: 15,
-                    color: const Color(0xFF374151),
+                    color: colors.textPrimary,
                   ),
             ),
           ),

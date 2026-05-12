@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import '../../../core/theme/zenda_theme_x.dart';
 import '../../../l10n/l10n_extension.dart';
 
 class SummaryCard extends StatelessWidget {
@@ -16,13 +16,13 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -41,7 +41,7 @@ class SummaryCard extends StatelessWidget {
                 Text(
                   l10n.summaryTodayLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        color: colors.textMuted,
                       ),
                 ),
                 const SizedBox(height: 4),
@@ -49,17 +49,13 @@ class SummaryCard extends StatelessWidget {
                   '$currency ${todayExpense.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
+                        color: colors.textPrimary,
                       ),
                 ),
               ],
             ),
           ),
-          Container(
-            width: 1,
-            height: 40,
-            color: isDark ? Colors.grey[700] : Colors.grey[300],
-          ),
+          Container(width: 1, height: 40, color: colors.border),
           const SizedBox(width: 24),
           Expanded(
             child: Column(
@@ -68,7 +64,7 @@ class SummaryCard extends StatelessWidget {
                 Text(
                   l10n.summaryWeekLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        color: colors.textMuted,
                       ),
                 ),
                 const SizedBox(height: 4),
@@ -76,7 +72,7 @@ class SummaryCard extends StatelessWidget {
                   '$currency ${weekExpense.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
+                        color: colors.textPrimary,
                       ),
                 ),
               ],

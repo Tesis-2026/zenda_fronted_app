@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../l10n/l10n_extension.dart';
@@ -52,8 +53,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final contributionsAsync = ref.watch(_contributionsProvider(_goal.id));
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final colors = context.colors;
     final dueLabel = _dueDateLabel(context);
 
     return Scaffold(
@@ -108,7 +108,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: cardBg,
+                        color: colors.card,
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(28),
                         ),
@@ -214,8 +214,7 @@ class _ContributeSheetState extends State<_ContributeSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final colors = context.colors;
     final pct = widget.goal.progressPercent.clamp(0.0, 100.0);
     final amountLabel = _amount != null && _amount! > 0
         ? l10n.goalsContributeAddAction(_amount!.toStringAsFixed(0))
@@ -227,7 +226,7 @@ class _ContributeSheetState extends State<_ContributeSheet> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: bg,
+          color: colors.card,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -240,7 +239,7 @@ class _ContributeSheetState extends State<_ContributeSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : const Color(0xFFE5E7EB),
+                  color: colors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -255,7 +254,7 @@ class _ContributeSheetState extends State<_ContributeSheet> {
               widget.goal.name,
               style: TextStyle(
                 fontSize: 14,
-                color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                color: colors.textMuted,
               ),
             ),
             const SizedBox(height: 12),
@@ -263,7 +262,6 @@ class _ContributeSheetState extends State<_ContributeSheet> {
               value: pct / 100,
               height: 8,
               color: const Color(0xFF34D399),
-              isDark: isDark,
             ),
             const SizedBox(height: 20),
             TextField(
@@ -353,7 +351,6 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final remaining = goal.targetAmount - goal.currentAmount;
     final pct = goal.progressPercent.clamp(0.0, 100.0);
     final isComplete = pct >= 100;
@@ -392,8 +389,6 @@ class _Body extends StatelessWidget {
           value: pct / 100,
           height: 8,
           color: const Color(0xFF34D399),
-          backgroundColor: const Color(0xFFE5E7EB),
-          isDark: isDark,
         ),
         const SizedBox(height: 8),
         if (!isComplete && remaining > 0)

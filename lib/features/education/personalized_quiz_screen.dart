@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,7 +31,7 @@ class PersonalizedQuizScreen extends ConsumerWidget {
     final quizAsync = ref.watch(_personalizedQuizProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(title: l10n.quizPersonalizedTitle),
       body: quizAsync.when(
         loading: () => Center(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/recommendations_api_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -91,10 +93,14 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: colors.card,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         titleSpacing: 12,
         title: Row(
           children: [
@@ -103,7 +109,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
               height: 40,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF34D399),
+                color: AppColors.primary,
               ),
               child: const Icon(Icons.psychology_rounded, size: 22, color: Colors.white),
             ),
@@ -115,17 +121,17 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                 children: [
                   Text(
                     l10n.aiChatTitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1F2937),
+                      color: colors.textPrimary,
                     ),
                   ),
                   Text(
                     l10n.aiChatSubtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF6B7280),
+                      color: colors.textMuted,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
@@ -135,7 +141,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: const Color(0xFFECFDF5),
+                color: colors.primaryLight,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -145,7 +151,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                     width: 7,
                     height: 7,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF34D399),
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -154,7 +160,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                     l10n.aiChatOnline,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF059669),
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -163,7 +169,10 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
             ),
           ],
         ),
-        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: colors.border),
+        ),
       ),
       body: Column(
         children: [
@@ -174,15 +183,14 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
               itemCount: _messages.length + (_loading ? 1 : 0),
               itemBuilder: (context, i) {
                 if (i == _messages.length) {
-                  return _TypingBubble(isDark: isDark);
+                  return const _TypingBubble();
                 }
-                return _MessageBubble(bubble: _messages[i], isDark: isDark);
+                return _MessageBubble(bubble: _messages[i]);
               },
             ),
           ),
           if (!_loading)
             _QuickActions(
-              isDark: isDark,
               onTap: (text) {
                 _inputController.text = text;
                 _send();
@@ -199,7 +207,6 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
             loading: _loading,
             hint: l10n.aiChatInputHint,
             sendLabel: l10n.aiChatSend,
-            isDark: isDark,
           ),
         ],
       ),
@@ -209,13 +216,13 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.bubble, required this.isDark});
+  const _MessageBubble({required this.bubble});
   final _ChatBubble bubble;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     final isUser = bubble.isUser;
+    final colors = context.colors;
 
     if (isUser) {
       return Align(
@@ -225,7 +232,7 @@ class _MessageBubble extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: const BoxDecoration(
-            color: Color(0xFF34D399),
+            color: AppColors.primary,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(18),
               topRight: Radius.circular(18),
@@ -252,7 +259,7 @@ class _MessageBubble extends StatelessWidget {
             height: 32,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xFF34D399),
+              color: AppColors.primary,
             ),
             child: const Icon(Icons.psychology_rounded, size: 18, color: Colors.white),
           ),
@@ -262,7 +269,7 @@ class _MessageBubble extends StatelessWidget {
               constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                color: colors.card,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(4),
                   topRight: Radius.circular(18),
@@ -279,10 +286,7 @@ class _MessageBubble extends StatelessWidget {
               ),
               child: Text(
                 bubble.text,
-                style: TextStyle(
-                  color: isDark ? Colors.white : const Color(0xFF1F2937),
-                  height: 1.5,
-                ),
+                style: TextStyle(color: colors.textPrimary, height: 1.5),
               ),
             ),
           ),
@@ -293,18 +297,18 @@ class _MessageBubble extends StatelessWidget {
 }
 
 class _TypingBubble extends StatelessWidget {
-  const _TypingBubble({required this.isDark});
-  final bool isDark;
+  const _TypingBubble();
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          color: colors.card,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(18),
             topRight: Radius.circular(18),
@@ -315,7 +319,7 @@ class _TypingBubble extends StatelessWidget {
         child: const SizedBox(
           width: 40,
           height: 16,
-          child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF34D399)),
+          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
         ),
       ),
     );
@@ -323,21 +327,17 @@ class _TypingBubble extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions({
-    required this.isDark,
-    required this.onTap,
-    required this.labels,
-  });
+  const _QuickActions({required this.onTap, required this.labels});
 
-  final bool isDark;
   final void Function(String) onTap;
   final List<String> labels;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      color: isDark ? const Color(0xFF0B1220) : Colors.white,
+      color: colors.card,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -349,12 +349,12 @@ class _QuickActions extends StatelessWidget {
                         label,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? const Color(0xFF34D399) : const Color(0xFF065F46),
+                          color: colors.primary,
                         ),
                       ),
-                      backgroundColor: const Color(0xFF34D399).withValues(alpha: 0.12),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
                       side: BorderSide(
-                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                       ),
                       onPressed: () => onTap(label),
                       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -375,7 +375,6 @@ class _InputBar extends StatelessWidget {
     required this.loading,
     required this.hint,
     required this.sendLabel,
-    required this.isDark,
   });
 
   final TextEditingController controller;
@@ -383,14 +382,14 @@ class _InputBar extends StatelessWidget {
   final bool loading;
   final String hint;
   final String sendLabel;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0B1220) : Colors.white,
+        color: colors.card,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -416,7 +415,7 @@ class _InputBar extends StatelessWidget {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                  fillColor: colors.fill,
                 ),
               ),
             ),
@@ -424,7 +423,7 @@ class _InputBar extends StatelessWidget {
             FilledButton(
               onPressed: loading ? null : onSend,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF34D399),
+                backgroundColor: AppColors.primary,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(14),
               ),

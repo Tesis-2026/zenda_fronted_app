@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +21,7 @@ class NotificationPreferencesScreen extends ConsumerWidget {
     final prefsAsync = ref.watch(_preferencesProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(title: l10n.notificationsTitle),
       body: prefsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,7 +20,7 @@ class SurveyComparisonScreen extends ConsumerWidget {
     final async = ref.watch(_comparisonProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(title: l10n.surveyComparisonNavTitle),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),

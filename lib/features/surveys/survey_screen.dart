@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,7 +45,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         : ref.watch(_postSurveyProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       appBar: ZendaAppBar(
         title: widget.isPre ? l10n.surveyPreTitle : l10n.surveyPostTitle,
         actions: [

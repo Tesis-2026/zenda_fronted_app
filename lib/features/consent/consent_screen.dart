@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -16,13 +18,13 @@ class _ConsentScreenState extends State<ConsentScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final onSurface = isDark ? Colors.white : const Color(0xFF1F2937);
-    final muted = isDark ? Colors.grey[400]! : const Color(0xFF6B7280);
-    final surface = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final colors = context.colors;
+    final onSurface = colors.textPrimary;
+    final muted = colors.textMuted;
+    final surface = colors.card;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
+      backgroundColor: colors.bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -37,13 +39,13 @@ class _ConsentScreenState extends State<ConsentScreen> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                        color: AppColors.primary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Icon(
                         Icons.lock_outline_rounded,
                         size: 32,
-                        color: Color(0xFF34D399),
+                        color: AppColors.primary,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -64,11 +66,11 @@ class _ConsentScreenState extends State<ConsentScreen> {
                     const SizedBox(height: 28),
 
                     // Three bullet points
-                    _BulletPoint(text: l10n.consentBullet1, isDark: isDark),
+                    _BulletPoint(text: l10n.consentBullet1),
                     const SizedBox(height: 12),
-                    _BulletPoint(text: l10n.consentBullet2, isDark: isDark),
+                    _BulletPoint(text: l10n.consentBullet2),
                     const SizedBox(height: 12),
-                    _BulletPoint(text: l10n.consentBullet3, isDark: isDark),
+                    _BulletPoint(text: l10n.consentBullet3),
 
                     const SizedBox(height: 24),
 
@@ -79,13 +81,13 @@ class _ConsentScreenState extends State<ConsentScreen> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: _accepted
-                              ? const Color(0xFF34D399).withValues(alpha: 0.08)
+                              ? AppColors.primary.withValues(alpha: 0.08)
                               : surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: _accepted
-                                ? const Color(0xFF34D399)
-                                : (isDark ? Colors.grey[600]! : const Color(0xFFD1D5DB)),
+                                ? AppColors.primary
+                                : context.colors.border,
                             width: _accepted ? 1.5 : 1.0,
                           ),
                         ),
@@ -95,7 +97,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                             Checkbox(
                               value: _accepted,
                               onChanged: (v) => setState(() => _accepted = v ?? false),
-                              activeColor: const Color(0xFF34D399),
+                              activeColor: AppColors.primary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
@@ -150,7 +152,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                     context.go('/auth/register');
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF34D399),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -174,9 +176,8 @@ class _ConsentScreenState extends State<ConsentScreen> {
 }
 
 class _BulletPoint extends StatelessWidget {
-  const _BulletPoint({required this.text, required this.isDark});
+  const _BulletPoint({required this.text});
   final String text;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +190,7 @@ class _BulletPoint extends StatelessWidget {
           height: 20,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFF34D399),
+            color: AppColors.primary,
           ),
           child: const Icon(
             Icons.check_rounded,
@@ -202,7 +203,7 @@ class _BulletPoint extends StatelessWidget {
           child: Text(
             text,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? Colors.white : const Color(0xFF1F2937),
+                  color: context.colors.textPrimary,
                   height: 1.5,
                 ),
           ),

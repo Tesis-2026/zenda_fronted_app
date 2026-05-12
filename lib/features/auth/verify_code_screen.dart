@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/services/auth_api_service.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../l10n/l10n_extension.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
@@ -106,11 +107,10 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB),
+      backgroundColor: colors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -119,13 +119,13 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
           onPressed: () => context.go('/auth/forgot-password'),
           icon: Icon(
             Icons.chevron_left,
-            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
+            color: colors.textPrimary,
             size: 22,
           ),
           label: Text(
             l10n.authBack,
             style: TextStyle(
-              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1F2937),
+              color: colors.textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
@@ -165,9 +165,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                 l10n.authVerifyTitle,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? const Color(0xFFF1F5F9)
-                          : const Color(0xFF1F2937),
+                      color: colors.textPrimary,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -177,9 +175,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
               Text(
                 l10n.authVerifySubtitle(widget.email),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
-                          : const Color(0xFF6B7280),
+                      color: colors.textMuted,
                     ),
                 textAlign: TextAlign.center,
               ),
@@ -222,9 +218,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                 l10n.authVerifyResendAvailable(_formatCountdown(_resendCooldown)),
                 style: TextStyle(
                   fontSize: 13,
-                  color: isDark
-                      ? const Color(0xFFF1F5F9).withValues(alpha: 0.5)
-                      : const Color(0xFF9CA3AF),
+                  color: colors.textSubtle,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -239,9 +233,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                     '${l10n.authCodeNotReceived} ',
                     style: TextStyle(
                       fontSize: 14,
-                      color: isDark
-                          ? const Color(0xFFF1F5F9).withValues(alpha: 0.7)
-                          : const Color(0xFF6B7280),
+                      color: colors.textMuted,
                     ),
                   ),
                   GestureDetector(
@@ -253,9 +245,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                         fontWeight: FontWeight.w600,
                         color: _resendCooldown == 0
                             ? const Color(0xFF34D399)
-                            : (isDark
-                                ? const Color(0xFFF1F5F9).withValues(alpha: 0.4)
-                                : const Color(0xFF9CA3AF)),
+                            : colors.textSubtle,
                       ),
                     ),
                   ),
@@ -313,7 +303,7 @@ class _OtpBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
     return SizedBox(
       width: 46,
       height: 56,
@@ -329,14 +319,10 @@ class _OtpBox extends StatelessWidget {
         decoration: InputDecoration(
           counterText: '',
           filled: true,
-          fillColor: isDark
-              ? const Color(0xFF1E293B)
-              : const Color(0xFFF8FAFC),
+          fillColor: colors.card,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-            ),
+            borderSide: BorderSide(color: colors.border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

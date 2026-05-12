@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/zenda_theme_x.dart';
 import '../../../l10n/l10n_extension.dart';
 
 class StreakCard extends StatelessWidget {
@@ -10,6 +12,7 @@ class StreakCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colors = context.colors;
 
     return GestureDetector(
       onTap: () => context.push('/progress'),
@@ -17,9 +20,9 @@ class StreakCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF3F4F6)),
+          border: Border.all(color: colors.border),
         ),
         child: Row(
           children: [
@@ -31,10 +34,10 @@ class StreakCard extends StatelessWidget {
                 children: [
                   Text(
                     l10n.streakLabel(streakDays),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1F2937),
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -42,7 +45,7 @@ class StreakCard extends StatelessWidget {
                     '${l10n.streakTapToView} →',
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF34D399),
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

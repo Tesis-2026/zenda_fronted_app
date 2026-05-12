@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_card.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../core/widgets/app_sheet_container.dart';
 import '../../core/widgets/section_label.dart';
 import '../../core/widgets/sheet_header.dart';
@@ -17,45 +20,17 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final locale = ref.watch(localeProvider).asData?.value ?? const Locale('en');
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF9FAFB);
-    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final onSurface = isDark ? Colors.white : const Color(0xFF1F2937);
-    final muted = isDark ? Colors.grey[400] : const Color(0xFF6B7280);
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: bg,
-      appBar: AppBar(
-        backgroundColor: cardBg,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          l10n.settingsTitle,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: onSurface,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(
-            height: 1,
-            color: isDark ? Colors.white12 : const Color(0xFFE5E7EB),
-          ),
-        ),
-      ),
+      backgroundColor: colors.bg,
+      appBar: ZendaAppBar(title: l10n.settingsTitle),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          SectionLabel(l10n.settingsSectionGeneral, color: muted!),
+          SectionLabel(l10n.settingsSectionGeneral, color: colors.textMuted),
           const SizedBox(height: 8),
           _SettingsCard(
-            isDark: isDark,
-            cardBg: cardBg,
             items: [
               _SettingsItem(
                 icon: Icons.language_rounded,
@@ -91,11 +66,9 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          SectionLabel(l10n.settingsSectionResearch, color: muted),
+          SectionLabel(l10n.settingsSectionResearch, color: colors.textMuted),
           const SizedBox(height: 8),
           _SettingsCard(
-            isDark: isDark,
-            cardBg: cardBg,
             items: [
               _SettingsItem(
                 icon: Icons.assignment_outlined,
@@ -108,8 +81,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           _SettingsCard(
-            isDark: isDark,
-            cardBg: cardBg,
             items: [
               _SettingsItem(
                 icon: Icons.logout_rounded,
@@ -218,7 +189,7 @@ class _SurveysSheet extends StatelessWidget {
               context.push('/surveys/pre');
             },
           ),
-          const Divider(height: 1, color: Color(0xFFF3F4F6)),
+          const Divider(height: 1),
           _SurveyTile(
             icon: Icons.psychology_rounded,
             title: l10n.settingsSurveyPostLabel,
@@ -228,7 +199,7 @@ class _SurveysSheet extends StatelessWidget {
               context.push('/surveys/post');
             },
           ),
-          const Divider(height: 1, color: Color(0xFFF3F4F6)),
+          const Divider(height: 1),
           _SurveyTile(
             icon: Icons.assignment_turned_in_outlined,
             title: l10n.settingsSurveySusLabel,
@@ -238,7 +209,7 @@ class _SurveysSheet extends StatelessWidget {
               context.push('/surveys/sus');
             },
           ),
-          const Divider(height: 1, color: Color(0xFFF3F4F6)),
+          const Divider(height: 1),
           _SurveyTile(
             icon: Icons.compare_arrows_rounded,
             title: l10n.settingsSurveyComparisonLabel,
@@ -269,6 +240,7 @@ class _SurveyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -279,10 +251,10 @@ class _SurveyTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFECFDF5),
+                color: colors.primaryLight,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, size: 20, color: const Color(0xFF059669)),
+              child: Icon(icon, size: 20, color: AppColors.primary),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -291,25 +263,24 @@ class _SurveyTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1F2937),
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF6B7280),
+                      color: colors.textMuted,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                size: 20, color: Color(0xFF9CA3AF)),
+            Icon(Icons.chevron_right_rounded, size: 20, color: colors.textSubtle),
           ],
         ),
       ),
@@ -318,20 +289,14 @@ class _SurveyTile extends StatelessWidget {
 }
 
 class _SettingsCard extends StatelessWidget {
-  const _SettingsCard({
-    required this.isDark,
-    required this.cardBg,
-    required this.items,
-  });
+  const _SettingsCard({required this.items});
 
-  final bool isDark;
-  final Color cardBg;
   final List<_SettingsItem> items;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppCard(
-      isDark: isDark,
       hasShadow: true,
       padding: EdgeInsets.zero,
       child: Column(
@@ -343,7 +308,7 @@ class _SettingsCard extends StatelessWidget {
                 indent: 60,
                 color: isDark ? Colors.white10 : const Color(0xFFF3F4F6),
               ),
-            _SettingsRow(item: items[i], isDark: isDark),
+            _SettingsRow(item: items[i]),
           ],
         ],
       ),
@@ -372,12 +337,12 @@ class _SettingsItem {
 }
 
 class _SettingsRow extends StatelessWidget {
-  const _SettingsRow({required this.item, required this.isDark});
+  const _SettingsRow({required this.item});
   final _SettingsItem item;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return InkWell(
       onTap: item.onTap,
       borderRadius: BorderRadius.circular(16),
@@ -404,8 +369,7 @@ class _SettingsRow extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: item.titleColor ??
-                          (isDark ? Colors.white : const Color(0xFF1F2937)),
+                      color: item.titleColor ?? colors.textPrimary,
                     ),
                   ),
                   if (item.subtitle != null) ...[
@@ -414,7 +378,7 @@ class _SettingsRow extends StatelessWidget {
                       item.subtitle!,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+                        color: colors.textMuted,
                       ),
                     ),
                   ],
@@ -425,7 +389,7 @@ class _SettingsRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: isDark ? Colors.grey[600] : const Color(0xFF9CA3AF),
+                color: colors.textSubtle,
               ),
           ],
         ),
@@ -458,13 +422,13 @@ class _LanguageOption extends StatelessWidget {
                 fontSize: 15,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 color: selected
-                    ? const Color(0xFF059669)
-                    : const Color(0xFF1F2937),
+                    ? AppColors.primary
+                    : context.colors.textPrimary,
               ),
             ),
           ),
           if (selected)
-            const Icon(Icons.check_rounded, size: 18, color: Color(0xFF059669)),
+            const Icon(Icons.check_rounded, size: 18, color: AppColors.primary),
         ],
       ),
     );

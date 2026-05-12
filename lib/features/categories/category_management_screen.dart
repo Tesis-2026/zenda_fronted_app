@@ -1,3 +1,4 @@
+import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +28,7 @@ class CategoryManagementScreen extends ConsumerWidget {
     final categoriesAsync = ref.watch(_categoriesProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: context.colors.bg,
       body: SafeArea(
         child: Column(
           children: [
