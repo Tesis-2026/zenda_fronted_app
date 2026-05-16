@@ -35,9 +35,7 @@ class App extends ConsumerWidget {
       theme: AppTheme.lightTheme.copyWith(
         textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
       ),
-      darkTheme: AppTheme.darkTheme.copyWith(
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
-      ),
+      themeMode: ThemeMode.light,
       routerConfig: router,
     );
   }

@@ -1087,7 +1087,6 @@ class _DailyBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final axisLabelColor = context.colors.textMuted;
     final maxVal = breakdown
         .expand((d) => [d.totalIncome, d.totalExpense])
@@ -1103,9 +1102,7 @@ class _DailyBarChart extends StatelessWidget {
             show: true,
             drawVerticalLine: false,
             getDrawingHorizontalLine: (_) => FlLine(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               strokeWidth: 1,
             ),
           ),
@@ -1292,7 +1289,6 @@ class _ComparisonChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = context.colors.textMuted;
 
     final incomeSpots = entries.asMap().entries
@@ -1327,9 +1323,7 @@ class _ComparisonChart extends StatelessWidget {
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (_) => FlLine(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     strokeWidth: 1,
                   ),
                 ),

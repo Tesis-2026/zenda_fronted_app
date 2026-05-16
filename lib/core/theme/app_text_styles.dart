@@ -86,7 +86,6 @@ abstract final class AppTextStyles {
     letterSpacing: 0.1,
   );
 
-  // Helpers: return a copy with given color (for dark mode adaption)
   static TextStyle withColor(TextStyle base, Color color) =>
       base.copyWith(color: color);
 }

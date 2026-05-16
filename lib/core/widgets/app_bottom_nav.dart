@@ -27,11 +27,10 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = context.l10n;
-    final bg = isDark ? const Color(0xFF0B1220) : const Color(0xFFF9FAFB);
-    final pillBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB);
+    const bg = Color(0xFFF9FAFB);
+    const pillBg = Colors.white;
+    const borderColor = Color(0xFFE5E7EB);
 
     final labels = [
       l10n.dashboardNavHome,

@@ -247,7 +247,7 @@ class _SectionTabs extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Featured dark card
+// Featured card
 // ─────────────────────────────────────────────────────────────────
 
 class _FeaturedCard extends StatelessWidget {

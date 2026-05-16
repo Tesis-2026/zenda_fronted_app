@@ -10,25 +10,19 @@ class AppCard extends StatelessWidget {
     this.hasShadow = false,
     this.backgroundColor,
     this.margin,
-    @Deprecated('AppCard auto-detects dark mode via Theme — remove this param')
-    this.isDark = false,
   });
 
   final Widget child;
   final EdgeInsets padding;
   final double borderRadius;
-  // ignore: deprecated_member_use_from_same_package
-  final bool isDark;
   final bool hasShadow;
   final Color? backgroundColor;
   final EdgeInsets? margin;
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = backgroundColor ??
-        (dark ? AppColors.darkCard : AppColors.cardBackground);
-    final borderColor = dark ? AppColors.darkBorder : const Color(0xFFF3F4F6);
+    final bg = backgroundColor ?? AppColors.cardBackground;
+    const borderColor = Color(0xFFF3F4F6);
 
     return Container(
       margin: margin,
@@ -37,7 +31,7 @@ class AppCard extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(color: borderColor),
-        boxShadow: hasShadow && !dark
+        boxShadow: hasShadow
             ? [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),

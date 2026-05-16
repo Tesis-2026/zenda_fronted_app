@@ -4,24 +4,21 @@ class AppSheetContainer extends StatelessWidget {
   const AppSheetContainer({
     super.key,
     required this.child,
-    this.isDark = false,
     this.topRadius = 24.0,
     this.padding = const EdgeInsets.fromLTRB(24, 12, 24, 40),
     this.avoidKeyboard = true,
   });
 
   final Widget child;
-  final bool isDark;
   final double topRadius;
   final EdgeInsets padding;
   final bool avoidKeyboard;
 
   @override
   Widget build(BuildContext context) {
-    final bg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final inner = Container(
       decoration: BoxDecoration(
-        color: bg,
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(topRadius)),
       ),
       padding: padding,
@@ -34,7 +31,7 @@ class AppSheetContainer extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: isDark ? Colors.white24 : const Color(0xFFE5E7EB),
+                color: const Color(0xFFE5E7EB),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

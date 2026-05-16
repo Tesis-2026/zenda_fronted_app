@@ -295,7 +295,6 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppCard(
       hasShadow: true,
       padding: EdgeInsets.zero,
@@ -303,10 +302,10 @@ class _SettingsCard extends StatelessWidget {
         children: [
           for (int i = 0; i < items.length; i++) ...[
             if (i > 0)
-              Divider(
+              const Divider(
                 height: 1,
                 indent: 60,
-                color: isDark ? Colors.white10 : const Color(0xFFF3F4F6),
+                color: Color(0xFFF3F4F6),
               ),
             _SettingsRow(item: items[i]),
           ],

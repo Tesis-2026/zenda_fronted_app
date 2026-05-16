@@ -41,19 +41,19 @@ Módulo de onboarding premium con UI moderna para la app Zenda. Implementa un fl
 ## Características Implementadas
 
 ### UI Premium
-- ✅ Gradientes suaves en iconos hero
-- ✅ Cards con sombras sutiles y bordes redondeados (24px)
-- ✅ Animaciones smooth en PageView y indicadores
-- ✅ Soporte completo para modo claro y oscuro
-- ✅ Layout responsive (funciona en pantallas pequeñas)
-- ✅ Espaciado generoso y jerarquía visual clara
+- Gradientes suaves en iconos hero
+- Cards con sombras sutiles y bordes redondeados (24px)
+- Animaciones smooth en PageView y indicadores
+- Soporte completo para modo claro y oscuro
+- Layout responsive (funciona en pantallas pequeñas)
+- Espaciado generoso y jerarquía visual clara
 
 ### Navegación
-- ✅ PageView con 3 pantallas
-- ✅ Botón "Siguiente" en páginas 1-2, "Empezar" en página 3
-- ✅ Botón "Saltar" (top-right) que va directo a auth
-- ✅ Link "Ya tengo cuenta" que va a auth
-- ✅ Persistencia del estado (no se muestra de nuevo después de completar)
+- PageView con 3 pantallas
+- Botón "Siguiente" en páginas 1-2, "Empezar" en página 3
+- Botón "Saltar" (top-right) que va directo a auth
+- Link "Ya tengo cuenta" que va a auth
+- Persistencia del estado (no se muestra de nuevo después de completar)
 
 ### Contenido (Español Peruano)
 **Página 1:**
@@ -71,7 +71,7 @@ Módulo de onboarding premium con UI moderna para la app Zenda. Implementa un fl
 - Gradiente: Azul cielo (#60A5FA → #3B82F6)
 
 **Página 3:**
-- Título: "Mantén tu racha y mejora cada día 🔥"
+- Título: "Mantén tu racha y mejora cada día"
 - Subtítulo: "Gana constancia registrando a diario y viendo tu progreso."
 - Microcopy: "Lo importante es volver mañana."
 - Icono: Fire (fuego)
@@ -128,10 +128,10 @@ SplashDecider (/)
 
 ## Accesibilidad
 
-- ✅ Botones con altura mínima 48px
-- ✅ Buen contraste en dark mode
-- ✅ Textos responsivos
-- ✅ Sin overflow en pantallas pequeñas (SingleChildScrollView)
+- Botones con altura mínima 48px
+- Buen contraste en todas las superficies
+- Textos responsivos
+- Sin overflow en pantallas pequeñas (SingleChildScrollView)
 
 ## Próximos Pasos
 

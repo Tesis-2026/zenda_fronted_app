@@ -8,24 +8,16 @@ class AppProgressBar extends StatelessWidget {
     required this.color,
     this.height = 6.0,
     this.backgroundColor,
-    @Deprecated('AppProgressBar auto-detects dark mode via Theme — remove this param')
-    this.isDark = false,
   });
 
   final double value;
   final Color color;
   final double height;
   final Color? backgroundColor;
-  // ignore: deprecated_member_use_from_same_package
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final bg = backgroundColor ??
-        (dark
-            ? Colors.white.withValues(alpha: 0.1)
-            : AppColors.fillLight);
+    final bg = backgroundColor ?? AppColors.fillLight;
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
       child: LinearProgressIndicator(

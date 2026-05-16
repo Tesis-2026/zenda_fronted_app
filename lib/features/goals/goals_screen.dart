@@ -301,7 +301,7 @@ class _GoalCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: colors.isDark ? Colors.white10 : _bgColor(),
+                  color: _bgColor(),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
@@ -438,10 +438,8 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppSheetContainer(
-      isDark: isDark,
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,

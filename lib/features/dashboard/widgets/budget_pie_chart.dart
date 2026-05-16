@@ -62,7 +62,7 @@ class BudgetPieChart extends StatelessWidget {
               titleStyle: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.white, // Ahorro color might need dark text
+                color: Colors.white,
                 shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
               ),
             ),

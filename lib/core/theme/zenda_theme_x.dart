@@ -1,43 +1,27 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// BuildContext extension providing dark-mode-aware color tokens.
+/// BuildContext extension exposing the app's color tokens.
 /// Usage: `context.colors.bg`, `context.colors.card`, etc.
 extension ZendaThemeX on BuildContext {
-  ZendaColors get colors => ZendaColors(
-        isDark: Theme.of(this).brightness == Brightness.dark,
-      );
+  ZendaColors get colors => const ZendaColors();
 }
 
 class ZendaColors {
-  final bool isDark;
-  const ZendaColors({required this.isDark});
+  const ZendaColors();
 
-  Color get bg =>
-      isDark ? AppColors.darkPageBackground : AppColors.pageBackground;
-  Color get card =>
-      isDark ? AppColors.darkCard : AppColors.cardBackground;
-  Color get cardElevated =>
-      isDark ? AppColors.darkCardElevated : AppColors.fillLight;
-  Color get fill =>
-      isDark ? AppColors.darkFill : AppColors.fillLight;
-  Color get border =>
-      isDark ? AppColors.darkBorder : AppColors.border;
-  Color get textPrimary =>
-      isDark ? AppColors.darkTextPrimary : AppColors.textDark;
-  Color get textMuted =>
-      isDark ? AppColors.darkTextMuted : AppColors.textMuted;
-  Color get textSubtle =>
-      isDark ? AppColors.darkTextSubtle : AppColors.textSubtle;
+  Color get bg => AppColors.pageBackground;
+  Color get card => AppColors.cardBackground;
+  Color get cardElevated => AppColors.fillLight;
+  Color get fill => AppColors.fillLight;
+  Color get border => AppColors.border;
+  Color get textPrimary => AppColors.textDark;
+  Color get textMuted => AppColors.textMuted;
+  Color get textSubtle => AppColors.textSubtle;
 
-  // Shorthand for primary brand color (same in both modes)
   Color get primary => AppColors.primary;
-  Color get primaryLight =>
-      isDark ? const Color(0xFF064E3B) : AppColors.primaryLight;
+  Color get primaryLight => AppColors.primaryLight;
 
-  // Icon tint
-  Color get icon =>
-      isDark ? AppColors.darkTextMuted : AppColors.textSubtle;
-  Color get iconStrong =>
-      isDark ? AppColors.darkTextPrimary : AppColors.textDark;
+  Color get icon => AppColors.textSubtle;
+  Color get iconStrong => AppColors.textDark;
 }

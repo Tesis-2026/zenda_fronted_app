@@ -15,7 +15,7 @@ class ZendaAiCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.darkCard,
+        color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFF818CF8), width: 2),
       ),

@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 
 /// Consistent sub-screen AppBar matching the Pencil design.
-/// Auto-detects dark mode — no manual isDark needed by callers.
 class ZendaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
@@ -20,10 +19,9 @@ class ZendaAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? AppColors.darkCard : AppColors.cardBackground;
-    final onBg = isDark ? AppColors.darkTextPrimary : AppColors.textDark;
-    final divider = isDark ? AppColors.darkBorder : AppColors.border;
+    const bg = AppColors.cardBackground;
+    const onBg = AppColors.textDark;
+    const divider = AppColors.border;
 
     return AppBar(
       backgroundColor: bg,
@@ -31,13 +29,13 @@ class ZendaAppBar extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: onBg),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: onBg),
         onPressed: onLeadingPressed ?? () => context.pop(),
       ),
-      iconTheme: IconThemeData(color: onBg),
+      iconTheme: const IconThemeData(color: onBg),
       title: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: onBg,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -46,9 +44,9 @@ class ZendaAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       centerTitle: false,
       actions: actions,
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: divider),
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(1),
+        child: SizedBox(height: 1, child: ColoredBox(color: divider)),
       ),
     );
   }
