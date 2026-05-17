@@ -347,7 +347,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SheetHeader(
                 title: l10n.txNewTitle,
-                onClose: () => Navigator.of(context).pop(),
+                onClose: () => context.pop(),
               ),
             ),
             const SizedBox(height: 8),
@@ -403,7 +403,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           FilledButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => ctx.pop(),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF34D399),
               minimumSize: const Size(140, 44),

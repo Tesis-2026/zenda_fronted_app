@@ -504,7 +504,7 @@ class _CreateBudgetSheetState extends State<_CreateBudgetSheet> {
     if (amount == null || amount <= 0) return;
     setState(() => _saving = true);
     await widget.onSave(_selectedCategoryId, amount, _month, _year);
-    if (mounted) Navigator.pop(context);
+    if (mounted) context.pop();
   }
 }
 
@@ -552,7 +552,7 @@ class _EditBudgetSheetState extends State<_EditBudgetSheet> {
         children: [
           SheetHeader(
             title: l10n.budgetEditTitle,
-            onClose: () => Navigator.pop(context),
+            onClose: () => context.pop(),
           ),
           const SizedBox(height: 20),
           FieldLabel(
@@ -606,7 +606,7 @@ class _EditBudgetSheetState extends State<_EditBudgetSheet> {
     if (amount == null || amount <= 0) return;
     setState(() => _saving = true);
     await widget.onSave(amount);
-    if (mounted) Navigator.pop(context);
+    if (mounted) context.pop();
   }
 }
 

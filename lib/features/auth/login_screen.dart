@@ -120,12 +120,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               content: Text(l10n.authAccountNotFoundMessage),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                   child: Text(l10n.commonCancel),
                 ),
                 FilledButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    context.pop();
                     context.go('/onboarding?flow=register');
                   },
                   style: FilledButton.styleFrom(

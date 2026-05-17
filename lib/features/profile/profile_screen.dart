@@ -93,11 +93,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         content: Text(l10n.profileSignOutDialogContent),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => context.pop(false),
             child: Text(l10n.commonCancel),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => context.pop(true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.commonSignOut),
           ),

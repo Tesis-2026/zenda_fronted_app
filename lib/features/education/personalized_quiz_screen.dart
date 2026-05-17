@@ -1,6 +1,7 @@
 import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/quiz_models.dart';
 import '../../core/widgets/app_progress_bar.dart';
@@ -70,7 +71,7 @@ class PersonalizedQuizScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => context.pop(),
                     child: Text(context.l10n.commonCancel),
                   ),
                 ],
@@ -242,7 +243,7 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => context.pop(),
                 child: Text(l10n.commonDone),
               ),
             ),

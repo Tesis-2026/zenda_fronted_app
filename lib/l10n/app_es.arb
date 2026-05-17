@@ -716,6 +716,7 @@
   "aiChatInputHint": "Pregúntale a Zenda AI lo que quieras...",
   "aiChatSend": "Enviar",
   "aiChatWelcome": "¡Hola! Soy Zenda, tu asistente financiero. Pregúntame sobre presupuestos, ahorros o gastos.",
+  "aiChatWelcomeDemo": "¡Hola! Soy Zenda AI, tu asistente financiero personal. Veo que este mes tu gasto total es S/ 1,240 en 20 transacciones. Tu categoría de mayor gasto es Comida con S/ 320. ¿En qué puedo ayudarte hoy?",
   "aiChatError": "No pude obtener una respuesta. Inténtalo de nuevo.",
   "aiChatNavLabel": "Zenda IA",
 

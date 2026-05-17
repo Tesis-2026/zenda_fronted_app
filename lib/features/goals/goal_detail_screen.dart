@@ -205,7 +205,7 @@ class _ContributeSheetState extends State<_ContributeSheet> {
     setState(() => _saving = true);
     try {
       await widget.onContribute(amount);
-      if (mounted) Navigator.pop(context);
+      if (mounted) context.pop();
     } finally {
       if (mounted) setState(() => _saving = false);
     }

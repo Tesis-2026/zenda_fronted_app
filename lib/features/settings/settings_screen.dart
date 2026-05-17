@@ -108,7 +108,7 @@ class SettingsScreen extends ConsumerWidget {
             label: l10n.settingsLanguageEnglish,
             selected: current.languageCode == 'en',
             onTap: () {
-              Navigator.pop(ctx);
+              ctx.pop();
               ref.read(localeProvider.notifier).setLocale('en');
             },
           ),
@@ -116,7 +116,7 @@ class SettingsScreen extends ConsumerWidget {
             label: l10n.settingsLanguageSpanish,
             selected: current.languageCode == 'es',
             onTap: () {
-              Navigator.pop(ctx);
+              ctx.pop();
               ref.read(localeProvider.notifier).setLocale('es');
             },
           ),
@@ -142,11 +142,11 @@ class SettingsScreen extends ConsumerWidget {
         content: Text(l10n.profileSignOutDialogContent),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => ctx.pop(false),
             child: Text(l10n.commonCancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => ctx.pop(true),
             child: Text(
               l10n.commonSignOut,
               style: const TextStyle(color: Color(0xFFEF4444)),
@@ -176,7 +176,7 @@ class _SurveysSheet extends StatelessWidget {
         children: [
           SheetHeader(
             title: l10n.settingsSurveysSheetTitle,
-            onClose: () => Navigator.pop(context),
+            onClose: () => context.pop(),
             fontSize: 17,
           ),
           const SizedBox(height: 16),
@@ -185,7 +185,7 @@ class _SurveysSheet extends StatelessWidget {
             title: l10n.settingsSurveyPreLabel,
             subtitle: l10n.settingsSurveyPreSubtitle,
             onTap: () {
-              Navigator.pop(context);
+              context.pop();
               context.push('/surveys/pre');
             },
           ),
@@ -195,7 +195,7 @@ class _SurveysSheet extends StatelessWidget {
             title: l10n.settingsSurveyPostLabel,
             subtitle: l10n.settingsSurveyPostSubtitle,
             onTap: () {
-              Navigator.pop(context);
+              context.pop();
               context.push('/surveys/post');
             },
           ),
@@ -205,7 +205,7 @@ class _SurveysSheet extends StatelessWidget {
             title: l10n.settingsSurveySusLabel,
             subtitle: l10n.settingsSurveySusSubtitle,
             onTap: () {
-              Navigator.pop(context);
+              context.pop();
               context.push('/surveys/sus');
             },
           ),
@@ -215,7 +215,7 @@ class _SurveysSheet extends StatelessWidget {
             title: l10n.settingsSurveyComparisonLabel,
             subtitle: l10n.settingsSurveyComparisonSubtitle,
             onTap: () {
-              Navigator.pop(context);
+              context.pop();
               context.push('/surveys/comparison');
             },
           ),

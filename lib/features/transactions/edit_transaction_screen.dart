@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
@@ -124,7 +125,7 @@ class _EditTransactionScreenState
           children: [
             SheetHeader(
               title: l10n.txEditTitle,
-              onClose: () => Navigator.of(context).pop(),
+              onClose: () => context.pop(),
             ),
             const SizedBox(height: 16),
             KindToggle(
@@ -296,7 +297,7 @@ class _EditTransactionScreenState
         occurredAt: _date,
         description: _noteController.text.trim(),
       );
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) context.pop(true);
     } catch (_) {
       if (mounted) {
         showAppToast(context, l10n.errorTxSaveFailed, type: ToastType.error);

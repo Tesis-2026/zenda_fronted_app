@@ -429,7 +429,7 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
         double.parse(_targetCtrl.text.trim()),
         _dueDate,
       );
-      if (mounted) Navigator.pop(context);
+      if (mounted) context.pop();
     } finally {
       if (mounted) setState(() => _saving = false);
     }
