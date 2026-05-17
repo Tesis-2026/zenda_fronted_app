@@ -6,8 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
-import '../../core/services/transaction_api_service.dart';
+import '../../core/services/transaction_api_service.dart' show categoryToApiName;
 import '../../core/utils/category_utils.dart';
+import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
@@ -61,7 +62,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _classifyDebounce = Timer(const Duration(milliseconds: 800), () async {
       if (!mounted) return;
       setState(() => _isClassifying = true);
-      final suggestion = await TransactionApiService()
+      final suggestion = await ref
+          .read(transactionApiServiceProvider)
           .classify(description: note.trim(), amount: amount);
       if (!mounted) return;
       setState(() {

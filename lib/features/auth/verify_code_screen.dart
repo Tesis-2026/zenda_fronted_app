@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/services/auth_api_service.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../l10n/l10n_extension.dart';
+import '../../providers/services_providers.dart';
 
-class VerifyCodeScreen extends StatefulWidget {
+class VerifyCodeScreen extends ConsumerStatefulWidget {
   final String email;
   const VerifyCodeScreen({super.key, required this.email});
 
   @override
-  State<VerifyCodeScreen> createState() => _VerifyCodeScreenState();
+  ConsumerState<VerifyCodeScreen> createState() => _VerifyCodeScreenState();
 }
 
-class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
+class _VerifyCodeScreenState extends ConsumerState<VerifyCodeScreen> {
   final List<TextEditingController> _controllers =
       List.generate(6, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
@@ -75,7 +76,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
       _error = null;
     });
 
-    final authService = AuthApiService();
+    final authService = ref.read(authApiServiceProvider);
     final resetToken = await authService.verifyOtp(
       email: widget.email,
       code: _code,
@@ -97,7 +98,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
 
   Future<void> _resend() async {
     if (_resendCooldown > 0) return;
-    final authService = AuthApiService();
+    final authService = ref.read(authApiServiceProvider);
     await authService.sendOtp(widget.email);
     if (!mounted) return;
     _startCooldown();

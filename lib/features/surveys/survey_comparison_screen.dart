@@ -6,9 +6,10 @@ import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
+import 'survey_screen.dart' show surveysServiceProvider;
 
 final _comparisonProvider = FutureProvider.autoDispose<SurveyComparison>((ref) {
-  return SurveysApiService().getComparison();
+  return ref.read(surveysServiceProvider).getComparison();
 });
 
 class SurveyComparisonScreen extends ConsumerWidget {

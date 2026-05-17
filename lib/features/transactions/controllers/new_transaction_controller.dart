@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/error_codes.dart';
 import '../../../core/models/account.dart';
 import '../../../core/models/transaction.dart';
-import '../../../core/services/budget_api_service.dart';
 import '../../../core/services/pending_transaction_queue.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../providers/repositories_providers.dart';
 import '../../auth/auth_controller.dart';
+import '../../budget/budget_screen.dart';
 import '../../dashboard/dashboard_providers.dart';
 
 @immutable
@@ -281,7 +281,8 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         // US-020: check if any budget just reached ≥80% after this expense.
         if (kind == TransactionKind.expense) {
           final now = state.date;
-          final budgets = await BudgetApiService()
+          final budgets = await ref
+              .read(budgetServiceProvider)
               .getAll(month: now.month, year: now.year);
           final triggered = budgets.where(
             (b) => b.percentageUsed >= 80.0 && b.percentageUsed < 100.0,
