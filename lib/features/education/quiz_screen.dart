@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/quiz_models.dart';
 import '../../core/services/quiz_api_service.dart';
@@ -112,7 +113,7 @@ class QuizScreen extends ConsumerWidget {
                 Text(l10n.quizEmpty, textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => context.pop(),
                   child: Text(l10n.commonCancel),
                 ),
               ],
@@ -638,7 +639,7 @@ class _ResultsView extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => context.pop(),
               child: Text(l10n.commonDone),
             ),
           ),

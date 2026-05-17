@@ -221,7 +221,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         content: Text(body),
         actions: [
           FilledButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => ctx.pop(),
             child: Text(l10n.commonOk),
           ),
         ],

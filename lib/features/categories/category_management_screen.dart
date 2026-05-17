@@ -1,6 +1,7 @@
 import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/models/category.dart';
 import '../../core/widgets/app_card.dart';
@@ -41,7 +42,7 @@ class CategoryManagementScreen extends ConsumerWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () => context.pop(),
                       child: const Icon(
                         Icons.arrow_back_ios_new_rounded,
                         size: 20,
@@ -351,7 +352,7 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
     setState(() => _saving = true);
     try {
       await widget.onSave(name);
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) context.pop(true);
     } catch (_) {
       if (mounted) {
         showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
@@ -371,7 +372,7 @@ class _AddCategorySheetState extends State<_AddCategorySheet> {
         children: [
           SheetHeader(
             title: l10n.catMgmtAddTitle,
-            onClose: () => Navigator.of(context).pop(),
+            onClose: () => context.pop(),
           ),
           const SizedBox(height: 20),
           AppTextField(
@@ -428,13 +429,13 @@ class _EditCategorySheetState extends State<_EditCategorySheet> {
   Future<void> _submit() async {
     final name = _controller.text.trim();
     if (name.isEmpty || name == widget.category.name) {
-      Navigator.of(context).pop();
+      context.pop();
       return;
     }
     setState(() => _saving = true);
     try {
       await widget.onSave(name);
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) context.pop();
     } catch (_) {
       if (mounted) {
         showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
@@ -454,7 +455,7 @@ class _EditCategorySheetState extends State<_EditCategorySheet> {
         children: [
           SheetHeader(
             title: l10n.catMgmtRenameTitle,
-            onClose: () => Navigator.of(context).pop(),
+            onClose: () => context.pop(),
           ),
           const SizedBox(height: 20),
           AppTextField(

@@ -2936,6 +2936,12 @@ abstract class AppLocalizations {
   /// **'Hi! I\'m Zenda, your financial assistant. Ask me anything about budgets, savings, or expenses.'**
   String get aiChatWelcome;
 
+  /// No description provided for @aiChatWelcomeDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! I\'m Zenda AI, your personal finance assistant. I can see your spending this month totals S/ 1,240 across 20 transactions. Your biggest expense category is Food at S/ 320. How can I help you today?'**
+  String get aiChatWelcomeDemo;
+
   /// No description provided for @aiChatError.
   ///
   /// In en, this message translates to:

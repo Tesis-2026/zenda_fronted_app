@@ -1,6 +1,7 @@
 import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_toast.dart';
@@ -296,7 +297,7 @@ class _ResultView extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => context.pop(),
                 child: Text(l10n.susSurveyResultContinue),
               ),
             ),

@@ -1584,6 +1584,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Hi! I\'m Zenda, your financial assistant. Ask me anything about budgets, savings, or expenses.';
 
   @override
+  String get aiChatWelcomeDemo =>
+      'Hi! I\'m Zenda AI, your personal finance assistant. I can see your spending this month totals S/ 1,240 across 20 transactions. Your biggest expense category is Food at S/ 320. How can I help you today?';
+
+  @override
   String get aiChatError => 'Could not get a response. Please try again.';
 
   @override

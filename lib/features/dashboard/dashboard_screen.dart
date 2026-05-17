@@ -538,7 +538,7 @@ class _AddAccountSheetState extends State<_AddAccountSheet> {
     );
 
     await widget.onSave(account);
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) context.pop();
   }
 
   @override

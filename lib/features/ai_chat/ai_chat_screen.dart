@@ -9,7 +9,8 @@ import '../../l10n/l10n_extension.dart';
 class _ChatBubble {
   final String text;
   final bool isUser;
-  _ChatBubble({required this.text, required this.isUser});
+  final bool isWelcome;
+  _ChatBubble({required this.text, required this.isUser, this.isWelcome = false});
 }
 
 class AiChatScreen extends ConsumerStatefulWidget {
@@ -25,18 +26,18 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   final _messages = <_ChatBubble>[];
   bool _loading = false;
 
-  // Hardcoded personalized welcome message shown when chat history is empty
-  static const _demoWelcome =
-      "Hi! I'm Zenda AI, your personal finance assistant. "
-      "I can see your spending this month totals S/ 1,240 across 20 transactions. "
-      "Your biggest expense category is Food at S/ 320. "
-      "How can I help you today?";
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() => _messages.add(_ChatBubble(text: _demoWelcome, isUser: false)));
+      if (!mounted) return;
+      setState(() => _messages.add(
+            _ChatBubble(
+              text: context.l10n.aiChatWelcomeDemo,
+              isUser: false,
+              isWelcome: true,
+            ),
+          ));
     });
   }
 
@@ -60,7 +61,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
     try {
       final history = _messages
-          .where((m) => m.text != _demoWelcome || m.isUser)
+          .where((m) => !m.isWelcome)
           .map((m) => ChatMessage(role: m.isUser ? 'user' : 'assistant', content: m.text))
           .toList();
 
