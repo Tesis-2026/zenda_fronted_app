@@ -3,11 +3,11 @@ import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
 import '../../core/models/breakdown_503020.dart';
 import '../../core/models/summary_models.dart';
-import '../../core/services/insights_api_service.dart';
 import '../../core/services/recommendations_api_service.dart';
 import '../../core/services/streak_repository.dart';
 import '../../core/services/transaction_api_service.dart';
 import '../../providers/repositories_providers.dart';
+import '../../providers/services_providers.dart';
 import '../../l10n/app_localizations.dart';
 
 // ─── ISO week helper ───────────────────────────────────────────────────────
@@ -32,26 +32,26 @@ int _isoWeekNumber(DateTime date) {
 
 // ─── API-backed summary providers ─────────────────────────────────────────
 
-final _insightsService = InsightsApiService();
-
 final daySummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
   final now = DateTime.now();
   final date =
       '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-  return _insightsService.getDaySummary(date: date);
+  return ref.read(insightsApiServiceProvider).getDaySummary(date: date);
 });
 
 final weekSummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
   final now = DateTime.now();
-  return _insightsService.getWeekSummary(
-    year: now.year,
-    week: _isoWeekNumber(now),
-  );
+  return ref.read(insightsApiServiceProvider).getWeekSummary(
+        year: now.year,
+        week: _isoWeekNumber(now),
+      );
 });
 
 final monthSummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
   final now = DateTime.now();
-  return _insightsService.getMonthSummary(year: now.year, month: now.month);
+  return ref
+      .read(insightsApiServiceProvider)
+      .getMonthSummary(year: now.year, month: now.month);
 });
 
 // ─── Existing providers ────────────────────────────────────────────────────

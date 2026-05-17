@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/quiz_models.dart';
-import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
@@ -96,16 +95,17 @@ class PersonalizedQuizScreen extends ConsumerWidget {
 
 enum _Phase { answering, reviewing, results }
 
-class _PersonalizedQuizBody extends StatefulWidget {
+class _PersonalizedQuizBody extends ConsumerStatefulWidget {
   const _PersonalizedQuizBody({required this.result});
 
   final PersonalizedQuizResult result;
 
   @override
-  State<_PersonalizedQuizBody> createState() => _PersonalizedQuizBodyState();
+  ConsumerState<_PersonalizedQuizBody> createState() =>
+      _PersonalizedQuizBodyState();
 }
 
-class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
+class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
   int _index = 0;
   String? _selected;
   final Map<String, String> _answers = {};
@@ -146,7 +146,9 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
       _phase = _Phase.results;
     });
     try {
-      final res = await EducationApiService().submitPersonalizedQuiz(_answers);
+      final res = await ref
+          .read(educationServiceProvider)
+          .submitPersonalizedQuiz(_answers);
       setState(() {
         _submitResult = res;
         _submitting = false;
