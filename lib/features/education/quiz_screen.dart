@@ -1,74 +1,12 @@
 import '../../core/theme/zenda_theme_x.dart';
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/quiz_models.dart';
-import '../../core/services/quiz_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
-
-// ─────────────────────────────────────────────────────────────────
-// Provider
-// ─────────────────────────────────────────────────────────────────
-
-final _quizProvider = FutureProvider.autoDispose
-    .family<List<QuizQuestion>, ({String topicId, String language})>(
-  (ref, args) =>
-      ref.read(quizServiceProvider).getQuiz(args.topicId, args.language),
-);
-
-// ─────────────────────────────────────────────────────────────────
-// Screen state machine
-// ─────────────────────────────────────────────────────────────────
-
-enum _QuizPhase { answering, reviewing, results }
-
-class _QuizState {
-  final List<QuizQuestion> questions;
-  final int currentIndex;
-  final Map<String, String> answers;
-  final String? selectedOption;
-  final _QuizPhase phase;
-  final QuizResult? result;
-  final bool submitting;
-
-  const _QuizState({
-    required this.questions,
-    this.currentIndex = 0,
-    this.answers = const {},
-    this.selectedOption,
-    this.phase = _QuizPhase.answering,
-    this.result,
-    this.submitting = false,
-  });
-
-  QuizQuestion get current => questions[currentIndex];
-  bool get isLast => currentIndex >= questions.length - 1;
-
-  _QuizState copyWith({
-    int? currentIndex,
-    Map<String, String>? answers,
-    String? selectedOption,
-    _QuizPhase? phase,
-    QuizResult? result,
-    bool? submitting,
-    bool clearSelection = false,
-  }) {
-    return _QuizState(
-      questions: questions,
-      currentIndex: currentIndex ?? this.currentIndex,
-      answers: answers ?? this.answers,
-      selectedOption:
-          clearSelection ? null : (selectedOption ?? this.selectedOption),
-      phase: phase ?? this.phase,
-      result: result ?? this.result,
-      submitting: submitting ?? this.submitting,
-    );
-  }
-}
+import 'quiz_game_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // QuizScreen
@@ -89,8 +27,8 @@ class QuizScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final language = _deviceLanguage(context);
-    final quizAsync =
-        ref.watch(_quizProvider((topicId: topicId, language: language)));
+    final args = (topicId: topicId, language: language);
+    final quizAsync = ref.watch(quizQuestionsProvider(args));
 
     return Scaffold(
       backgroundColor: context.colors.bg,
@@ -119,135 +57,45 @@ class QuizScreen extends ConsumerWidget {
             ),
           ),
         ),
-        data: (questions) => _QuizBody(
-          topicId: topicId,
-          questions: questions,
-          service: ref.read(quizServiceProvider),
-        ),
+        data: (_) => _QuizBody(args: args),
       ),
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Quiz body (stateful — manages state machine)
+// Quiz body — reads the state machine from QuizGameController
 // ─────────────────────────────────────────────────────────────────
 
-class _QuizBody extends StatefulWidget {
-  const _QuizBody({
-    required this.topicId,
-    required this.questions,
-    required this.service,
-  });
+class _QuizBody extends ConsumerWidget {
+  const _QuizBody({required this.args});
 
-  final String topicId;
-  final List<QuizQuestion> questions;
-  final QuizApiService service;
+  final QuizArgs args;
 
   @override
-  State<_QuizBody> createState() => _QuizBodyState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(quizGameProvider(args));
+    final controller = ref.read(quizGameProvider(args).notifier);
 
-class _QuizBodyState extends State<_QuizBody> {
-  late _QuizState _state;
-  int _timerSeconds = 120;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _state = _QuizState(questions: widget.questions);
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    _timerSeconds = 120;
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      if (_timerSeconds > 0) setState(() => _timerSeconds--);
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _selectOption(String option) {
-    if (_state.phase != _QuizPhase.answering) return;
-    setState(() {
-      _state = _state.copyWith(selectedOption: option);
-    });
-  }
-
-  void _confirmAnswer() {
-    final selected = _state.selectedOption;
-    if (selected == null) return;
-    _timer?.cancel();
-
-    final newAnswers = Map<String, String>.from(_state.answers)
-      ..[_state.current.id] = selected;
-
-    setState(() {
-      _state = _state.copyWith(
-        answers: newAnswers,
-        phase: _QuizPhase.reviewing,
-      );
-    });
-  }
-
-  Future<void> _next() async {
-    if (_state.isLast) {
-      await _submit();
-    } else {
-      setState(() {
-        _state = _state.copyWith(
-          currentIndex: _state.currentIndex + 1,
-          phase: _QuizPhase.answering,
-          clearSelection: true,
-        );
-      });
-      _startTimer();
-    }
-  }
-
-  Future<void> _submit() async {
-    setState(() =>
-        _state = _state.copyWith(submitting: true, phase: _QuizPhase.results));
-    try {
-      final result =
-          await widget.service.submitQuiz(widget.topicId, _state.answers);
-      setState(
-          () => _state = _state.copyWith(result: result, submitting: false));
-    } catch (_) {
-      setState(() => _state =
-          _state.copyWith(submitting: false, phase: _QuizPhase.reviewing));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_state.phase == _QuizPhase.results) {
-      return _ResultsView(state: _state);
+    if (state.phase == QuizPhase.results) {
+      return _ResultsView(state: state);
     }
 
     return Column(
       children: [
         _ProgressBar(
-          current: _state.currentIndex,
-          total: _state.questions.length,
-          timerSeconds: _timerSeconds,
+          current: state.currentIndex,
+          total: state.questions.length,
+          timerSeconds: state.secondsRemaining,
         ),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: _QuestionView(
-              state: _state,
-              onSelectOption: _selectOption,
-              onConfirm: _confirmAnswer,
-              onNext: _next,
+              state: state,
+              onSelectOption: controller.selectOption,
+              onConfirm: controller.confirmAnswer,
+              onNext: controller.next,
             ),
           ),
         ),
@@ -352,7 +200,7 @@ class _QuestionView extends StatelessWidget {
     required this.onNext,
   });
 
-  final _QuizState state;
+  final QuizGameState state;
   final void Function(String) onSelectOption;
   final VoidCallback onConfirm;
   final Future<void> Function() onNext;
@@ -374,7 +222,7 @@ class _QuestionView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final q = state.current;
-    final reviewing = state.phase == _QuizPhase.reviewing;
+    final reviewing = state.phase == QuizPhase.reviewing;
     final diffColor = _difficultyColor(q.difficulty);
 
     return Column(
@@ -574,7 +422,7 @@ class _OptionTile extends StatelessWidget {
 class _ResultsView extends StatelessWidget {
   const _ResultsView({required this.state});
 
-  final _QuizState state;
+  final QuizGameState state;
 
   Color _scoreColor(int score) {
     if (score >= 80) return Colors.green;

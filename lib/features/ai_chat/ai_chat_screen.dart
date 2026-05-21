@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/services/recommendations_api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../l10n/l10n_extension.dart';
-
-class _ChatBubble {
-  final String text;
-  final bool isUser;
-  _ChatBubble({required this.text, required this.isUser});
-}
+import 'ai_chat_controller.dart';
 
 class AiChatScreen extends ConsumerStatefulWidget {
   const AiChatScreen({super.key});
@@ -22,23 +16,6 @@ class AiChatScreen extends ConsumerStatefulWidget {
 class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   final _inputController = TextEditingController();
   final _scrollController = ScrollController();
-  final _messages = <_ChatBubble>[];
-  bool _loading = false;
-
-  // Hardcoded personalized welcome message shown when chat history is empty
-  static const _demoWelcome =
-      "Hi! I'm Zenda AI, your personal finance assistant. "
-      "I can see your spending this month totals S/ 1,240 across 20 transactions. "
-      "Your biggest expense category is Food at S/ 320. "
-      "How can I help you today?";
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() => _messages.add(_ChatBubble(text: _demoWelcome, isUser: false)));
-    });
-  }
 
   @override
   void dispose() {
@@ -49,33 +26,11 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
   Future<void> _send() async {
     final text = _inputController.text.trim();
-    if (text.isEmpty || _loading) return;
-
-    setState(() {
-      _messages.add(_ChatBubble(text: text, isUser: true));
-      _loading = true;
-    });
+    if (text.isEmpty || ref.read(aiChatNotifierProvider).loading) return;
     _inputController.clear();
-    _scrollToBottom();
-
-    try {
-      final history = _messages
-          .where((m) => m.text != _demoWelcome || m.isUser)
-          .map((m) => ChatMessage(role: m.isUser ? 'user' : 'assistant', content: m.text))
-          .toList();
-
-      final reply = await ref.read(aiChatServiceProvider).sendMessage(history);
-      if (mounted) {
-        setState(() => _messages.add(_ChatBubble(text: reply, isUser: false)));
-        _scrollToBottom();
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() => _messages.add(_ChatBubble(text: context.l10n.aiChatError, isUser: false)));
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+    await ref
+        .read(aiChatNotifierProvider.notifier)
+        .send(text, errorMessage: context.l10n.aiChatError);
   }
 
   void _scrollToBottom() {
@@ -94,6 +49,17 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
+
+    final chat = ref.watch(aiChatNotifierProvider);
+    final messages = chat.messages;
+    final loading = chat.loading;
+
+    ref.listen(aiChatNotifierProvider, (prev, next) {
+      if (prev?.messages.length != next.messages.length ||
+          prev?.loading != next.loading) {
+        _scrollToBottom();
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -180,16 +146,16 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              itemCount: _messages.length + (_loading ? 1 : 0),
+              itemCount: messages.length + (loading ? 1 : 0),
               itemBuilder: (context, i) {
-                if (i == _messages.length) {
+                if (i == messages.length) {
                   return const _TypingBubble();
                 }
-                return _MessageBubble(bubble: _messages[i]);
+                return _MessageBubble(bubble: messages[i]);
               },
             ),
           ),
-          if (!_loading)
+          if (!loading)
             _QuickActions(
               onTap: (text) {
                 _inputController.text = text;
@@ -204,7 +170,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           _InputBar(
             controller: _inputController,
             onSend: _send,
-            loading: _loading,
+            loading: loading,
             hint: l10n.aiChatInputHint,
             sendLabel: l10n.aiChatSend,
           ),
@@ -217,7 +183,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
 class _MessageBubble extends StatelessWidget {
   const _MessageBubble({required this.bubble});
-  final _ChatBubble bubble;
+  final ChatBubble bubble;
 
   @override
   Widget build(BuildContext context) {

@@ -1,13 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/errors/error_codes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_toast.dart';
 import 'auth_controller.dart';
+import 'login_lockout_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -23,56 +21,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  static const _lockoutKey = 'zenda.auth.lockout_until';
-  int _lockoutSeconds = 0;
-  Timer? _lockoutTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _restoreLockout();
-  }
-
-  Future<void> _restoreLockout() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedMs = prefs.getInt(_lockoutKey);
-    if (storedMs == null) return;
-    final expiresAt = DateTime.fromMillisecondsSinceEpoch(storedMs);
-    final remaining = expiresAt.difference(DateTime.now()).inSeconds;
-    if (remaining > 0) {
-      setState(() => _lockoutSeconds = remaining);
-      _startLockoutTimer();
-    } else {
-      await prefs.remove(_lockoutKey);
-    }
-  }
-
-  void _startLockoutCountdown() async {
-    _lockoutTimer?.cancel();
-    final expiresAt = DateTime.now().add(const Duration(minutes: 15));
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_lockoutKey, expiresAt.millisecondsSinceEpoch);
-    setState(() => _lockoutSeconds = 15 * 60);
-    _startLockoutTimer();
-  }
-
-  void _startLockoutTimer() {
-    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) {
-        t.cancel();
-        return;
-      }
-      setState(() {
-        if (_lockoutSeconds > 0) {
-          _lockoutSeconds--;
-        } else {
-          t.cancel();
-          SharedPreferences.getInstance().then((p) => p.remove(_lockoutKey));
-        }
-      });
-    });
-  }
-
   String _formatCountdown(int seconds) {
     final m = (seconds ~/ 60).toString().padLeft(2, '0');
     final s = (seconds % 60).toString().padLeft(2, '0');
@@ -81,7 +29,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
-    _lockoutTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -107,6 +54,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
+    final lockoutSeconds = ref.watch(loginLockoutProvider);
     final l10n = context.l10n;
 
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
@@ -138,7 +86,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           );
         } else if (next.error == AuthErrorCode.accountLocked) {
-          _startLockoutCountdown();
+          ref.read(loginLockoutProvider.notifier).lock();
           showAppToast(context, l10n.authLockedAccount, type: ToastType.warning);
         } else {
           showAppToast(context, l10n.resolveError(next.error!), type: ToastType.error);
@@ -317,7 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
 
                 // Lockout banner
-                if (_lockoutSeconds > 0) ...[
+                if (lockoutSeconds > 0) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
@@ -336,7 +284,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Expanded(
                           child: Text(
                             l10n.authLockedCountdown(
-                                _formatCountdown(_lockoutSeconds)),
+                                _formatCountdown(lockoutSeconds)),
                             style: const TextStyle(
                               color: AppColors.warning,
                               fontSize: 13,
@@ -355,7 +303,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 SizedBox(
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: (authState.isLoading || _lockoutSeconds > 0)
+                    onPressed: (authState.isLoading || lockoutSeconds > 0)
                         ? null
                         : _handleLogin,
                     style: ElevatedButton.styleFrom(
@@ -378,9 +326,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : _lockoutSeconds > 0
+                        : lockoutSeconds > 0
                             ? Text(
-                                _formatCountdown(_lockoutSeconds),
+                                _formatCountdown(lockoutSeconds),
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               )

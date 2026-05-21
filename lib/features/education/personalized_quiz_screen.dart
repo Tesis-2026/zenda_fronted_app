@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/quiz_models.dart';
-import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import 'education_screen.dart';
+import 'personalized_quiz_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // Provider
@@ -94,86 +94,25 @@ class PersonalizedQuizScreen extends ConsumerWidget {
 // Quiz body
 // ─────────────────────────────────────────────────────────────────
 
-enum _Phase { answering, reviewing, results }
-
-class _PersonalizedQuizBody extends StatefulWidget {
+class _PersonalizedQuizBody extends ConsumerWidget {
   const _PersonalizedQuizBody({required this.result});
 
   final PersonalizedQuizResult result;
 
   @override
-  State<_PersonalizedQuizBody> createState() => _PersonalizedQuizBodyState();
-}
-
-class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
-  int _index = 0;
-  String? _selected;
-  final Map<String, String> _answers = {};
-  _Phase _phase = _Phase.answering;
-  bool _submitting = false;
-  Map<String, dynamic>? _submitResult;
-
-  PersonalizedQuizQuestion get _current => widget.result.questions[_index];
-  bool get _isLast => _index >= widget.result.questions.length - 1;
-
-  void _selectOption(String option) {
-    if (_phase != _Phase.answering) return;
-    setState(() => _selected = option);
-  }
-
-  void _confirmAnswer() {
-    final sel = _selected;
-    if (sel == null) return;
-    _answers[_current.id] = sel;
-    setState(() => _phase = _Phase.reviewing);
-  }
-
-  Future<void> _next() async {
-    if (_isLast) {
-      await _submit();
-    } else {
-      setState(() {
-        _index++;
-        _selected = null;
-        _phase = _Phase.answering;
-      });
-    }
-  }
-
-  Future<void> _submit() async {
-    setState(() {
-      _submitting = true;
-      _phase = _Phase.results;
-    });
-    try {
-      final res = await EducationApiService().submitPersonalizedQuiz(_answers);
-      setState(() {
-        _submitResult = res;
-        _submitting = false;
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _submitting = false;
-          _phase = _Phase.reviewing;
-        });
-        showAppToast(context, context.l10n.quizPersonalizedError,
-            type: ToastType.error);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final state = ref.watch(personalizedQuizControllerProvider);
+    final controller = ref.read(personalizedQuizControllerProvider.notifier);
 
-    if (_phase == _Phase.results) {
-      if (_submitting || _submitResult == null) {
+    if (state.phase == PersonalizedQuizPhase.results) {
+      if (state.submitting || state.submitResult == null) {
         return const Center(child: CircularProgressIndicator());
       }
-      final score = _submitResult!['score'] as int? ?? 0;
-      final correct = _submitResult!['correctCount'] as int? ?? 0;
-      final total = _submitResult!['totalCount'] as int? ?? widget.result.questions.length;
+      final score = state.submitResult!['score'] as int? ?? 0;
+      final correct = state.submitResult!['correctCount'] as int? ?? 0;
+      final total =
+          state.submitResult!['totalCount'] as int? ?? result.questions.length;
       final scoreColor = score >= 80
           ? Colors.green
           : score >= 50
@@ -185,7 +124,7 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
         child: Column(
           children: [
             const SizedBox(height: 24),
-            if (widget.result.attemptsRemainingToday > 0)
+            if (result.attemptsRemainingToday > 0)
               Align(
                 alignment: Alignment.centerRight,
                 child: Container(
@@ -195,7 +134,7 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    l10n.quizPersonalizedAttemptsLeft(widget.result.attemptsRemainingToday),
+                    l10n.quizPersonalizedAttemptsLeft(result.attemptsRemainingToday),
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF818CF8),
@@ -249,8 +188,9 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
       );
     }
 
-    final q = _current;
-    final reviewing = _phase == _Phase.reviewing;
+    final q = result.questions[state.index];
+    final isLast = state.index >= result.questions.length - 1;
+    final reviewing = state.phase == PersonalizedQuizPhase.reviewing;
 
     return Column(
       children: [
@@ -262,13 +202,13 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
               Row(
                 children: [
                   Text(
-                    '${_index + 1} / ${widget.result.questions.length}',
+                    '${state.index + 1} / ${result.questions.length}',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
                   const Spacer(),
-                  if (widget.result.attemptsRemainingToday > 0)
+                  if (result.attemptsRemainingToday > 0)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -276,7 +216,7 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        context.l10n.quizPersonalizedAttemptsLeft(widget.result.attemptsRemainingToday),
+                        context.l10n.quizPersonalizedAttemptsLeft(result.attemptsRemainingToday),
                         style: const TextStyle(
                           fontSize: 11,
                           color: Color(0xFF818CF8),
@@ -288,7 +228,7 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
               ),
               const SizedBox(height: 6),
               AppProgressBar(
-                value: (_index + 1) / widget.result.questions.length,
+                value: (state.index + 1) / result.questions.length,
                 color: const Color(0xFF34D399),
                 height: 4,
               ),
@@ -313,9 +253,9 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
                   (entry) => _OptionTile(
                     option: entry.value,
                     index: entry.key,
-                    isSelected: _selected == entry.value,
+                    isSelected: state.selected == entry.value,
                     isReviewing: reviewing,
-                    onTap: reviewing ? null : () => _selectOption(entry.value),
+                    onTap: reviewing ? null : () => controller.selectOption(entry.value),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -323,11 +263,23 @@ class _PersonalizedQuizBodyState extends State<_PersonalizedQuizBody> {
                   width: double.infinity,
                   child: reviewing
                       ? FilledButton(
-                          onPressed: _next,
-                          child: Text(_isLast ? l10n.quizFinish : l10n.quizNext),
+                          onPressed: () async {
+                            final failed =
+                                await controller.next(isLast: isLast);
+                            if (failed && context.mounted) {
+                              showAppToast(
+                                context,
+                                context.l10n.quizPersonalizedError,
+                                type: ToastType.error,
+                              );
+                            }
+                          },
+                          child: Text(isLast ? l10n.quizFinish : l10n.quizNext),
                         )
                       : FilledButton(
-                          onPressed: _selected != null ? _confirmAnswer : null,
+                          onPressed: state.selected != null
+                              ? () => controller.confirmAnswer(q.id)
+                              : null,
                           child: Text(l10n.quizSubmit),
                         ),
                 ),
