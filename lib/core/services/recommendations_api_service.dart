@@ -66,7 +66,7 @@ class LiveAiChatApiService extends AiChatApiService {
     final body = await ApiClient.post('/ai/chat', {
       'messages': messages.map((m) => m.toJson()).toList(),
     });
-    return body['reply'] as String? ?? 'No response received.';
+    return body['reply'] as String? ?? 'No se recibió respuesta.';
   }
 }
 

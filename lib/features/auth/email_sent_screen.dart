@@ -103,7 +103,7 @@ class EmailSentScreen extends ConsumerWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      showAppToast(context, 'Email resent', type: ToastType.success);
+                      showAppToast(context, 'Correo reenviado', type: ToastType.success);
                     },
                     child: Text(
                       l10n.emailVerifResendAction,

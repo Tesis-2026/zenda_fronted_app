@@ -288,7 +288,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
             (b) => b.percentageUsed >= 80.0 && b.percentageUsed < 100.0,
           );
           if (triggered.isNotEmpty) {
-            budgetAlertName = triggered.first.categoryName ?? 'Budget';
+            budgetAlertName = triggered.first.categoryName ?? 'Presupuesto';
           }
         }
       } catch (_) {

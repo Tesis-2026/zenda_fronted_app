@@ -73,16 +73,12 @@ class _TopicDetailBody extends StatelessWidget {
   }
 
   Color _difficultyColor() {
-    switch (topic.difficulty.toUpperCase()) {
-      case 'BEGINNER':
-        return const Color(0xFF43A047);
-      case 'INTERMEDIATE':
-        return const Color(0xFFFB8C00);
-      case 'ADVANCED':
-        return const Color(0xFFE53935);
-      default:
-        return const Color(0xFF757575);
-    }
+    return switch (topic.difficulty.toLowerCase()) {
+      'principiante' || 'beginner' => const Color(0xFF43A047),
+      'intermedio' || 'intermediate' => const Color(0xFFFB8C00),
+      'avanzado' || 'advanced' => const Color(0xFFE53935),
+      _ => const Color(0xFF757575),
+    };
   }
 
   String _categoryLabel(BuildContext context) {
@@ -153,7 +149,7 @@ class _TopicDetailBody extends StatelessWidget {
                     Row(
                       children: [
                         _MetaBadge(
-                          label: topic.difficulty.toUpperCase(),
+                          label: topic.difficulty,
                           accentColor: diffColor,
                         ),
                         const SizedBox(width: 8),
@@ -178,7 +174,7 @@ class _TopicDetailBody extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'Reading progress',
+                  'Progreso de lectura',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colors.textMuted,
                         fontSize: 12,

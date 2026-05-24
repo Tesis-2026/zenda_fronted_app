@@ -359,16 +359,12 @@ class _QuestionView extends StatelessWidget {
   final Future<void> Function() onNext;
 
   Color _difficultyColor(String diff) {
-    switch (diff.toUpperCase()) {
-      case 'BEGINNER':
-        return const Color(0xFF43A047);
-      case 'INTERMEDIATE':
-        return const Color(0xFFFB8C00);
-      case 'ADVANCED':
-        return const Color(0xFFE53935);
-      default:
-        return Colors.grey;
-    }
+    return switch (diff.toLowerCase()) {
+      'principiante' || 'beginner' => const Color(0xFF43A047),
+      'intermedio' || 'intermediate' => const Color(0xFFFB8C00),
+      'avanzado' || 'advanced' => const Color(0xFFE53935),
+      _ => Colors.grey,
+    };
   }
 
   @override
@@ -628,7 +624,7 @@ class _ResultsView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${result.correctCount} / ${result.totalCount} correct',
+            '${result.correctCount} / ${result.totalCount} correctas',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -664,7 +660,7 @@ class _ReviewList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Review',
+          'Revisión',
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -714,7 +710,7 @@ class _ReviewList extends StatelessWidget {
                   if (!fb.correct) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'Correct: ${fb.correctAnswer}',
+                      'Correcto: ${fb.correctAnswer}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.green.shade700,
                           ),

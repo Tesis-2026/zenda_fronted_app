@@ -135,7 +135,7 @@ class ApiClient {
     final raw = body['message'];
     final message = raw is List
         ? raw.cast<Object>().join('; ')
-        : (raw as String?) ?? 'Unexpected error';
+        : (raw as String?) ?? 'Error inesperado';
     throw ApiException(statusCode: response.statusCode, message: message);
   }
 
