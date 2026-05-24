@@ -11,7 +11,6 @@ import '../../core/widgets/section_label.dart';
 import '../../core/widgets/sheet_header.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../l10n/l10n_extension.dart';
-import '../../providers/locale_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -19,7 +18,6 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final locale = ref.watch(localeProvider).asData?.value ?? const Locale('en');
     final colors = context.colors;
 
     return Scaffold(
@@ -32,16 +30,6 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           _SettingsCard(
             items: [
-              _SettingsItem(
-                icon: Icons.language_rounded,
-                iconBg: const Color(0xFFECFDF5),
-                iconColor: const Color(0xFF059669),
-                title: l10n.settingsLanguageLabel,
-                subtitle: locale.languageCode == 'es'
-                    ? l10n.settingsLanguageSpanish
-                    : l10n.settingsLanguageEnglish,
-                onTap: () => _showLanguageDialog(context, ref, l10n, locale),
-              ),
               _SettingsItem(
                 icon: Icons.category_rounded,
                 iconBg: const Color(0xFFF3F4F6),
@@ -91,34 +79,6 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => _confirmSignOut(context, ref, l10n),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLanguageDialog(
-      BuildContext context, WidgetRef ref, dynamic l10n, Locale current) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(l10n.settingsLanguageDialogTitle),
-        children: [
-          _LanguageOption(
-            label: l10n.settingsLanguageEnglish,
-            selected: current.languageCode == 'en',
-            onTap: () {
-              ctx.pop();
-              ref.read(localeProvider.notifier).setLocale('en');
-            },
-          ),
-          _LanguageOption(
-            label: l10n.settingsLanguageSpanish,
-            selected: current.languageCode == 'es',
-            onTap: () {
-              ctx.pop();
-              ref.read(localeProvider.notifier).setLocale('es');
-            },
           ),
         ],
       ),
@@ -323,7 +283,6 @@ class _SettingsItem {
     required this.title,
     required this.onTap,
     this.titleColor,
-    this.subtitle,
   });
 
   final IconData icon;
@@ -332,7 +291,6 @@ class _SettingsItem {
   final String title;
   final VoidCallback onTap;
   final Color? titleColor;
-  final String? subtitle;
 }
 
 class _SettingsRow extends StatelessWidget {
@@ -371,16 +329,6 @@ class _SettingsRow extends StatelessWidget {
                       color: item.titleColor ?? colors.textPrimary,
                     ),
                   ),
-                  if (item.subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      item.subtitle!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colors.textMuted,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -397,39 +345,3 @@ class _SettingsRow extends StatelessWidget {
   }
 }
 
-class _LanguageOption extends StatelessWidget {
-  const _LanguageOption({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SimpleDialogOption(
-      onPressed: onTap,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected
-                    ? AppColors.primary
-                    : context.colors.textPrimary,
-              ),
-            ),
-          ),
-          if (selected)
-            const Icon(Icons.check_rounded, size: 18, color: AppColors.primary),
-        ],
-      ),
-    );
-  }
-}
