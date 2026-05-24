@@ -190,36 +190,36 @@ class MockEducationApiService extends EducationApiService {
       questions: [
         PersonalizedQuizQuestion(
           id: 'pq-1',
-          difficulty: 'INTERMEDIATE',
-          text: 'Your food spending this month is S/ 116 out of a S/ 150 budget (77%). Which action is most effective for the remaining 8 days?',
+          difficulty: 'Intermedio',
+          text: 'Tu gasto en comida este mes es S/ 116 de un presupuesto de S/ 150 (77%). ¿Qué acción es más efectiva para los 8 días que quedan?',
           options: [
-            'Cook at home 3 times this week',
-            'Switch to a cheaper supermarket',
-            'Cut out all restaurant meals',
-            'Track every food purchase daily',
+            'Cocinar en casa 3 veces esta semana',
+            'Cambiar a un supermercado más barato',
+            'Eliminar por completo las comidas en restaurantes',
+            'Registrar cada compra de comida a diario',
           ],
         ),
         PersonalizedQuizQuestion(
           id: 'pq-2',
-          difficulty: 'BEGINNER',
-          text: 'Your Emergency Fund goal is at 28% (S/ 850 of S/ 3,000). At your current pace you\'ll reach it in December. What would get you there 3 months earlier?',
+          difficulty: 'Principiante',
+          text: 'Tu meta de Fondo de Emergencia está al 28% (S/ 850 de S/ 3 000). Al ritmo actual la alcanzarás en diciembre. ¿Qué te llevaría a alcanzarla 3 meses antes?',
           options: [
-            'Add S/ 50 extra per month',
-            'Add S/ 150 extra per month',
-            'Add S/ 200 extra per month',
-            'Do nothing — the current pace is fine',
+            'Aportar S/ 50 extra al mes',
+            'Aportar S/ 150 extra al mes',
+            'Aportar S/ 200 extra al mes',
+            'No hacer nada — el ritmo actual está bien',
           ],
         ),
         PersonalizedQuizQuestion(
           id: 'pq-3',
-          difficulty: 'INTERMEDIATE',
-          text: 'You have a Visa Credit card with S/ 1,150 available. Your current utilization rate is about 23%. What is the recommended maximum utilization to protect your credit score?',
+          difficulty: 'Intermedio',
+          text: 'Tienes una tarjeta de crédito Visa con S/ 1 150 disponibles. Tu tasa de utilización actual es de aproximadamente 23%. ¿Cuál es la utilización máxima recomendada para proteger tu score crediticio?',
           options: ['10%', '30%', '50%', '70%'],
         ),
         PersonalizedQuizQuestion(
           id: 'pq-4',
-          difficulty: 'BEGINNER',
-          text: 'Looking at your May budget: income S/ 1,200, expenses S/ 481, net S/ 719. What percentage of your income are you saving?',
+          difficulty: 'Principiante',
+          text: 'Mirando tu presupuesto de mayo: ingreso S/ 1 200, gastos S/ 481, neto S/ 719. ¿Qué porcentaje de tu ingreso estás ahorrando?',
           options: ['30%', '40%', '50%', '60%'],
         ),
       ],
@@ -317,7 +317,7 @@ class MockQuizApiService extends QuizApiService {
       score: score,
       correctCount: correct,
       totalCount: total,
-      level: score >= 80 ? 'advanced' : score >= 50 ? 'intermediate' : 'beginner',
+      level: score >= 80 ? 'Avanzado' : score >= 50 ? 'Intermedio' : 'Principiante',
       feedback: feedback,
     );
   }
@@ -343,10 +343,10 @@ class MockSurveysApiService extends SurveysApiService {
   Future<SurveyResult> submitPost(Map<String, String> answers) async =>
       const SurveyResult(
         score: 85.0,
-        level: 'advanced',
+        level: 'Avanzado',
         improvement: 13.0,
         xpEarned: 75,
-        badgeUnlocked: 'Budget Master',
+        badgeUnlocked: 'Maestro del presupuesto',
       );
 
   @override
@@ -358,61 +358,61 @@ class MockSurveysApiService extends SurveysApiService {
         const SurveyQuestion(
           id: 'sus-1',
           order: 1,
-          text: 'I think that I would like to use this app frequently.',
+          text: 'Creo que me gustaría usar esta aplicación con frecuencia.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-2',
           order: 2,
-          text: 'I found the app unnecessarily complex.',
+          text: 'Encontré la aplicación innecesariamente compleja.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-3',
           order: 3,
-          text: 'I thought the app was easy to use.',
+          text: 'Me pareció que la aplicación era fácil de usar.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-4',
           order: 4,
-          text: 'I would need the support of a technical person to use this app.',
+          text: 'Necesitaría el apoyo de una persona técnica para poder usar esta aplicación.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-5',
           order: 5,
-          text: 'I found the various functions in this app well integrated.',
+          text: 'Encontré que las distintas funciones de la aplicación estaban bien integradas.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-6',
           order: 6,
-          text: 'I thought there was too much inconsistency in this app.',
+          text: 'Pensé que había demasiada inconsistencia en esta aplicación.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-7',
           order: 7,
-          text: 'I imagine that most people would learn to use this app quickly.',
+          text: 'Imagino que la mayoría de las personas aprenderían a usar esta aplicación rápidamente.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-8',
           order: 8,
-          text: 'I found the app very cumbersome to use.',
+          text: 'Encontré la aplicación muy engorrosa de usar.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-9',
           order: 9,
-          text: 'I felt very confident using the app.',
+          text: 'Me sentí muy seguro usando la aplicación.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-10',
           order: 10,
-          text: 'I needed to learn a lot of things before I could use this app.',
+          text: 'Necesité aprender muchas cosas antes de poder usar esta aplicación.',
           options: ['1', '2', '3', '4', '5'],
         ),
       ],
@@ -568,16 +568,16 @@ class MockCategoryApiService extends CategoryApiService {
   static final _custom = <CategoryModel>[];
 
   static const _system = <CategoryModel>[
-    CategoryModel(id: 'cat-food', name: 'Food', type: CategoryType.system),
-    CategoryModel(id: 'cat-transport', name: 'Transportation', type: CategoryType.system),
-    CategoryModel(id: 'cat-housing', name: 'Housing', type: CategoryType.system),
-    CategoryModel(id: 'cat-utilities', name: 'Utilities', type: CategoryType.system),
-    CategoryModel(id: 'cat-health', name: 'Health', type: CategoryType.system),
-    CategoryModel(id: 'cat-entertainment', name: 'Entertainment', type: CategoryType.system),
-    CategoryModel(id: 'cat-shopping', name: 'Shopping', type: CategoryType.system),
-    CategoryModel(id: 'cat-subscriptions', name: 'Subscriptions', type: CategoryType.system),
-    CategoryModel(id: 'cat-savings', name: 'Savings', type: CategoryType.system),
-    CategoryModel(id: 'cat-other', name: 'Other', type: CategoryType.system),
+    CategoryModel(id: 'cat-food', name: 'Comida', type: CategoryType.system),
+    CategoryModel(id: 'cat-transport', name: 'Transporte', type: CategoryType.system),
+    CategoryModel(id: 'cat-housing', name: 'Vivienda', type: CategoryType.system),
+    CategoryModel(id: 'cat-utilities', name: 'Servicios', type: CategoryType.system),
+    CategoryModel(id: 'cat-health', name: 'Salud', type: CategoryType.system),
+    CategoryModel(id: 'cat-entertainment', name: 'Entretenimiento', type: CategoryType.system),
+    CategoryModel(id: 'cat-shopping', name: 'Compras', type: CategoryType.system),
+    CategoryModel(id: 'cat-subscriptions', name: 'Suscripciones', type: CategoryType.system),
+    CategoryModel(id: 'cat-savings', name: 'Ahorro', type: CategoryType.system),
+    CategoryModel(id: 'cat-other', name: 'Otros', type: CategoryType.system),
   ];
 
   @override
