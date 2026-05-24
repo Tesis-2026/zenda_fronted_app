@@ -45,7 +45,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } else {
       state = state.copyWith(
         isLoading: false,
-        error: result.error ?? 'Unknown error',
+        error: result.error ?? 'Error desconocido',
       );
     }
   }
@@ -65,7 +65,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } else {
       state = state.copyWith(
         isLoading: false,
-        error: result.error ?? 'Unknown error',
+        error: result.error ?? 'Error desconocido',
       );
     }
   }

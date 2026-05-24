@@ -54,8 +54,8 @@ int _isoWeekNumber(DateTime date) {
   return woy;
 }
 
-const _monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
+const _monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 // Hardcoded demo data for May 2026 shown when the API is unavailable
 const _demoMaySummary = PeriodSummary(
@@ -63,11 +63,11 @@ const _demoMaySummary = PeriodSummary(
   totalExpense: 1240,
   netBalance: 760,
   topCategories: [
-    TopCategoryItem(name: 'Food', amount: 320),
-    TopCategoryItem(name: 'Transport', amount: 210),
-    TopCategoryItem(name: 'Utilities', amount: 180),
-    TopCategoryItem(name: 'Entertainment', amount: 150),
-    TopCategoryItem(name: 'Health', amount: 90),
+    TopCategoryItem(name: 'Comida', amount: 320),
+    TopCategoryItem(name: 'Transporte', amount: 210),
+    TopCategoryItem(name: 'Servicios', amount: 180),
+    TopCategoryItem(name: 'Entretenimiento', amount: 150),
+    TopCategoryItem(name: 'Salud', amount: 90),
   ],
 );
 
@@ -220,7 +220,7 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
         if (!mounted) return;
         showAppToast(
           context,
-          'Report ready — PDF export available when connected to the backend.',
+          'Reporte listo — la exportación a PDF estará disponible cuando te conectes al backend.',
           type: ToastType.success,
         );
         return;
@@ -234,7 +234,7 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
       if (!mounted) return;
       await SharePlus.instance.share(ShareParams(
         files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: 'Zenda Report — ${_monthNames[_month - 1]} $_year',
+        subject: 'Reporte Zenda — ${_monthNames[_month - 1]} $_year',
       ));
     } catch (_) {
       if (!mounted) return;
@@ -834,7 +834,7 @@ class _AiInsightsCard extends StatelessWidget {
             _InsightBullet(
               icon: Icons.circle,
               iconColor: const Color(0xFF34D399),
-              text: '${summary.topCategories.first.name} spending is above your average.',
+              text: 'El gasto en ${summary.topCategories.first.name} está por encima de tu promedio.',
             ),
             const SizedBox(height: 8),
           ] else ...[
@@ -842,19 +842,19 @@ class _AiInsightsCard extends StatelessWidget {
             const _InsightBullet(
               icon: Icons.circle,
               iconColor: Color(0xFF34D399),
-              text: 'You saved S/ 760 this month — 38% of your income. That\'s above the recommended 20%!',
+              text: 'Ahorraste S/ 760 este mes — 38% de tus ingresos. ¡Supera el 20% recomendado!',
             ),
             const SizedBox(height: 8),
             const _InsightBullet(
               icon: Icons.circle,
               iconColor: Color(0xFFF97316),
-              text: 'Food spending exceeded budget by S/ 20 (120% used). Consider meal planning.',
+              text: 'El gasto en Comida superó el presupuesto por S/ 20 (120% usado). Considera planificar tus comidas.',
             ),
             const SizedBox(height: 8),
             const _InsightBullet(
               icon: Icons.circle,
               iconColor: Color(0xFF60A5FA),
-              text: 'You\'re on track to reach your Emergency Fund goal in ~14 months at current pace.',
+              text: 'Vas en camino a alcanzar tu meta de Fondo de Emergencia en ~14 meses al ritmo actual.',
             ),
           ],
           if (summary.topCategories.isNotEmpty) ...[

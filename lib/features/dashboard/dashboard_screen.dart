@@ -442,7 +442,7 @@ class _BudgetRuleCard extends StatelessWidget {
               GestureDetector(
                 onTap: () => context.push('/budgets'),
                 child: const Text(
-                  'Manage →',
+                  'Gestionar →',
                   style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 12,

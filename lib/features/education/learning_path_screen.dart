@@ -24,27 +24,27 @@ class _PathStep {
 const _demoPath = [
   _PathStep(
     'topic-3',
-    'No savings recorded in May — building an emergency fund is your highest priority right now.',
+    'No registraste ahorros en mayo — construir un fondo de emergencia es tu mayor prioridad ahora mismo.',
   ),
   _PathStep(
     'topic-2',
-    'Food is at 77% and Health at 80% of their budgets. Better planning keeps you on track.',
+    'Comida está al 77% y Salud al 80% de sus presupuestos. Planificar mejor te ayuda a mantener el rumbo.',
   ),
   _PathStep(
     'topic-4',
-    'Automating a small transfer on payday removes willpower from the equation.',
+    'Automatizar una pequeña transferencia el día de pago elimina la fuerza de voluntad de la ecuación.',
   ),
   _PathStep(
     'topic-1',
-    'Review: 58% of your spending goes to Needs this month, above the 50% target.',
+    'Revisión: el 58% de tu gasto se va en Necesidades este mes, por encima del objetivo del 50%.',
   ),
   _PathStep(
     'topic-5',
-    'You have a Visa Credit card — understanding interest will save you money every month.',
+    'Tienes una tarjeta de crédito Visa — entender los intereses te ahorrará dinero cada mes.',
   ),
   _PathStep(
     'topic-6',
-    'Once your emergency fund reaches S/ 3 000, investing is your natural next milestone.',
+    'Cuando tu fondo de emergencia llegue a S/ 3 000, invertir es tu siguiente meta natural.',
   ),
 ];
 
@@ -76,7 +76,7 @@ class LearningPathScreen extends ConsumerWidget {
       appBar: ZendaAppBar(title: l10n.learningPathTitle),
       body: pathAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(child: Text('Could not load learning path')),
+        error: (_, _) => const Center(child: Text('No se pudo cargar la ruta de aprendizaje')),
         data: (topics) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           children: [
@@ -133,7 +133,7 @@ class _AiBanner extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    'AI Personalized',
+                    'Personalizado por IA',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -143,7 +143,7 @@ class _AiBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Topics ordered by what will help you most this month.',
+                  'Temas ordenados por lo que más te ayudará este mes.',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -153,7 +153,7 @@ class _AiBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Based on May spending — no savings yet, food at 77%, health at 80%.',
+                  'Según tus gastos de mayo — aún sin ahorros, comida al 77%, salud al 80%.',
                   style: TextStyle(
                     fontSize: 11,
                     color: Color(0xFF9CA3AF),
@@ -183,8 +183,8 @@ class _PathCard extends StatelessWidget {
   final VoidCallback onTap;
 
   Color _diffColor(String d) => switch (d.toLowerCase()) {
-        'beginner' => const Color(0xFF34D399),
-        'intermediate' => const Color(0xFFF97316),
+        'principiante' || 'beginner' => const Color(0xFF34D399),
+        'intermedio' || 'intermediate' => const Color(0xFFF97316),
         _ => const Color(0xFFEF4444),
       };
 
@@ -276,7 +276,7 @@ class _PathCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '${topic.difficulty[0].toUpperCase()}${topic.difficulty.substring(1)}',
+                          topic.difficulty,
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
@@ -315,7 +315,7 @@ class _PathCard extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        done ? 'Review →' : 'Start →',
+                        done ? 'Repasar →' : 'Empezar →',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

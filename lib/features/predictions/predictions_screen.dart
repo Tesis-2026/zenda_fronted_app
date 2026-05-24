@@ -344,7 +344,7 @@ class _ExpenseForecastCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Zenda AI Insight',
+                        'Análisis IA de Zenda',
                         style: Theme.of(context)
                             .textTheme
                             .labelMedium

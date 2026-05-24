@@ -349,16 +349,12 @@ class _DifficultyChip extends StatelessWidget {
   const _DifficultyChip({required this.difficulty});
 
   Color get _color {
-    switch (difficulty.toUpperCase()) {
-      case 'BEGINNER':
-        return const Color(0xFF43A047);
-      case 'INTERMEDIATE':
-        return const Color(0xFFFB8C00);
-      case 'ADVANCED':
-        return const Color(0xFFE53935);
-      default:
-        return Colors.grey;
-    }
+    return switch (difficulty.toLowerCase()) {
+      'principiante' || 'beginner' => const Color(0xFF43A047),
+      'intermedio' || 'intermediate' => const Color(0xFFFB8C00),
+      'avanzado' || 'advanced' => const Color(0xFFE53935),
+      _ => Colors.grey,
+    };
   }
 
   @override

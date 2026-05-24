@@ -291,7 +291,7 @@ class _StrengthBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (level == 0) return const SizedBox.shrink();
 
-    final labels = ['', 'Weak', 'Fair', 'Strong'];
+    final labels = ['', 'Débil', 'Aceptable', 'Fuerte'];
     final colors = [
       Colors.transparent,
       const Color(0xFFEF4444),

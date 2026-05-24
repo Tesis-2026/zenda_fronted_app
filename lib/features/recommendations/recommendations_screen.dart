@@ -132,13 +132,13 @@ class _RecommendationCard extends StatelessWidget {
   String _labelForType(String type) {
     switch (type.toUpperCase()) {
       case 'SAVING':
-        return 'SAVINGS';
+        return 'AHORRO';
       case 'BUDGET':
-        return 'BUDGET';
+        return 'PRESUPUESTO';
       case 'GOAL':
-        return 'GOAL';
+        return 'META';
       case 'SPENDING':
-        return 'SPENDING';
+        return 'GASTO';
       default:
         return type.toUpperCase();
     }

@@ -347,8 +347,8 @@ class _CreateBudgetSheetState extends State<_CreateBudgetSheet> {
   bool _saving = false;
 
   static const _monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
   ];
 
   @override
@@ -555,11 +555,7 @@ class _EditBudgetSheetState extends State<_EditBudgetSheet> {
             onClose: () => context.pop(),
           ),
           const SizedBox(height: 20),
-          FieldLabel(
-            l10n.budgetCategoryAll.split(' ').first == 'All'
-                ? 'Category'
-                : 'Categoría',
-          ),
+          const FieldLabel('Categoría'),
           const SizedBox(height: 8),
           AppCard(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -713,7 +709,7 @@ class _BucketCell extends StatelessWidget {
           ),
           if (limit > 0)
             Text(
-              'of S/ ${limit.toStringAsFixed(0)}',
+              'de S/ ${limit.toStringAsFixed(0)}',
               style: const TextStyle(fontSize: 11, color: AppColors.textSubtle),
             ),
         ],

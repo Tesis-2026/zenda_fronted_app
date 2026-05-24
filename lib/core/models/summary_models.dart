@@ -31,7 +31,7 @@ class DailyBreakdownItem {
     final parts = date.split('-');
     if (parts.length < 3) return date;
     final weekday = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2])).weekday;
-    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     return labels[weekday - 1];
   }
 }
@@ -168,7 +168,7 @@ class MonthComparisonEntry {
       );
 
   String get label {
-    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     return names[month - 1];
   }
 }
