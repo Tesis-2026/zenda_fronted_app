@@ -84,6 +84,11 @@ class TransactionApiService {
     // or AI_OVERRIDDEN (user later changed the category).
     String? aiSuggestedCategoryName,
     double? aiConfidence,
+    /// Stable key for safe retries (Integration fix #6). Pass the local
+    /// transaction id so any automatic retry (offline-queue flush,
+    /// network blip) replays the cached response instead of creating
+    /// a duplicate row server-side.
+    String? idempotencyKey,
   }) async {
     // Transfers are local-only; no backend call needed.
     if (kind == TransactionKind.transfer) {
@@ -119,7 +124,12 @@ class TransactionApiService {
       }
     }
 
-    final json = await ApiClient.post('/transactions', body, authenticated: true);
+    final json = await ApiClient.post(
+      '/transactions',
+      body,
+      authenticated: true,
+      idempotencyKey: idempotencyKey,
+    );
 
     final rawChallenges = json['newlyCompletedChallenges'];
     final completedChallenges =

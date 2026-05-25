@@ -511,6 +511,7 @@ class MockTransactionApiService extends TransactionApiService {
     String? customCategoryName,
     String? aiSuggestedCategoryName,
     double? aiConfidence,
+    String? idempotencyKey,
   }) async {
     return (completedChallenges: <String>[], anomalyAlert: null);
   }
