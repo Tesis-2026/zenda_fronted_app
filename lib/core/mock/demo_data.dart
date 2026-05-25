@@ -952,13 +952,15 @@ abstract final class DemoData {
 
   static final expensePrediction = PredictionResult(
     period: '2026-06',
-    predictedAmount: 460.00,
-    confidenceLevel: 0.78,
-    narrative: 'Según tus últimos 3 meses, estimamos tus gastos de junio en S/ 460. Tus costos de comida y transporte se mantienen estables. Reducir una de tus suscripciones podría llevarlo por debajo de S/ 430.',
+    predictedTotal: 460.00,
+    confidence: PredictionConfidence.medium,
+    confidenceInterval: PredictionInterval(lower: 391.00, upper: 529.00),
+    narrative:
+        'Según tus últimos 3 meses, estimamos tus gastos de junio en S/ 460. Tus costos de comida y transporte se mantienen estables. Reducir una de tus suscripciones podría llevarlo por debajo de S/ 430.',
     projectedBalance: 780.00,
     budgetUsageFraction: 0.73,
     vsLastMonthLabel: '+8% vs abril',
-    topCategories: [
+    categories: [
       PredictionCategory(
         name: 'Comida',
         amount: 320.00,

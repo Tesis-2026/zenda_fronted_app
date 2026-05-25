@@ -62,7 +62,7 @@ class _PredictionsScreenState extends ConsumerState<PredictionsScreen> {
                 message: l10n.predictionsErrorLoad,
                 onRetry: () => ref.invalidate(_expensePredictionProvider),
               ),
-              data: (p) => p.confidenceLevel >= 0.60
+              data: (p) => p.confidenceFraction >= 0.60
                   ? _ExpenseForecastCard(result: p)
                   : _LowConfidenceCard(message: l10n.predictionsLowConfidence),
             ),
@@ -124,13 +124,13 @@ class _ExpenseForecastCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final confidencePct = (result.confidenceLevel * 100).toStringAsFixed(0);
+    final confidencePct = (result.confidenceFraction * 100).toStringAsFixed(0);
 
     // Projected balance is total - predicted expenses (or the predicted amount as balance proxy)
-    final projectedBalance = result.projectedBalance ?? result.predictedAmount;
+    final projectedBalance = result.projectedBalance ?? result.predictedTotal;
 
-    // Top categories from result (may be null for older API responses)
-    final categories = result.topCategories ?? const <PredictionCategory>[];
+    // Top categories from result (empty when AI didn't emit per-category split).
+    final categories = result.categories;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -219,7 +219,7 @@ class _ExpenseForecastCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      'S/ ${result.predictedAmount.toStringAsFixed(0)}',
+                      'S/ ${result.predictedTotal.toStringAsFixed(0)}',
                       style: const TextStyle(
                         color: Color(0xFFEF4444),
                         fontWeight: FontWeight.w700,
