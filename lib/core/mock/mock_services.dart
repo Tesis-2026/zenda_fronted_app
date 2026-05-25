@@ -432,14 +432,32 @@ class MockSurveysApiService extends SurveysApiService {
 }
 
 class MockAiChatApiService extends AiChatApiService {
+  // In-memory transcript so the demo behaves like the real backend:
+  // history persists across sends within the same app run, and is
+  // wiped on closeActive().
+  final List<ChatMessage> _history = [];
+
   @override
-  Future<String> sendMessage(List<ChatMessage> messages) async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    final last = messages.lastWhere(
-      (m) => m.role == 'user',
-      orElse: () => messages.last,
+  Future<ActiveConversation> getActive() async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    return ActiveConversation(
+      conversationId: _history.isEmpty ? null : 'mock-conversation',
+      messages: List.unmodifiable(_history),
     );
-    return _respond(last.content.toLowerCase());
+  }
+
+  @override
+  Future<ChatReply> sendMessage(String message) async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    _history.add(ChatMessage(role: 'user', content: message));
+    final reply = _respond(message.toLowerCase());
+    _history.add(ChatMessage(role: 'assistant', content: reply));
+    return ChatReply(conversationId: 'mock-conversation', reply: reply);
+  }
+
+  @override
+  Future<void> closeActive() async {
+    _history.clear();
   }
 
   String _respond(String input) {

@@ -29,15 +29,42 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Fetch the server-persisted history first; fall back to a welcome
+    // bubble (UI-only, not persisted) when the user has no prior session.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      setState(() => _messages.add(
-            _ChatBubble(
-              text: context.l10n.aiChatWelcomeDemo,
-              isUser: false,
-              isWelcome: true,
-            ),
-          ));
+      try {
+        final active = await ref.read(aiChatServiceProvider).getActive();
+        if (!mounted) return;
+        if (active.messages.isEmpty) {
+          setState(() => _messages.add(
+                _ChatBubble(
+                  text: context.l10n.aiChatWelcomeDemo,
+                  isUser: false,
+                  isWelcome: true,
+                ),
+              ));
+        } else {
+          setState(() {
+            _messages.addAll(active.messages.map(
+              (m) => _ChatBubble(text: m.content, isUser: m.role == 'user'),
+            ));
+          });
+          _scrollToBottom();
+        }
+      } catch (_) {
+        if (!mounted) return;
+        // Best-effort — show the welcome bubble if /active fails (e.g.
+        // offline, expired token). The next sendMessage will recreate
+        // the conversation server-side.
+        setState(() => _messages.add(
+              _ChatBubble(
+                text: context.l10n.aiChatWelcomeDemo,
+                isUser: false,
+                isWelcome: true,
+              ),
+            ));
+      }
     });
   }
 
@@ -60,14 +87,11 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
     _scrollToBottom();
 
     try {
-      final history = _messages
-          .where((m) => !m.isWelcome)
-          .map((m) => ChatMessage(role: m.isUser ? 'user' : 'assistant', content: m.text))
-          .toList();
-
-      final reply = await ref.read(aiChatServiceProvider).sendMessage(history);
+      // Backend owns the conversation history (B7). We send only the new
+      // user message; the server appends it + the assistant reply.
+      final result = await ref.read(aiChatServiceProvider).sendMessage(text);
       if (mounted) {
-        setState(() => _messages.add(_ChatBubble(text: reply, isUser: false)));
+        setState(() => _messages.add(_ChatBubble(text: result.reply, isUser: false)));
         _scrollToBottom();
       }
     } catch (_) {

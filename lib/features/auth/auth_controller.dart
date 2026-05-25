@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/user.dart';
 import '../../core/services/api_client.dart';
 import '../../core/services/auth_api_service.dart';
+import '../../core/services/recommendations_api_service.dart' show aiChatServiceProvider;
 import '../../features/dashboard/dashboard_providers.dart';
 
 export '../../core/services/auth_api_service.dart' show LockoutInfo;
@@ -75,6 +76,13 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> logout() async {
     final authService = ref.read(authServiceProvider);
+    // Close the AI conversation server-side so the next session starts
+    // fresh — best-effort, must not block sign-out if it fails.
+    try {
+      await ref.read(aiChatServiceProvider).closeActive();
+    } catch (_) {
+      // Network/auth error during best-effort cleanup — ignore.
+    }
     await authService.logout();
     _clearDataProviders();
     state = const AuthState.unauthenticated();
