@@ -77,6 +77,9 @@ class SyncService {
           customCategoryName: entry.customCategoryName,
           aiSuggestedCategoryName: entry.aiSuggestedCategoryName,
           aiConfidence: entry.aiConfidence,
+          // Stable key per queued entry so the eventual retry replays
+          // the server response instead of duplicating.
+          idempotencyKey: entry.txId,
         );
         await _queue.remove(entry.txId);
         _retryCount.remove(entry.txId);

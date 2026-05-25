@@ -303,6 +303,10 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           customCategoryName: customName,
           aiSuggestedCategoryName: state.aiSuggestedCategoryName,
           aiConfidence: state.aiConfidence,
+          // Local tx id is unique per save attempt — reuse it as the
+          // Idempotency-Key so any retry (network blip, queue flush)
+          // replays the cached response instead of inserting again.
+          idempotencyKey: tx.id,
         );
         completedNames = result.completedChallenges;
 

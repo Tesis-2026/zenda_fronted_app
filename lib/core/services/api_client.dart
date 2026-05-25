@@ -170,11 +170,20 @@ class ApiClient {
     String path,
     Map<String, dynamic> body, {
     bool authenticated = false,
+    String? idempotencyKey,
   }) async {
     final url = '$_kBaseUrl$path';
     final headers = authenticated
         ? await _authHeaders()
         : {HttpHeaders.contentTypeHeader: 'application/json'};
+    // Idempotency-Key (B28) lets the server dedupe automatic retries —
+    // a mobile network glitch that succeeds on retry should NOT create
+    // a duplicate transaction. The key must be stable per logical
+    // action (caller's responsibility); the server caches the first
+    // response and replays it on subsequent calls with the same key.
+    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+      headers['idempotency-key'] = idempotencyKey;
+    }
 
     try {
       var response = await http
