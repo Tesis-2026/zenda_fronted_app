@@ -130,17 +130,82 @@ class ChatMessage {
   Map<String, dynamic> toJson() => {'role': role, 'content': content};
 }
 
+/// Reply returned by `POST /ai/chat`. The backend persists the user
+/// message and the assistant reply on the active conversation; the id
+/// is returned so a follow-up screen could deep-link to a transcript.
+class ChatReply {
+  final String conversationId;
+  final String reply;
+
+  const ChatReply({required this.conversationId, required this.reply});
+}
+
+/// Snapshot of the user's active AI conversation. `conversationId` is
+/// null when no conversation has been opened yet — the next
+/// `sendMessage` call will create one server-side.
+class ActiveConversation {
+  final String? conversationId;
+  final List<ChatMessage> messages;
+
+  const ActiveConversation({
+    required this.conversationId,
+    required this.messages,
+  });
+
+  factory ActiveConversation.empty() =>
+      const ActiveConversation(conversationId: null, messages: []);
+}
+
 abstract class AiChatApiService {
-  Future<String> sendMessage(List<ChatMessage> messages);
+  /// Loads the user's active conversation + ordered history. Used on
+  /// chat-screen open so history survives app restarts.
+  Future<ActiveConversation> getActive();
+
+  /// Sends a single user message. Backend appends the message + the
+  /// assistant reply to the active conversation (creates one if needed).
+  Future<ChatReply> sendMessage(String message);
+
+  /// Marks the active conversation CLOSED. Messages stay in the DB.
+  /// Called from logout so the next session starts fresh.
+  Future<void> closeActive();
 }
 
 class LiveAiChatApiService extends AiChatApiService {
   @override
-  Future<String> sendMessage(List<ChatMessage> messages) async {
-    final body = await ApiClient.post('/ai/chat', {
-      'messages': messages.map((m) => m.toJson()).toList(),
-    });
-    return body['reply'] as String? ?? 'No se recibió respuesta.';
+  Future<ActiveConversation> getActive() async {
+    final body = await ApiClient.get('/ai/chat/active');
+    final rawMessages = body['messages'];
+    final messages = rawMessages is List
+        ? rawMessages
+            .cast<Map<String, dynamic>>()
+            .map((m) => ChatMessage(
+                  role: m['role'] as String,
+                  content: m['content'] as String,
+                ))
+            .toList()
+        : <ChatMessage>[];
+    return ActiveConversation(
+      conversationId: body['conversationId'] as String?,
+      messages: messages,
+    );
+  }
+
+  @override
+  Future<ChatReply> sendMessage(String message) async {
+    final body = await ApiClient.post(
+      '/ai/chat',
+      {'message': message},
+      authenticated: true,
+    );
+    return ChatReply(
+      conversationId: (body['conversationId'] as String?) ?? '',
+      reply: (body['reply'] as String?) ?? 'No se recibió respuesta.',
+    );
+  }
+
+  @override
+  Future<void> closeActive() async {
+    await ApiClient.post('/ai/chat/close', {}, authenticated: true);
   }
 }
 
