@@ -105,6 +105,31 @@ DateTime? _parseDate(Object? raw) {
   return null;
 }
 
+/// Acceptance-rate stats for the authenticated user. Feeds the
+/// `Acceptance Rate >= 60%` thesis KPI dashboard (US-0902).
+class RecommendationStats {
+  final int total;
+  final int accepted;
+
+  /// `accepted / total`, 0..1. Backend returns 0 when total is 0
+  /// (no divide-by-zero blow-up).
+  final double acceptanceRate;
+
+  const RecommendationStats({
+    required this.total,
+    required this.accepted,
+    required this.acceptanceRate,
+  });
+
+  factory RecommendationStats.fromJson(Map<String, dynamic> json) {
+    return RecommendationStats(
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      accepted: (json['accepted'] as num?)?.toInt() ?? 0,
+      acceptanceRate: (json['acceptanceRate'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
 class RecommendationsApiService {
   Future<List<Recommendation>> getAll() async {
     final list = await ApiClient.getList('/recommendations');
@@ -112,6 +137,14 @@ class RecommendationsApiService {
         .cast<Map<String, dynamic>>()
         .map(Recommendation.fromJson)
         .toList();
+  }
+
+  /// Returns acceptance-rate stats for the current user. Used by the
+  /// dashboard to surface the Acceptance Rate KPI without recomputing
+  /// it client-side from the full recommendation list.
+  Future<RecommendationStats> getStats() async {
+    final body = await ApiClient.get('/recommendations/stats');
+    return RecommendationStats.fromJson(body);
   }
 
   Future<void> submitFeedback(String id, {required bool accepted}) async {
