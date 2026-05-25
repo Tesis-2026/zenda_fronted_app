@@ -417,10 +417,7 @@ class _CreateBudgetSheetState extends State<_CreateBudgetSheet> {
             const SizedBox(height: 16),
             FieldLabel(l10n.budgetAmountLabel),
             const SizedBox(height: 8),
-            AmountInputField(
-              controller: _amountController,
-              label: l10n.budgetAmountLabel,
-            ),
+            AmountInputField(controller: _amountController),
             const SizedBox(height: 16),
             // Period (month + year) row
             Row(
@@ -581,11 +578,7 @@ class _EditBudgetSheetState extends State<_EditBudgetSheet> {
           const SizedBox(height: 16),
           FieldLabel(l10n.budgetAmountLabel),
           const SizedBox(height: 8),
-          AmountInputField(
-            controller: _controller,
-            label: l10n.budgetAmountLabel,
-            autofocus: true,
-          ),
+          AmountInputField(controller: _controller, autofocus: true),
           const SizedBox(height: 24),
           AppPrimaryButton(
             label: l10n.commonSave,
