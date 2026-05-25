@@ -19,7 +19,17 @@ class ApiException implements Exception {
   final int statusCode;
   final String message;
 
-  const ApiException({required this.statusCode, required this.message});
+  /// Full parsed JSON body of the error response. Lets callers read
+  /// contextual fields the server attaches (e.g. `failedAttempts`,
+  /// `lockedUntil` on a login 401 — see B14). May be empty when the
+  /// server returns no body or the body is not JSON.
+  final Map<String, dynamic> body;
+
+  const ApiException({
+    required this.statusCode,
+    required this.message,
+    this.body = const {},
+  });
 
   @override
   String toString() => 'ApiException($statusCode): $message';
@@ -136,7 +146,7 @@ class ApiClient {
     final message = raw is List
         ? raw.cast<Object>().join('; ')
         : (raw as String?) ?? 'Error inesperado';
-    throw ApiException(statusCode: response.statusCode, message: message);
+    throw ApiException(statusCode: response.statusCode, message: message, body: body);
   }
 
   static void _log(String method, String url, int statusCode) {
