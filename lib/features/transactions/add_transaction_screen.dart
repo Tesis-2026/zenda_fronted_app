@@ -62,12 +62,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _classifyDebounce = Timer(const Duration(milliseconds: 800), () async {
       if (!mounted) return;
       setState(() => _isClassifying = true);
-      final suggestion = await ref
+      final result = await ref
           .read(transactionApiServiceProvider)
           .classify(description: note.trim(), amount: amount);
       if (!mounted) return;
+      // Persist the suggestion on the controller regardless of whether
+      // the user later accepts it. The backend uses it on save() to
+      // derive `categorySource = AI / AI_OVERRIDDEN / USER`.
+      if (result != null) {
+        ref
+            .read(newTransactionControllerProvider.notifier)
+            .recordAiSuggestion(result.categoryName, result.confidence);
+      }
       setState(() {
-        _aiSuggestion = suggestion;
+        _aiSuggestion = result?.category;
         _isClassifying = false;
       });
     });
