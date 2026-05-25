@@ -184,9 +184,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     const SizedBox(height: 16),
 
                     // Amount input
+                    Text(
+                      l10n.txAmountLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     AmountInputField(
                       controller: _amountController,
-                      label: l10n.txAmountLabel,
                       onChanged: controller.setAmountFromText,
                       textInputAction: TextInputAction.next,
                     ),
@@ -438,22 +445,34 @@ class _DatePickerTile extends StatelessWidget {
     final text = DateFormat('EEE d MMM, yyyy', 'es').format(date);
     return InkWell(
       onTap: onPick,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Ink(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: colors.card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colors.border),
+          // Match AmountInputField/AppTextField surface so date picker
+          // reads as a tappable form field, not a flat card. The
+          // previous `colors.card` (white) on `colors.bg` (#F9FAFB)
+          // had ~zero contrast — user couldn't see where to tap.
+          color: const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFD1D5DB), width: 1.2),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_month_rounded),
+            Icon(Icons.calendar_month_rounded, color: colors.textMuted),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-            const Icon(Icons.chevron_right_rounded),
+            Icon(Icons.chevron_right_rounded, color: colors.textMuted),
           ],
         ),
       ),

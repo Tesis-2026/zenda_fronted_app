@@ -135,10 +135,9 @@ class _EditTransactionScreenState
               incomeLabel: l10n.txIncome,
             ),
             const SizedBox(height: 16),
-            AmountInputField(
-              controller: _amountController,
-              label: l10n.txAmountLabel,
-            ),
+            FieldLabel(l10n.txAmountLabel),
+            const SizedBox(height: 6),
+            AmountInputField(controller: _amountController),
             const SizedBox(height: 16),
             FieldLabel(l10n.txNoteLabel),
             const SizedBox(height: 6),
