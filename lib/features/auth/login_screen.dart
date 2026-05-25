@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/errors/error_codes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_toast.dart';
@@ -23,53 +22,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  static const _lockoutKey = 'zenda.auth.lockout_until';
-  int _lockoutSeconds = 0;
-  Timer? _lockoutTimer;
+  /// Server-authoritative lockout deadline (B11/B14). Set when the login
+  /// 401 response carries `lockedUntil`. Null when not locked.
+  ///
+  /// We deliberately do NOT persist this to SharedPreferences anymore —
+  /// the server is the source of truth. If the app restarts, the next
+  /// login attempt will get a fresh `lockedUntil` from the 401 body if
+  /// the account is still locked.
+  DateTime? _lockedUntil;
+  Timer? _tickTimer;
 
-  @override
-  void initState() {
-    super.initState();
-    _restoreLockout();
+  int get _lockoutSeconds {
+    final until = _lockedUntil;
+    if (until == null) return 0;
+    final remaining = until.difference(DateTime.now()).inSeconds;
+    return remaining > 0 ? remaining : 0;
   }
 
-  Future<void> _restoreLockout() async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedMs = prefs.getInt(_lockoutKey);
-    if (storedMs == null) return;
-    final expiresAt = DateTime.fromMillisecondsSinceEpoch(storedMs);
-    final remaining = expiresAt.difference(DateTime.now()).inSeconds;
-    if (remaining > 0) {
-      setState(() => _lockoutSeconds = remaining);
-      _startLockoutTimer();
-    } else {
-      await prefs.remove(_lockoutKey);
-    }
-  }
-
-  void _startLockoutCountdown() async {
-    _lockoutTimer?.cancel();
-    final expiresAt = DateTime.now().add(const Duration(minutes: 15));
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_lockoutKey, expiresAt.millisecondsSinceEpoch);
-    setState(() => _lockoutSeconds = 15 * 60);
-    _startLockoutTimer();
-  }
-
-  void _startLockoutTimer() {
-    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+  void _applyLockout(DateTime lockedUntil) {
+    if (!lockedUntil.isAfter(DateTime.now())) return;
+    _tickTimer?.cancel();
+    setState(() => _lockedUntil = lockedUntil);
+    _tickTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
         return;
       }
-      setState(() {
-        if (_lockoutSeconds > 0) {
-          _lockoutSeconds--;
-        } else {
-          t.cancel();
-          SharedPreferences.getInstance().then((p) => p.remove(_lockoutKey));
-        }
-      });
+      if (_lockoutSeconds <= 0) {
+        t.cancel();
+        setState(() => _lockedUntil = null);
+      } else {
+        setState(() {}); // triggers re-render of the countdown text
+      }
     });
   }
 
@@ -81,7 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
-    _lockoutTimer?.cancel();
+    _tickTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -138,7 +122,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           );
         } else if (next.error == AuthErrorCode.accountLocked) {
-          _startLockoutCountdown();
+          // B11: prefer the server-authoritative lockedUntil from the
+          // 401 body (B14). Fall back to a 15-minute estimate only if
+          // an older backend response didn't include the field.
+          final serverLockedUntil = next.lockout?.lockedUntil;
+          _applyLockout(
+            serverLockedUntil ?? DateTime.now().add(const Duration(minutes: 15)),
+          );
           showAppToast(context, l10n.authLockedAccount, type: ToastType.warning);
         } else {
           showAppToast(context, l10n.resolveError(next.error!), type: ToastType.error);

@@ -4,6 +4,8 @@ import '../../core/services/api_client.dart';
 import '../../core/services/auth_api_service.dart';
 import '../../features/dashboard/dashboard_providers.dart';
 
+export '../../core/services/auth_api_service.dart' show LockoutInfo;
+
 // Auth service provider
 final authServiceProvider = Provider<AuthApiService>((ref) {
   return AuthApiService();
@@ -32,7 +34,7 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> login(String email, String password) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, error: null, clearLockout: true);
     final authService = ref.read(authServiceProvider);
 
     final result = await authService.login(
@@ -46,6 +48,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(
         isLoading: false,
         error: result.error ?? 'Error desconocido',
+        lockout: result.lockout,
       );
     }
   }
@@ -104,25 +107,35 @@ class AuthState {
   final bool isLoading;
   final String? error;
 
+  /// Server-reported lockout state from the most recent failed login attempt.
+  /// Populated by the auth notifier from the 401 body (B14); read by
+  /// `LoginScreen` to render the countdown (B11). Cleared on a successful
+  /// login or on the next attempt.
+  final LockoutInfo? lockout;
+
   const AuthState({
     this.user,
     this.isLoading = false,
     this.error,
+    this.lockout,
   });
 
   const AuthState.initial()
       : user = null,
         isLoading = true,
-        error = null;
+        error = null,
+        lockout = null;
 
   const AuthState.authenticated(User this.user)
       : isLoading = false,
-        error = null;
+        error = null,
+        lockout = null;
 
   const AuthState.unauthenticated()
       : user = null,
         isLoading = false,
-        error = null;
+        error = null,
+        lockout = null;
 
   bool get isAuthenticated => user != null;
 
@@ -130,11 +143,14 @@ class AuthState {
     User? user,
     bool? isLoading,
     String? error,
+    LockoutInfo? lockout,
+    bool clearLockout = false,
   }) {
     return AuthState(
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      lockout: clearLockout ? null : (lockout ?? this.lockout),
     );
   }
 }
