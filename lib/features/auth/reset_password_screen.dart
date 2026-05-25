@@ -160,7 +160,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                     if (value == null || value.isEmpty) {
                       return l10n.validationEnterNewPassword;
                     }
-                    if (value.length < 8) return l10n.validationMinPassword;
+                    if (value.length < 12) return l10n.validationMinPassword;
                     return null;
                   },
                 ),
