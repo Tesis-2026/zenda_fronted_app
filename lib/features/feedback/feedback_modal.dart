@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/feedback_api_service.dart';
+import '../../providers/repositories_providers.dart';
 import '../../l10n/l10n_extension.dart';
 
 /// Call [FeedbackModal.show] from any screen to display the feedback bottom sheet.
-class FeedbackModal extends StatefulWidget {
+class FeedbackModal extends ConsumerStatefulWidget {
   const FeedbackModal({super.key, this.screenName});
 
   final String? screenName;
@@ -19,12 +20,11 @@ class FeedbackModal extends StatefulWidget {
   }
 
   @override
-  State<FeedbackModal> createState() => _FeedbackModalState();
+  ConsumerState<FeedbackModal> createState() => _FeedbackModalState();
 }
 
-class _FeedbackModalState extends State<FeedbackModal> {
+class _FeedbackModalState extends ConsumerState<FeedbackModal> {
   final _messageController = TextEditingController();
-  final _service = FeedbackApiService();
 
   String _type = 'GENERAL';
   int _rating = 0;
@@ -156,12 +156,12 @@ class _FeedbackModalState extends State<FeedbackModal> {
 
     setState(() => _submitting = true);
     try {
-      await _service.submit(
-        type: _type,
-        message: message,
-        screenName: widget.screenName,
-        rating: _rating > 0 ? _rating : null,
-      );
+      await ref.read(feedbackApiServiceProvider).submit(
+            type: _type,
+            message: message,
+            screenName: widget.screenName,
+            rating: _rating > 0 ? _rating : null,
+          );
       if (mounted) setState(() => _submitted = true);
     } catch (_) {
       if (mounted) {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
-import '../../core/services/user_api_service.dart';
+import '../../providers/repositories_providers.dart';
 import '../auth/auth_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_extension.dart';
@@ -55,13 +55,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           ? null
           : _universityController.text.trim();
 
-      await UserApiService().updateProfile(
-        age: age,
-        university: university,
-        incomeType: _selectedIncomeType,
-        averageMonthlyIncome: income,
-        profileCompleted: true,
-      );
+      await ref.read(userApiServiceProvider).updateProfile(
+            age: age,
+            university: university,
+            incomeType: _selectedIncomeType,
+            averageMonthlyIncome: income,
+            profileCompleted: true,
+          );
 
       if (mounted) {
         ref.invalidate(authNotifierProvider);
@@ -84,7 +84,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   Future<void> _skip() async {
     try {
-      await UserApiService().updateProfile(profileCompleted: true);
+      await ref.read(userApiServiceProvider).updateProfile(profileCompleted: true);
     } catch (_) {
       // Non-blocking: skip still navigates forward even if the update fails
     }
