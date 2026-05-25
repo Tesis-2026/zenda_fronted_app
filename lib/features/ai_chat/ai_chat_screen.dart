@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/services/ai_chat_api_service.dart';
+import '../../providers/repositories_providers.dart';
 import '../../l10n/l10n_extension.dart';
 
 class _ChatBubble {
@@ -19,7 +20,6 @@ class AiChatScreen extends ConsumerStatefulWidget {
 class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   final _inputController = TextEditingController();
   final _scrollController = ScrollController();
-  final _service = AiChatApiService();
   final _messages = <_ChatBubble>[];
   bool _loading = false;
 
@@ -56,7 +56,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           .map((m) => ChatMessage(role: m.isUser ? 'user' : 'assistant', content: m.text))
           .toList();
 
-      final reply = await _service.sendMessage(history);
+      final reply = await ref.read(aiChatApiServiceProvider).sendMessage(history);
       if (mounted) {
         setState(() => _messages.add(_ChatBubble(text: reply, isUser: false)));
         _scrollToBottom();

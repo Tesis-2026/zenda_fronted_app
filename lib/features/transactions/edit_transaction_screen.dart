@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
-import '../../core/services/transaction_api_service.dart';
+import '../../providers/repositories_providers.dart';
 import '../../l10n/l10n_extension.dart';
 
 /// Pass the raw API map of the transaction via GoRouter `extra`.
@@ -222,7 +222,7 @@ class _EditTransactionScreenState
 
     setState(() => _saving = true);
     try {
-      await TransactionApiService().update(
+      await ref.read(transactionApiServiceProvider).update(
         id: id,
         kind: _kind,
         amount: amount,

@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
-import '../../core/services/transaction_api_service.dart';
+import '../../providers/repositories_providers.dart';
 import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -44,7 +44,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _classifyDebounce = Timer(const Duration(milliseconds: 800), () async {
       if (!mounted) return;
       setState(() => _isClassifying = true);
-      final suggestion = await TransactionApiService()
+      final suggestion = await ref
+          .read(transactionApiServiceProvider)
           .classify(description: note.trim(), amount: amount);
       if (!mounted) return;
       setState(() {

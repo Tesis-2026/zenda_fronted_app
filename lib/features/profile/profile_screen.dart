@@ -3,16 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/models/user.dart';
-import '../../core/services/user_api_service.dart';
+import '../../providers/repositories_providers.dart';
 import '../auth/auth_controller.dart';
 import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
 
-const _kNumberFormatKey = 'zenda.number_format';
 const _kConsentRevokedKey = 'zenda.consent.revoked';
 
 final _profileProvider = FutureProvider<User>((ref) async {
-  return UserApiService().getProfile();
+  return ref.read(userApiServiceProvider).getProfile();
 });
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -26,7 +25,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isEditing = false;
   bool _isSaving = false;
   String _currency = 'PEN';
-  bool _useCommaSeparator = false;
 
   late TextEditingController _nameController;
   late TextEditingController _ageController;
@@ -38,20 +36,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _nameController = TextEditingController();
     _ageController = TextEditingController();
     _universityController = TextEditingController();
-    _loadNumberFormat();
   }
 
-  Future<void> _loadNumberFormat() async {
-    final prefs = await SharedPreferences.getInstance();
-    final value = prefs.getString(_kNumberFormatKey) ?? 'dot';
-    if (mounted) setState(() => _useCommaSeparator = value == 'comma');
-  }
-
+  /// Persists the user's number-format choice via the Riverpod notifier so
+  /// every screen watching `numberFormatProvider` (dashboard, reports) sees
+  /// the change immediately — previous implementation only updated this
+  /// screen's setState and required an app restart elsewhere.
   Future<void> _saveNumberFormat(bool useComma) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kNumberFormatKey, useComma ? 'comma' : 'dot');
+    await ref
+        .read(numberFormatProvider.notifier)
+        .setFormat(useComma ? 'comma' : 'dot');
     if (!mounted) return;
-    setState(() => _useCommaSeparator = useComma);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.l10n.profileNumberFormatSaved)),
     );
@@ -76,12 +71,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _saveEdit() async {
     setState(() => _isSaving = true);
     try {
-      await UserApiService().updateProfile(
-        fullName: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
-        age: int.tryParse(_ageController.text),
-        university: _universityController.text.trim().isEmpty ? null : _universityController.text.trim(),
-        currency: _currency,
-      );
+      await ref.read(userApiServiceProvider).updateProfile(
+            fullName: _nameController.text.trim().isEmpty
+                ? null
+                : _nameController.text.trim(),
+            age: int.tryParse(_ageController.text),
+            university: _universityController.text.trim().isEmpty
+                ? null
+                : _universityController.text.trim(),
+            currency: _currency,
+          );
       ref.invalidate(_profileProvider);
       if (mounted) setState(() => _isEditing = false);
     } catch (_) {
@@ -200,6 +199,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildReadView(User user) {
     final l10n = context.l10n;
+    final numberFormat = ref.watch(numberFormatProvider).asData?.value ?? 'dot';
+    final useCommaSeparator = numberFormat == 'comma';
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -241,7 +242,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               label: Text(l10n.profileNumberFormatComma, style: const TextStyle(fontSize: 12)),
             ),
           ],
-          selected: {_useCommaSeparator},
+          selected: {useCommaSeparator},
           onSelectionChanged: (s) => _saveNumberFormat(s.first),
           style: const ButtonStyle(
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
