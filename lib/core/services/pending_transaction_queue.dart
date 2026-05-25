@@ -14,6 +14,10 @@ class PendingSyncEntry {
   final DateTime occurredAt;
   final String? description;
   final String? customCategoryName;
+  // AI provenance — preserved across the offline queue so retries still
+  // emit `categorySource` correctly (Integration fix #4).
+  final String? aiSuggestedCategoryName;
+  final double? aiConfidence;
 
   const PendingSyncEntry({
     required this.txId,
@@ -23,6 +27,8 @@ class PendingSyncEntry {
     required this.occurredAt,
     this.description,
     this.customCategoryName,
+    this.aiSuggestedCategoryName,
+    this.aiConfidence,
   });
 
   Map<String, dynamic> toJson() => {
@@ -33,6 +39,9 @@ class PendingSyncEntry {
     'occurredAt': occurredAt.toUtc().toIso8601String(),
     if (description != null) 'description': description,
     if (customCategoryName != null) 'customCategoryName': customCategoryName,
+    if (aiSuggestedCategoryName != null)
+      'aiSuggestedCategoryName': aiSuggestedCategoryName,
+    if (aiConfidence != null) 'aiConfidence': aiConfidence,
   };
 
   factory PendingSyncEntry.fromJson(Map<String, dynamic> json) {
@@ -44,6 +53,8 @@ class PendingSyncEntry {
       occurredAt: DateTime.parse(json['occurredAt'] as String),
       description: json['description'] as String?,
       customCategoryName: json['customCategoryName'] as String?,
+      aiSuggestedCategoryName: json['aiSuggestedCategoryName'] as String?,
+      aiConfidence: (json['aiConfidence'] as num?)?.toDouble(),
     );
   }
 }

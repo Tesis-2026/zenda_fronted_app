@@ -75,6 +75,8 @@ class SyncService {
           occurredAt: entry.occurredAt,
           description: entry.description,
           customCategoryName: entry.customCategoryName,
+          aiSuggestedCategoryName: entry.aiSuggestedCategoryName,
+          aiConfidence: entry.aiConfidence,
         );
         await _queue.remove(entry.txId);
         _retryCount.remove(entry.txId);

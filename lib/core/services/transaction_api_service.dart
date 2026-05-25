@@ -40,6 +40,16 @@ typedef CreateTransactionResult = ({
   String? anomalyAlert,
 });
 
+/// Raw output of the AI classify call. The screen uses [category] to
+/// render the suggestion chip; the controller persists [categoryName]
+/// + [confidence] so they can be threaded back to the backend on save
+/// (lets the BE derive `categorySource` = AI / AI_OVERRIDDEN / USER).
+typedef ClassifyResult = ({
+  TransactionCategory? category,
+  String categoryName,
+  double confidence,
+});
+
 class TransactionApiService {
   // Cache of lowercase category name → category UUID from the backend.
   // Populated once per app session; prevents a name-based DB lookup on every
@@ -67,6 +77,13 @@ class TransactionApiService {
     required DateTime occurredAt,
     String? description,
     String? customCategoryName,
+    // AI provenance (Integration fix #4). When the user accepted an AI
+    // suggestion at any point during this draft, the controller passes
+    // the original suggested category name + confidence here so the
+    // backend can derive `categorySource` = AI (final == suggestion)
+    // or AI_OVERRIDDEN (user later changed the category).
+    String? aiSuggestedCategoryName,
+    double? aiConfidence,
   }) async {
     // Transfers are local-only; no backend call needed.
     if (kind == TransactionKind.transfer) {
@@ -87,6 +104,19 @@ class TransactionApiService {
       body['categoryId'] = categoryId;
     } else {
       body['newCategoryName'] = apiName;
+    }
+
+    // suggestedCategoryId + aiConfidence MUST be sent together (the
+    // backend rejects with 400 when only one is present). We can only
+    // resolve the suggestion to a UUID if it's a known seed category;
+    // for AI suggestions that map to a brand-new category we silently
+    // drop the suggestion fields to avoid the paired-field violation.
+    if (aiSuggestedCategoryName != null && aiConfidence != null) {
+      final suggestedId = cache[aiSuggestedCategoryName.toLowerCase()];
+      if (suggestedId != null) {
+        body['suggestedCategoryId'] = suggestedId;
+        body['aiConfidence'] = aiConfidence;
+      }
     }
 
     final json = await ApiClient.post('/transactions', body, authenticated: true);
@@ -155,7 +185,7 @@ class TransactionApiService {
     await ApiClient.delete('/transactions/$id');
   }
 
-  Future<TransactionCategory?> classify({
+  Future<ClassifyResult?> classify({
     required String description,
     required double amount,
   }) async {
@@ -167,7 +197,12 @@ class TransactionApiService {
       );
       final name = json['categoryName'] as String?;
       if (name == null) return null;
-      return categoryFromApiName(name);
+      final confidence = (json['confidence'] as num?)?.toDouble() ?? 0.0;
+      return (
+        category: categoryFromApiName(name),
+        categoryName: name,
+        confidence: confidence,
+      );
     } catch (_) {
       return null;
     }

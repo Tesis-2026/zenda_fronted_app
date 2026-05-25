@@ -28,6 +28,12 @@ class NewTransactionState {
   final String? budgetAlert; // category name at ≥80% after save (US-020)
   final String? anomalyAlert; // category name when spending >20% over avg (US-016)
   final List<String> completedChallengeNames; // titles of auto-completed challenges
+  // AI provenance (Integration fix #4). When the user accepted an AI
+  // classify suggestion during this draft, we keep the original name +
+  // confidence so they survive subsequent category overrides — the
+  // backend uses them to derive AI vs AI_OVERRIDDEN.
+  final String? aiSuggestedCategoryName;
+  final double? aiConfidence;
 
   const NewTransactionState({
     required this.kind,
@@ -45,6 +51,8 @@ class NewTransactionState {
     this.budgetAlert,
     this.anomalyAlert,
     this.completedChallengeNames = const [],
+    this.aiSuggestedCategoryName,
+    this.aiConfidence,
   });
 
   factory NewTransactionState.initial() => NewTransactionState(
@@ -87,11 +95,14 @@ class NewTransactionState {
     String? budgetAlert,
     String? anomalyAlert,
     List<String>? completedChallengeNames,
+    String? aiSuggestedCategoryName,
+    double? aiConfidence,
     bool clearError = false,
     bool clearCategory = false,
     bool clearCustomCategory = false,
     bool clearBudgetAlert = false,
     bool clearAnomalyAlert = false,
+    bool clearAiSuggestion = false,
   }) {
     return NewTransactionState(
       kind: kind ?? this.kind,
@@ -109,6 +120,11 @@ class NewTransactionState {
       budgetAlert: clearBudgetAlert ? null : (budgetAlert ?? this.budgetAlert),
       anomalyAlert: clearAnomalyAlert ? null : (anomalyAlert ?? this.anomalyAlert),
       completedChallengeNames: completedChallengeNames ?? this.completedChallengeNames,
+      aiSuggestedCategoryName: clearAiSuggestion
+          ? null
+          : (aiSuggestedCategoryName ?? this.aiSuggestedCategoryName),
+      aiConfidence:
+          clearAiSuggestion ? null : (aiConfidence ?? this.aiConfidence),
     );
   }
 }
@@ -150,11 +166,26 @@ class NewTransactionController extends Notifier<NewTransactionState> {
   }
 
   void setCategory(TransactionCategory category) {
+    // NOTE: do NOT clear the AI suggestion here — if the user accepted
+    // an AI suggestion earlier and then changes their mind, the BE
+    // needs both `suggestedCategoryId` and the (different) `categoryId`
+    // to derive `categorySource = AI_OVERRIDDEN`.
     state = state.copyWith(category: category, clearCustomCategory: true, clearError: true);
   }
 
   void setCustomCategory(String name) {
     state = state.copyWith(customCategoryName: name, clearCategory: true, clearError: true);
+  }
+
+  /// Records that the AI suggested a category for the current draft.
+  /// Called by the screen whether or not the user later accepts the
+  /// suggestion — the data is needed at save time so the backend can
+  /// classify the resulting transaction as AI / AI_OVERRIDDEN.
+  void recordAiSuggestion(String categoryName, double confidence) {
+    state = state.copyWith(
+      aiSuggestedCategoryName: categoryName,
+      aiConfidence: confidence,
+    );
   }
 
   void setNote(String note) {
@@ -270,6 +301,8 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           occurredAt: state.date,
           description: state.note.isEmpty ? null : state.note,
           customCategoryName: customName,
+          aiSuggestedCategoryName: state.aiSuggestedCategoryName,
+          aiConfidence: state.aiConfidence,
         );
         completedNames = result.completedChallenges;
 
@@ -302,6 +335,8 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           occurredAt: state.date,
           description: state.note.isEmpty ? null : state.note,
           customCategoryName: customName,
+          aiSuggestedCategoryName: state.aiSuggestedCategoryName,
+          aiConfidence: state.aiConfidence,
         ));
       }
 

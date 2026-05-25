@@ -509,6 +509,8 @@ class MockTransactionApiService extends TransactionApiService {
     required DateTime occurredAt,
     String? description,
     String? customCategoryName,
+    String? aiSuggestedCategoryName,
+    double? aiConfidence,
   }) async {
     return (completedChallenges: <String>[], anomalyAlert: null);
   }
@@ -527,12 +529,22 @@ class MockTransactionApiService extends TransactionApiService {
   Future<void> deleteTransaction(String id) async {}
 
   @override
-  Future<TransactionCategory?> classify({
+  Future<ClassifyResult?> classify({
     required String description,
     required double amount,
   }) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final d = description.toLowerCase();
+    final category = _matchCategory(d);
+    if (category == null) return null;
+    return (
+      category: category,
+      categoryName: categoryToApiName(category),
+      confidence: 0.85,
+    );
+  }
+
+  TransactionCategory? _matchCategory(String d) {
     if (d.contains('food') || d.contains('lunch') || d.contains('dinner') ||
         d.contains('breakfast') || d.contains('groceries') ||
         d.contains('supermarket') || d.contains('restaurant') ||
