@@ -20,6 +20,11 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _pageController = PageController();
   int _page = 0;
+  // Celebration screen runs OUTSIDE the PageView (as a separate
+  // scaffold) so adjacent pages can't bleed through the green
+  // background — mock build had the age stepper visibly leaking
+  // through the welcome page.
+  bool _completed = false;
 
   final _ageController = TextEditingController();
   final _universityController = TextEditingController();
@@ -66,10 +71,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
       if (mounted) {
         ref.invalidate(authNotifierProvider);
-        _pageController.nextPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        // Switch to the celebration scaffold instead of advancing the
+        // PageView — PageView now owns only the 4 form steps.
+        setState(() => _completed = true);
       }
     } catch (_) {
       if (mounted) {
@@ -86,8 +90,27 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final l10n = context.l10n;
     final colors = context.colors;
 
+    // Celebration screen renders as its own scaffold — outside the
+    // PageView — so the form pages cannot leak through the green
+    // background.
+    if (_completed) {
+      final userName =
+          ref.watch(authNotifierProvider).user?.name.split(' ').first ?? '';
+      return Scaffold(
+        backgroundColor: AppColors.primary,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(child: _CompletePage(l10n: l10n, userName: userName)),
+              _buildCompleteFooter(l10n),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: _page == 4 ? AppColors.primary : colors.bg,
+      backgroundColor: colors.bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -106,15 +129,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     l10n: l10n,
                   ),
                   _MonthlyIncomePage(controller: _incomeController, l10n: l10n),
-                  _CompletePage(
-                    l10n: l10n,
-                    userName: ref.watch(authNotifierProvider).user?.name.split(' ').first ?? '',
-                  ),
                 ],
               ),
             ),
-            if (_page < 4) _buildFooter(l10n),
-            if (_page == 4) _buildCompleteFooter(l10n),
+            _buildFooter(l10n),
           ],
         ),
       ),
@@ -122,7 +140,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   Widget _buildHeader(AppLocalizations l10n, ZendaColors colors) {
-    if (_page == 4) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Column(
