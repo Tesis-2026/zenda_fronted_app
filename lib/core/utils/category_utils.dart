@@ -35,6 +35,32 @@ abstract final class CategoryUtils {
     'other': Icons.category_rounded,
   };
 
+  /// Spanish display label for a system category whose backend `name` is kept
+  /// in English (English is required for the client's category resolution).
+  /// Unknown names (custom categories the user typed) are returned as-is.
+  static String labelEs(String? name) {
+    if (name == null || name.isEmpty) return '';
+    return switch (name.toLowerCase()) {
+      'food' => 'Comida',
+      'transportation' => 'Transporte',
+      'housing' => 'Vivienda',
+      'utilities' => 'Servicios',
+      'health' => 'Salud',
+      'entertainment' => 'Entretenimiento',
+      'shopping' => 'Compras',
+      'subscriptions' => 'Suscripciones',
+      'cravings' => 'Antojos',
+      'savings' => 'Ahorro',
+      'education' => 'Educación',
+      'other' => 'Otros',
+      'scholarship' => 'Beca',
+      'part-time work' => 'Trabajo part-time',
+      'family' => 'Familia',
+      'freelance' => 'Freelance',
+      _ => name,
+    };
+  }
+
   static IconData iconForCategory(
     String? name, {
     String? iconKey,

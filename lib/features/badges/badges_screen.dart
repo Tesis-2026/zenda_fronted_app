@@ -10,6 +10,22 @@ final badgesServiceProvider = Provider<BadgesApiService>(
   (_) => BadgesApiService(),
 );
 
+/// Spanish display label for badges. Backend badge `name` is kept in English
+/// because it is the code key used by `awardIfNotEarned`. Unknown names (e.g.
+/// demo data already in Spanish) are returned unchanged.
+String _badgeLabelEs(String name) {
+  return switch (name) {
+    'First Transaction' => 'Primera transacción',
+    'Consistency' => 'Constancia',
+    'Goal Achieved' => 'Meta cumplida',
+    'Challenger' => 'Retador',
+    'Financial Sage' => 'Sabio financiero',
+    'Predictor' => 'Predictor',
+    'Budgeter' => 'Presupuestador',
+    _ => name,
+  };
+}
+
 final _badgesProvider = FutureProvider.autoDispose<List<ZendaBadge>>((ref) {
   return ref.read(badgesServiceProvider).getAll();
 });
@@ -205,8 +221,10 @@ class _BadgeTile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                // Always show the badge name (locked names are visible in design)
-                badge.name,
+                // Always show the badge name (locked names are visible in design).
+                // Backend badge names are kept in English (code key for
+                // awardIfNotEarned); map to a Spanish label for display.
+                _badgeLabelEs(badge.name),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

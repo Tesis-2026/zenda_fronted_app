@@ -219,7 +219,7 @@ class _SystemCategoryGrid extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                c.name,
+                CategoryUtils.labelEs(c.name),
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,

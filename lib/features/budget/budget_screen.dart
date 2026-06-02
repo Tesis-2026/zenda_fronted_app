@@ -388,7 +388,7 @@ class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
                       iconKey: c.icon,
                       isCustom: c.isCustom,
                     ),
-                    label: c.name,
+                    label: CategoryUtils.labelEs(c.name),
                     selected: categoryId == c.id,
                     onTap: () => setState(() => categoryId = c.id),
                   ),
@@ -443,8 +443,9 @@ class _EditBudgetBodyState extends State<_EditBudgetBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final categoryName =
-        widget.budget.categoryName ?? l10n.budgetCategoryAll;
+    final categoryName = widget.budget.categoryName != null
+        ? CategoryUtils.labelEs(widget.budget.categoryName)
+        : l10n.budgetCategoryAll;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -678,7 +679,9 @@ class _BudgetCard extends StatelessWidget {
     final color = _progressColor(pct);
     final isOver =
         budget.currentSpent > budget.amountLimit && budget.amountLimit > 0;
-    final categoryName = budget.categoryName ?? l10n.budgetCategoryAll;
+    final categoryName = budget.categoryName != null
+        ? CategoryUtils.labelEs(budget.categoryName)
+        : l10n.budgetCategoryAll;
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 16),
