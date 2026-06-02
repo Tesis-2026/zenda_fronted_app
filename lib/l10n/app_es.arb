@@ -94,6 +94,11 @@
   "dashboardNavTransactions": "MOVS",
   "dashboardNavAi": "IA",
   "dashboardNavGoals": "METAS",
+  "dashboardNavManagement": "GESTIÓN",
+  "managementTabProgress": "Progreso",
+  "managementTabBudgets": "Presupuestos",
+  "managementTabGoals": "Metas",
+  "managementTitle": "Gestión",
   "dashboardNavProfile": "PERFIL",
   "dashboardNavEducation": "EDUC.",
   "dashboardRecord": "Registrar",
@@ -680,7 +685,6 @@
       "total": { "type": "int" }
     }
   },
-  "profileSetupSkip": "Omitir",
   "profileSetupAge": "¿Cuántos años tienes?",
   "profileSetupAgeHint": "Esto nos ayuda a entender tu etapa financiera y personalizar tus insights.",
   "profileSetupUniversity": "¿En qué universidad estudias?",

@@ -47,7 +47,7 @@ class UserMenuButton extends StatelessWidget {
         position.dx - 140,
         position.dy + size.height + 4,
         position.dx + size.width,
-        position.dy + size.height + 4 + 100,
+        position.dy + size.height + 4 + 150,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -105,6 +105,32 @@ class UserMenuButton extends StatelessWidget {
             ],
           ),
         ),
+        const PopupMenuDivider(height: 1),
+        PopupMenuItem<String>(
+          value: 'research',
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.science_outlined, size: 18, color: Color(0xFF374151)),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                l10n.settingsSectionResearch,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
 
@@ -112,6 +138,8 @@ class UserMenuButton extends StatelessWidget {
       context.push('/profile');
     } else if (result == 'settings' && context.mounted) {
       context.push('/settings');
+    } else if (result == 'research' && context.mounted) {
+      context.push('/research');
     }
   }
 }

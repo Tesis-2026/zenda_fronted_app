@@ -4,15 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/category.dart';
+import '../../core/utils/category_utils.dart';
 import '../../core/widgets/app_card.dart';
-import '../../core/widgets/app_primary_button.dart';
-import '../../core/widgets/app_sheet_container.dart';
+import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/green_pill_button.dart';
 import '../../core/widgets/icon_action_button.dart';
-import '../../core/widgets/sheet_header.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/repositories_providers.dart';
 
@@ -90,20 +89,36 @@ class CategoryManagementScreen extends ConsumerWidget {
   }
 
   Future<void> _showAddSheet(BuildContext context, WidgetRef ref) async {
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _AddCategorySheet(
-        onSave: (name) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController();
+    await showAppFormSheet(
+      context,
+      title: l10n.catMgmtAddTitle,
+      primaryLabel: l10n.catSaveButton,
+      body: AppTextField(
+        controller: controller,
+        hintText: l10n.catMgmtAddHint,
+        autofocus: true,
+        maxLength: 40,
+        textCapitalization: TextCapitalization.sentences,
+      ),
+      onSubmit: () async {
+        final name = controller.text.trim();
+        if (name.isEmpty) return false;
+        try {
           await ref.read(categoryApiServiceProvider).create(name);
           ref.invalidate(_categoriesProvider);
-        },
-      ),
+          return true;
+        } catch (_) {
+          if (context.mounted) {
+            showAppToast(context, l10n.catMgmtErrorSave,
+                type: ToastType.error);
+          }
+          return false;
+        }
+      },
     );
-    if (saved == true && context.mounted) {
-      // already invalidated inside the sheet
-    }
+    controller.dispose();
   }
 }
 
@@ -174,21 +189,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-IconData _systemCategoryIcon(String name) {
-  return switch (name.toLowerCase()) {
-    'food' || 'comida' => Icons.restaurant_rounded,
-    'transportation' || 'transporte' => Icons.directions_bus_rounded,
-    'housing' || 'vivienda' => Icons.home_rounded,
-    'utilities' || 'servicios' => Icons.bolt_rounded,
-    'health' || 'salud' => Icons.favorite_rounded,
-    'entertainment' || 'entretenimiento' => Icons.sports_esports_rounded,
-    'shopping' || 'compras' => Icons.shopping_cart_rounded,
-    'subscriptions' || 'suscripciones' => Icons.smartphone_rounded,
-    'savings' || 'ahorro' => Icons.savings_rounded,
-    _ => Icons.category_rounded,
-  };
-}
-
 class _SystemCategoryGrid extends StatelessWidget {
   final List<CategoryModel> categories;
 
@@ -213,7 +213,7 @@ class _SystemCategoryGrid extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                _systemCategoryIcon(c.name),
+                CategoryUtils.iconForCategory(c.name, iconKey: c.icon),
                 size: 24,
                 color: const Color(0xFF374151),
               ),
@@ -256,7 +256,7 @@ class _CustomCategoryTile extends ConsumerWidget {
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.label_rounded, size: 18, color: Color(0xFF6B7280)),
+            child: const Icon(CategoryUtils.customCategoryIcon, size: 18, color: Color(0xFF6B7280)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -292,18 +292,35 @@ class _CustomCategoryTile extends ConsumerWidget {
   }
 
   Future<void> _showEditSheet(BuildContext context, WidgetRef ref) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _EditCategorySheet(
-        category: category,
-        onSave: (name) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController(text: category.name);
+    await showAppFormSheet(
+      context,
+      title: l10n.catMgmtRenameTitle,
+      primaryLabel: l10n.catSaveChanges,
+      body: AppTextField(
+        controller: controller,
+        autofocus: true,
+        maxLength: 40,
+        textCapitalization: TextCapitalization.sentences,
+      ),
+      onSubmit: () async {
+        final name = controller.text.trim();
+        if (name.isEmpty || name == category.name) return true;
+        try {
           await ref.read(categoryApiServiceProvider).rename(category.id, name);
           ref.invalidate(_categoriesProvider);
-        },
-      ),
+          return true;
+        } catch (_) {
+          if (context.mounted) {
+            showAppToast(context, l10n.catMgmtErrorSave,
+                type: ToastType.error);
+          }
+          return false;
+        }
+      },
     );
+    controller.dispose();
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
@@ -325,154 +342,3 @@ class _CustomCategoryTile extends ConsumerWidget {
   }
 }
 
-// ── Add category bottom sheet ─────────────────────────────────────────────────
-
-class _AddCategorySheet extends StatefulWidget {
-  final Future<void> Function(String name) onSave;
-
-  const _AddCategorySheet({required this.onSave});
-
-  @override
-  State<_AddCategorySheet> createState() => _AddCategorySheetState();
-}
-
-class _AddCategorySheetState extends State<_AddCategorySheet> {
-  final _controller = TextEditingController();
-  bool _saving = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final name = _controller.text.trim();
-    if (name.isEmpty) return;
-    setState(() => _saving = true);
-    try {
-      await widget.onSave(name);
-      if (mounted) context.pop(true);
-    } catch (_) {
-      if (mounted) {
-        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AppSheetContainer(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SheetHeader(
-            title: l10n.catMgmtAddTitle,
-            onClose: () => context.pop(),
-          ),
-          const SizedBox(height: 20),
-          AppTextField(
-            controller: _controller,
-            hintText: l10n.catMgmtAddHint,
-            autofocus: true,
-            maxLength: 40,
-            textCapitalization: TextCapitalization.sentences,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submit(),
-          ),
-          const SizedBox(height: 20),
-          AppPrimaryButton(
-            label: l10n.catSaveButton,
-            onPressed: _saving ? null : () => _submit(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Edit category bottom sheet ────────────────────────────────────────────────
-
-class _EditCategorySheet extends StatefulWidget {
-  final CategoryModel category;
-  final Future<void> Function(String name) onSave;
-
-  const _EditCategorySheet({
-    required this.category,
-    required this.onSave,
-  });
-
-  @override
-  State<_EditCategorySheet> createState() => _EditCategorySheetState();
-}
-
-class _EditCategorySheetState extends State<_EditCategorySheet> {
-  late final TextEditingController _controller;
-  bool _saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.category.name);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final name = _controller.text.trim();
-    if (name.isEmpty || name == widget.category.name) {
-      context.pop();
-      return;
-    }
-    setState(() => _saving = true);
-    try {
-      await widget.onSave(name);
-      if (mounted) context.pop();
-    } catch (_) {
-      if (mounted) {
-        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AppSheetContainer(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SheetHeader(
-            title: l10n.catMgmtRenameTitle,
-            onClose: () => context.pop(),
-          ),
-          const SizedBox(height: 20),
-          AppTextField(
-            controller: _controller,
-            autofocus: true,
-            maxLength: 40,
-            textCapitalization: TextCapitalization.sentences,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submit(),
-          ),
-          const SizedBox(height: 20),
-          AppPrimaryButton(
-            label: l10n.catSaveChanges,
-            onPressed: _saving ? null : () => _submit(),
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../l10n/l10n_extension.dart';
 
 /// Persistent pill-style bottom nav.
-/// activeIndex: 0=HOME, 1=TXNS, 2=AI, 3=GOALS, 4=EDUC.
+/// activeIndex: 0=HOME, 1=TXNS, 2=AI, 3=MANAGEMENT, 4=EDUC.
 class AppBottomNav extends StatelessWidget {
   final int activeIndex;
 
@@ -19,7 +19,7 @@ class AppBottomNav extends StatelessWidget {
       case 2:
         context.go('/ai-chat');
       case 3:
-        context.go('/goals');
+        context.go('/management');
       case 4:
         context.go('/education');
     }
@@ -36,14 +36,14 @@ class AppBottomNav extends StatelessWidget {
       l10n.dashboardNavHome,
       l10n.dashboardNavTransactions,
       l10n.dashboardNavAi,
-      l10n.dashboardNavGoals,
+      l10n.dashboardNavManagement,
       l10n.dashboardNavEducation,
     ];
     const icons = <IconData>[
       Icons.home_rounded,
       Icons.receipt_long_rounded,
       Icons.auto_awesome_rounded,
-      Icons.flag_rounded,
+      Icons.account_balance_wallet_rounded,
       Icons.school_rounded,
     ];
 

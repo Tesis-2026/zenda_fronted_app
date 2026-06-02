@@ -15,45 +15,18 @@ final _badgesProvider = FutureProvider.autoDispose<List<ZendaBadge>>((ref) {
 });
 
 class BadgesScreen extends ConsumerWidget {
-  const BadgesScreen({super.key});
+  const BadgesScreen({super.key, this.embedded = false});
+
+  /// When true, returns just the content (no Scaffold/AppBar) so it can be
+  /// hosted inside the Education screen's tab stack.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final badgesAsync = ref.watch(_badgesProvider);
 
-    return Scaffold(
-      backgroundColor: context.colors.bg,
-      appBar: ZendaAppBar(
-        title: l10n.badgesTitle,
-        actions: [
-          badgesAsync.whenOrNull(
-            data: (badges) {
-              final earned = badges.where((b) => b.isEarned).length;
-              return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '$earned ${l10n.badgesEarnedLabel}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF10B981),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ) ?? const SizedBox.shrink(),
-        ],
-      ),
-      body: badgesAsync.when(
+    final body = badgesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
           child: Column(
@@ -141,7 +114,41 @@ class BadgesScreen extends ConsumerWidget {
             ),
           );
         },
+    );
+
+    if (embedded) return body;
+    return Scaffold(
+      backgroundColor: context.colors.bg,
+      appBar: ZendaAppBar(
+        title: l10n.badgesTitle,
+        actions: [
+          badgesAsync.whenOrNull(
+            data: (badges) {
+              final earned = badges.where((b) => b.isEarned).length;
+              return Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '$earned ${l10n.badgesEarnedLabel}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF10B981),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ) ?? const SizedBox.shrink(),
+        ],
       ),
+      body: body,
     );
   }
 }

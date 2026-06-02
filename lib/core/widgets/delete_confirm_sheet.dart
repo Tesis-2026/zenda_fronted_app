@@ -1,48 +1,110 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/l10n_extension.dart';
+import '../theme/app_colors.dart';
 
-Future<bool> showDeleteConfirmSheet(
+/// Visual tone of a [showConfirmSheet].
+enum ConfirmTone {
+  /// Irreversible / dangerous action (delete). Red accent.
+  destructive,
+
+  /// Significant but non-destructive action (sign out). Primary accent.
+  neutral,
+}
+
+/// Standard confirmation bottom sheet for destructive / decision actions.
+///
+/// See `lib/core/widgets/README.md`. Use this for every delete, sign-out, or
+/// irreversible confirmation instead of an ad-hoc [AlertDialog]. Returns `true`
+/// when the user confirms, `false`/`null` otherwise.
+Future<bool> showConfirmSheet(
   BuildContext context, {
   required String title,
   required String message,
+  required String confirmLabel,
+  String? cancelLabel,
+  ConfirmTone tone = ConfirmTone.destructive,
+  IconData? icon,
 }) async {
   final result = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => _DeleteConfirmSheet(title: title, message: message),
+    builder: (_) => _ConfirmSheet(
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel,
+      cancelLabel: cancelLabel,
+      tone: tone,
+      icon: icon,
+    ),
   );
   return result == true;
 }
 
-class _DeleteConfirmSheet extends StatelessWidget {
-  const _DeleteConfirmSheet({required this.title, required this.message});
+/// Destructive-tone shortcut kept for existing call sites.
+Future<bool> showDeleteConfirmSheet(
+  BuildContext context, {
+  required String title,
+  required String message,
+}) {
+  return showConfirmSheet(
+    context,
+    title: title,
+    message: message,
+    confirmLabel: context.l10n.deleteConfirmYes,
+    tone: ConfirmTone.destructive,
+  );
+}
+
+class _ConfirmSheet extends StatelessWidget {
+  const _ConfirmSheet({
+    required this.title,
+    required this.message,
+    required this.confirmLabel,
+    required this.tone,
+    this.cancelLabel,
+    this.icon,
+  });
 
   final String title;
   final String message;
+  final String confirmLabel;
+  final String? cancelLabel;
+  final ConfirmTone tone;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bool destructive = tone == ConfirmTone.destructive;
+    final Color accent = destructive ? AppColors.danger : AppColors.primary;
+    final Color accentBg =
+        destructive ? AppColors.dangerLight : AppColors.primaryLight;
+    final IconData resolvedIcon = icon ??
+        (destructive ? Icons.delete_outline_rounded : Icons.info_outline_rounded);
 
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground,
+        // Sheet top radius token (28) — see README §2.
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      padding: const EdgeInsets.only(bottom: 40),
+      // Reserve the system bottom inset (gesture / transparent nav bar) so the
+      // buttons clear it on edge-to-edge devices.
+      padding: EdgeInsets.only(bottom: 40 + MediaQuery.of(context).padding.bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 12),
             child: Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFD1D5DB),
-                borderRadius: BorderRadius.circular(3),
+                // Grab handle token (#E5E7EB) — aligned with AppSheetContainer.
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
@@ -53,15 +115,11 @@ class _DeleteConfirmSheet extends StatelessWidget {
                 Container(
                   width: 80,
                   height: 80,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFEF2F2),
+                  decoration: BoxDecoration(
+                    color: accentBg,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.delete_outline_rounded,
-                    size: 36,
-                    color: Color(0xFFEF4444),
-                  ),
+                  child: Icon(resolvedIcon, size: 36, color: accent),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -69,7 +127,7 @@ class _DeleteConfirmSheet extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF1F2937),
+                    color: AppColors.textDark,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -78,7 +136,7 @@ class _DeleteConfirmSheet extends StatelessWidget {
                   message,
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF6B7280),
+                    color: AppColors.textMuted,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -89,13 +147,13 @@ class _DeleteConfirmSheet extends StatelessWidget {
                   child: FilledButton(
                     onPressed: () => Navigator.pop(context, true),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFFEF4444),
+                      backgroundColor: accent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     child: Text(
-                      l10n.deleteConfirmYes,
+                      confirmLabel,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -110,14 +168,14 @@ class _DeleteConfirmSheet extends StatelessWidget {
                   child: TextButton(
                     onPressed: () => Navigator.pop(context, false),
                     style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFF3F4F6),
-                      foregroundColor: const Color(0xFF1F2937),
+                      backgroundColor: AppColors.fillLight,
+                      foregroundColor: AppColors.textDark,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     child: Text(
-                      l10n.commonCancel,
+                      cancelLabel ?? l10n.commonCancel,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

@@ -5,6 +5,7 @@ class SavingsGoal {
   final double targetAmount;
   final double currentAmount;
   final String? dueDate;
+  final String? completedAt;
   final String createdAt;
   final String updatedAt;
   final String? deletedAt;
@@ -17,6 +18,7 @@ class SavingsGoal {
     required this.targetAmount,
     required this.currentAmount,
     this.dueDate,
+    this.completedAt,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -38,6 +40,7 @@ class SavingsGoal {
       targetAmount: (json['targetAmount'] as num).toDouble(),
       currentAmount: (json['currentAmount'] as num).toDouble(),
       dueDate: json['dueDate'] as String?,
+      completedAt: json['completedAt'] as String?,
       createdAt: json['createdAt'] as String,
       updatedAt: json['updatedAt'] as String,
       deletedAt: json['deletedAt'] as String?,

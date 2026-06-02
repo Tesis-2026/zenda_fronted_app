@@ -22,7 +22,11 @@ final _challengesProvider =
 const _statusOrder = ['ACTIVE', 'AVAILABLE', 'COMPLETED', 'EXPIRED'];
 
 class ChallengesScreen extends ConsumerWidget {
-  const ChallengesScreen({super.key});
+  const ChallengesScreen({super.key, this.embedded = false});
+
+  /// When true, returns just the content (no Scaffold/AppBar) so it can be
+  /// hosted inside the Education screen's tab stack.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,39 +34,7 @@ class ChallengesScreen extends ConsumerWidget {
     final challengesAsync = ref.watch(_challengesProvider);
     final streakDays = ref.watch(streakProvider);
 
-    return Scaffold(
-      backgroundColor: context.colors.bg,
-      appBar: ZendaAppBar(
-        title: l10n.challengesTitle,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEF3C7),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
-                  const SizedBox(width: 4),
-                  Text(
-                    l10n.streakLabel(streakDays),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFF59E0B),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: challengesAsync.when(
+    final body = challengesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
           child: Column(
@@ -139,7 +111,42 @@ class ChallengesScreen extends ConsumerWidget {
             ),
           );
         },
+    );
+
+    if (embedded) return body;
+    return Scaffold(
+      backgroundColor: context.colors.bg,
+      appBar: ZendaAppBar(
+        title: l10n.challengesTitle,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.streakLabel(streakDays),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFF59E0B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
+      body: body,
     );
   }
 

@@ -273,6 +273,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardNavGoals => 'GOALS';
 
   @override
+  String get dashboardNavManagement => 'MANAGEMENT';
+
+  @override
+  String get managementTabProgress => 'Progress';
+
+  @override
+  String get managementTabBudgets => 'Budgets';
+
+  @override
+  String get managementTabGoals => 'Goals';
+
+  @override
+  String get managementTitle => 'Management';
+
+  @override
   String get dashboardNavProfile => 'PROFILE';
 
   @override
@@ -1482,9 +1497,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String profileSetupStep(int step, int total) {
     return 'Step $step of $total';
   }
-
-  @override
-  String get profileSetupSkip => 'Skip';
 
   @override
   String get profileSetupAge => 'How old are you?';

@@ -6,8 +6,11 @@ import 'package:intl/intl.dart';
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
 import '../../core/theme/zenda_theme_x.dart';
+import '../../core/widgets/amount_input_field.dart';
+import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
+import '../../core/widgets/field_label.dart';
 import '../../l10n/l10n_extension.dart';
 import 'goals_screen.dart';
 
@@ -136,21 +139,27 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
   }
 
   Future<void> _showContributeSheet(BuildContext context) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _ContributeSheet(
-        goal: _goal,
-        onContribute: (amount) async {
-          final updated =
-              await ref.read(goalsServiceProvider).contribute(_goal.id, amount: amount);
-          if (!context.mounted) return;
+    final l10n = context.l10n;
+    final ctrl = TextEditingController();
+    await showAppFormSheet(
+      context,
+      title: l10n.goalsContributeTitle,
+      subtitle: _goal.name,
+      primaryLabel: l10n.goalsContributeTitle,
+      body: _ContributeBody(goal: _goal, controller: ctrl),
+      onSubmit: () async {
+        final amount = double.tryParse(ctrl.text.trim());
+        if (amount == null || amount <= 0) return false;
+        final updated =
+            await ref.read(goalsServiceProvider).contribute(_goal.id, amount: amount);
+        if (mounted) {
           setState(() => _goal = updated);
           ref.invalidate(_contributionsProvider(_goal.id));
-        },
-      ),
+        }
+        return true;
+      },
     );
+    ctrl.dispose();
   }
 
   Future<void> _deleteGoal(BuildContext context) async {
@@ -167,168 +176,64 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
   }
 }
 
-// ── Contribute bottom sheet ──────────────────────────────────────────────────
+// ── Contribute form body (rendered inside AppFormSheet) ──────────────────────
 
-class _ContributeSheet extends StatefulWidget {
+class _ContributeBody extends StatelessWidget {
   final SavingsGoal goal;
-  final Future<void> Function(double) onContribute;
+  final TextEditingController controller;
 
-  const _ContributeSheet({required this.goal, required this.onContribute});
-
-  @override
-  State<_ContributeSheet> createState() => _ContributeSheetState();
-}
-
-class _ContributeSheetState extends State<_ContributeSheet> {
-  final _ctrl = TextEditingController();
-  bool _saving = false;
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  double? get _amount => double.tryParse(_ctrl.text.trim());
+  const _ContributeBody({required this.goal, required this.controller});
 
   void _quickPick(double value) {
-    setState(() {
-      _ctrl.text = value.toStringAsFixed(0);
-      _ctrl.selection =
-          TextSelection.fromPosition(TextPosition(offset: _ctrl.text.length));
-    });
-  }
-
-  Future<void> _save() async {
-    final amount = _amount;
-    if (amount == null || amount <= 0) return;
-    setState(() => _saving = true);
-    try {
-      await widget.onContribute(amount);
-      if (mounted) context.pop();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
+    final text = value.toStringAsFixed(0);
+    controller.text = text;
+    controller.selection =
+        TextSelection.fromPosition(TextPosition(offset: text.length));
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final pct = widget.goal.progressPercent.clamp(0.0, 100.0);
-    final amountLabel = _amount != null && _amount! > 0
-        ? l10n.goalsContributeAddAction(_amount!.toStringAsFixed(0))
-        : l10n.goalsContributeTitle;
+    final pct = goal.progressPercent.clamp(0.0, 100.0);
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.card,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AppProgressBar(
+          value: pct / 100,
+          height: 8,
+          color: colors.primary,
         ),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colors.border,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              l10n.goalsContributeTitle,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.goal.name,
-              style: TextStyle(
-                fontSize: 14,
-                color: colors.textMuted,
-              ),
-            ),
-            const SizedBox(height: 12),
-            AppProgressBar(
-              value: pct / 100,
-              height: 8,
-              color: const Color(0xFF34D399),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _ctrl,
-              autofocus: true,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(
-                prefixText: 'S/ ',
-                hintText: '0',
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [50.0, 100.0, 200.0].map((v) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: OutlinedButton(
-                    onPressed: () => _quickPick(v),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      side: const BorderSide(color: Color(0xFF34D399)),
-                      foregroundColor: const Color(0xFF34D399),
-                    ),
-                    child: Text('S/ ${v.toStringAsFixed(0)}'),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _saving || (_amount == null || _amount! <= 0)
-                  ? null
-                  : _save,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF34D399),
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-              ),
-              child: _saving
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(
-                      amountLabel,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
-            ),
-          ],
+        const SizedBox(height: 20),
+        FieldLabel(l10n.goalsContributeLabel),
+        const SizedBox(height: 8),
+        AmountInputField(
+          controller: controller,
+          autofocus: true,
         ),
-      ),
+        const SizedBox(height: 12),
+        Row(
+          children: [50.0, 100.0, 200.0].map((v) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: OutlinedButton(
+                onPressed: () => _quickPick(v),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  side: BorderSide(color: colors.primary),
+                  foregroundColor: colors.primary,
+                ),
+                child: Text('S/ ${v.toStringAsFixed(0)}'),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 }

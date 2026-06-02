@@ -8,6 +8,9 @@ import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../features/dashboard/dashboard_providers.dart';
+import '../badges/badges_screen.dart';
+import '../challenges/challenges_screen.dart';
+import 'learning_path_screen.dart';
 import '../../l10n/l10n_extension.dart';
 
 final educationServiceProvider = Provider<EducationApiService>(
@@ -28,6 +31,7 @@ class EducationScreen extends ConsumerStatefulWidget {
 class _EducationScreenState extends ConsumerState<EducationScreen> {
   final _searchController = TextEditingController();
   String _query = '';
+  int _tab = 0; // 0 Aprende · 1 Ruta · 2 Retos · 3 Logros
 
   @override
   void dispose() {
@@ -45,7 +49,6 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final topicsAsync = ref.watch(_topicsProvider);
     final streakDays = ref.watch(streakProvider);
 
     return Scaffold(
@@ -82,7 +85,32 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
         ],
       ),
       bottomNavigationBar: const AppBottomNav(activeIndex: 4),
-      body: topicsAsync.when(
+      body: Column(
+        children: [
+          _SectionTabs(
+            selected: _tab,
+            onSelect: (i) => setState(() => _tab = i),
+          ),
+          Expanded(
+            child: IndexedStack(
+              index: _tab,
+              children: [
+                _buildLearnTab(context),
+                const LearningPathScreen(embedded: true),
+                const ChallengesScreen(embedded: true),
+                const BadgesScreen(embedded: true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLearnTab(BuildContext context) {
+    final l10n = context.l10n;
+    final topicsAsync = ref.watch(_topicsProvider);
+    return topicsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
           child: Column(
@@ -145,9 +173,6 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: _SectionTabs(),
-                ),
                 if (featured != null) ...[
                   SliverToBoxAdapter(
                     child: _FeaturedCard(
@@ -182,7 +207,6 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
             ),
           );
         },
-      ),
     );
   }
 }
@@ -192,55 +216,57 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
 // ─────────────────────────────────────────────────────────────────
 
 class _SectionTabs extends StatelessWidget {
+  const _SectionTabs({required this.selected, required this.onSelect});
+
+  final int selected;
+  final ValueChanged<int> onSelect;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final tabs = [
-      (label: l10n.educationTabLearn, route: null),
-      (label: l10n.educationTabPath, route: '/education/learning-path'),
-      (label: l10n.educationTabChallenges, route: '/challenges'),
-      (label: l10n.educationTabBadges, route: '/badges'),
-      (label: l10n.educationTabProgress, route: '/progress'),
+    final labels = [
+      l10n.educationTabLearn,
+      l10n.educationTabPath,
+      l10n.educationTabChallenges,
+      l10n.educationTabBadges,
     ];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
-        children: tabs.map((tab) {
-          final isActive = tab.route == null;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: tab.route != null
-                  ? () => context.push(tab.route!)
-                  : null,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? const Color(0xFF34D399)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  border: isActive
-                      ? null
-                      : Border.all(color: const Color(0xFFE5E7EB)),
-                ),
-                child: Text(
-                  tab.label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isActive
-                        ? Colors.white
-                        : AppColors.textMuted,
+        children: [
+          for (var i = 0; i < labels.length; i++)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: GestureDetector(
+                onTap: () => onSelect(i),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: selected == i
+                        ? const Color(0xFF34D399)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                    border: selected == i
+                        ? null
+                        : Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Text(
+                    labels[i],
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: selected == i
+                          ? Colors.white
+                          : AppColors.textMuted,
+                    ),
                   ),
                 ),
               ),
             ),
-          );
-        }).toList(),
+        ],
       ),
     );
   }

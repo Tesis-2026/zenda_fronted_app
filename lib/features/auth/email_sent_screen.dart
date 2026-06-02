@@ -21,21 +21,23 @@ class EmailSentScreen extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
               // Envelope icon
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF34D399).withValues(alpha: 0.12),
-                ),
-                child: const Icon(
-                  Icons.mail_outline_rounded,
-                  size: 48,
-                  color: Color(0xFF34D399),
+              Center(
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF34D399).withValues(alpha: 0.12),
+                  ),
+                  child: const Icon(
+                    Icons.mail_outline_rounded,
+                    size: 48,
+                    color: Color(0xFF34D399),
+                  ),
                 ),
               ),
               const SizedBox(height: 28),
@@ -75,7 +77,6 @@ class EmailSentScreen extends ConsumerWidget {
               ),
               const Spacer(),
               SizedBox(
-                width: double.infinity,
                 height: 56,
                 child: FilledButton(
                   onPressed: () => context.go('/profile-setup'),

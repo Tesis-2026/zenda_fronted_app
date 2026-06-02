@@ -94,6 +94,11 @@
   "dashboardNavTransactions": "TXNS",
   "dashboardNavAi": "AI",
   "dashboardNavGoals": "GOALS",
+  "dashboardNavManagement": "MANAGEMENT",
+  "managementTabProgress": "Progress",
+  "managementTabBudgets": "Budgets",
+  "managementTabGoals": "Goals",
+  "managementTitle": "Management",
   "dashboardNavProfile": "PROFILE",
   "dashboardNavEducation": "EDUC.",
   "dashboardRecord": "Record",
@@ -680,7 +685,6 @@
       "total": { "type": "int" }
     }
   },
-  "profileSetupSkip": "Skip",
   "profileSetupAge": "How old are you?",
   "profileSetupAgeHint": "This helps us understand your financial stage and tailor insights for you.",
   "profileSetupUniversity": "Which university do you attend?",

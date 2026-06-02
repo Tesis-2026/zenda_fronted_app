@@ -596,6 +596,36 @@ abstract class AppLocalizations {
   /// **'GOALS'**
   String get dashboardNavGoals;
 
+  /// No description provided for @dashboardNavManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'MANAGEMENT'**
+  String get dashboardNavManagement;
+
+  /// No description provided for @managementTabProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get managementTabProgress;
+
+  /// No description provided for @managementTabBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get managementTabBudgets;
+
+  /// No description provided for @managementTabGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get managementTabGoals;
+
+  /// No description provided for @managementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Management'**
+  String get managementTitle;
+
   /// No description provided for @dashboardNavProfile.
   ///
   /// In en, this message translates to:
@@ -2755,12 +2785,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Step {step} of {total}'**
   String profileSetupStep(int step, int total);
-
-  /// No description provided for @profileSetupSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get profileSetupSkip;
 
   /// No description provided for @profileSetupAge.
   ///

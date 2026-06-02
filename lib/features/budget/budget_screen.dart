@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import 'package:go_router/go_router.dart';
-
 import '../../core/models/budget.dart';
 import '../../core/models/category.dart';
 import '../../core/services/budget_api_service.dart';
@@ -11,18 +9,20 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/widgets/amount_input_field.dart';
+import '../../core/widgets/app_date_field.dart';
+import '../../core/widgets/category_selector.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
-import '../../core/widgets/app_primary_button.dart';
+import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_progress_bar.dart';
-import '../../core/widgets/app_sheet_container.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/field_label.dart';
 import '../../core/widgets/green_pill_button.dart';
 import '../../core/widgets/icon_action_button.dart';
 import '../../core/widgets/month_navigator.dart';
-import '../../core/widgets/sheet_header.dart';
+import '../../core/widgets/month_year_picker.dart';
+import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
 final budgetServiceProvider = Provider<BudgetApiService>((ref) {
@@ -46,7 +46,11 @@ final _categoriesProvider =
 });
 
 class BudgetScreen extends ConsumerStatefulWidget {
-  const BudgetScreen({super.key});
+  const BudgetScreen({super.key, this.embedded = false});
+
+  /// When true, returns just the content (no Scaffold/AppBar) so it can be
+  /// hosted inside the Management screen's tab stack.
+  final bool embedded;
 
   @override
   ConsumerState<BudgetScreen> createState() => _BudgetScreenState();
@@ -128,10 +132,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final l10n = context.l10n;
     final budgetsAsync = ref.watch(_budgetsProvider(_filter));
 
-    return Scaffold(
-      backgroundColor: context.colors.bg,
-      body: SafeArea(
-        child: budgetsAsync.when(
+    final content = budgetsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, _) => Center(
             child: Column(
@@ -149,11 +150,19 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           data: (budgets) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _BudgetHeader(
-                label: _monthLabel(context),
-                onPrevious: _prevMonth,
-                onNext: _nextMonth,
-                onAdd: () => _showCreateSheet(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+                child: MonthNavigator(
+                  label: _monthLabel(context),
+                  onPrev: _prevMonth,
+                  onNext: _nextMonth,
+                  trailing: widget.embedded
+                      ? GreenPillButton(
+                          label: l10n.catMgmtAddButton,
+                          onTap: () => _showCreateSheet(context),
+                        )
+                      : null,
+                ),
               ),
               if (budgets.isEmpty)
                 Expanded(
@@ -188,61 +197,92 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                 ),
             ],
           ),
-        ),
+    );
+
+    if (widget.embedded) return content;
+    return Scaffold(
+      backgroundColor: context.colors.bg,
+      appBar: ZendaAppBar(
+        title: l10n.budgetTitle,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Center(
+              child: GreenPillButton(
+                label: l10n.catMgmtAddButton,
+                onTap: () => _showCreateSheet(context),
+              ),
+            ),
+          ),
+        ],
       ),
+      body: SafeArea(top: false, child: content),
     );
   }
 
   // ── Create bottom sheet ────────────────────────────────────────────────────
 
   Future<void> _showCreateSheet(BuildContext context) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CreateBudgetSheet(
+    final l10n = context.l10n;
+    final key = GlobalKey<_CreateBudgetBodyState>();
+    await showAppFormSheet(
+      context,
+      title: l10n.budgetAddTitle,
+      primaryLabel: l10n.commonSave,
+      body: _CreateBudgetBody(
+        key: key,
         initialMonth: _month,
         initialYear: _year,
-        onSave: (categoryId, amount, month, year) async {
-          final l10n = context.l10n;
-          try {
-            await ref.read(budgetServiceProvider).create(
-                  categoryId: categoryId,
-                  amountLimit: amount,
-                  month: month,
-                  year: year,
-                );
-            ref.invalidate(_budgetsProvider(_filter));
-          } on Exception catch (e) {
-            if (!context.mounted) return;
-            final msg = e.toString().contains('409') ||
-                    e.toString().contains('already exists')
-                ? l10n.budgetDuplicate
-                : l10n.commonUnknownError;
-            showAppToast(context, msg, type: ToastType.error);
-          }
-        },
         categoriesFuture: ref.read(_categoriesProvider.future),
       ),
+      onSubmit: () async {
+        final st = key.currentState;
+        if (st == null) return false;
+        final amount = double.tryParse(st.amountController.text.trim());
+        if (amount == null || amount <= 0) return false;
+        try {
+          await ref.read(budgetServiceProvider).create(
+                categoryId: st.categoryId,
+                amountLimit: amount,
+                month: st.month,
+                year: st.year,
+              );
+          ref.invalidate(_budgetsProvider(_filter));
+          return true;
+        } on Exception catch (e) {
+          if (!context.mounted) return false;
+          final msg = e.toString().contains('409') ||
+                  e.toString().contains('already exists')
+              ? l10n.budgetDuplicate
+              : l10n.commonUnknownError;
+          showAppToast(context, msg, type: ToastType.error);
+          return false;
+        }
+      },
     );
   }
 
   // ── Edit bottom sheet ──────────────────────────────────────────────────────
 
   Future<void> _showEditSheet(BuildContext context, Budget budget) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _EditBudgetSheet(
-        budget: budget,
-        onSave: (amount) async {
-          await ref
-              .read(budgetServiceProvider)
-              .update(budget.id, amountLimit: amount);
-          ref.invalidate(_budgetsProvider(_filter));
-        },
-      ),
+    final l10n = context.l10n;
+    final key = GlobalKey<_EditBudgetBodyState>();
+    await showAppFormSheet(
+      context,
+      title: l10n.budgetEditTitle,
+      primaryLabel: l10n.commonSave,
+      body: _EditBudgetBody(key: key, budget: budget),
+      onSubmit: () async {
+        final st = key.currentState;
+        if (st == null) return false;
+        final amount = double.tryParse(st.controller.text.trim());
+        if (amount == null || amount <= 0) return false;
+        await ref
+            .read(budgetServiceProvider)
+            .update(budget.id, amountLimit: amount);
+        ref.invalidate(_budgetsProvider(_filter));
+        return true;
+      },
     );
   }
 
@@ -261,276 +301,142 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   }
 }
 
-// ── Header ─────────────────────────────────────────────────────────────────
-
-class _BudgetHeader extends StatelessWidget {
-  const _BudgetHeader({
-    required this.label,
-    required this.onPrevious,
-    required this.onNext,
-    required this.onAdd,
-  });
-
-  final String label;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 16, 20, 16),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              size: 20,
-              color: Color(0xFF374151),
-            ),
-            onPressed: () => context.pop(),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-          ),
-          Text(
-            l10n.budgetTitle,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: MonthNavigator(
-              label: label,
-              onPrev: onPrevious,
-              onNext: onNext,
-              trailing: GreenPillButton(
-                label: l10n.catMgmtAddButton,
-                onTap: onAdd,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ── Create Budget bottom sheet ─────────────────────────────────────────────
 
-class _CreateBudgetSheet extends StatefulWidget {
-  const _CreateBudgetSheet({
+class _CreateBudgetBody extends StatefulWidget {
+  const _CreateBudgetBody({
+    super.key,
     required this.initialMonth,
     required this.initialYear,
-    required this.onSave,
     required this.categoriesFuture,
   });
 
   final int initialMonth;
   final int initialYear;
-  final Future<void> Function(
-      String? categoryId, double amount, int month, int year) onSave;
   final Future<List<CategoryModel>> categoriesFuture;
 
   @override
-  State<_CreateBudgetSheet> createState() => _CreateBudgetSheetState();
+  State<_CreateBudgetBody> createState() => _CreateBudgetBodyState();
 }
 
-class _CreateBudgetSheetState extends State<_CreateBudgetSheet> {
-  final _amountController = TextEditingController();
-  String? _selectedCategoryId;
-  late int _month;
-  late int _year;
-  bool _saving = false;
-
-  static const _monthNames = [
-    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-  ];
+class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
+  final amountController = TextEditingController();
+  String? categoryId;
+  late int month;
+  late int year;
 
   @override
   void initState() {
     super.initState();
-    _month = widget.initialMonth;
-    _year = widget.initialYear;
+    month = widget.initialMonth;
+    year = widget.initialYear;
   }
 
   @override
   void dispose() {
-    _amountController.dispose();
+    amountController.dispose();
     super.dispose();
+  }
+
+  String _periodText() {
+    final text = DateFormat('MMMM yyyy', 'es').format(DateTime(year, month));
+    return text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
+  }
+
+  Future<void> _pickPeriod() async {
+    final l10n = context.l10n;
+    final result = await showMonthYearPicker(
+      context,
+      initialMonth: month,
+      initialYear: year,
+      title: 'Período',
+      confirmLabel: l10n.commonOk,
+    );
+    if (result != null) {
+      setState(() {
+        month = result.month;
+        year = result.year;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AppSheetContainer(
-      topRadius: 28,
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SheetHeader(title: l10n.budgetAddTitle),
-          const SizedBox(height: 20),
-          // Category dropdown
-          FieldLabel(l10n.budgetCategoryAll),
-          const SizedBox(height: 8),
-            FutureBuilder<List<CategoryModel>>(
-              future: widget.categoriesFuture,
-              builder: (ctx, snap) {
-                final categories = snap.data ?? [];
-                return DropdownButtonFormField<String?>(
-                  // ignore: deprecated_member_use
-                  value: _selectedCategoryId,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: const Color(0xFFF9FAFB),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                    ),
-                  ),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(l10n.budgetCategoryAll),
-                    ),
-                    ...categories.map((c) => DropdownMenuItem<String?>(
-                          value: c.id,
-                          child: Text(c.name),
-                        )),
-                  ],
-                  onChanged: (v) => setState(() => _selectedCategoryId = v),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            FieldLabel(l10n.budgetAmountLabel),
-            const SizedBox(height: 8),
-            AmountInputField(controller: _amountController),
-            const SizedBox(height: 16),
-            // Period (month + year) row
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    // ignore: deprecated_member_use
-                    value: _month,
-                    decoration: InputDecoration(
-                      labelText: l10n.budgetMonthLabel,
-                      filled: true,
-                      fillColor: const Color(0xFFF9FAFB),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                    ),
-                    items: List.generate(
-                      12,
-                      (i) => DropdownMenuItem(
-                        value: i + 1,
-                        child: Text(_monthNames[i]),
-                      ),
-                    ),
-                    onChanged: (v) => setState(() => _month = v!),
-                  ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const FieldLabel('Categoría'),
+        const SizedBox(height: 8),
+        FutureBuilder<List<CategoryModel>>(
+          future: widget.categoriesFuture,
+          builder: (ctx, snap) {
+            final categories = snap.data ?? [];
+            return CategoryGrid(
+              items: [
+                CategoryGridItem(
+                  icon: Icons.grid_view_rounded,
+                  label: l10n.budgetCategoryAll,
+                  selected: categoryId == null,
+                  onTap: () => setState(() => categoryId = null),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    // ignore: deprecated_member_use
-                    value: _year,
-                    decoration: InputDecoration(
-                      labelText: l10n.budgetYearLabel,
-                      filled: true,
-                      fillColor: const Color(0xFFF9FAFB),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
+                for (final c in categories)
+                  CategoryGridItem(
+                    icon: CategoryUtils.iconForCategory(
+                      c.name,
+                      iconKey: c.icon,
+                      isCustom: c.isCustom,
                     ),
-                    items: List.generate(5, (i) {
-                      final y = DateTime.now().year + i - 1;
-                      return DropdownMenuItem(
-                          value: y, child: Text('$y'));
-                    }),
-                    onChanged: (v) => setState(() => _year = v!),
+                    label: c.name,
+                    selected: categoryId == c.id,
+                    onTap: () => setState(() => categoryId = c.id),
                   ),
-                ),
               ],
-            ),
-            const SizedBox(height: 24),
-            AppPrimaryButton(
-              label: l10n.commonSave,
-              onPressed: _saving ? null : _submit,
-              isLoading: _saving,
-            ),
-          ],
+            );
+          },
         ),
-      );
-  }
-
-  Future<void> _submit() async {
-    final amount = double.tryParse(_amountController.text.trim());
-    if (amount == null || amount <= 0) return;
-    setState(() => _saving = true);
-    await widget.onSave(_selectedCategoryId, amount, _month, _year);
-    if (mounted) context.pop();
+        const SizedBox(height: 16),
+        FieldLabel(l10n.budgetAmountLabel),
+        const SizedBox(height: 8),
+        AmountInputField(controller: amountController),
+        const SizedBox(height: 16),
+        const FieldLabel('Período'),
+        const SizedBox(height: 8),
+        AppDateField(
+          displayText: _periodText(),
+          icon: Icons.event_rounded,
+          onTap: _pickPeriod,
+        ),
+      ],
+    );
   }
 }
 
 // ── Edit Budget bottom sheet ───────────────────────────────────────────────
 
-class _EditBudgetSheet extends StatefulWidget {
-  const _EditBudgetSheet({required this.budget, required this.onSave});
+class _EditBudgetBody extends StatefulWidget {
+  const _EditBudgetBody({super.key, required this.budget});
 
   final Budget budget;
-  final Future<void> Function(double amount) onSave;
 
   @override
-  State<_EditBudgetSheet> createState() => _EditBudgetSheetState();
+  State<_EditBudgetBody> createState() => _EditBudgetBodyState();
 }
 
-class _EditBudgetSheetState extends State<_EditBudgetSheet> {
-  late final TextEditingController _controller;
-  bool _saving = false;
+class _EditBudgetBodyState extends State<_EditBudgetBody> {
+  late final TextEditingController controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(
+    controller = TextEditingController(
         text: widget.budget.amountLimit.toStringAsFixed(2));
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -540,62 +446,43 @@ class _EditBudgetSheetState extends State<_EditBudgetSheet> {
     final categoryName =
         widget.budget.categoryName ?? l10n.budgetCategoryAll;
 
-    return AppSheetContainer(
-      topRadius: 28,
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SheetHeader(
-            title: l10n.budgetEditTitle,
-            onClose: () => context.pop(),
-          ),
-          const SizedBox(height: 20),
-          const FieldLabel('Categoría'),
-          const SizedBox(height: 8),
-          AppCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Icon(
-                  CategoryUtils.iconForCategory(widget.budget.categoryName),
-                  size: 16,
-                  color: AppColors.textMuted,
-                ),
-                const SizedBox(width: 8),
-                Text(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const FieldLabel('Categoría'),
+        const SizedBox(height: 8),
+        AppCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(
+                CategoryUtils.iconForCategory(widget.budget.categoryName),
+                size: 16,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
                   categoryName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textDark,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          FieldLabel(l10n.budgetAmountLabel),
-          const SizedBox(height: 8),
-          AmountInputField(controller: _controller, autofocus: true),
-          const SizedBox(height: 24),
-          AppPrimaryButton(
-            label: l10n.commonSave,
-            onPressed: _saving ? null : _submit,
-            isLoading: _saving,
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        FieldLabel(l10n.budgetAmountLabel),
+        const SizedBox(height: 8),
+        AmountInputField(controller: controller, autofocus: true),
+      ],
     );
-  }
-
-  Future<void> _submit() async {
-    final amount = double.tryParse(_controller.text.trim());
-    if (amount == null || amount <= 0) return;
-    setState(() => _saving = true);
-    await widget.onSave(amount);
-    if (mounted) context.pop();
   }
 }
 
@@ -685,6 +572,8 @@ class _BucketCell extends StatelessWidget {
         children: [
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -692,17 +581,23 @@ class _BucketCell extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            'S/ ${spent.toStringAsFixed(0)}',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: color,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'S/ ${spent.toStringAsFixed(0)}',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
             ),
           ),
           if (limit > 0)
             Text(
               'de S/ ${limit.toStringAsFixed(0)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 11, color: AppColors.textSubtle),
             ),
         ],
@@ -809,25 +704,13 @@ class _BudgetCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   categoryName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textDark,
                   ),
-                ),
-              ),
-              if (isOver) ...[
-                const Icon(Icons.warning_amber_rounded,
-                    color: Color(0xFFEF4444), size: 18),
-                const SizedBox(width: 4),
-              ],
-              Text(
-                'S/ ${budget.currentSpent.toStringAsFixed(0)} / S/ ${budget.amountLimit.toStringAsFixed(0)}',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      isOver ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
                 ),
               ),
               const SizedBox(width: 8),
@@ -846,11 +729,44 @@ class _BudgetCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           AppProgressBar(
             value: (pct / 100).clamp(0.0, 1.0),
             height: 6,
             color: color,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              if (isOver) ...[
+                const Icon(Icons.warning_amber_rounded,
+                    color: Color(0xFFEF4444), size: 16),
+                const SizedBox(width: 4),
+              ],
+              Expanded(
+                child: Text(
+                  'S/ ${budget.currentSpent.toStringAsFixed(0)} de S/ ${budget.amountLimit.toStringAsFixed(0)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isOver
+                        ? const Color(0xFFEF4444)
+                        : const Color(0xFF6B7280),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${pct.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
+            ],
           ),
         ],
       ),

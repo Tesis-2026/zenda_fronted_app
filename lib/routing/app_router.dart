@@ -34,9 +34,11 @@ import '../features/education/personalized_quiz_screen.dart';
 import '../features/challenges/challenges_screen.dart';
 import '../features/badges/badges_screen.dart';
 import '../features/progress/progress_screen.dart';
+import '../features/management/management_screen.dart';
 import '../features/surveys/survey_screen.dart';
 import '../features/surveys/survey_comparison_screen.dart';
 import '../features/surveys/sus_screen.dart';
+import '../features/surveys/research_screen.dart';
 import '../providers/pre_survey_provider.dart';
 import '../features/notifications/notification_preferences_screen.dart';
 import '../features/ai_chat/ai_chat_screen.dart';
@@ -69,7 +71,7 @@ const _profileSetupExempt = {
 };
 
 // Routes exempt from the pre-survey redirect.
-const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/surveys/sus', '/profile-setup'};
+const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/surveys/sus', '/profile-setup', '/research'};
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
@@ -296,6 +298,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ProgressScreen(),
       ),
       GoRoute(
+        path: '/management',
+        builder: (context, state) {
+          final tab = state.uri.queryParameters['tab'];
+          final index = switch (tab) {
+            'budgets' => 1,
+            'goals' => 2,
+            _ => 0, // progress (default)
+          };
+          return ManagementScreen(initialTab: index);
+        },
+      ),
+      GoRoute(
         path: '/surveys/pre',
         builder: (context, state) => const SurveyScreen(isPre: true),
       ),
@@ -339,6 +353,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/research',
+        builder: (context, state) => const ResearchScreen(),
       ),
     ],
   );

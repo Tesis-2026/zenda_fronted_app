@@ -16,12 +16,23 @@ class AppSheetContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    // Add the system bottom inset (gesture / transparent nav bar) to the
+    // content padding so the footer / button clears it on edge-to-edge
+    // devices. When the keyboard is open this is 0 (the keyboard inset below
+    // handles the lift instead).
+    final effectivePadding = EdgeInsets.fromLTRB(
+      padding.left,
+      padding.top,
+      padding.right,
+      padding.bottom + media.padding.bottom,
+    );
     final inner = Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(topRadius)),
       ),
-      padding: padding,
+      padding: effectivePadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,8 +56,7 @@ class AppSheetContainer extends StatelessWidget {
     if (!avoidKeyboard) return inner;
 
     return Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
       child: inner,
     );
   }

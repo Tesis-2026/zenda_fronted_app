@@ -20,7 +20,11 @@ final _progressProvider =
 });
 
 class ProgressScreen extends ConsumerStatefulWidget {
-  const ProgressScreen({super.key});
+  const ProgressScreen({super.key, this.embedded = false});
+
+  /// When true, returns just the content (no Scaffold/AppBar) so it can be
+  /// hosted inside the Management screen's tab stack.
+  final bool embedded;
 
   @override
   ConsumerState<ProgressScreen> createState() => _ProgressScreenState();
@@ -57,10 +61,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final l10n = context.l10n;
     final progressAsync = ref.watch(_progressProvider);
 
-    return Scaffold(
-      backgroundColor: context.colors.bg,
-      appBar: ZendaAppBar(title: l10n.progressTitle),
-      body: progressAsync.when(
+    final body = progressAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) {
           // Hardcoded demo fallback when API is unavailable
@@ -90,7 +91,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
           onRefresh: () async => ref.invalidate(_progressProvider),
           child: _buildContent(context, progress),
         ),
-      ),
+    );
+
+    if (widget.embedded) return body;
+    return Scaffold(
+      backgroundColor: context.colors.bg,
+      appBar: ZendaAppBar(title: l10n.progressTitle),
+      body: body,
     );
   }
 

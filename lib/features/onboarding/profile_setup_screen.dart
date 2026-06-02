@@ -145,33 +145,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.profileSetupStep(_page + 1, 4),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colors.textMuted,
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-              TextButton(
-                onPressed: () => context.go('/dashboard'),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          Text(
+            l10n.profileSetupStep(_page + 1, 4),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colors.textMuted,
+                  fontWeight: FontWeight.w500,
                 ),
-                child: Text(
-                  l10n.profileSetupSkip,
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
           ),
           const SizedBox(height: 8),
           Row(

@@ -64,17 +64,18 @@ final learningPathProvider =
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 class LearningPathScreen extends ConsumerWidget {
-  const LearningPathScreen({super.key});
+  const LearningPathScreen({super.key, this.embedded = false});
+
+  /// When true, returns just the content (no Scaffold/AppBar) so it can be
+  /// hosted inside the Education screen's tab stack.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final pathAsync = ref.watch(learningPathProvider);
 
-    return Scaffold(
-      backgroundColor: context.colors.bg,
-      appBar: ZendaAppBar(title: l10n.learningPathTitle),
-      body: pathAsync.when(
+    final body = pathAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const Center(child: Text('No se pudo cargar la ruta de aprendizaje')),
         data: (topics) => ListView(
@@ -92,7 +93,13 @@ class LearningPathScreen extends ConsumerWidget {
                 ),
           ],
         ),
-      ),
+    );
+
+    if (embedded) return body;
+    return Scaffold(
+      backgroundColor: context.colors.bg,
+      appBar: ZendaAppBar(title: l10n.learningPathTitle),
+      body: body,
     );
   }
 }

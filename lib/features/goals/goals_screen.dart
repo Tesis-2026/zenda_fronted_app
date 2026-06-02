@@ -6,12 +6,14 @@ import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/utils/date_formatter.dart';
+import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_date_field.dart';
 import '../../core/widgets/app_card.dart';
-import '../../core/widgets/app_primary_button.dart';
+import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_progress_bar.dart';
-import '../../core/widgets/app_sheet_container.dart';
-import '../../core/widgets/sheet_header.dart';
+import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/field_label.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -24,15 +26,18 @@ final _goalsProvider = FutureProvider.autoDispose<List<SavingsGoal>>((ref) {
 });
 
 class GoalsScreen extends ConsumerWidget {
-  const GoalsScreen({super.key});
+  const GoalsScreen({super.key, this.embedded = false});
+
+  /// When true, returns just the content (no Scaffold/AppBar/bottom nav) so it
+  /// can be hosted inside the Management screen's tab stack.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final goalsAsync = ref.watch(_goalsProvider);
 
-    return Scaffold(
-      body: goalsAsync.when(
+    final content = goalsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
           child: Column(
@@ -85,29 +90,46 @@ class GoalsScreen extends ConsumerWidget {
             ],
           );
         },
+    );
+
+    final newButton = TextButton(
+      onPressed: () => _showCreateSheet(context, ref),
+      style: TextButton.styleFrom(
+        backgroundColor: const Color(0xFF34D399),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
+      child: Text(
+        l10n.goalsNewButton,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+      ),
+    );
+
+    if (embedded) {
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Row(
+              children: [const Spacer(), newButton],
+            ),
+          ),
+          Expanded(child: content),
+        ],
+      );
+    }
+
+    return Scaffold(
+      body: content,
       appBar: AppBar(
         title: Text(l10n.goalsTitle),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 0),
-            child: TextButton(
-              onPressed: () => _showCreateSheet(context, ref),
-              style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFF34D399),
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: Text(
-                l10n.goalsNewButton,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ),
+            child: newButton,
           ),
           const Padding(
             padding: EdgeInsets.only(right: 12),
@@ -120,20 +142,27 @@ class GoalsScreen extends ConsumerWidget {
   }
 
   Future<void> _showCreateSheet(BuildContext context, WidgetRef ref) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CreateGoalSheet(
-        onSave: (name, target, dueDate) async {
-          await ref.read(goalsServiceProvider).create(
-                name: name,
-                targetAmount: target,
-                dueDate: dueDate?.toIso8601String(),
-              );
-          ref.invalidate(_goalsProvider);
-        },
-      ),
+    final l10n = context.l10n;
+    final key = GlobalKey<_CreateGoalBodyState>();
+    await showAppFormSheet(
+      context,
+      title: l10n.goalsAddTitle,
+      primaryLabel: l10n.goalsCreateButton,
+      body: _CreateGoalBody(key: key),
+      onSubmit: () async {
+        final st = key.currentState;
+        if (st == null) return false;
+        final name = st.nameCtrl.text.trim();
+        final target = double.tryParse(st.targetCtrl.text.trim());
+        if (name.isEmpty || target == null || target <= 0) return false;
+        await ref.read(goalsServiceProvider).create(
+              name: name,
+              targetAmount: target,
+              dueDate: st.dueDate?.toIso8601String(),
+            );
+        ref.invalidate(_goalsProvider);
+        return true;
+      },
     );
   }
 
@@ -392,131 +421,62 @@ class _GoalCard extends StatelessWidget {
 
 // ── Create Goal bottom sheet ──────────────────────────────────────────────────
 
-class _CreateGoalSheet extends StatefulWidget {
-  final Future<void> Function(String name, double target, DateTime? dueDate)
-      onSave;
-
-  const _CreateGoalSheet({required this.onSave});
+class _CreateGoalBody extends StatefulWidget {
+  const _CreateGoalBody({super.key});
 
   @override
-  State<_CreateGoalSheet> createState() => _CreateGoalSheetState();
+  State<_CreateGoalBody> createState() => _CreateGoalBodyState();
 }
 
-class _CreateGoalSheetState extends State<_CreateGoalSheet> {
-  final _nameCtrl = TextEditingController();
-  final _targetCtrl = TextEditingController();
-  DateTime? _dueDate;
-  bool _saving = false;
+class _CreateGoalBodyState extends State<_CreateGoalBody> {
+  final nameCtrl = TextEditingController();
+  final targetCtrl = TextEditingController();
+  DateTime? dueDate;
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
-    _targetCtrl.dispose();
+    nameCtrl.dispose();
+    targetCtrl.dispose();
     super.dispose();
-  }
-
-  bool get _valid {
-    final target = double.tryParse(_targetCtrl.text.trim());
-    return _nameCtrl.text.trim().isNotEmpty && target != null && target > 0;
-  }
-
-  Future<void> _save() async {
-    if (!_valid) return;
-    setState(() => _saving = true);
-    try {
-      await widget.onSave(
-        _nameCtrl.text.trim(),
-        double.parse(_targetCtrl.text.trim()),
-        _dueDate,
-      );
-      if (mounted) context.pop();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return AppSheetContainer(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SheetHeader(title: l10n.goalsAddTitle),
-          const SizedBox(height: 20),
-            TextField(
-              controller: _nameCtrl,
-              autofocus: true,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.goalsNameLabel,
-                hintText: l10n.goalsNameHint,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _targetCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: l10n.goalsTargetLabel,
-                prefixText: 'S/ ',
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _dueDate ??
-                      DateTime.now().add(const Duration(days: 30)),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 3650)),
-                );
-                if (picked != null) setState(() => _dueDate = picked);
-              },
-              borderRadius: BorderRadius.circular(14),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: l10n.goalsDueDateLabel,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                  suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
-                ),
-                child: Text(
-                  _dueDate != null
-                      ? AppDateFormatter.shortDate(_dueDate!)
-                      : '',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            AppPrimaryButton(
-              label: l10n.goalsCreateButton,
-              onPressed: _saving || !_valid ? null : _save,
-              isLoading: _saving,
-            ),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FieldLabel(l10n.goalsNameLabel),
+        const SizedBox(height: 8),
+        AppTextField(
+          controller: nameCtrl,
+          hintText: l10n.goalsNameHint,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
         ),
+        const SizedBox(height: 16),
+        FieldLabel(l10n.goalsTargetLabel),
+        const SizedBox(height: 8),
+        AmountInputField(controller: targetCtrl),
+        const SizedBox(height: 16),
+        FieldLabel(l10n.goalsDueDateLabel),
+        const SizedBox(height: 8),
+        AppDateField(
+          value: dueDate,
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate:
+                  dueDate ?? DateTime.now().add(const Duration(days: 30)),
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(const Duration(days: 3650)),
+            );
+            if (picked != null) setState(() => dueDate = picked);
+          },
+        ),
+      ],
     );
   }
 }

@@ -3,15 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart' show categoryToApiName;
-import '../../core/utils/category_utils.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
+import '../../core/widgets/app_date_field.dart';
+import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/category_selector.dart';
 import '../../core/widgets/kind_toggle.dart';
 import '../../core/widgets/sheet_header.dart';
 import '../../core/theme/zenda_theme_x.dart';
@@ -241,9 +242,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _DatePickerTile(
-                      date: state.date,
-                      onPick: () async {
+                    AppDateField(
+                      value: state.date,
+                      onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
                           initialDate: state.date,
@@ -272,7 +273,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    _CategoryGrid(
+                    CategorySelector(
                       selected: state.category,
                       onSelected: controller.setCategory,
                     ),
@@ -305,34 +306,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ),
                   ],
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: FilledButton(
-                    onPressed: state.isSaving ? null : () async { await controller.save(); },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF34D399),
-                      disabledBackgroundColor: const Color(0xFF34D399).withValues(alpha: 0.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                    ),
-                    child: state.isSaving
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(l10n.txSaveButton, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward_rounded, size: 18),
-                            ],
-                          ),
-                  ),
+                child: AppPrimaryButton(
+                  label: l10n.txSaveButton,
+                  isLoading: state.isSaving,
+                  onPressed: () async {
+                    await controller.save();
+                  },
                 ),
               ),
             ),
@@ -344,7 +323,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         height: MediaQuery.of(context).size.height * 0.92,
         decoration: BoxDecoration(
           color: context.colors.card,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
           children: [
@@ -433,53 +412,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 }
 
 
-class _DatePickerTile extends StatelessWidget {
-  final DateTime date;
-  final VoidCallback onPick;
-
-  const _DatePickerTile({required this.date, required this.onPick});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final text = DateFormat('EEE d MMM, yyyy', 'es').format(date);
-    return InkWell(
-      onTap: onPick,
-      borderRadius: BorderRadius.circular(12),
-      child: Ink(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          // Match AmountInputField/AppTextField surface so date picker
-          // reads as a tappable form field, not a flat card. The
-          // previous `colors.card` (white) on `colors.bg` (#F9FAFB)
-          // had ~zero contrast — user couldn't see where to tap.
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFD1D5DB), width: 1.2),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.calendar_month_rounded, color: colors.textMuted),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                text,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: colors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: colors.textMuted),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _AiSuggestionChip extends StatelessWidget {
   final TransactionCategory? category;
   final bool isLoading;
@@ -515,7 +447,7 @@ class _AiSuggestionChip extends StatelessWidget {
 
     if (category == null) return const SizedBox.shrink();
 
-    final categoryLabel = _categoryLabel(category!, l10n);
+    final categoryLabel = CategorySelector.labelFor(context, category!);
 
     return GestureDetector(
       onTap: onApply,
@@ -553,22 +485,6 @@ class _AiSuggestionChip extends StatelessWidget {
       ),
     );
   }
-
-  String _categoryLabel(TransactionCategory c, dynamic l10n) {
-    return switch (c) {
-      TransactionCategory.comida => l10n.txCategoryFood,
-      TransactionCategory.transporte => l10n.txCategoryTransport,
-      TransactionCategory.vivienda => l10n.txCategoryHousing,
-      TransactionCategory.servicios => l10n.txCategoryUtilities,
-      TransactionCategory.salud => l10n.txCategoryHealth,
-      TransactionCategory.ocio => l10n.txCategoryEntertainment,
-      TransactionCategory.compras => l10n.txCategoryShopping,
-      TransactionCategory.suscripciones => l10n.txCategorySubscriptions,
-      TransactionCategory.antojos => l10n.txCategoryCravings,
-      TransactionCategory.ahorro => l10n.txCategorySavings,
-      TransactionCategory.otros => l10n.txCategoryOther,
-    };
-  }
 }
 
 class _BucketChip extends StatelessWidget {
@@ -602,100 +518,3 @@ class _BucketChip extends StatelessWidget {
   }
 }
 
-class _CategoryGrid extends StatelessWidget {
-  final TransactionCategory? selected;
-  final ValueChanged<TransactionCategory> onSelected;
-
-  const _CategoryGrid({
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final l10n = context.l10n;
-    final items = TransactionCategory.values;
-
-    Widget buildChip(int index) {
-      final c = items[index];
-      final isSelected = c == selected;
-      final icon = _categoryIcon(c);
-      final label = _categoryLabel(c, l10n);
-      return InkWell(
-        onTap: () => onSelected(c),
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: isSelected
-                ? const Color(0xFF34D399).withValues(alpha: 0.18)
-                : colors.card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected
-                  ? const Color(0xFF34D399)
-                  : colors.border,
-            ),
-          ),
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 22),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const crossAxisCount = 4;
-        const spacing = 8.0;
-        final itemWidth = (constraints.maxWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            for (var i = 0; i < items.length; i++)
-              SizedBox(
-                width: itemWidth,
-                height: itemWidth / 1.1,
-                child: buildChip(i),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  IconData _categoryIcon(TransactionCategory c) =>
-      CategoryUtils.iconForCategory(c.name);
-
-  String _categoryLabel(TransactionCategory c, dynamic l10n) {
-    return switch (c) {
-      TransactionCategory.comida => l10n.txCategoryFood,
-      TransactionCategory.transporte => l10n.txCategoryTransport,
-      TransactionCategory.vivienda => l10n.txCategoryHousing,
-      TransactionCategory.servicios => l10n.txCategoryUtilities,
-      TransactionCategory.salud => l10n.txCategoryHealth,
-      TransactionCategory.ocio => l10n.txCategoryEntertainment,
-      TransactionCategory.compras => l10n.txCategoryShopping,
-      TransactionCategory.suscripciones => l10n.txCategorySubscriptions,
-      TransactionCategory.antojos => l10n.txCategoryCravings,
-      TransactionCategory.ahorro => l10n.txCategorySavings,
-      TransactionCategory.otros => l10n.txCategoryOther,
-    };
-  }
-}

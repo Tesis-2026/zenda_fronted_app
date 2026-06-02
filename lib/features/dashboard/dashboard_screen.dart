@@ -6,11 +6,9 @@ import '../../core/models/account.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
-import '../../core/widgets/app_primary_button.dart';
-import '../../core/widgets/app_sheet_container.dart';
+import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/field_label.dart';
-import '../../core/widgets/sheet_header.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../providers/repositories_providers.dart';
 import 'dashboard_providers.dart';
@@ -160,16 +158,20 @@ class _InicioSection extends ConsumerWidget {
   }
 
   Future<void> _showAddAccountSheet(BuildContext context, WidgetRef ref) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _AddAccountSheet(
-        onSave: (account) async {
-          await ref.read(accountsRepositoryProvider).upsert(account);
-          ref.invalidate(accountsProvider);
-        },
-      ),
+    final l10n = context.l10n;
+    final key = GlobalKey<_AddAccountBodyState>();
+    await showAppFormSheet(
+      context,
+      title: l10n.accountAddTitle,
+      primaryLabel: l10n.accountAddButton,
+      body: _AddAccountBody(key: key),
+      onSubmit: () async {
+        final st = key.currentState;
+        if (st == null || !st.isValid) return false;
+        await ref.read(accountsRepositoryProvider).upsert(st.buildAccount());
+        ref.invalidate(accountsProvider);
+        return true;
+      },
     );
   }
 }
@@ -483,141 +485,114 @@ class _LegendDot extends StatelessWidget {
   }
 }
 
-class _AddAccountSheet extends StatefulWidget {
-  final Future<void> Function(Account) onSave;
-
-  const _AddAccountSheet({required this.onSave});
+class _AddAccountBody extends StatefulWidget {
+  const _AddAccountBody({super.key});
 
   @override
-  State<_AddAccountSheet> createState() => _AddAccountSheetState();
+  State<_AddAccountBody> createState() => _AddAccountBodyState();
 }
 
-class _AddAccountSheetState extends State<_AddAccountSheet> {
-  final _nameController = TextEditingController();
-  final _balanceController = TextEditingController();
-  final _creditLimitController = TextEditingController();
-  AccountType _selectedType = AccountType.cash;
-  bool _isSaving = false;
+class _AddAccountBodyState extends State<_AddAccountBody> {
+  final nameController = TextEditingController();
+  final balanceController = TextEditingController();
+  final creditLimitController = TextEditingController();
+  AccountType selectedType = AccountType.cash;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _balanceController.dispose();
-    _creditLimitController.dispose();
+    nameController.dispose();
+    balanceController.dispose();
+    creditLimitController.dispose();
     super.dispose();
   }
 
-  bool get _isValid {
-    if (_nameController.text.trim().isEmpty) return false;
-    if (_selectedType == AccountType.credit) {
-      final limit = double.tryParse(
-          _creditLimitController.text.replaceAll(',', '.'));
+  bool get isValid {
+    if (nameController.text.trim().isEmpty) return false;
+    if (selectedType == AccountType.credit) {
+      final limit =
+          double.tryParse(creditLimitController.text.replaceAll(',', '.'));
       return limit != null && limit > 0;
     }
     return true;
   }
 
-  Future<void> _submit() async {
-    if (!_isValid || _isSaving) return;
-    setState(() => _isSaving = true);
-
+  Account buildAccount() {
     final balance =
-        double.tryParse(_balanceController.text.replaceAll(',', '.')) ?? 0.0;
+        double.tryParse(balanceController.text.replaceAll(',', '.')) ?? 0.0;
     final creditLimit =
-        double.tryParse(_creditLimitController.text.replaceAll(',', '.')) ??
-            0.0;
-
-    final account = Account(
+        double.tryParse(creditLimitController.text.replaceAll(',', '.')) ?? 0.0;
+    return Account(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
-      name: _nameController.text.trim(),
-      type: _selectedType,
-      balance: _selectedType != AccountType.credit ? balance : 0.0,
-      creditLimit: _selectedType == AccountType.credit ? creditLimit : 0.0,
+      name: nameController.text.trim(),
+      type: selectedType,
+      balance: selectedType != AccountType.credit ? balance : 0.0,
+      creditLimit: selectedType == AccountType.credit ? creditLimit : 0.0,
       creditAvailable:
-          _selectedType == AccountType.credit ? creditLimit : 0.0,
+          selectedType == AccountType.credit ? creditLimit : 0.0,
     );
-
-    await widget.onSave(account);
-    if (mounted) context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isCredit = _selectedType == AccountType.credit;
+    final isCredit = selectedType == AccountType.credit;
 
-    return AppSheetContainer(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SheetHeader(title: l10n.accountAddTitle),
-          const SizedBox(height: 20),
-          FieldLabel(l10n.accountNameLabel),
-          const SizedBox(height: 6),
-          AppTextField(
-            controller: _nameController,
-            hintText: l10n.accountNameHint,
-            textCapitalization: TextCapitalization.words,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 16),
-          FieldLabel(l10n.accountTypeLabel),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _TypeChip(
-                label: l10n.accountTypeCash,
-                selected: _selectedType == AccountType.cash,
-                onTap: () => setState(() => _selectedType = AccountType.cash),
-              ),
-              const SizedBox(width: 8),
-              _TypeChip(
-                label: l10n.accountTypeDebit,
-                selected: _selectedType == AccountType.debit,
-                onTap: () =>
-                    setState(() => _selectedType = AccountType.debit),
-              ),
-              const SizedBox(width: 8),
-              _TypeChip(
-                label: l10n.accountTypeCredit,
-                selected: _selectedType == AccountType.credit,
-                onTap: () =>
-                    setState(() => _selectedType = AccountType.credit),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (isCredit) ...[
-            FieldLabel(l10n.accountCreditLimit),
-            const SizedBox(height: 6),
-            AppTextField(
-              controller: _creditLimitController,
-              prefixText: 'S/ ',
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              onChanged: (_) => setState(() {}),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FieldLabel(l10n.accountNameLabel),
+        const SizedBox(height: 6),
+        AppTextField(
+          controller: nameController,
+          hintText: l10n.accountNameHint,
+          textCapitalization: TextCapitalization.words,
+        ),
+        const SizedBox(height: 16),
+        FieldLabel(l10n.accountTypeLabel),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _TypeChip(
+              label: l10n.accountTypeCash,
+              selected: selectedType == AccountType.cash,
+              onTap: () => setState(() => selectedType = AccountType.cash),
             ),
-          ] else ...[
-            FieldLabel(l10n.accountInitialBalance),
-            const SizedBox(height: 6),
-            AppTextField(
-              controller: _balanceController,
-              prefixText: 'S/ ',
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              onChanged: (_) => setState(() {}),
+            const SizedBox(width: 8),
+            _TypeChip(
+              label: l10n.accountTypeDebit,
+              selected: selectedType == AccountType.debit,
+              onTap: () => setState(() => selectedType = AccountType.debit),
+            ),
+            const SizedBox(width: 8),
+            _TypeChip(
+              label: l10n.accountTypeCredit,
+              selected: selectedType == AccountType.credit,
+              onTap: () => setState(() => selectedType = AccountType.credit),
             ),
           ],
-          const SizedBox(height: 24),
-          AppPrimaryButton(
-            label: l10n.accountAddButton,
-            onPressed: _isValid && !_isSaving ? _submit : null,
-            isLoading: _isSaving,
-            borderRadius: 12,
+        ),
+        const SizedBox(height: 16),
+        if (isCredit) ...[
+          FieldLabel(l10n.accountCreditLimit),
+          const SizedBox(height: 6),
+          AppTextField(
+            controller: creditLimitController,
+            prefixText: 'S/ ',
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+          ),
+        ] else ...[
+          FieldLabel(l10n.accountInitialBalance),
+          const SizedBox(height: 6),
+          AppTextField(
+            controller: balanceController,
+            prefixText: 'S/ ',
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
           ),
         ],
-      ),
+      ],
     );
   }
 }

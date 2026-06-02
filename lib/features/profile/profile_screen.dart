@@ -8,6 +8,7 @@ import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/section_label.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../auth/auth_controller.dart';
@@ -86,25 +87,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _confirmLogout() async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.profileSignOutDialogTitle),
-        content: Text(l10n.profileSignOutDialogContent),
-        actions: [
-          TextButton(
-            onPressed: () => context.pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            onPressed: () => context.pop(true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.commonSignOut),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmSheet(
+      context,
+      title: l10n.profileSignOutDialogTitle,
+      message: l10n.profileSignOutDialogContent,
+      confirmLabel: l10n.commonSignOut,
+      tone: ConfirmTone.neutral,
+      icon: Icons.logout_rounded,
     );
-    if (confirmed == true && mounted) {
+    if (confirmed && mounted) {
       await ref.read(authNotifierProvider.notifier).logout();
       if (mounted) context.go('/auth/login');
     }
@@ -258,6 +249,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 24),
+        // ── Finanzas ──────────────────────────────────────────────────────────
+        _NavSection(
+          label: l10n.profileSectionFinance,
+          items: [
+            _NavItem(
+              icon: Icons.bar_chart_rounded,
+              iconColor: AppColors.primary,
+              title: l10n.reportsTitle,
+              onTap: () => context.push('/reports'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
         // ── Learn & Grow ──────────────────────────────────────────────────────
         _NavSection(
           label: l10n.profileSectionLearnGrow,
@@ -279,19 +283,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               iconColor: AppColors.primary,
               title: l10n.progressTitle,
               onTap: () => context.push('/progress'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // ── Surveys ───────────────────────────────────────────────────────────
-        _NavSection(
-          label: l10n.profileSectionSurveys,
-          items: [
-            _NavItem(
-              icon: Icons.compare_arrows_rounded,
-              iconColor: AppColors.primary,
-              title: l10n.surveyComparisonNavTitle,
-              onTap: () => context.push('/surveys/comparison'),
             ),
           ],
         ),
@@ -328,12 +319,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showFeedback(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => const _FeedbackSheetProxy(),
-    );
+    FeedbackModal.show(context, screenName: 'profile');
   }
 
   Widget _buildEditView(User user) {
@@ -534,13 +520,3 @@ class _NavRow extends StatelessWidget {
   }
 }
 
-// ── Feedback proxy (avoids importing FeedbackModal state in build) ─────────────
-
-class _FeedbackSheetProxy extends StatelessWidget {
-  const _FeedbackSheetProxy();
-
-  @override
-  Widget build(BuildContext context) {
-    return FeedbackModal(screenName: 'profile');
-  }
-}

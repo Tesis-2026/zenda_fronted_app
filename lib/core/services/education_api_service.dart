@@ -256,6 +256,10 @@ class Challenge {
   final String? daysLeft;
   final String? badgeReward;
 
+  /// Backend-computed deadline for an accepted challenge (AC.6 / EXPIRED state).
+  /// Null when the challenge is open-ended or not yet accepted.
+  final DateTime? expiresAt;
+
   const Challenge({
     required this.id,
     required this.title,
@@ -266,9 +270,23 @@ class Challenge {
     this.progressTotal,
     this.daysLeft,
     this.badgeReward,
+    this.expiresAt,
   });
 
   factory Challenge.fromJson(Map<String, dynamic> json) {
+    final expiresAtRaw = json['expiresAt'] as String?;
+    final expiresAt = expiresAtRaw != null && expiresAtRaw.isNotEmpty
+        ? DateTime.tryParse(expiresAtRaw)
+        : null;
+
+    // Prefer backend-provided daysLeft (legacy field). Fall back to
+    // computing it from expiresAt so the chip works without extra payload.
+    String? daysLeft = json['daysLeft']?.toString();
+    if (daysLeft == null && expiresAt != null) {
+      final diff = expiresAt.difference(DateTime.now()).inDays;
+      if (diff > 0) daysLeft = diff.toString();
+    }
+
     return Challenge(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -277,8 +295,9 @@ class Challenge {
       status: json['status'] as String? ?? 'AVAILABLE',
       progressCurrent: json['progressCurrent'] as int?,
       progressTotal: json['progressTotal'] as int?,
-      daysLeft: json['daysLeft']?.toString(),
+      daysLeft: daysLeft,
       badgeReward: json['badgeReward'] as String?,
+      expiresAt: expiresAt,
     );
   }
 }
