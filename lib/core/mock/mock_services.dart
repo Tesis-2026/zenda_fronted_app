@@ -599,16 +599,16 @@ class MockCategoryApiService extends CategoryApiService {
   static final _custom = <CategoryModel>[];
 
   static const _system = <CategoryModel>[
-    CategoryModel(id: 'cat-food', name: 'Comida', type: CategoryType.system),
-    CategoryModel(id: 'cat-transport', name: 'Transporte', type: CategoryType.system),
-    CategoryModel(id: 'cat-housing', name: 'Vivienda', type: CategoryType.system),
-    CategoryModel(id: 'cat-utilities', name: 'Servicios', type: CategoryType.system),
-    CategoryModel(id: 'cat-health', name: 'Salud', type: CategoryType.system),
-    CategoryModel(id: 'cat-entertainment', name: 'Entretenimiento', type: CategoryType.system),
-    CategoryModel(id: 'cat-shopping', name: 'Compras', type: CategoryType.system),
-    CategoryModel(id: 'cat-subscriptions', name: 'Suscripciones', type: CategoryType.system),
-    CategoryModel(id: 'cat-savings', name: 'Ahorro', type: CategoryType.system),
-    CategoryModel(id: 'cat-other', name: 'Otros', type: CategoryType.system),
+    CategoryModel(id: 'cat-food', name: 'Comida', type: CategoryType.system, icon: 'food'),
+    CategoryModel(id: 'cat-transport', name: 'Transporte', type: CategoryType.system, icon: 'transport'),
+    CategoryModel(id: 'cat-housing', name: 'Vivienda', type: CategoryType.system, icon: 'housing'),
+    CategoryModel(id: 'cat-utilities', name: 'Servicios', type: CategoryType.system, icon: 'utilities'),
+    CategoryModel(id: 'cat-health', name: 'Salud', type: CategoryType.system, icon: 'health'),
+    CategoryModel(id: 'cat-entertainment', name: 'Entretenimiento', type: CategoryType.system, icon: 'entertainment'),
+    CategoryModel(id: 'cat-shopping', name: 'Compras', type: CategoryType.system, icon: 'shopping'),
+    CategoryModel(id: 'cat-subscriptions', name: 'Suscripciones', type: CategoryType.system, icon: 'subscriptions'),
+    CategoryModel(id: 'cat-savings', name: 'Ahorro', type: CategoryType.system, icon: 'savings'),
+    CategoryModel(id: 'cat-other', name: 'Otros', type: CategoryType.system, icon: 'other'),
   ];
 
   @override

@@ -284,6 +284,7 @@ class _TransactionRow extends ConsumerWidget {
     final occurredAt = tx['occurredAt'] as String?;
     final category = tx['category'] as Map<String, dynamic>?;
     final categoryName = category?['name'] as String?;
+    final categoryIconKey = category?['icon'] as String?;
 
     DateTime? parsedDate;
     if (occurredAt != null) {
@@ -377,7 +378,7 @@ class _TransactionRow extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
-                      CategoryUtils.iconForCategory(categoryName),
+                      CategoryUtils.iconForCategory(categoryName, iconKey: categoryIconKey),
                       color: iconColor,
                       size: 20,
                     ),

@@ -3,10 +3,52 @@ import '../theme/app_colors.dart';
 
 /// Centralized category icon and color mapping.
 /// All screens should use these helpers instead of local switch statements.
+///
+/// Resolution order for icons:
+///   1. The backend-provided semantic [iconKey] (e.g. 'food', 'transport').
+///   2. A legacy match on the category [name] (covers the fixed transaction
+///      enum and any category without a key).
+///   3. A single default icon ([customCategoryIcon]) — used for custom
+///      categories, whose name already differentiates them.
 abstract final class CategoryUtils {
-  static IconData iconForCategory(String? name) {
+  /// The one icon every custom (or unkeyed/unknown) category falls back to.
+  static const IconData customCategoryIcon = Icons.label_rounded;
+
+  /// Backend icon key → IconData. Keep in sync with the seed's
+  /// ICON_BY_CATEGORY_NAME map in the backend.
+  static const Map<String, IconData> _iconByKey = {
+    'food': Icons.restaurant_rounded,
+    'transport': Icons.directions_bus_rounded,
+    'housing': Icons.home_rounded,
+    'utilities': Icons.bolt_rounded,
+    'health': Icons.favorite_rounded,
+    'entertainment': Icons.sports_esports_rounded,
+    'shopping': Icons.shopping_bag_rounded,
+    'subscriptions': Icons.subscriptions_rounded,
+    'cravings': Icons.icecream_rounded,
+    'savings': Icons.savings_rounded,
+    'education': Icons.school_rounded,
+    'scholarship': Icons.school_rounded,
+    'work': Icons.work_rounded,
+    'family': Icons.family_restroom_rounded,
+    'freelance': Icons.laptop_mac_rounded,
+    'other': Icons.category_rounded,
+  };
+
+  static IconData iconForCategory(
+    String? name, {
+    String? iconKey,
+    bool isCustom = false,
+  }) {
+    final key = iconKey?.toLowerCase();
+    if (key != null && _iconByKey.containsKey(key)) return _iconByKey[key]!;
+    if (isCustom) return customCategoryIcon;
     if (name == null) return Icons.swap_horiz_rounded;
-    return switch (name.toLowerCase()) {
+    return _iconByName(name.toLowerCase());
+  }
+
+  static IconData _iconByName(String name) {
+    return switch (name) {
       'food' || 'comida' => Icons.restaurant_rounded,
       'transportation' || 'transporte' => Icons.directions_bus_rounded,
       'housing' || 'vivienda' => Icons.home_rounded,
@@ -17,12 +59,20 @@ abstract final class CategoryUtils {
       'subscriptions' || 'suscripciones' => Icons.subscriptions_rounded,
       'cravings' || 'antojos' => Icons.icecream_rounded,
       'savings' || 'ahorro' => Icons.savings_rounded,
-      _ => Icons.category_rounded,
+      'education' || 'educación' || 'educacion' => Icons.school_rounded,
+      'other' || 'otros' => Icons.category_rounded,
+      // Unknown name (a custom category) → single default icon.
+      _ => customCategoryIcon,
     };
   }
 
-  static Color bgColorForCategory(String? name, {bool isIncome = false}) {
+  static Color bgColorForCategory(
+    String? name, {
+    bool isIncome = false,
+    bool isCustom = false,
+  }) {
     if (isIncome) return AppColors.primaryLight;
+    if (isCustom) return const Color(0xFFF3F4F6); // neutral for custom
     if (name == null) return AppColors.dangerLight;
     return switch (name.toLowerCase()) {
       'food' || 'comida' => AppColors.warningLight,
@@ -34,8 +84,13 @@ abstract final class CategoryUtils {
     };
   }
 
-  static Color iconColorForCategory(String? name, {bool isIncome = false}) {
+  static Color iconColorForCategory(
+    String? name, {
+    bool isIncome = false,
+    bool isCustom = false,
+  }) {
     if (isIncome) return AppColors.income;
+    if (isCustom) return const Color(0xFF6B7280); // neutral for custom
     if (name == null) return AppColors.danger;
     return switch (name.toLowerCase()) {
       'food' || 'comida' => AppColors.warning,
@@ -50,7 +105,9 @@ abstract final class CategoryUtils {
   /// Returns a widget with the category icon inside a colored rounded square.
   static Widget iconWidget(
     String? categoryName, {
+    String? iconKey,
     bool isIncome = false,
+    bool isCustom = false,
     double size = 44,
     double iconSize = 20,
   }) {
@@ -58,12 +115,12 @@ abstract final class CategoryUtils {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: bgColorForCategory(categoryName, isIncome: isIncome),
+        color: bgColorForCategory(categoryName, isIncome: isIncome, isCustom: isCustom),
         borderRadius: BorderRadius.circular(size * 0.32),
       ),
       child: Icon(
-        iconForCategory(categoryName),
-        color: iconColorForCategory(categoryName, isIncome: isIncome),
+        iconForCategory(categoryName, iconKey: iconKey, isCustom: isCustom),
+        color: iconColorForCategory(categoryName, isIncome: isIncome, isCustom: isCustom),
         size: iconSize,
       ),
     );
