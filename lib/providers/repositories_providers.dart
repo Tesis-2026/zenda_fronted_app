@@ -10,6 +10,7 @@ import '../core/services/category_api_service.dart';
 import '../core/services/user_api_service.dart';
 import '../core/services/pending_transaction_queue.dart';
 import '../core/services/sync_service.dart';
+import '../core/services/fcm_service.dart';
 
 final localKvStoreProvider = Provider<LocalKvStore>((ref) {
   return LocalKvStore();
@@ -84,3 +85,13 @@ final numberFormatProvider =
     AsyncNotifierProvider<NumberFormatNotifier, NumberFormatPref>(
   NumberFormatNotifier.new,
 );
+
+// ── FCM service provider (Phase 11) ──────────────────────────────────
+// Singleton wrapping firebase-admin on the device. The real instance is
+// constructed in `main.dart` (so Firebase.initializeApp can run before
+// `runApp`) and injected here via `overrideWithValue`.
+final fcmServiceProvider = Provider<FcmService>((ref) {
+  final service = FcmService(ref.read(notificationsServiceProvider));
+  ref.onDispose(() => service.dispose());
+  return service;
+});

@@ -1,3 +1,4 @@
+import '../models/notification.dart';
 import '../models/user.dart';
 import 'api_client.dart';
 
@@ -68,5 +69,42 @@ class NotificationsApiService {
       '/notifications/preferences/$type',
       {'enabled': enabled},
     );
+  }
+
+  // ── Inbox ──────────────────────────────────────────────────────────────────
+
+  Future<NotificationInboxPage> getInbox({int limit = 50, bool unreadOnly = false}) async {
+    final query = 'limit=$limit&unreadOnly=$unreadOnly';
+    final body = await ApiClient.get('/notifications/inbox?$query');
+    return NotificationInboxPage.fromJson(body);
+  }
+
+  Future<AppNotification> markRead(String id) async {
+    final body = await ApiClient.patch('/notifications/$id/read', const {});
+    return AppNotification.fromJson(body);
+  }
+
+  Future<int> markAllRead() async {
+    final body = await ApiClient.patch('/notifications/read-all', const {});
+    final updated = body['updated'];
+    return updated is num ? updated.toInt() : 0;
+  }
+
+  // ── FCM token registration ────────────────────────────────────────────────
+
+  Future<void> registerFcmToken(String token) async {
+    await ApiClient.post(
+      '/notifications/fcm-token',
+      {'token': token},
+      authenticated: true,
+    );
+  }
+
+  Future<void> unregisterFcmToken() async {
+    await ApiClient.delete('/notifications/fcm-token');
+  }
+
+  Future<void> setDailyReminderTime(String? hhmm) async {
+    await ApiClient.patch('/notifications/daily-reminder-time', {'time': hhmm});
   }
 }
