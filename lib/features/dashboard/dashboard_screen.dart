@@ -16,6 +16,7 @@ import 'widgets/streak_card.dart';
 import 'widgets/zenda_ai_card.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
+import '../notifications/notifications_inbox_providers.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -106,20 +107,7 @@ class _InicioSection extends ConsumerWidget {
                   ],
                 ),
                 const Spacer(),
-                GestureDetector(
-                  onTap: () => context.push('/notifications'),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: colors.card,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colors.border),
-                    ),
-                    child: Icon(Icons.notifications_outlined,
-                        size: 20, color: colors.iconStrong),
-                  ),
-                ),
+                _DashboardBell(),
                 const SizedBox(width: 8),
                 const UserMenuButton(),
               ],
@@ -631,6 +619,59 @@ class _TypeChip extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Dashboard-styled notification bell with unread badge. Routes to the inbox.
+class _DashboardBell extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final unread = ref.watch(unreadNotificationsCountProvider);
+
+    return GestureDetector(
+      onTap: () => context.push('/notifications/inbox'),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colors.card,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colors.border),
+            ),
+            child: Icon(Icons.notifications_outlined,
+                size: 20, color: colors.iconStrong),
+          ),
+          if (unread > 0)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: colors.card, width: 1.5),
+                ),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                child: Text(
+                  unread > 9 ? '9+' : '$unread',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

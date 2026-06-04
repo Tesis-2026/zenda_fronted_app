@@ -74,6 +74,13 @@ dependencies:
   share_plus: ^12.0.2
   path_provider: ^2.1.4
 
+  # Firebase Cloud Messaging — push notifications (Phase 11)
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.3
+  # Renders system notifications when an FCM message arrives while the app is
+  # in foreground (FCM does not show notifications automatically in foreground).
+  flutter_local_notifications: ^18.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -41,6 +41,7 @@ import '../features/surveys/sus_screen.dart';
 import '../features/surveys/research_screen.dart';
 import '../providers/pre_survey_provider.dart';
 import '../features/notifications/notification_preferences_screen.dart';
+import '../features/notifications/notifications_inbox_screen.dart';
 import '../features/ai_chat/ai_chat_screen.dart';
 import '../features/transactions/transaction_saved_screen.dart';
 import '../features/auth/reset_success_screen.dart';
@@ -328,6 +329,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationPreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/notifications/inbox',
+        builder: (context, state) => const NotificationsInboxScreen(),
       ),
       GoRoute(
         path: '/ai-chat',

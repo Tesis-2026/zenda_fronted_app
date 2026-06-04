@@ -5,11 +5,15 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'app.dart';
 import 'core/mock/demo_overrides.dart';
+import 'core/services/fcm_service.dart';
+import 'core/services/user_api_service.dart';
+import 'providers/repositories_providers.dart';
 
 const bool _kDemoMode = true;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   // App is Spanish-only — make sure intl helpers (DateFormat, NumberFormat)
   // pick Spanish even when callers don't pass a locale explicitly.
   Intl.defaultLocale = 'es';
@@ -21,11 +25,21 @@ Future<void> main() async {
     SystemUiMode.manual,
     overlays: SystemUiOverlay.values,
   );
+
+  // Firebase + FCM setup runs before runApp so the background handler is
+  // registered. Falls back silently to inbox-only mode if google-services.json
+  // is missing or Firebase init fails.
+  final fcm = FcmService(NotificationsApiService());
+  await fcm.initialize();
+
   runApp(
     ProviderScope(
-      overrides: _kDemoMode ? buildDemoOverrides() : const [],
+      overrides: [
+        // Share the eager-initialized FCM instance with the rest of the app.
+        fcmServiceProvider.overrideWithValue(fcm),
+        if (_kDemoMode) ...buildDemoOverrides(),
+      ],
       child: const App(),
     ),
   );
 }
-
