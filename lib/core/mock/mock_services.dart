@@ -126,11 +126,13 @@ class MockBudgetApiService extends BudgetApiService {
     required int month,
     required int year,
     String? categoryId,
+    String? name,
   }) async {
     final budget = Budget(
       id: 'budget-new-${DateTime.now().millisecondsSinceEpoch}',
       userId: 'demo-user-1',
       categoryId: categoryId,
+      name: name,
       amountLimit: amountLimit,
       month: month,
       year: year,
@@ -144,15 +146,18 @@ class MockBudgetApiService extends BudgetApiService {
   }
 
   @override
-  Future<Budget> update(String id, {required double amountLimit}) async {
+  Future<Budget> update(String id, {double? amountLimit, String? name}) async {
     final idx = _budgets.indexWhere((b) => b.id == id);
     if (idx != -1) {
       final b = _budgets[idx];
+      final newLimit = amountLimit ?? b.amountLimit;
       final updated = Budget(
         id: b.id, userId: b.userId, categoryId: b.categoryId,
-        categoryName: b.categoryName, amountLimit: amountLimit,
+        name: name ?? b.name,
+        categoryName: b.categoryName, amountLimit: newLimit,
         month: b.month, year: b.year, currentSpent: b.currentSpent,
-        percentageUsed: (b.currentSpent / amountLimit * 100).clamp(0, 100),
+        incomeAdded: b.incomeAdded,
+        percentageUsed: (b.currentSpent / (newLimit + b.incomeAdded) * 100).clamp(0, 100),
         createdAt: b.createdAt, updatedAt: DateTime.now().toIso8601String(),
       );
       _budgets[idx] = updated;

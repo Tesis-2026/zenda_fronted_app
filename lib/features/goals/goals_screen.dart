@@ -21,7 +21,7 @@ final goalsServiceProvider = Provider<GoalsApiService>((ref) {
   return GoalsApiService();
 });
 
-final _goalsProvider = FutureProvider.autoDispose<List<SavingsGoal>>((ref) {
+final goalsListProvider = FutureProvider.autoDispose<List<SavingsGoal>>((ref) {
   return ref.read(goalsServiceProvider).getAll();
 });
 
@@ -35,7 +35,7 @@ class GoalsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final goalsAsync = ref.watch(_goalsProvider);
+    final goalsAsync = ref.watch(goalsListProvider);
 
     final content = goalsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -46,7 +46,7 @@ class GoalsScreen extends ConsumerWidget {
               Text(l10n.goalsErrorLoad),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.invalidate(_goalsProvider),
+                onPressed: () => ref.invalidate(goalsListProvider),
                 child: Text(l10n.commonRetry),
               ),
             ],
@@ -160,7 +160,7 @@ class GoalsScreen extends ConsumerWidget {
               targetAmount: target,
               dueDate: st.dueDate?.toIso8601String(),
             );
-        ref.invalidate(_goalsProvider);
+        ref.invalidate(goalsListProvider);
         return true;
       },
     );

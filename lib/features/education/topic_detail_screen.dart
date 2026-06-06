@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
 import '../../core/theme/zenda_theme_x.dart';
+import '../../core/utils/difficulty_utils.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 import 'education_screen.dart';
+import 'learning_path_screen.dart';
 
-final _topicDetailProvider =
+final topicDetailProvider =
     FutureProvider.autoDispose.family<EducationTopic, String>((ref, id) {
   return ref.read(educationServiceProvider).getTopic(id);
 });
@@ -21,7 +23,7 @@ class TopicDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final topicAsync = ref.watch(_topicDetailProvider(topicId));
+    final topicAsync = ref.watch(topicDetailProvider(topicId));
 
     return topicAsync.when(
       loading: () => const Scaffold(
@@ -37,13 +39,17 @@ class TopicDetailScreen extends ConsumerWidget {
       data: (topic) => Scaffold(
         body: _TopicDetailBody(
           topic: topic,
-          onComplete: () async {
-            await ref.read(educationServiceProvider).completeTopic(topic.id);
-            ref.invalidate(_topicDetailProvider(topicId));
+          onRead: () async {
+            // Marking as READ is not completion — completion is earned via the
+            // quiz (>=70%). Refresh detail + list + path to reflect read state.
+            await ref.read(educationServiceProvider).markRead(topic.id);
+            ref.invalidate(topicDetailProvider(topicId));
+            ref.invalidate(topicsProvider);
+            ref.invalidate(learningPathProvider);
             if (context.mounted) {
               showAppToast(
                 context,
-                l10n.educationTopicCompleted,
+                l10n.educationMarkedRead,
                 type: ToastType.success,
               );
             }
@@ -55,9 +61,9 @@ class TopicDetailScreen extends ConsumerWidget {
 }
 
 class _TopicDetailBody extends StatelessWidget {
-  const _TopicDetailBody({required this.topic, required this.onComplete});
+  const _TopicDetailBody({required this.topic, required this.onRead});
   final EducationTopic topic;
-  final Future<void> Function() onComplete;
+  final Future<void> Function() onRead;
 
   Color _categoryColor() {
     switch (topic.category.toLowerCase()) {
@@ -149,7 +155,7 @@ class _TopicDetailBody extends StatelessWidget {
                     Row(
                       children: [
                         _MetaBadge(
-                          label: topic.difficulty,
+                          label: difficultyEs(topic.difficulty),
                           accentColor: diffColor,
                         ),
                         const SizedBox(width: 8),
@@ -223,44 +229,39 @@ class _TopicDetailBody extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 32, 20, 40),
             child: Column(
               children: [
-                if (!topic.isCompleted)
+                if (topic.isCompleted)
+                  _StatusPill(
+                    icon: Icons.check_circle_rounded,
+                    label: l10n.educationTopicCompleted,
+                    color: const Color(0xFF34D399),
+                  )
+                else if (topic.isRead) ...[
+                  _StatusPill(
+                    icon: Icons.menu_book_rounded,
+                    label: l10n.educationTopicRead,
+                    color: const Color(0xFF818CF8),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.educationCompleteHint,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF6B7280)),
+                  ),
+                ]
+                else
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
-                      icon: const Icon(Icons.check_rounded, size: 18),
-                      label: Text(l10n.educationMarkComplete),
-                      onPressed: onComplete,
+                      icon: const Icon(Icons.menu_book_rounded, size: 18),
+                      label: Text(l10n.educationMarkRead),
+                      onPressed: onRead,
                       style: FilledButton.styleFrom(
                         padding:
                             const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                    ),
-                  )
-                else
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF34D399)
-                          .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.check_circle_rounded,
-                            color: Color(0xFF34D399), size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.educationTopicCompleted,
-                          style: const TextStyle(
-                            color: Color(0xFF34D399),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 const SizedBox(height: 12),
@@ -314,6 +315,42 @@ class _MetaBadge extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+}
+
+/// Full-width status banner (e.g. "Completado" / "Leído").
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }

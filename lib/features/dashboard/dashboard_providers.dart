@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/models/account.dart';
+import '../../core/models/budget.dart';
 import '../../core/models/transaction.dart';
 import '../../core/models/breakdown_503020.dart';
 import '../../core/models/summary_models.dart';
@@ -9,6 +9,7 @@ import '../../core/services/transaction_api_service.dart';
 import '../../providers/repositories_providers.dart';
 import '../../providers/services_providers.dart';
 import '../../l10n/app_localizations.dart';
+import '../budget/budget_screen.dart' show budgetServiceProvider;
 
 // ─── ISO week helper ───────────────────────────────────────────────────────
 // Standard ISO 8601: W = floor((dayOfYear - weekday + 10) / 7)
@@ -56,8 +57,38 @@ final monthSummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
 
 // ─── Existing providers ────────────────────────────────────────────────────
 
-final accountsProvider = FutureProvider.autoDispose<List<Account>>((ref) async {
-  return ref.watch(accountsRepositoryProvider).getAccounts();
+/// Total money the user has = sum of their registered category budgets for the
+/// current month. `spent`/`available` are derived from each budget's progress.
+class BudgetTotals {
+  final double total;
+  final double spent;
+  const BudgetTotals({required this.total, required this.spent});
+  double get available => total - spent;
+}
+
+final budgetSummaryProvider =
+    FutureProvider.autoDispose<BudgetTotals>((ref) async {
+  final now = DateTime.now();
+  final budgets = await ref
+      .read(budgetServiceProvider)
+      .getAll(month: now.month, year: now.year);
+  var total = 0.0;
+  var spent = 0.0;
+  for (final b in budgets) {
+    total += b.total; // base limit + income assigned to the pot
+    spent += b.currentSpent;
+  }
+  return BudgetTotals(total: total, spent: spent);
+});
+
+/// The user's budgets for the current month — used as the required selector when
+/// registering a transaction (which budget the money comes from / goes to).
+final currentMonthBudgetsProvider =
+    FutureProvider.autoDispose<List<Budget>>((ref) async {
+  final now = DateTime.now();
+  return ref
+      .read(budgetServiceProvider)
+      .getAll(month: now.month, year: now.year);
 });
 
 final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>((ref) async {

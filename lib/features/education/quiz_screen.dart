@@ -7,9 +7,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/quiz_models.dart';
 import '../../core/services/quiz_api_service.dart';
+import '../../core/utils/difficulty_utils.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
+import 'education_screen.dart';
+import 'learning_path_screen.dart';
+import 'topic_detail_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // Provider
@@ -124,6 +128,11 @@ class QuizScreen extends ConsumerWidget {
           topicId: topicId,
           questions: questions,
           service: ref.read(quizServiceProvider),
+          onCompleted: () {
+            ref.invalidate(topicsProvider);
+            ref.invalidate(learningPathProvider);
+            ref.invalidate(topicDetailProvider(topicId));
+          },
         ),
       ),
     );
@@ -139,11 +148,15 @@ class _QuizBody extends StatefulWidget {
     required this.topicId,
     required this.questions,
     required this.service,
+    required this.onCompleted,
   });
 
   final String topicId;
   final List<QuizQuestion> questions;
   final QuizApiService service;
+  // Called after a successful submit so education list / path / detail refresh
+  // (a HIGH score completes the topic server-side).
+  final VoidCallback onCompleted;
 
   @override
   State<_QuizBody> createState() => _QuizBodyState();
@@ -222,6 +235,7 @@ class _QuizBodyState extends State<_QuizBody> {
           await widget.service.submitQuiz(widget.topicId, _state.answers);
       setState(
           () => _state = _state.copyWith(result: result, submitting: false));
+      widget.onCompleted();
     } catch (_) {
       setState(() => _state =
           _state.copyWith(submitting: false, phase: _QuizPhase.reviewing));
@@ -385,7 +399,7 @@ class _QuestionView extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            q.difficulty,
+            difficultyEs(q.difficulty),
             style: TextStyle(
                 color: diffColor, fontSize: 12, fontWeight: FontWeight.w600),
           ),

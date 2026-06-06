@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../models/transaction.dart';
-import '../theme/zenda_theme_x.dart';
 import '../utils/category_utils.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -61,18 +60,22 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return InkWell(
       onTap: item.onTap,
       borderRadius: BorderRadius.circular(16),
       child: Ink(
         decoration: BoxDecoration(
+          // Unselected cells get a subtle gray fill + a clearly visible border
+          // so each category reads as a tappable box (not blank white).
           color: item.selected
               ? const Color(0xFF34D399).withValues(alpha: 0.18)
-              : colors.card,
+              : const Color(0xFFF9FAFB),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: item.selected ? const Color(0xFF34D399) : colors.border,
+            color: item.selected
+                ? const Color(0xFF34D399)
+                : const Color(0xFFD1D5DB),
+            width: item.selected ? 1.5 : 1.2,
           ),
         ),
         padding: const EdgeInsets.all(10),

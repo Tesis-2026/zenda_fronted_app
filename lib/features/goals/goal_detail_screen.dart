@@ -155,6 +155,8 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
         if (mounted) {
           setState(() => _goal = updated);
           ref.invalidate(_contributionsProvider(_goal.id));
+          // Refresh the goals list / Gestión so the card percentage reflects it.
+          ref.invalidate(goalsListProvider);
         }
         return true;
       },
@@ -171,6 +173,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
     );
     if (confirmed != true || !context.mounted) return;
     await ref.read(goalsServiceProvider).delete(_goal.id);
+    ref.invalidate(goalsListProvider);
     if (!context.mounted) return;
     context.pop();
   }

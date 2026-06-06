@@ -9,7 +9,9 @@ import 'core/services/fcm_service.dart';
 import 'core/services/user_api_service.dart';
 import 'providers/repositories_providers.dart';
 
-const bool _kDemoMode = true;
+// Demo mode replaces every API service with an in-memory mock (no backend).
+// Defaults to the REAL backend; run demo with `--dart-define=DEMO=true`.
+const bool _kDemoMode = bool.fromEnvironment('DEMO', defaultValue: false);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

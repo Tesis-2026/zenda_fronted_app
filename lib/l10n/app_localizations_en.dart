@@ -1096,7 +1096,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorTxInvalidAmount => 'Enter an amount greater than 0.';
 
   @override
-  String get errorTxNoCategory => 'Select a category.';
+  String get errorTxNoCategory => 'Select a budget.';
 
   @override
   String get errorTxNoDestAccount => 'Select a destination account.';
@@ -1170,6 +1170,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get educationMarkComplete => 'Mark as completed';
+
+  @override
+  String get educationMarkRead => 'Mark as read';
+
+  @override
+  String get educationTopicRead => 'Read';
+
+  @override
+  String get educationMarkedRead => 'Topic marked as read';
+
+  @override
+  String get educationCompleteHint =>
+      'Pass the quiz (>=70%) to complete this topic.';
 
   @override
   String get educationTopicCompleted => 'Topic completed!';
@@ -1824,6 +1837,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardTotalBalance => 'Total Balance';
+
+  @override
+  String get dashboardTotalMoney => 'Total money';
+
+  @override
+  String get dashboardAvailableLabel => 'Available';
+
+  @override
+  String get dashboardSpentLabel => 'Spent';
 
   @override
   String get dashboardViewAll => 'View all';

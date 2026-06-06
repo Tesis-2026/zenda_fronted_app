@@ -17,7 +17,7 @@ final educationServiceProvider = Provider<EducationApiService>(
   (_) => EducationApiService(),
 );
 
-final _topicsProvider = FutureProvider.autoDispose<List<EducationTopic>>((ref) {
+final topicsProvider = FutureProvider.autoDispose<List<EducationTopic>>((ref) {
   return ref.read(educationServiceProvider).listTopics();
 });
 
@@ -109,7 +109,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
 
   Widget _buildLearnTab(BuildContext context) {
     final l10n = context.l10n;
-    final topicsAsync = ref.watch(_topicsProvider);
+    final topicsAsync = ref.watch(topicsProvider);
     return topicsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -119,7 +119,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
               Text(l10n.educationErrorLoad),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.invalidate(_topicsProvider),
+                onPressed: () => ref.invalidate(topicsProvider),
                 child: Text(l10n.commonRetry),
               ),
             ],
@@ -131,7 +131,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
           final rest = filtered.length > 1 ? filtered.sublist(1) : <EducationTopic>[];
 
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(_topicsProvider),
+            onRefresh: () async => ref.invalidate(topicsProvider),
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/quiz_models.dart';
+import '../../core/utils/difficulty_utils.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
@@ -365,7 +366,7 @@ class _DifficultyChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
-          difficulty,
+          difficultyEs(difficulty),
           style: TextStyle(color: _color, fontSize: 12, fontWeight: FontWeight.w600),
         ),
       );

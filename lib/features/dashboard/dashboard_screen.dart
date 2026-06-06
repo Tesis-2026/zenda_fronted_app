@@ -2,15 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../core/models/account.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
-import '../../core/widgets/app_form_sheet.dart';
-import '../../core/widgets/app_text_field.dart';
-import '../../core/widgets/field_label.dart';
 import '../../features/auth/auth_controller.dart';
-import '../../providers/repositories_providers.dart';
 import 'dashboard_providers.dart';
 import 'widgets/streak_card.dart';
 import 'widgets/zenda_ai_card.dart';
@@ -43,17 +38,11 @@ class _InicioSection extends ConsumerWidget {
     final onSurface = colors.textPrimary;
     final onSurfaceMuted = colors.textMuted;
 
-    final accountsAsync = ref.watch(accountsProvider);
+    final budgetSummaryAsync = ref.watch(budgetSummaryProvider);
     final monthSummaryAsync = ref.watch(monthSummaryProvider);
 
     final streak = ref.watch(streakProvider);
     final advice = ref.watch(aiAdviceProvider(l10n));
-
-    final totalBalance = accountsAsync.asData?.value.fold<double>(
-          0.0,
-          (sum, a) => sum + a.balance,
-        ) ??
-        0.0;
 
     final income = monthSummaryAsync.when(
       data: (s) => s.totalIncome,
@@ -68,7 +57,7 @@ class _InicioSection extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(accountsProvider);
+        ref.invalidate(budgetSummaryProvider);
         ref.invalidate(transactionsProvider);
         ref.invalidate(daySummaryProvider);
         ref.invalidate(weekSummaryProvider);
@@ -115,12 +104,8 @@ class _InicioSection extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
-            // Balance card
-            _TotalBalanceCard(
-              totalBalance: totalBalance,
-              accounts: accountsAsync.asData?.value ?? [],
-              onAddAccount: () => _showAddAccountSheet(context, ref),
-            ),
+            // Total money = sum of registered budgets
+            _TotalMoneyCard(summary: budgetSummaryAsync),
 
             const SizedBox(height: 12),
 
@@ -144,72 +129,24 @@ class _InicioSection extends ConsumerWidget {
       ),
     );
   }
-
-  Future<void> _showAddAccountSheet(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final key = GlobalKey<_AddAccountBodyState>();
-    await showAppFormSheet(
-      context,
-      title: l10n.accountAddTitle,
-      primaryLabel: l10n.accountAddButton,
-      body: _AddAccountBody(key: key),
-      onSubmit: () async {
-        final st = key.currentState;
-        if (st == null || !st.isValid) return false;
-        await ref.read(accountsRepositoryProvider).upsert(st.buildAccount());
-        ref.invalidate(accountsProvider);
-        return true;
-      },
-    );
-  }
 }
 
-class _TotalBalanceCard extends StatelessWidget {
-  final double totalBalance;
-  final List<Account> accounts;
-  final VoidCallback onAddAccount;
+/// Shows the user's total money — the sum of their registered category budgets —
+/// plus how much is available vs. spent. Money is tracked through budgets;
+/// there are no accounts. Tapping routes to the budgets manager.
+class _TotalMoneyCard extends StatelessWidget {
+  final AsyncValue<BudgetTotals> summary;
 
-  const _TotalBalanceCard({
-    required this.totalBalance,
-    required this.accounts,
-    required this.onAddAccount,
-  });
+  const _TotalMoneyCard({required this.summary});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-
-    if (accounts.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1F2937),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          children: [
-            const Icon(Icons.account_balance_wallet_outlined,
-                color: Color(0xFF6B7280), size: 36),
-            const SizedBox(height: 10),
-            Text(
-              l10n.dashboardNoAccounts,
-              style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 15),
-            ),
-            const SizedBox(height: 12),
-            TextButton.icon(
-              onPressed: onAddAccount,
-              icon: const Icon(Icons.add_circle_outline,
-                  color: Color(0xFF34D399), size: 18),
-              label: Text(
-                l10n.dashboardAddFirstAccount,
-                style: const TextStyle(color: Color(0xFF34D399), fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final totals = summary.asData?.value;
+    final total = totals?.total ?? 0.0;
+    final available = totals?.available ?? 0.0;
+    final spent = totals?.spent ?? 0.0;
+    final hasBudgets = total > 0;
 
     return Container(
       width: double.infinity,
@@ -225,11 +162,11 @@ class _TotalBalanceCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.dashboardTotalBalance,
+                l10n.dashboardTotalMoney,
                 style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
               ),
               GestureDetector(
-                onTap: onAddAccount,
+                onTap: () => context.push('/budgets'),
                 child: const Icon(Icons.add_circle_outline,
                     color: Color(0xFF34D399), size: 20),
               ),
@@ -237,7 +174,7 @@ class _TotalBalanceCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'S/ ${totalBalance.toStringAsFixed(2)}',
+            'S/ ${total.toStringAsFixed(2)}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
@@ -245,25 +182,34 @@ class _TotalBalanceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.dashboardCashDebitCredit,
-                style: const TextStyle(color: Color(0xFF6B7280), fontSize: 12),
-              ),
-              GestureDetector(
-                onTap: () => context.go('/transactions'),
-                child: Text(
-                  '▶  ${l10n.dashboardViewAll}',
-                  style: const TextStyle(
-                    color: Color(0xFF34D399),
-                    fontSize: 12,
+          if (hasBudgets)
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${l10n.dashboardAvailableLabel}: S/ ${available.toStringAsFixed(2)}   ·   ${l10n.dashboardSpentLabel}: S/ ${spent.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        color: Color(0xFF9CA3AF), fontSize: 12),
                   ),
                 ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => context.push('/budgets'),
+                  child: Text(
+                    '▶  ${l10n.dashboardViewAll}',
+                    style: const TextStyle(color: Color(0xFF34D399), fontSize: 12),
+                  ),
+                ),
+              ],
+            )
+          else
+            GestureDetector(
+              onTap: () => context.push('/budgets'),
+              child: Text(
+                '+  ${l10n.budgetEmptySubtitle}',
+                style: const TextStyle(color: Color(0xFF34D399), fontSize: 12),
               ),
-            ],
-          ),
+            ),
         ],
       ),
     );
@@ -469,157 +415,6 @@ class _LegendDot extends StatelessWidget {
           style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
         ),
       ],
-    );
-  }
-}
-
-class _AddAccountBody extends StatefulWidget {
-  const _AddAccountBody({super.key});
-
-  @override
-  State<_AddAccountBody> createState() => _AddAccountBodyState();
-}
-
-class _AddAccountBodyState extends State<_AddAccountBody> {
-  final nameController = TextEditingController();
-  final balanceController = TextEditingController();
-  final creditLimitController = TextEditingController();
-  AccountType selectedType = AccountType.cash;
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    balanceController.dispose();
-    creditLimitController.dispose();
-    super.dispose();
-  }
-
-  bool get isValid {
-    if (nameController.text.trim().isEmpty) return false;
-    if (selectedType == AccountType.credit) {
-      final limit =
-          double.tryParse(creditLimitController.text.replaceAll(',', '.'));
-      return limit != null && limit > 0;
-    }
-    return true;
-  }
-
-  Account buildAccount() {
-    final balance =
-        double.tryParse(balanceController.text.replaceAll(',', '.')) ?? 0.0;
-    final creditLimit =
-        double.tryParse(creditLimitController.text.replaceAll(',', '.')) ?? 0.0;
-    return Account(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      name: nameController.text.trim(),
-      type: selectedType,
-      balance: selectedType != AccountType.credit ? balance : 0.0,
-      creditLimit: selectedType == AccountType.credit ? creditLimit : 0.0,
-      creditAvailable:
-          selectedType == AccountType.credit ? creditLimit : 0.0,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final isCredit = selectedType == AccountType.credit;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FieldLabel(l10n.accountNameLabel),
-        const SizedBox(height: 6),
-        AppTextField(
-          controller: nameController,
-          hintText: l10n.accountNameHint,
-          textCapitalization: TextCapitalization.words,
-        ),
-        const SizedBox(height: 16),
-        FieldLabel(l10n.accountTypeLabel),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            _TypeChip(
-              label: l10n.accountTypeCash,
-              selected: selectedType == AccountType.cash,
-              onTap: () => setState(() => selectedType = AccountType.cash),
-            ),
-            const SizedBox(width: 8),
-            _TypeChip(
-              label: l10n.accountTypeDebit,
-              selected: selectedType == AccountType.debit,
-              onTap: () => setState(() => selectedType = AccountType.debit),
-            ),
-            const SizedBox(width: 8),
-            _TypeChip(
-              label: l10n.accountTypeCredit,
-              selected: selectedType == AccountType.credit,
-              onTap: () => setState(() => selectedType = AccountType.credit),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (isCredit) ...[
-          FieldLabel(l10n.accountCreditLimit),
-          const SizedBox(height: 6),
-          AppTextField(
-            controller: creditLimitController,
-            prefixText: 'S/ ',
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-          ),
-        ] else ...[
-          FieldLabel(l10n.accountInitialBalance),
-          const SizedBox(height: 6),
-          AppTextField(
-            controller: balanceController,
-            prefixText: 'S/ ',
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _TypeChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _TypeChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected
-                ? const Color(0xFF34D399)
-                : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: selected ? Colors.white : const Color(0xFF6B7280),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

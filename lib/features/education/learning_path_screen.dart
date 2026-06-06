@@ -4,61 +4,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/utils/difficulty_utils.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import 'education_screen.dart';
 
-// ── Demo: AI-prioritised order + reasons ─────────────────────────────────────
-// Based on demo user (Paolo, May 2026):
-//   • No savings recorded this month
-//   • Food budget at 77%, Health at 80%
-//   • Emergency Fund goal at 28% (S/ 850 of S/ 3 000)
-//   • Has Visa Credit card with S/ 1 150 available
+// ── Learning path ────────────────────────────────────────────────────────────
+// Orders the real backend topics into a simple curriculum: the topics the user
+// has not completed yet come first, then completed ones for review. Each step
+// shows a short rationale based on its theme (category).
 
-class _PathStep {
-  final String topicId;
-  final String reason;
-  const _PathStep(this.topicId, this.reason);
+/// Short, theme-based rationale shown under each topic in the path.
+String reasonForTopic(EducationTopic t) {
+  switch (t.category.toLowerCase()) {
+    case 'saving':
+      return 'Construir el hábito de ahorrar es clave para tu estabilidad financiera.';
+    case 'investing':
+      return 'Haz crecer tu dinero con el tiempo entendiendo cómo invertir.';
+    case 'budgeting':
+    default:
+      return 'Planifica tus gastos para mantenerte dentro de tus presupuestos.';
+  }
 }
-
-const _demoPath = [
-  _PathStep(
-    'topic-3',
-    'No registraste ahorros en mayo — construir un fondo de emergencia es tu mayor prioridad ahora mismo.',
-  ),
-  _PathStep(
-    'topic-2',
-    'Comida está al 77% y Salud al 80% de sus presupuestos. Planificar mejor te ayuda a mantener el rumbo.',
-  ),
-  _PathStep(
-    'topic-4',
-    'Automatizar una pequeña transferencia el día de pago elimina la fuerza de voluntad de la ecuación.',
-  ),
-  _PathStep(
-    'topic-1',
-    'Revisión: el 58% de tu gasto se va en Necesidades este mes, por encima del objetivo del 50%.',
-  ),
-  _PathStep(
-    'topic-5',
-    'Tienes una tarjeta de crédito Visa — entender los intereses te ahorrará dinero cada mes.',
-  ),
-  _PathStep(
-    'topic-6',
-    'Cuando tu fondo de emergencia llegue a S/ 3 000, invertir es tu siguiente meta natural.',
-  ),
-];
 
 // ── Provider ─────────────────────────────────────────────────────────────────
 
 final learningPathProvider =
     FutureProvider.autoDispose<List<EducationTopic>>((ref) async {
   final topics = await ref.read(educationServiceProvider).listTopics();
-  final result = <EducationTopic>[];
-  for (final step in _demoPath) {
-    final match = topics.where((t) => t.id == step.topicId);
-    if (match.isNotEmpty) result.add(match.first);
-  }
-  return result;
+  // Pending topics first (what to learn next), then completed ones for review.
+  final pending = topics.where((t) => !t.isCompleted).toList();
+  final done = topics.where((t) => t.isCompleted).toList();
+  return [...pending, ...done];
 });
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -87,7 +64,7 @@ class LearningPathScreen extends ConsumerWidget {
                   (e) => _PathCard(
                     index: e.key,
                     topic: e.value,
-                    reason: _demoPath[e.key].reason,
+                    reason: reasonForTopic(e.value),
                     onTap: () => context.push('/education/${e.value.id}'),
                   ),
                 ),
@@ -140,7 +117,7 @@ class _AiBanner extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    'Personalizado por IA',
+                    'Ruta recomendada',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -150,7 +127,7 @@ class _AiBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Temas ordenados por lo que más te ayudará este mes.',
+                  'Sigue esta ruta para fortalecer tu educación financiera paso a paso.',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -160,7 +137,7 @@ class _AiBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Según tus gastos de mayo — aún sin ahorros, comida al 77%, salud al 80%.',
+                  'Primero los temas que aún no completas; luego repasa lo aprendido.',
                   style: TextStyle(
                     fontSize: 11,
                     color: Color(0xFF9CA3AF),
@@ -283,7 +260,7 @@ class _PathCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          topic.difficulty,
+                          difficultyEs(topic.difficulty),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,

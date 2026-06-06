@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/models/budget.dart';
 import '../../core/models/transaction.dart';
-import '../../core/services/transaction_api_service.dart' show categoryToApiName;
+import '../../core/services/transaction_api_service.dart'
+    show categoryToApiName, categoryFromApiName;
+import '../../core/utils/category_utils.dart';
+import '../dashboard/dashboard_providers.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_date_field.dart';
@@ -88,6 +92,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final controller = ref.read(newTransactionControllerProvider.notifier);
     final colors = context.colors;
     final l10n = context.l10n;
+    final budgetsAsync = ref.watch(currentMonthBudgetsProvider);
 
     ref.listen<NewTransactionState>(newTransactionControllerProvider, (
       prev,
@@ -261,7 +266,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            l10n.txCategoryLabel,
+                            'Presupuesto',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: colors.textPrimary,
@@ -273,9 +278,35 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    CategorySelector(
-                      selected: state.category,
-                      onSelected: controller.setCategory,
+                    budgetsAsync.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      error: (_, _) => Text(
+                        l10n.budgetErrorLoad,
+                        style: const TextStyle(color: Color(0xFFEF4444)),
+                      ),
+                      data: (budgets) {
+                        if (budgets.isEmpty) return const _NoBudgetsHint();
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final b in budgets)
+                              _BudgetChip(
+                                budget: b,
+                                selected:
+                                    categoryFromApiName(b.categoryName) ==
+                                        state.category,
+                                onTap: () => controller.setCategory(
+                                  categoryFromApiName(b.categoryName) ??
+                                      TransactionCategory.otros,
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
 
                     if (state.error != null) ...[
@@ -512,6 +543,108 @@ class _BucketChip extends StatelessWidget {
           color: color,
           fontWeight: FontWeight.w800,
           fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
+
+/// Selectable chip for a budget pot: shows its name + remaining available.
+/// Picking it sets the transaction's category (money is tracked by budget).
+class _BudgetChip extends StatelessWidget {
+  final Budget budget;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _BudgetChip({
+    required this.budget,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final label = (budget.name != null && budget.name!.isNotEmpty)
+        ? budget.name!
+        : CategoryUtils.labelEs(budget.categoryName);
+    const accent = Color(0xFF34D399);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? accent.withValues(alpha: 0.14)
+              : const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? accent : const Color(0xFFE5E7EB),
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CategoryUtils.iconForCategory(budget.categoryName),
+              size: 16,
+              color: selected ? accent : const Color(0xFF6B7280),
+            ),
+            const SizedBox(width: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: selected
+                        ? const Color(0xFF065F46)
+                        : const Color(0xFF374151),
+                  ),
+                ),
+                Text(
+                  'Disp. S/ ${budget.available.toStringAsFixed(0)}',
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown when the user has no budgets yet — registering needs at least one.
+class _NoBudgetsHint extends StatelessWidget {
+  const _NoBudgetsHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/budgets'),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.add_circle_outline, color: Color(0xFF34D399), size: 18),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Aún no tienes presupuestos. Crea uno para poder registrar.',
+                style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
+              ),
+            ),
+          ],
         ),
       ),
     );

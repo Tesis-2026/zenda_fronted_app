@@ -18,6 +18,7 @@ import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/field_label.dart';
+import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/green_pill_button.dart';
 import '../../core/widgets/icon_action_button.dart';
 import '../../core/widgets/month_navigator.dart';
@@ -241,8 +242,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         final amount = double.tryParse(st.amountController.text.trim());
         if (amount == null || amount <= 0) return false;
         try {
+          final nm = st.nameController.text.trim();
           await ref.read(budgetServiceProvider).create(
                 categoryId: st.categoryId,
+                name: nm.isEmpty ? null : nm,
                 amountLimit: amount,
                 month: st.month,
                 year: st.year,
@@ -277,9 +280,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         if (st == null) return false;
         final amount = double.tryParse(st.controller.text.trim());
         if (amount == null || amount <= 0) return false;
+        final nm = st.nameController.text.trim();
         await ref
             .read(budgetServiceProvider)
-            .update(budget.id, amountLimit: amount);
+            .update(budget.id, amountLimit: amount, name: nm.isEmpty ? null : nm);
         ref.invalidate(_budgetsProvider(_filter));
         return true;
       },
@@ -321,6 +325,7 @@ class _CreateBudgetBody extends StatefulWidget {
 
 class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
   final amountController = TextEditingController();
+  final nameController = TextEditingController();
   String? categoryId;
   late int month;
   late int year;
@@ -335,6 +340,7 @@ class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
   @override
   void dispose() {
     amountController.dispose();
+    nameController.dispose();
     super.dispose();
   }
 
@@ -367,6 +373,14 @@ class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const FieldLabel('Nombre'),
+        const SizedBox(height: 8),
+        AppTextField(
+          controller: nameController,
+          hintText: 'ej. Alquiler',
+          textCapitalization: TextCapitalization.sentences,
+        ),
+        const SizedBox(height: 16),
         const FieldLabel('Categoría'),
         const SizedBox(height: 8),
         FutureBuilder<List<CategoryModel>>(
@@ -426,17 +440,20 @@ class _EditBudgetBody extends StatefulWidget {
 
 class _EditBudgetBodyState extends State<_EditBudgetBody> {
   late final TextEditingController controller;
+  late final TextEditingController nameController;
 
   @override
   void initState() {
     super.initState();
     controller = TextEditingController(
         text: widget.budget.amountLimit.toStringAsFixed(2));
+    nameController = TextEditingController(text: widget.budget.name ?? '');
   }
 
   @override
   void dispose() {
     controller.dispose();
+    nameController.dispose();
     super.dispose();
   }
 
@@ -451,6 +468,14 @@ class _EditBudgetBodyState extends State<_EditBudgetBody> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const FieldLabel('Nombre'),
+        const SizedBox(height: 8),
+        AppTextField(
+          controller: nameController,
+          hintText: 'ej. Alquiler',
+          textCapitalization: TextCapitalization.sentences,
+        ),
+        const SizedBox(height: 16),
         const FieldLabel('Categoría'),
         const SizedBox(height: 8),
         AppCard(
@@ -671,17 +696,18 @@ class _BudgetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final pct = (budget.amountLimit > 0
-            ? (budget.currentSpent / budget.amountLimit) * 100
-            : 0)
+    final potTotal = budget.total;
+    final pct = (potTotal > 0 ? (budget.currentSpent / potTotal) * 100 : 0)
         .clamp(0, 200)
         .toDouble();
     final color = _progressColor(pct);
-    final isOver =
-        budget.currentSpent > budget.amountLimit && budget.amountLimit > 0;
+    final isOver = budget.currentSpent > potTotal && potTotal > 0;
     final categoryName = budget.categoryName != null
         ? CategoryUtils.labelEs(budget.categoryName)
         : l10n.budgetCategoryAll;
+    final displayName = (budget.name != null && budget.name!.isNotEmpty)
+        ? budget.name!
+        : categoryName;
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 16),
@@ -705,15 +731,29 @@ class _BudgetCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  categoryName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textDark,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    Text(
+                      categoryName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSubtle,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: 8),
@@ -748,7 +788,7 @@ class _BudgetCard extends StatelessWidget {
               ],
               Expanded(
                 child: Text(
-                  'S/ ${budget.currentSpent.toStringAsFixed(0)} de S/ ${budget.amountLimit.toStringAsFixed(0)}',
+                  'S/ ${budget.currentSpent.toStringAsFixed(0)} de S/ ${potTotal.toStringAsFixed(0)}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

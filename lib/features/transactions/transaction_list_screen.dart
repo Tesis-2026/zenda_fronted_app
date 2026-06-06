@@ -200,7 +200,6 @@ class TransactionListScreen extends ConsumerWidget {
                               ref.invalidate(weekSummaryProvider);
                               ref.invalidate(monthSummaryProvider);
                               ref.invalidate(transactionsProvider);
-                              ref.invalidate(accountsProvider);
                             },
                           ),
                       ],

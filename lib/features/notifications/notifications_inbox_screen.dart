@@ -12,12 +12,11 @@ class NotificationsInboxScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final inboxAsync = ref.watch(notificationsInboxProvider);
     final notifier = ref.read(notificationsInboxProvider.notifier);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBg : AppColors.background,
+      backgroundColor: AppColors.pageBackground,
       appBar: ZendaAppBar(
         title: 'Notificaciones',
         actions: [
@@ -63,11 +62,10 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? AppColors.darkCard : Colors.white;
+    const cardColor = Colors.white;
     final iconColor = _accentForType(notification.type);
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.textDark;
-    final subColor = isDark ? AppColors.darkTextSecondary : const Color(0xFF6B7280);
+    const textColor = AppColors.textDark;
+    const subColor = Color(0xFF6B7280);
 
     return Material(
       color: cardColor,
@@ -80,7 +78,7 @@ class _NotificationCard extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
               color: notification.isRead
-                  ? (isDark ? AppColors.darkBorder : AppColors.border)
+                  ? AppColors.border
                   : iconColor.withAlpha(80),
               width: notification.isRead ? 1 : 1.5,
             ),
@@ -158,8 +156,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subColor =
-        Theme.of(context).brightness == Brightness.dark ? AppColors.darkTextSecondary : const Color(0xFF6B7280);
+    const subColor = Color(0xFF6B7280);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),

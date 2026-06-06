@@ -28,10 +28,7 @@ buildDemoOverrides() {
       () => _DemoAuthNotifier(),
     ),
 
-    // ── Accounts + transactions + streak (local providers) ───────────────────
-    accountsProvider.overrideWith(
-      (ref) async => DemoData.accounts,
-    ),
+    // ── Transactions + streak (local providers) ──────────────────────────────
     transactionsProvider.overrideWith(
       (ref) async => DemoData.transactions,
     ),

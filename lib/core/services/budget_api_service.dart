@@ -13,6 +13,7 @@ class BudgetApiService {
 
   Future<Budget> create({
     String? categoryId,
+    String? name,
     required double amountLimit,
     required int month,
     required int year,
@@ -21,6 +22,7 @@ class BudgetApiService {
       '/budgets',
       {
         'categoryId': ?categoryId,
+        'name': ?name,
         'amountLimit': amountLimit,
         'month': month,
         'year': year,
@@ -30,10 +32,13 @@ class BudgetApiService {
     return Budget.fromJson(json);
   }
 
-  Future<Budget> update(String id, {required double amountLimit}) async {
+  Future<Budget> update(String id, {double? amountLimit, String? name}) async {
     final json = await ApiClient.put(
       '/budgets/$id',
-      {'amountLimit': amountLimit},
+      {
+        'amountLimit': ?amountLimit,
+        'name': ?name,
+      },
     );
     return Budget.fromJson(json);
   }

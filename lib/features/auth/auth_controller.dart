@@ -96,7 +96,6 @@ class AuthNotifier extends Notifier<AuthState> {
 
   void _clearDataProviders() {
     // Invalidate non-autoDispose providers so the next login gets fresh data.
-    ref.invalidate(accountsProvider);
     ref.invalidate(transactionsProvider);
     ref.invalidate(streakStateProvider);
   }

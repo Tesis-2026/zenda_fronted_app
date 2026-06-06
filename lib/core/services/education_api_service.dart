@@ -9,6 +9,7 @@ class EducationTopic {
   final String category;
   final int order;
   final bool isCompleted;
+  final bool isRead;
   final DateTime? completedAt;
   final int questionCount;
   final bool isLocked;
@@ -21,6 +22,7 @@ class EducationTopic {
     this.category = 'budgeting',
     required this.order,
     required this.isCompleted,
+    this.isRead = false,
     this.completedAt,
     this.questionCount = 0,
     this.isLocked = false,
@@ -37,6 +39,7 @@ class EducationTopic {
       category: json['category'] as String? ?? 'budgeting',
       order: json['order'] as int,
       isCompleted: json['isCompleted'] as bool? ?? false,
+      isRead: json['isRead'] as bool? ?? false,
       completedAt: json['completedAt'] != null
           ? DateTime.tryParse(json['completedAt'] as String)
           : null,
@@ -59,6 +62,10 @@ class EducationApiService {
 
   Future<void> completeTopic(String id) async {
     await ApiClient.patch('/education/topics/$id/complete', {});
+  }
+
+  Future<void> markRead(String id) async {
+    await ApiClient.patch('/education/topics/$id/read', {});
   }
 
   Future<PersonalizedQuizResult> getPersonalizedQuiz({String language = 'es'}) async {

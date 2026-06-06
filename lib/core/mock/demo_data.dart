@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../models/account.dart';
 import '../models/budget.dart';
 import '../models/savings_goal.dart';
 import '../models/summary_models.dart';
@@ -30,33 +29,6 @@ abstract final class DemoData {
     profileCompleted: true,
     currency: 'PEN',
   );
-
-  // ── Accounts ───────────────────────────────────────────────────────────────
-
-  static final accounts = <Account>[
-    const Account(
-      id: 'acc-cash-1',
-      name: 'Efectivo',
-      type: AccountType.cash,
-      balance: 450.00,
-      colorValue: 0xFF34D399,
-    ),
-    const Account(
-      id: 'acc-debit-1',
-      name: 'Débito BCP',
-      type: AccountType.debit,
-      balance: 1280.00,
-      colorValue: 0xFF3B82F6,
-    ),
-    const Account(
-      id: 'acc-credit-1',
-      name: 'Crédito Visa',
-      type: AccountType.credit,
-      creditLimit: 1500.00,
-      creditAvailable: 1150.00,
-      colorValue: 0xFF7C3AED,
-    ),
-  ];
 
   // ── Transactions ───────────────────────────────────────────────────────────
 

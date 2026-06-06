@@ -2063,7 +2063,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorTxNoCategory.
   ///
   /// In en, this message translates to:
-  /// **'Select a category.'**
+  /// **'Select a budget.'**
   String get errorTxNoCategory;
 
   /// No description provided for @errorTxNoDestAccount.
@@ -2197,6 +2197,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark as completed'**
   String get educationMarkComplete;
+
+  /// No description provided for @educationMarkRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get educationMarkRead;
+
+  /// No description provided for @educationTopicRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get educationTopicRead;
+
+  /// No description provided for @educationMarkedRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic marked as read'**
+  String get educationMarkedRead;
+
+  /// No description provided for @educationCompleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass the quiz (>=70%) to complete this topic.'**
+  String get educationCompleteHint;
 
   /// No description provided for @educationTopicCompleted.
   ///
@@ -3335,6 +3359,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Balance'**
   String get dashboardTotalBalance;
+
+  /// No description provided for @dashboardTotalMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Total money'**
+  String get dashboardTotalMoney;
+
+  /// No description provided for @dashboardAvailableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get dashboardAvailableLabel;
+
+  /// No description provided for @dashboardSpentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get dashboardSpentLabel;
 
   /// No description provided for @dashboardViewAll.
   ///
