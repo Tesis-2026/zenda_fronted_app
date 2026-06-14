@@ -305,6 +305,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           final index = switch (tab) {
             'budgets' => 1,
             'goals' => 2,
+            'income' => 3,
             _ => 0, // progress (default)
           };
           return ManagementScreen(initialTab: index);

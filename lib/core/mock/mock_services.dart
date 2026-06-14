@@ -39,7 +39,12 @@ class MockInsightsApiService extends InsightsApiService {
       DemoData.monthComparison;
 
   @override
-  Future<List<int>> downloadPdfReport({required int year, required int month}) async => [];
+  Future<List<int>> downloadPdfReport({
+    required int fromYear,
+    required int fromMonth,
+    required int toYear,
+    required int toMonth,
+  }) async => [];
 }
 
 class MockGoalsApiService extends GoalsApiService {
@@ -182,8 +187,7 @@ class MockBudgetApiService extends BudgetApiService {
         name: name ?? b.name,
         categoryName: b.categoryName, amountLimit: newLimit,
         month: b.month, year: b.year, currentSpent: b.currentSpent,
-        incomeAdded: b.incomeAdded,
-        percentageUsed: (b.currentSpent / (newLimit + b.incomeAdded) * 100).clamp(0, 100),
+        percentageUsed: (b.currentSpent / newLimit * 100).clamp(0, 100),
         createdAt: b.createdAt, updatedAt: DateTime.now().toIso8601String(),
       );
       _budgets[idx] = updated;

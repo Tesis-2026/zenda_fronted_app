@@ -57,6 +57,9 @@ int _isoWeekNumber(DateTime date) {
 const _monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+/// Max months a PDF report can span (mirrors the backend cap in the report use case).
+const _kMaxReportMonths = 6;
+
 // Hardcoded demo data for May 2026 shown when the API is unavailable
 const _demoMaySummary = PeriodSummary(
   totalIncome: 2000,
@@ -211,10 +214,25 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
 
   Future<void> _exportPdf() async {
     if (_exporting) return;
+
+    // Let the user pick the month range (max 6 months) before exporting.
+    final range = await showModalBottomSheet<_ReportRange>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ExportRangeSheet(initialYear: _year, initialMonth: _month),
+    );
+    if (range == null || !mounted) return;
+
     setState(() => _exporting = true);
     try {
       final service = ref.read(reportsInsightsServiceProvider);
-      final bytes = await service.downloadPdfReport(year: _year, month: _month);
+      final bytes = await service.downloadPdfReport(
+        fromYear: range.fromYear,
+        fromMonth: range.fromMonth,
+        toYear: range.toYear,
+        toMonth: range.toMonth,
+      );
 
       if (bytes.isEmpty) {
         if (!mounted) return;
@@ -227,14 +245,13 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
       }
 
       final dir = await getTemporaryDirectory();
-      final monthStr = _month.toString().padLeft(2, '0');
-      final file = File('${dir.path}/zenda-report-$_year-$monthStr.pdf');
+      final file = File('${dir.path}/${range.fileName}');
       await file.writeAsBytes(bytes);
 
       if (!mounted) return;
       await SharePlus.instance.share(ShareParams(
         files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: 'Reporte Zenda — ${_monthNames[_month - 1]} $_year',
+        subject: 'Reporte Zenda — ${range.label}',
       ));
     } catch (_) {
       if (!mounted) return;
@@ -283,6 +300,235 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
                 : const Icon(Icons.picture_as_pdf_rounded),
             label: Text(l10n.reportsExportPdf),
             backgroundColor: const Color(0xFF4F46E5),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Export range (PDF over up to 6 months) ──────────────────────────────────
+
+class _ReportRange {
+  final int fromYear, fromMonth, toYear, toMonth;
+  const _ReportRange(this.fromYear, this.fromMonth, this.toYear, this.toMonth);
+
+  bool get isSingle => fromYear == toYear && fromMonth == toMonth;
+
+  String get label => isSingle
+      ? '${_monthNames[fromMonth - 1]} $fromYear'
+      : '${_monthNames[fromMonth - 1]} $fromYear – ${_monthNames[toMonth - 1]} $toYear';
+
+  String get fileName {
+    final f = '$fromYear-${fromMonth.toString().padLeft(2, '0')}';
+    final t = '$toYear-${toMonth.toString().padLeft(2, '0')}';
+    return isSingle ? 'zenda-report-$f.pdf' : 'zenda-report-${f}_$t.pdf';
+  }
+}
+
+/// Bottom sheet to pick the inclusive month range for the PDF export.
+/// Enforces: `to` not in the future, `from <= to`, and span <= 6 months.
+class _ExportRangeSheet extends StatefulWidget {
+  const _ExportRangeSheet({required this.initialYear, required this.initialMonth});
+
+  final int initialYear;
+  final int initialMonth;
+
+  @override
+  State<_ExportRangeSheet> createState() => _ExportRangeSheetState();
+}
+
+class _ExportRangeSheetState extends State<_ExportRangeSheet> {
+  late int _fromY = widget.initialYear;
+  late int _fromM = widget.initialMonth;
+  late int _toY = widget.initialYear;
+  late int _toM = widget.initialMonth;
+
+  int _index(int y, int m) => y * 12 + (m - 1);
+  int get _span => _index(_toY, _toM) - _index(_fromY, _fromM) + 1;
+  bool get _valid => _span >= 1 && _span <= _kMaxReportMonths;
+
+  /// True when `to` is the current month — `next` is disabled here so the range
+  /// can never extend into the future.
+  bool get _toIsCurrent {
+    final now = DateTime.now();
+    return _toY == now.year && _toM == now.month;
+  }
+
+  void _shiftFrom(int delta) {
+    setState(() {
+      final i = _index(_fromY, _fromM) + delta;
+      _fromY = (i ~/ 12);
+      _fromM = (i % 12) + 1;
+      // Keep from <= to.
+      if (_index(_fromY, _fromM) > _index(_toY, _toM)) {
+        _toY = _fromY;
+        _toM = _fromM;
+      }
+    });
+  }
+
+  void _shiftTo(int delta) {
+    final now = DateTime.now();
+    final i = _index(_toY, _toM) + delta;
+    if (i > _index(now.year, now.month)) return; // no future
+    setState(() {
+      _toY = (i ~/ 12);
+      _toM = (i % 12) + 1;
+      // Keep from <= to.
+      if (_index(_fromY, _fromM) > _index(_toY, _toM)) {
+        _fromY = _toY;
+        _fromM = _toM;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.bg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Exportar reporte',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Elige el rango de meses (máximo 6 meses).',
+                style: TextStyle(fontSize: 13, color: colors.textMuted),
+              ),
+              const SizedBox(height: 18),
+              _RangeRow(
+                label: 'Desde',
+                valueLabel: '${_monthNames[_fromM - 1]} $_fromY',
+                onPrev: () => _shiftFrom(-1),
+                onNext: () => _shiftFrom(1),
+              ),
+              const SizedBox(height: 10),
+              _RangeRow(
+                label: 'Hasta',
+                valueLabel: '${_monthNames[_toM - 1]} $_toY',
+                onPrev: () => _shiftTo(-1),
+                onNext: _toIsCurrent ? null : () => _shiftTo(1),
+              ),
+              const SizedBox(height: 14),
+              if (!_valid)
+                Text(
+                  'El rango no puede exceder $_kMaxReportMonths meses.',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFFEF4444)),
+                )
+              else
+                Text(
+                  _span == 1 ? '1 mes seleccionado' : '$_span meses seleccionados',
+                  style: TextStyle(fontSize: 12, color: colors.textMuted),
+                ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _valid
+                      ? () => Navigator.of(context).pop(
+                            _ReportRange(_fromY, _fromM, _toY, _toM),
+                          )
+                      : null,
+                  icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                  label: const Text('Exportar PDF'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4F46E5),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RangeRow extends StatelessWidget {
+  const _RangeRow({
+    required this.label,
+    required this.valueLabel,
+    required this.onPrev,
+    required this.onNext,
+  });
+
+  final String label;
+  final String valueLabel;
+  final VoidCallback? onPrev;
+  final VoidCallback? onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      children: [
+        SizedBox(
+          width: 56,
+          child: Text(
+            label,
+            style: TextStyle(fontWeight: FontWeight.w600, color: colors.textPrimary),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            decoration: BoxDecoration(
+              color: colors.card,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: colors.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: onPrev,
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  color: colors.textPrimary,
+                ),
+                Text(
+                  valueLabel,
+                  style: TextStyle(fontWeight: FontWeight.w600, color: colors.textPrimary),
+                ),
+                IconButton(
+                  onPressed: onNext,
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  color: onNext == null ? colors.border : colors.textPrimary,
+                ),
+              ],
+            ),
           ),
         ),
       ],

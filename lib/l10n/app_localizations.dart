@@ -620,11 +620,35 @@ abstract class AppLocalizations {
   /// **'Goals'**
   String get managementTabGoals;
 
+  /// No description provided for @managementTabIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get managementTabIncome;
+
   /// No description provided for @managementTitle.
   ///
   /// In en, this message translates to:
   /// **'Management'**
   String get managementTitle;
+
+  /// No description provided for @incomeEntriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income entries'**
+  String get incomeEntriesTitle;
+
+  /// No description provided for @incomeEmptyMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No income recorded this month yet.'**
+  String get incomeEmptyMonth;
+
+  /// No description provided for @incomeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your income.'**
+  String get incomeLoadError;
 
   /// No description provided for @dashboardNavProfile.
   ///

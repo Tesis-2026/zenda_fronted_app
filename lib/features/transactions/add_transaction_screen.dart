@@ -296,54 +296,58 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         }
                       },
                     ),
-                    const SizedBox(height: 18),
-                    // Presupuesto (de dónde sale / a dónde suma) — obligatorio
-                    Text(
-                      l10n.txBudgetLabel,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
+                    // El presupuesto es un límite de gasto: solo aplica a gastos.
+                    // Un ingreso no "engorda" un límite, así que el campo se
+                    // omite para ingresos (presupuesto opcional a nivel backend).
+                    if (state.kind == TransactionKind.expense) ...[
+                      const SizedBox(height: 18),
+                      Text(
+                        l10n.txBudgetLabel,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    budgetsAsync.when(
-                      loading: () => const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Center(child: CircularProgressIndicator()),
+                      const SizedBox(height: 10),
+                      budgetsAsync.when(
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (_, _) => Text(
+                          l10n.budgetErrorLoad,
+                          style: const TextStyle(color: Color(0xFFEF4444)),
+                        ),
+                        data: (budgets) {
+                          if (budgets.isEmpty) return const _NoBudgetsHint();
+                          final selectedId =
+                              budgets.any((b) => b.id == state.selectedBudgetId)
+                                  ? state.selectedBudgetId
+                                  : null;
+                          // Standardized picker (same bordered field + bottom-sheet
+                          // pattern as category selection).
+                          return CategoryDropdownField<String>(
+                            value: selectedId,
+                            hintText: l10n.txBudgetHint,
+                            sheetTitle: l10n.txBudgetLabel,
+                            onChanged: controller.setBudget,
+                            options: [
+                              for (final b in budgets)
+                                CategoryOption<String>(
+                                  value: b.id,
+                                  label: (b.name != null && b.name!.isNotEmpty)
+                                      ? b.name!
+                                      : CategoryUtils.labelEs(b.categoryName),
+                                  icon: CategoryUtils.iconForCategory(
+                                      b.categoryName),
+                                  trailing:
+                                      'S/ ${b.available.toStringAsFixed(0)}',
+                                ),
+                            ],
+                          );
+                        },
                       ),
-                      error: (_, _) => Text(
-                        l10n.budgetErrorLoad,
-                        style: const TextStyle(color: Color(0xFFEF4444)),
-                      ),
-                      data: (budgets) {
-                        if (budgets.isEmpty) return const _NoBudgetsHint();
-                        final selectedId =
-                            budgets.any((b) => b.id == state.selectedBudgetId)
-                                ? state.selectedBudgetId
-                                : null;
-                        // Standardized picker (same bordered field + bottom-sheet
-                        // pattern as category selection).
-                        return CategoryDropdownField<String>(
-                          value: selectedId,
-                          hintText: l10n.txBudgetHint,
-                          sheetTitle: l10n.txBudgetLabel,
-                          onChanged: controller.setBudget,
-                          options: [
-                            for (final b in budgets)
-                              CategoryOption<String>(
-                                value: b.id,
-                                label: (b.name != null && b.name!.isNotEmpty)
-                                    ? b.name!
-                                    : CategoryUtils.labelEs(b.categoryName),
-                                icon: CategoryUtils.iconForCategory(
-                                    b.categoryName),
-                                trailing:
-                                    'S/ ${b.available.toStringAsFixed(0)}',
-                              ),
-                          ],
-                        );
-                      },
-                    ),
+                    ],
 
                     if (state.error != null) ...[
                       const SizedBox(height: 14),

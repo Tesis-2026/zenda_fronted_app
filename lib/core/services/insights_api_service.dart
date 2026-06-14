@@ -30,7 +30,17 @@ class InsightsApiService {
         .toList();
   }
 
-  Future<List<int>> downloadPdfReport({required int year, required int month}) async {
-    return ApiClient.getBytes('/reports/export/pdf?year=$year&month=$month');
+  /// Export the PDF report over an inclusive month range (max 6 months;
+  /// a single month is from == to).
+  Future<List<int>> downloadPdfReport({
+    required int fromYear,
+    required int fromMonth,
+    required int toYear,
+    required int toMonth,
+  }) async {
+    return ApiClient.getBytes(
+      '/reports/export/pdf?fromYear=$fromYear&fromMonth=$fromMonth'
+      '&toYear=$toYear&toMonth=$toMonth',
+    );
   }
 }

@@ -7,15 +7,16 @@ import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 import '../budget/budget_screen.dart';
 import '../goals/goals_screen.dart';
+import '../income/income_screen.dart';
 import '../progress/progress_screen.dart';
 
-/// "Gestión" tab — hosts Progreso / Presupuestos / Metas as three sub-tabs
+/// "Gestión" tab — hosts Progreso / Presupuestos / Metas / Ingresos as sub-tabs
 /// (chip switcher, same pattern as the Movimientos filter chips). Each sub-view
 /// is the corresponding screen rendered in `embedded: true` mode (no Scaffold).
 class ManagementScreen extends StatefulWidget {
   const ManagementScreen({super.key, this.initialTab = 0});
 
-  /// 0 = Progreso, 1 = Presupuestos, 2 = Metas.
+  /// 0 = Progreso, 1 = Presupuestos, 2 = Metas, 3 = Ingresos.
   final int initialTab;
 
   @override
@@ -23,7 +24,7 @@ class ManagementScreen extends StatefulWidget {
 }
 
 class _ManagementScreenState extends State<ManagementScreen> {
-  late int _tab = widget.initialTab.clamp(0, 2);
+  late int _tab = widget.initialTab.clamp(0, 3);
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +35,7 @@ class _ManagementScreenState extends State<ManagementScreen> {
       l10n.managementTabProgress,
       l10n.managementTabBudgets,
       l10n.managementTabGoals,
+      l10n.managementTabIncome,
     ];
 
     return Scaffold(
@@ -88,6 +90,7 @@ class _ManagementScreenState extends State<ManagementScreen> {
                   ProgressScreen(embedded: true),
                   BudgetScreen(embedded: true),
                   GoalsScreen(embedded: true),
+                  IncomeScreen(embedded: true),
                 ],
               ),
             ),

@@ -284,7 +284,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get managementTabGoals => 'Metas';
 
   @override
+  String get managementTabIncome => 'Ingresos';
+
+  @override
   String get managementTitle => 'Gestión';
+
+  @override
+  String get incomeEntriesTitle => 'Movimientos de ingreso';
+
+  @override
+  String get incomeEmptyMonth => 'Aún no registraste ingresos este mes.';
+
+  @override
+  String get incomeLoadError => 'No se pudieron cargar tus ingresos.';
 
   @override
   String get dashboardNavProfile => 'PERFIL';

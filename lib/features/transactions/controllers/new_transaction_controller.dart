@@ -16,8 +16,8 @@ class NewTransactionState {
   final double? amount;
   final TransactionCategory? category;
   final String? customCategoryName;
-  /// Budget the money comes from (expense) / goes to (income). Independent of
-  /// the category — both are required.
+  /// Budget the expense draws from (only required/sent for expenses). Income is
+  /// never linked to a budget. Independent of the category.
   final String? selectedBudgetId;
   final String note;
   final DateTime date;
@@ -197,13 +197,18 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     }
     final effectiveCategory = category ?? TransactionCategory.otros;
 
-    final budgetId = state.selectedBudgetId;
-    if (budgetId == null || budgetId.isEmpty) {
+    final kind = state.kind;
+
+    // Budget is a spending limit, so it only applies to expenses. Income does
+    // not draw from / inflate a budget, so it is neither required nor sent.
+    final budgetId =
+        kind == TransactionKind.expense ? state.selectedBudgetId : null;
+    if (kind == TransactionKind.expense &&
+        (budgetId == null || budgetId.isEmpty)) {
       // Reuses the (now account-free) source error slot to mean "no budget".
       state = state.copyWith(error: TxErrorCode.noSourceAccount);
       return;
     }
-    final kind = state.kind;
 
     state = state.copyWith(isSaving: true, clearError: true);
 

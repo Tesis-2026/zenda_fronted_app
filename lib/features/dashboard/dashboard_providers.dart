@@ -57,8 +57,10 @@ final monthSummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
 
 // ─── Existing providers ────────────────────────────────────────────────────
 
-/// Total money the user has = sum of their registered category budgets for the
-/// current month. `spent`/`available` are derived from each budget's progress.
+/// Aggregate of the user's spending limits for the current month: `total` is the
+/// sum of budget limits, `spent`/`available` derive from each budget's progress.
+/// Budgets are pure limits — income is tracked separately and never inflates them
+/// (see docs/income-as-first-class-concept.md).
 class BudgetTotals {
   final double total;
   final double spent;
@@ -75,7 +77,7 @@ final budgetSummaryProvider =
   var total = 0.0;
   var spent = 0.0;
   for (final b in budgets) {
-    total += b.total; // base limit + income assigned to the pot
+    total += b.total; // pure spending limit (no income inflation)
     spent += b.currentSpent;
   }
   return BudgetTotals(total: total, spent: spent);
