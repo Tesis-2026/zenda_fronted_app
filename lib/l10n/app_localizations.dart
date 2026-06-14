@@ -896,6 +896,30 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get txCategoryLabel;
 
+  /// No description provided for @categorySelectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category'**
+  String get categorySelectHint;
+
+  /// No description provided for @txBudgetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get txBudgetLabel;
+
+  /// No description provided for @txBudgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a budget'**
+  String get txBudgetHint;
+
+  /// No description provided for @txNoBudgetsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have budgets yet. Create one to start recording.'**
+  String get txNoBudgetsHint;
+
   /// No description provided for @txAddButton.
   ///
   /// In en, this message translates to:
@@ -1646,6 +1670,18 @@ abstract class AppLocalizations {
   /// **'A budget for this category and period already exists'**
   String get budgetDuplicate;
 
+  /// No description provided for @budgetLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the maximum of 7 budgets. Edit or delete one to create another.'**
+  String get budgetLimitReached;
+
+  /// No description provided for @budgetLastSlotHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your last budget (max 7). If you want a general one, keep it as \"Otros\" and edit it whenever you need.'**
+  String get budgetLastSlotHint;
+
   /// No description provided for @budgetEditTitle.
   ///
   /// In en, this message translates to:
@@ -1675,6 +1711,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New Goal'**
   String get goalsAddTitle;
+
+  /// No description provided for @goalsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit goal'**
+  String get goalsEditTitle;
 
   /// No description provided for @goalsNameLabel.
   ///
@@ -1934,6 +1976,18 @@ abstract class AppLocalizations {
   /// **'Mark as achieved'**
   String get goalsDetailMarkComplete;
 
+  /// No description provided for @goalsDetailCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal achieved!'**
+  String get goalsDetailCompletedLabel;
+
+  /// No description provided for @goalsDetailCompleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Congrats! You marked your goal as achieved.'**
+  String get goalsDetailCompleteSuccess;
+
   /// No description provided for @goalsDetailDelete.
   ///
   /// In en, this message translates to:
@@ -1975,6 +2029,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Apply suggestion'**
   String get txAiApply;
+
+  /// No description provided for @txAiSuggestButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest category with AI'**
+  String get txAiSuggestButton;
+
+  /// No description provided for @txAiAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing with AI…'**
+  String get txAiAnalyzing;
+
+  /// No description provided for @txAiNeedsInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount and a note for the AI to suggest.'**
+  String get txAiNeedsInfo;
 
   /// No description provided for @educationPersonalized.
   ///
@@ -2051,7 +2123,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorTxNoSourceAccount.
   ///
   /// In en, this message translates to:
-  /// **'Select a source account.'**
+  /// **'Select a budget.'**
   String get errorTxNoSourceAccount;
 
   /// No description provided for @errorTxInvalidAmount.
@@ -2063,7 +2135,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorTxNoCategory.
   ///
   /// In en, this message translates to:
-  /// **'Select a budget.'**
+  /// **'Select a category.'**
   String get errorTxNoCategory;
 
   /// No description provided for @errorTxNoDestAccount.
@@ -2167,6 +2239,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not relevant'**
   String get recommendationsReject;
+
+  /// No description provided for @recommendationsFeedbackThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your feedback!'**
+  String get recommendationsFeedbackThanks;
 
   /// No description provided for @educationTitle.
   ///

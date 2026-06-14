@@ -435,6 +435,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get txCategoryLabel => 'Categoría';
 
   @override
+  String get categorySelectHint => 'Selecciona una categoría';
+
+  @override
+  String get txBudgetLabel => 'Presupuesto';
+
+  @override
+  String get txBudgetHint => 'Selecciona un presupuesto';
+
+  @override
+  String get txNoBudgetsHint =>
+      'Aún no tienes presupuestos. Crea uno para poder registrar.';
+
+  @override
   String get txAddButton => '+ Agregar';
 
   @override
@@ -844,6 +857,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ya existe un presupuesto para esta categoría y período';
 
   @override
+  String get budgetLimitReached =>
+      'Llegaste al máximo de 7 presupuestos. Edita o elimina uno para crear otro.';
+
+  @override
+  String get budgetLastSlotHint =>
+      'Este es tu último presupuesto (máximo 7). Si quieres uno general, déjalo como \"Otros\" y edítalo cuando lo necesites.';
+
+  @override
   String get budgetEditTitle => 'Editar presupuesto';
 
   @override
@@ -858,6 +879,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get goalsAddTitle => 'Nueva meta';
+
+  @override
+  String get goalsEditTitle => 'Editar meta';
 
   @override
   String get goalsNameLabel => 'Nombre de la meta';
@@ -1027,6 +1051,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get goalsDetailMarkComplete => 'Marcar como lograda';
 
   @override
+  String get goalsDetailCompletedLabel => '¡Meta lograda!';
+
+  @override
+  String get goalsDetailCompleteSuccess =>
+      '¡Felicidades! Marcaste tu meta como lograda.';
+
+  @override
   String get goalsDetailDelete => 'Eliminar meta';
 
   @override
@@ -1052,6 +1083,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get txAiApply => 'Aplicar sugerencia';
+
+  @override
+  String get txAiSuggestButton => 'Sugerir categoría con IA';
+
+  @override
+  String get txAiAnalyzing => 'Analizando con IA…';
+
+  @override
+  String get txAiNeedsInfo =>
+      'Ingresa el monto y una nota para que la IA sugiera.';
 
   @override
   String get educationPersonalized => 'Personalizado para ti';
@@ -1091,13 +1132,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorNoConnection => 'No se pudo conectar con el servidor.';
 
   @override
-  String get errorTxNoSourceAccount => 'Selecciona una cuenta de origen.';
+  String get errorTxNoSourceAccount => 'Selecciona un presupuesto.';
 
   @override
   String get errorTxInvalidAmount => 'Ingresa un monto mayor a 0.';
 
   @override
-  String get errorTxNoCategory => 'Selecciona un presupuesto.';
+  String get errorTxNoCategory => 'Selecciona una categoría.';
 
   @override
   String get errorTxNoDestAccount => 'Selecciona una cuenta destino.';
@@ -1155,6 +1196,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get recommendationsReject => 'No es relevante';
+
+  @override
+  String get recommendationsFeedbackThanks => '¡Gracias por tu opinión!';
 
   @override
   String get educationTitle => 'Educación financiera';

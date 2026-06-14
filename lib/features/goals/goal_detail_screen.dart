@@ -9,6 +9,7 @@ import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_progress_bar.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/field_label.dart';
 import '../../l10n/l10n_extension.dart';
@@ -124,6 +125,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
                           goal: _goal,
                           contributions: contributions,
                           onContribute: () => _showContributeSheet(context),
+                          onComplete: () => _completeGoal(context),
                           onDelete: () => _deleteGoal(context),
                         ),
                       ),
@@ -162,6 +164,22 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
       },
     );
     ctrl.dispose();
+  }
+
+  Future<void> _completeGoal(BuildContext context) async {
+    final l10n = context.l10n;
+    try {
+      final updated = await ref.read(goalsServiceProvider).complete(_goal.id);
+      if (!context.mounted) return;
+      setState(() => _goal = updated);
+      ref.invalidate(goalsListProvider);
+      showAppToast(context, l10n.goalsDetailCompleteSuccess,
+          type: ToastType.success);
+    } catch (_) {
+      if (context.mounted) {
+        showAppToast(context, l10n.commonUnknownError, type: ToastType.error);
+      }
+    }
   }
 
   Future<void> _deleteGoal(BuildContext context) async {
@@ -247,12 +265,14 @@ class _Body extends StatelessWidget {
   final SavingsGoal goal;
   final List<GoalContribution> contributions;
   final VoidCallback onContribute;
+  final VoidCallback onComplete;
   final VoidCallback onDelete;
 
   const _Body({
     required this.goal,
     required this.contributions,
     required this.onContribute,
+    required this.onComplete,
     required this.onDelete,
   });
 
@@ -261,7 +281,11 @@ class _Body extends StatelessWidget {
     final l10n = context.l10n;
     final remaining = goal.targetAmount - goal.currentAmount;
     final pct = goal.progressPercent.clamp(0.0, 100.0);
-    final isComplete = pct >= 100;
+    // Distinguish "reached the target amount" from "officially marked complete"
+    // (the latter is server state that sets completedAt + awards the badge).
+    final reachedTarget =
+        goal.targetAmount > 0 && goal.currentAmount >= goal.targetAmount;
+    final markedComplete = goal.isCompleted;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
@@ -299,13 +323,58 @@ class _Body extends StatelessWidget {
           color: const Color(0xFF34D399),
         ),
         const SizedBox(height: 8),
-        if (!isComplete && remaining > 0)
+        if (!reachedTarget && remaining > 0)
           Text(
             l10n.goalsDetailLeftToReach(remaining.toStringAsFixed(0)),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
           ),
+        // Reached the target but not yet marked → offer the explicit completion
+        // (sets completedAt server-side and awards the "Goal Achieved" badge).
+        if (markedComplete) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD1FAE5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded,
+                    size: 18, color: Color(0xFF059669)),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.goalsDetailCompletedLabel,
+                  style: const TextStyle(
+                    color: Color(0xFF065F46),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else if (reachedTarget) ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: onComplete,
+              icon: const Icon(Icons.emoji_events_rounded, size: 18),
+              label: Text(l10n.goalsDetailMarkComplete),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF34D399),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 28),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -317,7 +386,7 @@ class _Body extends StatelessWidget {
                   .titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
-            if (!isComplete)
+            if (!reachedTarget)
               TextButton(
                 onPressed: onContribute,
                 style: TextButton.styleFrom(

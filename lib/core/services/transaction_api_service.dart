@@ -75,6 +75,7 @@ class TransactionApiService {
     required double amount,
     required TransactionCategory category,
     required DateTime occurredAt,
+    String? budgetId,
     String? description,
     String? customCategoryName,
     // AI provenance (Integration fix #4). When the user accepted an AI
@@ -109,6 +110,9 @@ class TransactionApiService {
       body['categoryId'] = categoryId;
     } else {
       body['newCategoryName'] = apiName;
+    }
+    if (budgetId != null) {
+      body['budgetId'] = budgetId;
     }
 
     // suggestedCategoryId + aiConfidence MUST be sent together (the

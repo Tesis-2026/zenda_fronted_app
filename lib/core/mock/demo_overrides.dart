@@ -1,3 +1,6 @@
+// `Override` (the return type below) is exported from misc.dart, not the barrel.
+import 'package:flutter_riverpod/misc.dart';
+
 import '../../core/models/user.dart';
 import '../../core/services/recommendations_api_service.dart';
 import '../../core/services/quiz_api_service.dart';
@@ -19,8 +22,7 @@ import 'demo_data.dart';
 import 'mock_services.dart';
 
 /// All ProviderScope overrides needed to run the app in demo mode.
-// ignore: always_declare_return_types
-buildDemoOverrides() {
+List<Override> buildDemoOverrides() {
   return [
     // ── Auth ─────────────────────────────────────────────────────────────────
     // Starts unauthenticated so the full sign-in / sign-up workflow is visible.

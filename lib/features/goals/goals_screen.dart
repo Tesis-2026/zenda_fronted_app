@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/models/savings_goal.dart';
 import '../../core/services/goals_api_service.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/amount_input_field.dart';
@@ -13,7 +14,11 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/field_label.dart';
+import '../../core/widgets/green_pill_button.dart';
+import '../../core/widgets/icon_action_button.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -74,6 +79,8 @@ class GoalsScreen extends ConsumerWidget {
                         '/goals/${goal.id}',
                         extra: goal,
                       ),
+                      onEdit: () => _showEditSheet(context, ref, goal),
+                      onDelete: () => _deleteGoal(context, ref, goal),
                     )),
               ],
               if (completed.isNotEmpty) ...[
@@ -85,6 +92,8 @@ class GoalsScreen extends ConsumerWidget {
                         '/goals/${goal.id}',
                         extra: goal,
                       ),
+                      onEdit: () => _showEditSheet(context, ref, goal),
+                      onDelete: () => _deleteGoal(context, ref, goal),
                     )),
               ],
             ],
@@ -92,20 +101,10 @@ class GoalsScreen extends ConsumerWidget {
         },
     );
 
-    final newButton = TextButton(
-      onPressed: () => _showCreateSheet(context, ref),
-      style: TextButton.styleFrom(
-        backgroundColor: const Color(0xFF34D399),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-      child: Text(
-        l10n.goalsNewButton,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-      ),
+    final newButton = GreenPillButton(
+      label: l10n.goalsNewButton,
+      height: 36,
+      onTap: () => _showCreateSheet(context, ref),
     );
 
     if (embedded) {
@@ -166,6 +165,59 @@ class GoalsScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _showEditSheet(
+      BuildContext context, WidgetRef ref, SavingsGoal goal) async {
+    final l10n = context.l10n;
+    final key = GlobalKey<_EditGoalBodyState>();
+    await showAppFormSheet(
+      context,
+      title: l10n.goalsEditTitle,
+      primaryLabel: l10n.commonSave,
+      body: _EditGoalBody(key: key, goal: goal),
+      onSubmit: () async {
+        final st = key.currentState;
+        if (st == null) return false;
+        final name = st.nameCtrl.text.trim();
+        final target = double.tryParse(st.targetCtrl.text.trim());
+        if (name.isEmpty || target == null || target <= 0) return false;
+        try {
+          await ref.read(goalsServiceProvider).update(
+                goal.id,
+                name: name,
+                targetAmount: target,
+                dueDate: st.dueDate?.toIso8601String(),
+              );
+          ref.invalidate(goalsListProvider);
+          return true;
+        } on Exception catch (_) {
+          if (context.mounted) {
+            showAppToast(context, l10n.commonUnknownError,
+                type: ToastType.error);
+          }
+          return false;
+        }
+      },
+    );
+  }
+
+  Future<void> _deleteGoal(
+      BuildContext context, WidgetRef ref, SavingsGoal goal) async {
+    final l10n = context.l10n;
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      title: l10n.goalDeleteTitle,
+      message: l10n.goalDeleteMessage,
+    );
+    if (confirmed != true) return;
+    try {
+      await ref.read(goalsServiceProvider).delete(goal.id);
+      ref.invalidate(goalsListProvider);
+    } catch (_) {
+      if (context.mounted) {
+        showAppToast(context, l10n.commonUnknownError, type: ToastType.error);
+      }
+    }
+  }
 }
 
 
@@ -259,10 +311,14 @@ class _CompletedOnLabel extends StatelessWidget {
 class _GoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const _GoalCard({
     required this.goal,
     required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   static const _icons = [
@@ -411,6 +467,26 @@ class _GoalCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              // Standard edit + delete affordance (matches budgets / categories).
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconActionButton(
+                    icon: Icons.edit_outlined,
+                    backgroundColor: AppColors.fillLight,
+                    iconColor: AppColors.textSubtle,
+                    onTap: onEdit,
+                  ),
+                  const SizedBox(height: 6),
+                  IconActionButton(
+                    icon: Icons.delete_outline,
+                    backgroundColor: const Color(0xFFFEE2E2),
+                    iconColor: const Color(0xFFEF4444),
+                    onTap: onDelete,
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -472,6 +548,81 @@ class _CreateGoalBodyState extends State<_CreateGoalBody> {
                   dueDate ?? DateTime.now().add(const Duration(days: 30)),
               firstDate: DateTime.now(),
               lastDate: DateTime.now().add(const Duration(days: 3650)),
+            );
+            if (picked != null) setState(() => dueDate = picked);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+// ── Edit Goal bottom sheet ────────────────────────────────────────────────────
+
+class _EditGoalBody extends StatefulWidget {
+  const _EditGoalBody({super.key, required this.goal});
+
+  final SavingsGoal goal;
+
+  @override
+  State<_EditGoalBody> createState() => _EditGoalBodyState();
+}
+
+class _EditGoalBodyState extends State<_EditGoalBody> {
+  late final TextEditingController nameCtrl;
+  late final TextEditingController targetCtrl;
+  DateTime? dueDate;
+
+  @override
+  void initState() {
+    super.initState();
+    nameCtrl = TextEditingController(text: widget.goal.name);
+    targetCtrl =
+        TextEditingController(text: widget.goal.targetAmount.toStringAsFixed(2));
+    dueDate = AppDateFormatter.tryParse(widget.goal.dueDate);
+  }
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    targetCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FieldLabel(l10n.goalsNameLabel),
+        const SizedBox(height: 8),
+        AppTextField(
+          controller: nameCtrl,
+          hintText: l10n.goalsNameHint,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+        ),
+        const SizedBox(height: 16),
+        FieldLabel(l10n.goalsTargetLabel),
+        const SizedBox(height: 8),
+        AmountInputField(controller: targetCtrl),
+        const SizedBox(height: 16),
+        FieldLabel(l10n.goalsDueDateLabel),
+        const SizedBox(height: 8),
+        AppDateField(
+          value: dueDate,
+          onTap: () async {
+            final now = DateTime.now();
+            final initial = dueDate ?? now.add(const Duration(days: 30));
+            // Allow a past existing due date so the picker doesn't assert.
+            final first = initial.isBefore(now) ? initial : now;
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: initial,
+              firstDate: first,
+              lastDate: now.add(const Duration(days: 3650)),
             );
             if (picked != null) setState(() => dueDate = picked);
           },

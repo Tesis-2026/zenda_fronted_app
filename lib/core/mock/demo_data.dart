@@ -6,13 +6,10 @@ import '../models/summary_models.dart';
 import '../models/transaction.dart';
 import '../models/user.dart';
 import '../services/education_api_service.dart';
-// merged into education_api_service.dart
-import '../services/education_api_service.dart';
 import '../services/predictions_api_service.dart';
 import '../services/progress_api_service.dart';
 import '../services/recommendations_api_service.dart';
 import '../services/streak_repository.dart';
-// merged into education_api_service.dart
 
 abstract final class DemoData {
   // ── User ───────────────────────────────────────────────────────────────────

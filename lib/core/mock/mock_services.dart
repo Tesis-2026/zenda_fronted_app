@@ -69,6 +69,30 @@ class MockGoalsApiService extends GoalsApiService {
   }
 
   @override
+  Future<SavingsGoal> update(
+    String id, {
+    String? name,
+    double? targetAmount,
+    String? dueDate,
+  }) async {
+    final idx = _goals.indexWhere((g) => g.id == id);
+    if (idx == -1) return _goals.first;
+    final g = _goals[idx];
+    final updated = SavingsGoal(
+      id: g.id,
+      userId: g.userId,
+      name: name ?? g.name,
+      targetAmount: targetAmount ?? g.targetAmount,
+      currentAmount: g.currentAmount,
+      dueDate: dueDate ?? g.dueDate,
+      createdAt: g.createdAt,
+      updatedAt: DateTime.now().toIso8601String(),
+    );
+    _goals[idx] = updated;
+    return updated;
+  }
+
+  @override
   Future<SavingsGoal> contribute(String id, {required double amount}) async {
     final goal = DemoData.goals.firstWhere(
       (g) => g.id == id,
@@ -91,20 +115,22 @@ class MockGoalsApiService extends GoalsApiService {
 
   @override
   Future<SavingsGoal> complete(String id) async {
-    final goal = DemoData.goals.firstWhere(
-      (g) => g.id == id,
-      orElse: () => DemoData.goals.first,
-    );
-    return SavingsGoal(
+    final idx = _goals.indexWhere((g) => g.id == id);
+    final goal = idx != -1 ? _goals[idx] : _goals.first;
+    final completed = SavingsGoal(
       id: goal.id,
       userId: goal.userId,
       name: goal.name,
       targetAmount: goal.targetAmount,
       currentAmount: goal.targetAmount,
       dueDate: goal.dueDate,
+      completedAt: DateTime.now().toIso8601String(),
+      isCompleted: true,
       createdAt: goal.createdAt,
       updatedAt: DateTime.now().toIso8601String(),
     );
+    if (idx != -1) _goals[idx] = completed;
+    return completed;
   }
 
   @override
@@ -492,6 +518,12 @@ class MockAiChatApiService extends AiChatApiService {
 }
 
 class MockTransactionApiService extends TransactionApiService {
+  // Mutable in-memory copy so demo deletions actually stick across refreshes
+  // (the soft-delete is simulated by removing the row from this list).
+  static final List<Map<String, dynamic>> _txs = [
+    for (final tx in DemoData.apiTransactions) Map<String, dynamic>.from(tx),
+  ];
+
   @override
   Future<List<Map<String, dynamic>>> getAll({
     String? type,
@@ -499,8 +531,8 @@ class MockTransactionApiService extends TransactionApiService {
     String? to,
     String? categoryId,
   }) async {
-    if (type == null) return DemoData.apiTransactions;
-    return DemoData.apiTransactions.where((tx) {
+    if (type == null) return List.unmodifiable(_txs);
+    return _txs.where((tx) {
       final txType = tx['type'] as String;
       return txType.toUpperCase() == type.toUpperCase();
     }).toList();
@@ -512,6 +544,7 @@ class MockTransactionApiService extends TransactionApiService {
     required double amount,
     required TransactionCategory category,
     required DateTime occurredAt,
+    String? budgetId,
     String? description,
     String? customCategoryName,
     String? aiSuggestedCategoryName,
@@ -532,7 +565,9 @@ class MockTransactionApiService extends TransactionApiService {
   }) async {}
 
   @override
-  Future<void> deleteTransaction(String id) async {}
+  Future<void> deleteTransaction(String id) async {
+    _txs.removeWhere((tx) => tx['id'] == id);
+  }
 
   @override
   Future<ClassifyResult?> classify({

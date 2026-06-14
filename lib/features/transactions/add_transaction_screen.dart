@@ -1,13 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/models/budget.dart';
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart'
-    show categoryToApiName, categoryFromApiName;
+    show categoryToApiName;
 import '../../core/utils/category_utils.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../providers/repositories_providers.dart';
@@ -16,6 +13,7 @@ import '../../core/widgets/app_date_field.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/category_dropdown_field.dart';
 import '../../core/widgets/category_selector.dart';
 import '../../core/widgets/kind_toggle.dart';
 import '../../core/widgets/sheet_header.dart';
@@ -45,44 +43,42 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
-  Timer? _classifyDebounce;
   TransactionCategory? _aiSuggestion;
   bool _isClassifying = false;
 
   @override
   void dispose() {
-    _classifyDebounce?.cancel();
     ref.invalidate(newTransactionControllerProvider);
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
-  void _onNoteChanged(String note, double? amount) {
-    _classifyDebounce?.cancel();
-    if (note.trim().length < 3 || amount == null || amount <= 0) {
-      if (_aiSuggestion != null) setState(() => _aiSuggestion = null);
-      return;
+  /// User-initiated AI categorization. Triggered by the helper button next to
+  /// the category field — never automatically — so the user explicitly asks for
+  /// a suggestion. Needs a note and a positive amount to classify.
+  Future<void> _requestAiSuggestion() async {
+    final state = ref.read(newTransactionControllerProvider);
+    final note = state.note.trim();
+    final amount = state.amount;
+    if (note.length < 3 || amount == null || amount <= 0) return;
+
+    setState(() => _isClassifying = true);
+    final result = await ref
+        .read(transactionApiServiceProvider)
+        .classify(description: note, amount: amount);
+    if (!mounted) return;
+    // Persist the suggestion on the controller regardless of whether the user
+    // later accepts it. The backend uses it on save() to derive
+    // `categorySource = AI / AI_OVERRIDDEN / USER`.
+    if (result != null) {
+      ref
+          .read(newTransactionControllerProvider.notifier)
+          .recordAiSuggestion(result.categoryName, result.confidence);
     }
-    _classifyDebounce = Timer(const Duration(milliseconds: 800), () async {
-      if (!mounted) return;
-      setState(() => _isClassifying = true);
-      final result = await ref
-          .read(transactionApiServiceProvider)
-          .classify(description: note.trim(), amount: amount);
-      if (!mounted) return;
-      // Persist the suggestion on the controller regardless of whether
-      // the user later accepts it. The backend uses it on save() to
-      // derive `categorySource = AI / AI_OVERRIDDEN / USER`.
-      if (result != null) {
-        ref
-            .read(newTransactionControllerProvider.notifier)
-            .recordAiSuggestion(result.categoryName, result.confidence);
-      }
-      setState(() {
-        _aiSuggestion = result?.category;
-        _isClassifying = false;
-      });
+    setState(() {
+      _aiSuggestion = result?.category;
+      _isClassifying = false;
     });
   }
 
@@ -220,23 +216,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       textInputAction: TextInputAction.done,
                       onChanged: (val) {
                         controller.setNote(val);
-                        _onNoteChanged(val, state.amount);
+                        // Editing the note invalidates a prior AI suggestion;
+                        // the user must request a fresh one.
+                        if (_aiSuggestion != null) {
+                          setState(() => _aiSuggestion = null);
+                        }
                       },
                     ),
-
-                    if (_isClassifying || _aiSuggestion != null) ...[
-                      const SizedBox(height: 10),
-                      _AiSuggestionChip(
-                        category: _aiSuggestion,
-                        isLoading: _isClassifying,
-                        onApply: _aiSuggestion != null
-                            ? () {
-                                controller.setCategory(_aiSuggestion!);
-                                setState(() => _aiSuggestion = null);
-                              }
-                            : null,
-                      ),
-                    ],
 
                     const SizedBox(height: 18),
                     Text(
@@ -262,11 +248,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       },
                     ),
                     const SizedBox(height: 18),
+                    // Categoría (clasificación) — obligatoria
                     Row(
                       children: [
                         Expanded(
                           child: Text(
-                            'Presupuesto',
+                            l10n.txCategoryLabel,
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: colors.textPrimary,
@@ -276,6 +263,47 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         if (state.bucket != null)
                           _BucketChip(bucket: state.bucket!),
                       ],
+                    ),
+                    const SizedBox(height: 10),
+                    CategoryDropdownField<TransactionCategory>(
+                      value: state.category,
+                      hintText: l10n.categorySelectHint,
+                      sheetTitle: l10n.txCategoryLabel,
+                      onChanged: controller.setCategory,
+                      options: [
+                        for (final c in TransactionCategory.values)
+                          CategoryOption<TransactionCategory>(
+                            value: c,
+                            label: CategorySelector.labelFor(context, c),
+                            icon: CategoryUtils.iconForCategory(c.name),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // AI categorization helper — sits next to the category
+                    // field and is only triggered when the user asks for it.
+                    _AiCategoryHelper(
+                      isLoading: _isClassifying,
+                      suggestion: _aiSuggestion,
+                      canRequest: state.note.trim().length >= 3 &&
+                          state.amount != null &&
+                          state.amount! > 0,
+                      onRequest: _requestAiSuggestion,
+                      onApply: () {
+                        if (_aiSuggestion != null) {
+                          controller.setCategory(_aiSuggestion!);
+                          setState(() => _aiSuggestion = null);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 18),
+                    // Presupuesto (de dónde sale / a dónde suma) — obligatorio
+                    Text(
+                      l10n.txBudgetLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     budgetsAsync.when(
@@ -289,20 +317,28 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ),
                       data: (budgets) {
                         if (budgets.isEmpty) return const _NoBudgetsHint();
-                        return Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
+                        final selectedId =
+                            budgets.any((b) => b.id == state.selectedBudgetId)
+                                ? state.selectedBudgetId
+                                : null;
+                        // Standardized picker (same bordered field + bottom-sheet
+                        // pattern as category selection).
+                        return CategoryDropdownField<String>(
+                          value: selectedId,
+                          hintText: l10n.txBudgetHint,
+                          sheetTitle: l10n.txBudgetLabel,
+                          onChanged: controller.setBudget,
+                          options: [
                             for (final b in budgets)
-                              _BudgetChip(
-                                budget: b,
-                                selected:
-                                    categoryFromApiName(b.categoryName) ==
-                                        state.category,
-                                onTap: () => controller.setCategory(
-                                  categoryFromApiName(b.categoryName) ??
-                                      TransactionCategory.otros,
-                                ),
+                              CategoryOption<String>(
+                                value: b.id,
+                                label: (b.name != null && b.name!.isNotEmpty)
+                                    ? b.name!
+                                    : CategoryUtils.labelEs(b.categoryName),
+                                icon: CategoryUtils.iconForCategory(
+                                    b.categoryName),
+                                trailing:
+                                    'S/ ${b.available.toStringAsFixed(0)}',
                               ),
                           ],
                         );
@@ -443,77 +479,142 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 }
 
 
-class _AiSuggestionChip extends StatelessWidget {
-  final TransactionCategory? category;
-  final bool isLoading;
-  final VoidCallback? onApply;
-
-  const _AiSuggestionChip({
-    required this.category,
+/// AI categorization helper shown right below the category dropdown.
+///
+/// Three states:
+///   - idle    → a "suggest with AI" button (disabled until there's enough info)
+///   - loading → an inline spinner while the classifier runs
+///   - ready   → the suggestion with an "apply" action
+///
+/// The suggestion is always user-initiated: it only runs when [onRequest] is
+/// tapped, never automatically.
+class _AiCategoryHelper extends StatelessWidget {
+  const _AiCategoryHelper({
     required this.isLoading,
+    required this.suggestion,
+    required this.canRequest,
+    required this.onRequest,
     required this.onApply,
   });
+
+  final bool isLoading;
+  final TransactionCategory? suggestion;
+  final bool canRequest;
+  final VoidCallback onRequest;
+  final VoidCallback onApply;
+
+  static const _accent = Color(0xFF818CF8);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
     if (isLoading) {
       return Row(
         children: [
           const SizedBox(
-            width: 14,
-            height: 14,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: _accent),
           ),
           const SizedBox(width: 8),
           Text(
-            '...',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+            l10n.txAiAnalyzing,
+            style: const TextStyle(
+              color: _accent,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
           ),
         ],
       );
     }
 
-    if (category == null) return const SizedBox.shrink();
-
-    final categoryLabel = CategorySelector.labelFor(context, category!);
-
-    return GestureDetector(
-      onTap: onApply,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF818CF8).withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
-          border:
-              Border.all(color: const Color(0xFF818CF8).withValues(alpha: 0.4)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.auto_awesome_rounded,
-                size: 15, color: Color(0xFF818CF8)),
-            const SizedBox(width: 6),
-            Text(
-              l10n.txAiSuggests(categoryLabel),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF818CF8),
+    if (suggestion != null) {
+      final label = CategorySelector.labelFor(context, suggestion!);
+      return InkWell(
+        onTap: onApply,
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: _accent.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _accent.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.txAiSuggests(label),
+                  style: const TextStyle(
+                    color: _accent,
                     fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              l10n.txAiApply,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: const Color(0xFF818CF8),
-                    decoration: TextDecoration.underline,
-                  ),
-            ),
-          ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.txAiApply,
+                style: const TextStyle(
+                  color: _accent,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      );
+    }
+
+    // Idle — the request button.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: canRequest ? onRequest : null,
+          borderRadius: BorderRadius.circular(12),
+          child: Ink(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              color: canRequest
+                  ? _accent.withValues(alpha: 0.10)
+                  : const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: canRequest
+                    ? _accent.withValues(alpha: 0.4)
+                    : const Color(0xFFE5E7EB),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  l10n.txAiSuggestButton,
+                  style: TextStyle(
+                    color: canRequest ? _accent : const Color(0xFF9CA3AF),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (!canRequest) ...[
+          const SizedBox(height: 6),
+          Text(
+            l10n.txAiNeedsInfo,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -549,75 +650,6 @@ class _BucketChip extends StatelessWidget {
   }
 }
 
-/// Selectable chip for a budget pot: shows its name + remaining available.
-/// Picking it sets the transaction's category (money is tracked by budget).
-class _BudgetChip extends StatelessWidget {
-  final Budget budget;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _BudgetChip({
-    required this.budget,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final label = (budget.name != null && budget.name!.isNotEmpty)
-        ? budget.name!
-        : CategoryUtils.labelEs(budget.categoryName);
-    const accent = Color(0xFF34D399);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected
-              ? accent.withValues(alpha: 0.14)
-              : const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? accent : const Color(0xFFE5E7EB),
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              CategoryUtils.iconForCategory(budget.categoryName),
-              size: 16,
-              color: selected ? accent : const Color(0xFF6B7280),
-            ),
-            const SizedBox(width: 6),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: selected
-                        ? const Color(0xFF065F46)
-                        : const Color(0xFF374151),
-                  ),
-                ),
-                Text(
-                  'Disp. S/ ${budget.available.toStringAsFixed(0)}',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Shown when the user has no budgets yet — registering needs at least one.
 class _NoBudgetsHint extends StatelessWidget {
   const _NoBudgetsHint();
@@ -634,14 +666,15 @@ class _NoBudgetsHint extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.add_circle_outline, color: Color(0xFF34D399), size: 18),
-            SizedBox(width: 8),
+            const Icon(Icons.add_circle_outline,
+                color: Color(0xFF34D399), size: 18),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Aún no tienes presupuestos. Crea uno para poder registrar.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
+                context.l10n.txNoBudgetsHint,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF374151)),
               ),
             ),
           ],

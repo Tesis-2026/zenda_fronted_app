@@ -149,8 +149,18 @@ Generalize the current `delete_confirm_sheet.dart` so it also covers sign-out an
 ## 6. Do / Don't
 
 **Do**
+- **List-item edit/delete affordance (standardized 2026-06):** every row/card in a list exposes the
+  same two trailing `IconActionButton`s — a pencil (`Icons.edit_outlined`, `AppColors.fillLight` bg /
+  `AppColors.textSubtle` icon) that opens the edit `AppFormSheet`, and a trash (`Icons.delete_outline`,
+  `#FEE2E2` bg / `#EF4444` icon) that opens `showDeleteConfirmSheet`. Reference: `budget_screen.dart`
+  `_BudgetCard`, `category_management_screen.dart`, `transaction_list_screen.dart`, `goals_screen.dart`
+  `_GoalCard`. Do NOT mix in swipe-to-delete or tap-the-row-to-edit — pick the two icons everywhere so
+  the gesture is identical across features. Goals also keep tap→detail (for contribute / complete) since
+  they are master-detail, but still expose the same pencil/trash icons on the card.
+- **Create entry point:** trigger every create flow with the shared `GreenPillButton` (never a bespoke
+  `Container`/`TextButton`). Reference: budget, categories, goals, transactions headers.
 - Use `AppFormSheet` + `AppTextField` + `AmountInputField` + `FieldLabel` + `AppPrimaryButton`.
-- For a transaction category picker use **`CategorySelector`** (`category_selector.dart`); for backend/`CategoryModel` categories (e.g. budget) build a **`CategoryGrid`** with `CategoryGridItem`s — same chip visual, never re-implement a grid/scroll/dropdown. Use `CategorySelector.labelFor(context, cat)` for enum labels.
+- For any category picker use **`CategoryDropdownField`** (`category_dropdown_field.dart`) — a single bordered field that opens a bottom-sheet list of bordered category rows. It is generic over the selected value, so the same widget serves the fixed `TransactionCategory` enum (transactions) and backend `CategoryModel` ids (budget); build the `CategoryOption`s and pass them in. Never re-implement a grid/scroll/dropdown per screen. Use `CategoryUtils.iconForCategory(...)` for icons and `CategorySelector.labelFor(context, cat)` for enum labels (`CategorySelector` now holds only that label helper — the old chip grid was removed).
 - For a date field use **`AppDateField`** (`app_date_field.dart`); for a month/year period use the same `AppDateField` with `displayText` + `showMonthYearPicker` (`month_year_picker.dart`). Never roll a custom date tile or period dropdowns.
 - Use `showConfirmSheet` for every destructive/irreversible action.
 - Read colors/radii from tokens, never inline hex per screen.

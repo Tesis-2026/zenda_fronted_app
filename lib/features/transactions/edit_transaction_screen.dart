@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/transaction.dart';
+import '../../core/utils/category_utils.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_date_field.dart';
 import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/category_dropdown_field.dart';
 import '../../core/widgets/category_selector.dart';
 import '../../core/widgets/field_label.dart';
 import '../../core/widgets/kind_toggle.dart';
@@ -178,9 +180,19 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
         const SizedBox(height: 16),
         FieldLabel(l10n.txCategoryLabel),
         const SizedBox(height: 8),
-        CategorySelector(
-          selected: _category,
-          onSelected: (c) => setState(() => _category = c),
+        CategoryDropdownField<TransactionCategory>(
+          value: _category,
+          hintText: l10n.categorySelectHint,
+          sheetTitle: l10n.txCategoryLabel,
+          onChanged: (c) => setState(() => _category = c),
+          options: [
+            for (final c in TransactionCategory.values)
+              CategoryOption<TransactionCategory>(
+                value: c,
+                label: CategorySelector.labelFor(context, c),
+                icon: CategoryUtils.iconForCategory(c.name),
+              ),
+          ],
         ),
       ],
     );

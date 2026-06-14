@@ -47,6 +47,20 @@ class GoalsApiService {
     return SavingsGoal.fromJson(json);
   }
 
+  Future<SavingsGoal> update(
+    String id, {
+    String? name,
+    double? targetAmount,
+    String? dueDate,
+  }) async {
+    final body = <String, dynamic>{};
+    if (name != null) body['name'] = name;
+    if (targetAmount != null) body['targetAmount'] = targetAmount;
+    if (dueDate != null) body['dueDate'] = dueDate;
+    final json = await ApiClient.put('/goals/$id', body);
+    return SavingsGoal.fromJson(json);
+  }
+
   Future<SavingsGoal> contribute(String id, {required double amount}) async {
     final json = await ApiClient.post(
       '/goals/$id/contribute',

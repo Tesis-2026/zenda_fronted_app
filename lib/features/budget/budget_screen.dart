@@ -10,7 +10,7 @@ import '../../core/theme/zenda_theme_x.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_date_field.dart';
-import '../../core/widgets/category_selector.dart';
+import '../../core/widgets/category_dropdown_field.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
@@ -29,6 +29,10 @@ import '../../l10n/l10n_extension.dart';
 final budgetServiceProvider = Provider<BudgetApiService>((ref) {
   return BudgetApiService();
 });
+
+/// Hard cap on active budgets per period (mirrors the backend
+/// MAX_BUDGETS_PER_PERIOD). The last slot is meant for a general "Otros" budget.
+const int _kMaxBudgets = 7;
 
 typedef _BudgetFilter = ({int month, int year});
 
@@ -132,6 +136,8 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final budgetsAsync = ref.watch(_budgetsProvider(_filter));
+    // Used to enforce the 7-budget cap and to flag the last available slot.
+    final budgetCount = budgetsAsync.asData?.value.length ?? 0;
 
     final content = budgetsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -160,7 +166,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   trailing: widget.embedded
                       ? GreenPillButton(
                           label: l10n.catMgmtAddButton,
-                          onTap: () => _showCreateSheet(context),
+                          onTap: () => _showCreateSheet(context, budgetCount),
                         )
                       : null,
                 ),
@@ -211,7 +217,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
             child: Center(
               child: GreenPillButton(
                 label: l10n.catMgmtAddButton,
-                onTap: () => _showCreateSheet(context),
+                onTap: () => _showCreateSheet(context, budgetCount),
               ),
             ),
           ),
@@ -223,8 +229,13 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
   // ── Create bottom sheet ────────────────────────────────────────────────────
 
-  Future<void> _showCreateSheet(BuildContext context) async {
+  Future<void> _showCreateSheet(BuildContext context, int currentCount) async {
     final l10n = context.l10n;
+    // Hard cap: block opening the sheet once the period is full.
+    if (currentCount >= _kMaxBudgets) {
+      showAppToast(context, l10n.budgetLimitReached, type: ToastType.warning);
+      return;
+    }
     final key = GlobalKey<_CreateBudgetBodyState>();
     await showAppFormSheet(
       context,
@@ -235,6 +246,8 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         initialMonth: _month,
         initialYear: _year,
         categoriesFuture: ref.read(_categoriesProvider.future),
+        // The 7th (last) budget is suggested as a general "Otros" catch-all.
+        isLastSlot: currentCount == _kMaxBudgets - 1,
       ),
       onSubmit: () async {
         final st = key.currentState;
@@ -254,10 +267,15 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           return true;
         } on Exception catch (e) {
           if (!context.mounted) return false;
-          final msg = e.toString().contains('409') ||
-                  e.toString().contains('already exists')
-              ? l10n.budgetDuplicate
-              : l10n.commonUnknownError;
+          final err = e.toString();
+          final String msg;
+          if (err.contains('limit') || err.contains('maximum')) {
+            msg = l10n.budgetLimitReached;
+          } else if (err.contains('409') || err.contains('already exists')) {
+            msg = l10n.budgetDuplicate;
+          } else {
+            msg = l10n.commonUnknownError;
+          }
           showAppToast(context, msg, type: ToastType.error);
           return false;
         }
@@ -313,11 +331,16 @@ class _CreateBudgetBody extends StatefulWidget {
     required this.initialMonth,
     required this.initialYear,
     required this.categoriesFuture,
+    this.isLastSlot = false,
   });
 
   final int initialMonth;
   final int initialYear;
   final Future<List<CategoryModel>> categoriesFuture;
+
+  /// True when this is the 7th (last allowed) budget — we suggest naming it
+  /// "Otros" so it works as a general catch-all the user can later edit.
+  final bool isLastSlot;
 
   @override
   State<_CreateBudgetBody> createState() => _CreateBudgetBodyState();
@@ -335,6 +358,8 @@ class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
     super.initState();
     month = widget.initialMonth;
     year = widget.initialYear;
+    // Suggest "Otros" for the last slot; the user can still edit it.
+    if (widget.isLastSlot) nameController.text = 'Otros';
   }
 
   @override
@@ -373,6 +398,10 @@ class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (widget.isLastSlot) ...[
+          _LastSlotHint(text: l10n.budgetLastSlotHint),
+          const SizedBox(height: 16),
+        ],
         const FieldLabel('Nombre'),
         const SizedBox(height: 8),
         AppTextField(
@@ -387,24 +416,26 @@ class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
           future: widget.categoriesFuture,
           builder: (ctx, snap) {
             final categories = snap.data ?? [];
-            return CategoryGrid(
-              items: [
-                CategoryGridItem(
-                  icon: Icons.grid_view_rounded,
+            return CategoryDropdownField<String?>(
+              value: categoryId,
+              hintText: l10n.budgetCategoryAll,
+              sheetTitle: l10n.txCategoryLabel,
+              onChanged: (id) => setState(() => categoryId = id),
+              options: [
+                CategoryOption<String?>(
+                  value: null,
                   label: l10n.budgetCategoryAll,
-                  selected: categoryId == null,
-                  onTap: () => setState(() => categoryId = null),
+                  icon: Icons.grid_view_rounded,
                 ),
                 for (final c in categories)
-                  CategoryGridItem(
+                  CategoryOption<String?>(
+                    value: c.id,
+                    label: CategoryUtils.labelEs(c.name),
                     icon: CategoryUtils.iconForCategory(
                       c.name,
                       iconKey: c.icon,
                       isCustom: c.isCustom,
                     ),
-                    label: CategoryUtils.labelEs(c.name),
-                    selected: categoryId == c.id,
-                    onTap: () => setState(() => categoryId = c.id),
                   ),
               ],
             );
@@ -423,6 +454,44 @@ class _CreateBudgetBodyState extends State<_CreateBudgetBody> {
           onTap: _pickPeriod,
         ),
       ],
+    );
+  }
+}
+
+/// Recommendation banner shown on the last (7th) budget slot, nudging the user
+/// to keep it as a general "Otros" budget they can edit later.
+class _LastSlotHint extends StatelessWidget {
+  const _LastSlotHint({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF3C7),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFCD34D)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline_rounded,
+              size: 18, color: Color(0xFFB45309)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: Color(0xFF92400E),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

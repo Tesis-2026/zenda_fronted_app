@@ -12,6 +12,7 @@ class PendingSyncEntry {
   final double amount;
   final TransactionCategory category;
   final DateTime occurredAt;
+  final String? budgetId;
   final String? description;
   final String? customCategoryName;
   // AI provenance — preserved across the offline queue so retries still
@@ -25,6 +26,7 @@ class PendingSyncEntry {
     required this.amount,
     required this.category,
     required this.occurredAt,
+    this.budgetId,
     this.description,
     this.customCategoryName,
     this.aiSuggestedCategoryName,
@@ -37,6 +39,7 @@ class PendingSyncEntry {
     'amount': amount,
     'category': category.name,
     'occurredAt': occurredAt.toUtc().toIso8601String(),
+    if (budgetId != null) 'budgetId': budgetId,
     if (description != null) 'description': description,
     if (customCategoryName != null) 'customCategoryName': customCategoryName,
     if (aiSuggestedCategoryName != null)
@@ -51,6 +54,7 @@ class PendingSyncEntry {
       amount: (json['amount'] as num).toDouble(),
       category: TransactionCategory.values.byName(json['category'] as String),
       occurredAt: DateTime.parse(json['occurredAt'] as String),
+      budgetId: json['budgetId'] as String?,
       description: json['description'] as String?,
       customCategoryName: json['customCategoryName'] as String?,
       aiSuggestedCategoryName: json['aiSuggestedCategoryName'] as String?,

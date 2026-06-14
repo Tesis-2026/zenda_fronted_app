@@ -16,6 +16,9 @@ class NewTransactionState {
   final double? amount;
   final TransactionCategory? category;
   final String? customCategoryName;
+  /// Budget the money comes from (expense) / goes to (income). Independent of
+  /// the category — both are required.
+  final String? selectedBudgetId;
   final String note;
   final DateTime date;
   final TransactionSource source;
@@ -37,6 +40,7 @@ class NewTransactionState {
     required this.amount,
     required this.category,
     this.customCategoryName,
+    this.selectedBudgetId,
     required this.note,
     required this.date,
     required this.source,
@@ -77,6 +81,7 @@ class NewTransactionState {
     double? amount,
     TransactionCategory? category,
     String? customCategoryName,
+    String? selectedBudgetId,
     String? note,
     DateTime? date,
     TransactionSource? source,
@@ -100,6 +105,7 @@ class NewTransactionState {
       amount: amount ?? this.amount,
       category: clearCategory ? null : (category ?? this.category),
       customCategoryName: clearCustomCategory ? null : (customCategoryName ?? this.customCategoryName),
+      selectedBudgetId: selectedBudgetId ?? this.selectedBudgetId,
       note: note ?? this.note,
       date: date ?? this.date,
       source: source ?? this.source,
@@ -153,6 +159,10 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     state = state.copyWith(customCategoryName: name, clearCategory: true, clearError: true);
   }
 
+  void setBudget(String budgetId) {
+    state = state.copyWith(selectedBudgetId: budgetId, clearError: true);
+  }
+
   /// Records that the AI suggested a category for the current draft.
   /// Called by the screen whether or not the user later accepts the
   /// suggestion — the data is needed at save time so the backend can
@@ -186,6 +196,13 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       return;
     }
     final effectiveCategory = category ?? TransactionCategory.otros;
+
+    final budgetId = state.selectedBudgetId;
+    if (budgetId == null || budgetId.isEmpty) {
+      // Reuses the (now account-free) source error slot to mean "no budget".
+      state = state.copyWith(error: TxErrorCode.noSourceAccount);
+      return;
+    }
     final kind = state.kind;
 
     state = state.copyWith(isSaving: true, clearError: true);
@@ -221,6 +238,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           kind: kind,
           amount: amount,
           category: effectiveCategory,
+          budgetId: budgetId,
           occurredAt: state.date,
           description: state.note.isEmpty ? null : state.note,
           customCategoryName: customName,
@@ -259,6 +277,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           kind: kind,
           amount: amount,
           category: effectiveCategory,
+          budgetId: budgetId,
           occurredAt: state.date,
           description: state.note.isEmpty ? null : state.note,
           customCategoryName: customName,

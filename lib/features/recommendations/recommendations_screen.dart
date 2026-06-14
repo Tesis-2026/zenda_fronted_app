@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/recommendations_api_service.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import '../feedback/feedback_modal.dart';
@@ -101,12 +102,12 @@ class RecommendationsScreen extends ConsumerWidget {
                     final recIndex = index - 1;
                     return _RecommendationCard(
                       rec: recs[recIndex],
-                      onFeedback: (accepted) async {
-                        await ref
-                            .read(_recsServiceProvider)
-                            .submitFeedback(recs[recIndex].id, accepted: accepted);
-                        ref.invalidate(_recsProvider);
-                      },
+                      // Persist only — the card reflects the verdict optimistically
+                      // via local state, so we don't refetch (which would flicker
+                      // the list and, in demo, drop the optimistic mark).
+                      onFeedback: (accepted) => ref
+                          .read(_recsServiceProvider)
+                          .submitFeedback(recs[recIndex].id, accepted: accepted),
                       onAction: _actionRouteFor(context, recs[recIndex].type),
                     );
                   },
@@ -117,7 +118,7 @@ class RecommendationsScreen extends ConsumerWidget {
   }
 }
 
-class _RecommendationCard extends StatelessWidget {
+class _RecommendationCard extends StatefulWidget {
   const _RecommendationCard({
     required this.rec,
     required this.onFeedback,
@@ -127,6 +128,42 @@ class _RecommendationCard extends StatelessWidget {
   final Recommendation rec;
   final Future<void> Function(bool accepted) onFeedback;
   final VoidCallback? onAction;
+
+  @override
+  State<_RecommendationCard> createState() => _RecommendationCardState();
+}
+
+class _RecommendationCardState extends State<_RecommendationCard> {
+  /// Optimistic verdict: null = no feedback, true = helpful, false = not relevant.
+  /// Seeded from the server value so a previously rated rec shows its mark.
+  bool? _verdict;
+  bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _verdict = widget.rec.feedbackAccepted;
+  }
+
+  Future<void> _handleFeedback(bool accepted) async {
+    // Feedback is final: once a verdict exists it can't be changed.
+    if (_submitting || _verdict != null) return;
+    final previous = _verdict;
+    setState(() {
+      _verdict = accepted;
+      _submitting = true;
+    });
+    try {
+      await widget.onFeedback(accepted);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _verdict = previous); // revert on failure
+      showAppToast(context, context.l10n.commonUnknownError,
+          type: ToastType.error);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
 
   // Design shows colored category chip labels
   String _labelForType(String type) {
@@ -177,6 +214,7 @@ class _RecommendationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final rec = widget.rec;
     final typeColor = _colorForType(rec.type);
     final actionLink = rec.actionLabel;
 
@@ -223,10 +261,12 @@ class _RecommendationCard extends StatelessWidget {
                   ),
             ),
             // Action link (green arrow text)
-            if (actionLink != null && actionLink.isNotEmpty && onAction != null) ...[
+            if (actionLink != null &&
+                actionLink.isNotEmpty &&
+                widget.onAction != null) ...[
               const SizedBox(height: 10),
               GestureDetector(
-                onTap: onAction,
+                onTap: widget.onAction,
                 child: Text(
                   '→ $actionLink',
                   style: const TextStyle(
@@ -238,40 +278,78 @@ class _RecommendationCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 14),
-            // Feedback buttons: outlined style matching design
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.thumb_up_outlined, size: 16),
-                    label: Text(l10n.recommendationsAccept),
-                    onPressed: () => onFeedback(true),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF6B7280),
-                      side: const BorderSide(color: Color(0xFFE5E7EB)),
-                      textStyle: const TextStyle(fontSize: 13),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.thumb_down_outlined, size: 16),
-                    label: Text(l10n.recommendationsReject),
-                    onPressed: () => onFeedback(false),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF6B7280),
-                      side: const BorderSide(color: Color(0xFFE5E7EB)),
-                      textStyle: const TextStyle(fontSize: 13),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-              ],
+            // Feedback buttons — the chosen verdict is filled with its color,
+            // the other stays outlined and dimmed. Feedback is final, so once a
+            // verdict exists the whole row is locked (no editing).
+            IgnorePointer(
+              ignoring: _verdict != null,
+              child: Row(
+                children: [
+                  Expanded(child: _feedbackButton(isLike: true)),
+                  const SizedBox(width: 10),
+                  Expanded(child: _feedbackButton(isLike: false)),
+                ],
+              ),
             ),
+            if (_verdict != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded,
+                      size: 14, color: Color(0xFF10B981)),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.recommendationsFeedbackThanks,
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFF6B7280)),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _feedbackButton({required bool isLike}) {
+    final l10n = context.l10n;
+    final selected = _verdict == isLike;
+    final color =
+        isLike ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final label =
+        isLike ? l10n.recommendationsAccept : l10n.recommendationsReject;
+    final icon = isLike
+        ? (selected ? Icons.thumb_up_rounded : Icons.thumb_up_outlined)
+        : (selected ? Icons.thumb_down_rounded : Icons.thumb_down_outlined);
+    final onPressed = _submitting ? null : () => _handleFeedback(isLike);
+
+    if (selected) {
+      return FilledButton.icon(
+        icon: Icon(icon, size: 16),
+        label: Text(label),
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          textStyle: const TextStyle(fontSize: 13),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+        ),
+      );
+    }
+
+    return OutlinedButton.icon(
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        // Dim the unchosen option once a verdict exists.
+        foregroundColor: _verdict == null
+            ? const Color(0xFF6B7280)
+            : const Color(0xFF9CA3AF),
+        side: const BorderSide(color: Color(0xFFE5E7EB)),
+        textStyle: const TextStyle(fontSize: 13),
+        padding: const EdgeInsets.symmetric(vertical: 10),
       ),
     );
   }

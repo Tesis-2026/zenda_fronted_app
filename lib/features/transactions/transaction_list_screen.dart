@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/api_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/utils/category_utils.dart';
@@ -10,6 +9,8 @@ import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_empty_state.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
+import '../../core/widgets/green_pill_button.dart';
+import '../../core/widgets/icon_action_button.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../features/dashboard/dashboard_providers.dart';
 import '../../features/transactions/add_transaction_screen.dart';
@@ -96,26 +97,10 @@ class TransactionListScreen extends ConsumerWidget {
                         ),
                       ),
                       const Spacer(),
-                      GestureDetector(
+                      GreenPillButton(
+                        label: l10n.txAddButton,
+                        height: 36,
                         onTap: () => AddTransactionScreen.show(context),
-                        child: Container(
-                          height: 36,
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 14),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            l10n.txAddButton,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                       ),
                       const SizedBox(width: 8),
                       const UserMenuButton(),
@@ -298,7 +283,7 @@ class _TransactionRow extends ConsumerWidget {
     final iconColor = CategoryUtils.iconColorForCategory(categoryName, isIncome: isIncome);
 
     final displayLabel =
-        description.isNotEmpty ? description : (categoryName ?? '');
+        description.isNotEmpty ? description : CategoryUtils.labelEs(categoryName);
     String relativeDay(DateTime d) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -312,117 +297,112 @@ class _TransactionRow extends ConsumerWidget {
     final timeStr = parsedDate != null
         ? AppDateFormatter.timeOfDay(parsedDate)
         : '';
-    final categoryDisplay = categoryName != null
-        ? categoryName[0].toUpperCase() + categoryName.substring(1).toLowerCase()
-        : '';
+    // Always translate the backend category name to Spanish (the backend
+    // seeds system categories in English, e.g. 'Food'); the app is es-only.
+    final categoryDisplay = CategoryUtils.labelEs(categoryName);
     final dateLabel = parsedDate != null
         ? '${relativeDay(parsedDate)}, $timeStr${categoryDisplay.isNotEmpty ? ' · $categoryDisplay' : ''}'
         : '';
 
-    return Dismissible(
-      key: ValueKey(id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: AppColors.danger.withValues(alpha: 0.12),
-        child: const Icon(Icons.delete_rounded, color: AppColors.danger),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: showTopBorder
+            ? const Border(top: BorderSide(color: Color(0xFFF3F4F6)))
+            : null,
       ),
-      confirmDismiss: (_) => showDeleteConfirmSheet(
-        context,
-        title: l10n.txDeleteConfirmTitle,
-        message: l10n.txDeleteConfirmMessage,
-      ),
-      onDismissed: (_) async {
-        try {
-          await ApiClient.delete('/transactions/$id');
-          onDeleted();
-        } catch (_) {
-          onDeleted();
-          if (context.mounted) {
-            showAppToast(
-              context,
-              context.l10n.txDeleteError,
-              type: ToastType.error,
-            );
-          }
-        }
-      },
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: showTopBorder
-              ? const Border(
-                  top: BorderSide(color: Color(0xFFF3F4F6)),
-                )
-              : null,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () async {
-              final refreshed =
-                  await EditTransactionScreen.show(context, tx);
-              if (refreshed == true) onDeleted();
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 14),
-              child: Row(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                CategoryUtils.iconForCategory(categoryName,
+                    iconKey: categoryIconKey),
+                color: iconColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(
-                      CategoryUtils.iconForCategory(categoryName, iconKey: categoryIconKey),
-                      color: iconColor,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayLabel,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          dateLabel,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSubtle,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
                   Text(
-                    '$amountSign S/ ${amount.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: amountColor,
+                    displayLabel,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    dateLabel,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSubtle,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
+            const SizedBox(width: 8),
+            Text(
+              '$amountSign S/ ${amount.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: amountColor,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Standard edit + delete affordance (matches budgets / categories).
+            IconActionButton(
+              icon: Icons.edit_outlined,
+              backgroundColor: AppColors.fillLight,
+              iconColor: AppColors.textSubtle,
+              onTap: () async {
+                final refreshed = await EditTransactionScreen.show(context, tx);
+                if (refreshed == true) onDeleted();
+              },
+            ),
+            const SizedBox(width: 6),
+            IconActionButton(
+              icon: Icons.delete_outline,
+              backgroundColor: const Color(0xFFFEE2E2),
+              iconColor: const Color(0xFFEF4444),
+              onTap: () => _confirmDelete(context, ref, id),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(
+      BuildContext context, WidgetRef ref, String id) async {
+    final l10n = context.l10n;
+    final confirmed = await showDeleteConfirmSheet(
+      context,
+      title: l10n.txDeleteConfirmTitle,
+      message: l10n.txDeleteConfirmMessage,
+    );
+    if (confirmed != true) return;
+    try {
+      await ref.read(transactionApiServiceProvider).deleteTransaction(id);
+      onDeleted();
+    } catch (_) {
+      if (context.mounted) {
+        showAppToast(context, l10n.txDeleteError, type: ToastType.error);
+      }
+    }
   }
 }

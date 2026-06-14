@@ -436,6 +436,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txCategoryLabel => 'Category';
 
   @override
+  String get categorySelectHint => 'Select a category';
+
+  @override
+  String get txBudgetLabel => 'Budget';
+
+  @override
+  String get txBudgetHint => 'Select a budget';
+
+  @override
+  String get txNoBudgetsHint =>
+      'You don\'t have budgets yet. Create one to start recording.';
+
+  @override
   String get txAddButton => '+ Add';
 
   @override
@@ -844,6 +857,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'A budget for this category and period already exists';
 
   @override
+  String get budgetLimitReached =>
+      'You\'ve reached the maximum of 7 budgets. Edit or delete one to create another.';
+
+  @override
+  String get budgetLastSlotHint =>
+      'This is your last budget (max 7). If you want a general one, keep it as \"Otros\" and edit it whenever you need.';
+
+  @override
   String get budgetEditTitle => 'Edit Budget';
 
   @override
@@ -858,6 +879,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsAddTitle => 'New Goal';
+
+  @override
+  String get goalsEditTitle => 'Edit goal';
 
   @override
   String get goalsNameLabel => 'Goal name';
@@ -1026,6 +1050,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalsDetailMarkComplete => 'Mark as achieved';
 
   @override
+  String get goalsDetailCompletedLabel => 'Goal achieved!';
+
+  @override
+  String get goalsDetailCompleteSuccess =>
+      'Congrats! You marked your goal as achieved.';
+
+  @override
   String get goalsDetailDelete => 'Delete goal';
 
   @override
@@ -1051,6 +1082,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txAiApply => 'Apply suggestion';
+
+  @override
+  String get txAiSuggestButton => 'Suggest category with AI';
+
+  @override
+  String get txAiAnalyzing => 'Analyzing with AI…';
+
+  @override
+  String get txAiNeedsInfo =>
+      'Enter the amount and a note for the AI to suggest.';
 
   @override
   String get educationPersonalized => 'Personalized for you';
@@ -1090,13 +1131,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorNoConnection => 'Could not connect to the server.';
 
   @override
-  String get errorTxNoSourceAccount => 'Select a source account.';
+  String get errorTxNoSourceAccount => 'Select a budget.';
 
   @override
   String get errorTxInvalidAmount => 'Enter an amount greater than 0.';
 
   @override
-  String get errorTxNoCategory => 'Select a budget.';
+  String get errorTxNoCategory => 'Select a category.';
 
   @override
   String get errorTxNoDestAccount => 'Select a destination account.';
@@ -1153,6 +1194,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recommendationsReject => 'Not relevant';
+
+  @override
+  String get recommendationsFeedbackThanks => 'Thanks for your feedback!';
 
   @override
   String get educationTitle => 'Financial Education';
