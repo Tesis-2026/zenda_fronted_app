@@ -1,0 +1,13 @@
+# Release signing config for the Android app.
+# Copy this file to `android/key.properties` and fill in real values.
+# NEVER commit key.properties or the .jks keystore (both are gitignored).
+#
+# Generate a keystore (valid 10000 days) with:
+#   keytool -genkey -v -keystore zenda-release.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias zenda
+#
+# storeFile is resolved relative to the android/app directory.
+storeFile=../zenda-release.jks
+storePassword=CHANGE_ME
+keyAlias=zenda
+keyPassword=CHANGE_ME

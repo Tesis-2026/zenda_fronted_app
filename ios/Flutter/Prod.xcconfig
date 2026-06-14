@@ -1,0 +1,8 @@
+// Prod flavor build settings for iOS.
+// Wire this into Xcode build configurations (Debug-prod / Release-prod) and a
+// scheme named `prod` — see RELEASE.md (iOS section). Then run:
+//   flutter run --flavor prod --dart-define-from-file=dart_defines/prod.json
+#include "Generated.xcconfig"
+
+APP_DISPLAY_NAME = Zenda
+PRODUCT_BUNDLE_IDENTIFIER = com.zenda.zendaFronted

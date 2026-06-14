@@ -4,17 +4,15 @@ import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../config/app_config.dart';
 
-/// Backend base URL. Override at build/run time without editing source:
-///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api
+/// Backend base URL. Resolved per flavor through [AppConfig] (set via
+/// `--dart-define-from-file=dart_defines/<flavor>.json` or `--dart-define`).
 /// Targets:
 ///   Windows desktop / web (Chrome,Edge) / iOS simulator: http://localhost:3000/api
 ///   Android emulator: http://10.0.2.2:3000/api
 ///   Physical device: http://YOUR-LAN-IP:3000/api  (or an ngrok tunnel)
-const String _kBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://localhost:3000/api',
-);
+const String _kBaseUrl = AppConfig.apiBaseUrl;
 
 const String _kAccessTokenKey = 'zenda.access_token';
 const String _kRefreshTokenKey = 'zenda.refresh_token';

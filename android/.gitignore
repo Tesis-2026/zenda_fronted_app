@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Firebase config per flavor — provided locally / via CI secrets, not committed.
+**/google-services.json

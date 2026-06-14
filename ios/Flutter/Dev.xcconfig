@@ -1,0 +1,8 @@
+// Dev flavor build settings for iOS.
+// Wire this into Xcode build configurations (Debug-dev / Release-dev) and a
+// scheme named `dev` — see RELEASE.md (iOS section). Then run:
+//   flutter run --flavor dev --dart-define-from-file=dart_defines/dev.json
+#include "Generated.xcconfig"
+
+APP_DISPLAY_NAME = Zenda Dev
+PRODUCT_BUNDLE_IDENTIFIER = com.zenda.zendaFronted.dev

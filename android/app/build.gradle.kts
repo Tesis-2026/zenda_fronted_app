@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,6 +8,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
     // Reads google-services.json to wire FCM credentials at build time.
     id("com.google.gms.google-services")
+}
+
+// Release signing is driven by android/key.properties (NOT committed to git).
+// See RELEASE.md for how to generate the keystore and fill this file.
+// When the file is absent (e.g. local dev / CI without secrets), release builds
+// fall back to the debug signing config so `flutter build` still works.
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+val hasReleaseSigning = keystorePropertiesFile.exists()
+if (hasReleaseSigning) {
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
 android {
@@ -22,21 +36,57 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.zenda.zenda_fronted"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 28
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
+
+    // Two flavors on the "env" dimension. Each gets a distinct applicationId
+    // and launcher name so dev and prod can be installed side by side.
+    flavorDimensions += "env"
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            manifestPlaceholders["appName"] = "Zenda Dev"
+            // Dev talks to a local backend over plain HTTP (10.0.2.2 / LAN IP).
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
+        }
+        create("prod") {
+            dimension = "env"
+            manifestPlaceholders["appName"] = "Zenda"
+            // Prod must use HTTPS only — block cleartext traffic.
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Use the real release keystore when configured; otherwise keep the
+            // debug key so `flutter run --release` and CI smoke builds still work.
+            signingConfig =
+                if (hasReleaseSigning) signingConfigs.getByName("release")
+                else signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
