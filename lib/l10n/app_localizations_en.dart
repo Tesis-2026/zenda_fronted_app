@@ -1603,6 +1603,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetupMonthlyIncomePerMonth => 'per month';
 
   @override
+  String get profileSetupMonthlyIncomeInputLabel => 'Monthly amount';
+
+  @override
+  String get profileSetupMonthlyIncomeInputHint => 'E.g. 1800';
+
+  @override
+  String get profileSetupMonthlyIncomePositiveError =>
+      'Enter an amount greater than 0.';
+
+  @override
   String get profileSetupNext => 'Continue →';
 
   @override

@@ -148,7 +148,9 @@ class RecommendationsApiService {
   }
 
   Future<void> submitFeedback(String id, {required bool accepted}) async {
-    await ApiClient.post('/recommendations/$id/feedback', {'accepted': accepted});
+    await ApiClient.post('/recommendations/$id/feedback', {
+      'accepted': accepted,
+    }, authenticated: true);
   }
 }
 
@@ -198,8 +200,8 @@ abstract class AiChatApiService {
   /// assistant reply to the active conversation (creates one if needed).
   Future<ChatReply> sendMessage(String message);
 
-  /// Marks the active conversation CLOSED. Messages stay in the DB.
-  /// Called from logout so the next session starts fresh.
+  /// Marks the active conversation CLOSED. Messages stay in the DB and can be
+  /// reopened by the backend if the user continues chatting later.
   Future<void> closeActive();
 }
 
@@ -210,12 +212,14 @@ class LiveAiChatApiService extends AiChatApiService {
     final rawMessages = body['messages'];
     final messages = rawMessages is List
         ? rawMessages
-            .cast<Map<String, dynamic>>()
-            .map((m) => ChatMessage(
+              .cast<Map<String, dynamic>>()
+              .map(
+                (m) => ChatMessage(
                   role: m['role'] as String,
                   content: m['content'] as String,
-                ))
-            .toList()
+                ),
+              )
+              .toList()
         : <ChatMessage>[];
     return ActiveConversation(
       conversationId: body['conversationId'] as String?,
@@ -225,11 +229,9 @@ class LiveAiChatApiService extends AiChatApiService {
 
   @override
   Future<ChatReply> sendMessage(String message) async {
-    final body = await ApiClient.post(
-      '/ai/chat',
-      {'message': message},
-      authenticated: true,
-    );
+    final body = await ApiClient.post('/ai/chat', {
+      'message': message,
+    }, authenticated: true);
     return ChatReply(
       conversationId: (body['conversationId'] as String?) ?? '',
       reply: (body['reply'] as String?) ?? 'No se recibió respuesta.',
@@ -242,5 +244,6 @@ class LiveAiChatApiService extends AiChatApiService {
   }
 }
 
-final aiChatServiceProvider =
-    Provider<AiChatApiService>((ref) => LiveAiChatApiService());
+final aiChatServiceProvider = Provider<AiChatApiService>(
+  (ref) => LiveAiChatApiService(),
+);

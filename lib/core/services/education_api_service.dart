@@ -28,7 +28,8 @@ class EducationTopic {
     this.isLocked = false,
   });
 
-  int get readingTimeMinutes => (content.split(' ').length / 200).ceil().clamp(1, 30);
+  int get readingTimeMinutes =>
+      (content.split(' ').length / 200).ceil().clamp(1, 30);
 
   factory EducationTopic.fromJson(Map<String, dynamic> json) {
     return EducationTopic(
@@ -52,7 +53,10 @@ class EducationTopic {
 class EducationApiService {
   Future<List<EducationTopic>> listTopics() async {
     final list = await ApiClient.getList('/education/topics');
-    return list.cast<Map<String, dynamic>>().map(EducationTopic.fromJson).toList();
+    return list
+        .cast<Map<String, dynamic>>()
+        .map(EducationTopic.fromJson)
+        .toList();
   }
 
   Future<EducationTopic> getTopic(String id) async {
@@ -68,17 +72,21 @@ class EducationApiService {
     await ApiClient.patch('/education/topics/$id/read', {});
   }
 
-  Future<PersonalizedQuizResult> getPersonalizedQuiz({String language = 'es'}) async {
-    final data = await ApiClient.get('/education/quiz/personalized?language=$language');
+  Future<PersonalizedQuizResult> getPersonalizedQuiz({
+    String language = 'es',
+  }) async {
+    final data = await ApiClient.get(
+      '/education/quiz/personalized?language=$language',
+    );
     return PersonalizedQuizResult.fromJson(data);
   }
 
-  Future<Map<String, dynamic>> submitPersonalizedQuiz(Map<String, String> answers) async {
-    return ApiClient.post(
-      '/education/quiz/personalized/submit',
-      {'answers': answers},
-      authenticated: true,
-    );
+  Future<Map<String, dynamic>> submitPersonalizedQuiz(
+    Map<String, String> answers,
+  ) async {
+    return ApiClient.post('/education/quiz/personalized/submit', {
+      'answers': answers,
+    }, authenticated: true);
   }
 }
 
@@ -96,7 +104,7 @@ class FeedbackApiService {
       'message': message,
       'screenName': ?screenName,
       'rating': ?rating,
-    });
+    }, authenticated: true);
   }
 }
 
@@ -208,7 +216,8 @@ class SurveyComparison {
     return SurveyComparison(
       preScore: (json['preScore'] as num?)?.toDouble(),
       postScore: (json['postScore'] as num?)?.toDouble(),
-      improvementPercentage: (json['improvementPercentage'] as num?)?.toDouble(),
+      improvementPercentage: (json['improvementPercentage'] as num?)
+          ?.toDouble(),
     );
   }
 }
@@ -225,12 +234,16 @@ class SurveysApiService {
   }
 
   Future<SurveyResult> submitPre(Map<String, String> answers) async {
-    final data = await ApiClient.post('/surveys/pre/response', {'answers': answers}, authenticated: true);
+    final data = await ApiClient.post('/surveys/pre/response', {
+      'answers': answers,
+    }, authenticated: true);
     return SurveyResult.fromJson(data);
   }
 
   Future<SurveyResult> submitPost(Map<String, String> answers) async {
-    final data = await ApiClient.post('/surveys/post/response', {'answers': answers}, authenticated: true);
+    final data = await ApiClient.post('/surveys/post/response', {
+      'answers': answers,
+    }, authenticated: true);
     return SurveyResult.fromJson(data);
   }
 
@@ -245,7 +258,9 @@ class SurveysApiService {
   }
 
   Future<SusResult> submitSus(Map<String, String> answers) async {
-    final data = await ApiClient.post('/surveys/sus/response', {'answers': answers});
+    final data = await ApiClient.post('/surveys/sus/response', {
+      'answers': answers,
+    }, authenticated: true);
     return SusResult.fromJson(data);
   }
 }
@@ -316,11 +331,11 @@ class ChallengesApiService {
   }
 
   Future<void> accept(String id) async {
-    await ApiClient.post('/challenges/$id/accept', {});
+    await ApiClient.post('/challenges/$id/accept', {}, authenticated: true);
   }
 
   Future<void> complete(String id) async {
-    await ApiClient.post('/challenges/$id/complete', {});
+    await ApiClient.post('/challenges/$id/complete', {}, authenticated: true);
   }
 }
 
