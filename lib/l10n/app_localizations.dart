@@ -2972,6 +2972,24 @@ abstract class AppLocalizations {
   /// **'per month'**
   String get profileSetupMonthlyIncomePerMonth;
 
+  /// No description provided for @profileSetupMonthlyIncomeInputLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly amount'**
+  String get profileSetupMonthlyIncomeInputLabel;
+
+  /// No description provided for @profileSetupMonthlyIncomeInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. 1800'**
+  String get profileSetupMonthlyIncomeInputHint;
+
+  /// No description provided for @profileSetupMonthlyIncomePositiveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than 0.'**
+  String get profileSetupMonthlyIncomePositiveError;
+
   /// No description provided for @profileSetupNext.
   ///
   /// In en, this message translates to:

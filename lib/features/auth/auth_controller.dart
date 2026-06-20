@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/user.dart';
 import '../../core/services/api_client.dart';
 import '../../core/services/auth_api_service.dart';
-import '../../core/services/recommendations_api_service.dart' show aiChatServiceProvider;
 import '../../features/dashboard/dashboard_providers.dart';
 
 export '../../core/services/auth_api_service.dart' show LockoutInfo;
@@ -14,7 +13,6 @@ final authServiceProvider = Provider<AuthApiService>((ref) {
 
 // Auth state notifier
 class AuthNotifier extends Notifier<AuthState> {
-
   @override
   AuthState build() {
     _checkAuthStatus();
@@ -38,10 +36,7 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null, clearLockout: true);
     final authService = ref.read(authServiceProvider);
 
-    final result = await authService.login(
-      email: email,
-      password: password,
-    );
+    final result = await authService.login(email: email, password: password);
 
     if (result.isSuccess && result.user != null) {
       state = AuthState.authenticated(result.user!);
@@ -76,13 +71,6 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> logout() async {
     final authService = ref.read(authServiceProvider);
-    // Close the AI conversation server-side so the next session starts
-    // fresh — best-effort, must not block sign-out if it fails.
-    try {
-      await ref.read(aiChatServiceProvider).closeActive();
-    } catch (_) {
-      // Network/auth error during best-effort cleanup — ignore.
-    }
     await authService.logout();
     _clearDataProviders();
     state = const AuthState.unauthenticated();
@@ -106,7 +94,9 @@ class AuthNotifier extends Notifier<AuthState> {
 }
 
 // Auth state provider
-final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);
 
 // Auth state class
 class AuthState {
@@ -128,21 +118,21 @@ class AuthState {
   });
 
   const AuthState.initial()
-      : user = null,
-        isLoading = true,
-        error = null,
-        lockout = null;
+    : user = null,
+      isLoading = true,
+      error = null,
+      lockout = null;
 
   const AuthState.authenticated(User this.user)
-      : isLoading = false,
-        error = null,
-        lockout = null;
+    : isLoading = false,
+      error = null,
+      lockout = null;
 
   const AuthState.unauthenticated()
-      : user = null,
-        isLoading = false,
-        error = null,
-        lockout = null;
+    : user = null,
+      isLoading = false,
+      error = null,
+      lockout = null;
 
   bool get isAuthenticated => user != null;
 

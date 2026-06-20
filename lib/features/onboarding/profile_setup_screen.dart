@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
 import '../../core/theme/app_colors.dart';
@@ -48,6 +49,15 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         curve: Curves.easeOut,
       );
     } else {
+      final income = double.tryParse(_incomeController.text.trim());
+      if (income == null || income <= 0) {
+        showAppToast(
+          context,
+          context.l10n.profileSetupMonthlyIncomePositiveError,
+          type: ToastType.error,
+        );
+        return;
+      }
       _save();
     }
   }
@@ -61,13 +71,15 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           ? null
           : _universityController.text.trim();
 
-      await ref.read(profileUserServiceProvider).updateProfile(
-        age: age,
-        university: university,
-        incomeType: _selectedIncomeType,
-        averageMonthlyIncome: income,
-        profileCompleted: true,
-      );
+      await ref
+          .read(profileUserServiceProvider)
+          .updateProfile(
+            age: age,
+            university: university,
+            incomeType: _selectedIncomeType,
+            averageMonthlyIncome: income,
+            profileCompleted: true,
+          );
 
       if (mounted) {
         ref.invalidate(authNotifierProvider);
@@ -77,7 +89,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       }
     } catch (_) {
       if (mounted) {
-        showAppToast(context, context.l10n.profileSetupSaveError, type: ToastType.error);
+        showAppToast(
+          context,
+          context.l10n.profileSetupSaveError,
+          type: ToastType.error,
+        );
         context.go('/dashboard');
       }
     } finally {
@@ -101,7 +117,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              Expanded(child: _CompletePage(l10n: l10n, userName: userName)),
+              Expanded(
+                child: _CompletePage(l10n: l10n, userName: userName),
+              ),
               _buildCompleteFooter(l10n),
             ],
           ),
@@ -122,7 +140,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 onPageChanged: (i) => setState(() => _page = i),
                 children: [
                   _AgePage(controller: _ageController, l10n: l10n),
-                  _UniversityPage(controller: _universityController, l10n: l10n),
+                  _UniversityPage(
+                    controller: _universityController,
+                    l10n: l10n,
+                  ),
                   _IncomeTypePage(
                     selected: _selectedIncomeType,
                     onSelect: (t) => setState(() => _selectedIncomeType = t),
@@ -148,9 +169,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           Text(
             l10n.profileSetupStep(_page + 1, 4),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.textMuted,
-                  fontWeight: FontWeight.w500,
-                ),
+              color: colors.textMuted,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -173,18 +194,18 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           Text(
             _pageTitleFor(_page, l10n),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colors.textPrimary,
-                  height: 1.15,
-                ),
+              fontWeight: FontWeight.bold,
+              color: colors.textPrimary,
+              height: 1.15,
+            ),
           ),
           if (_pageSubtitleFor(_page, l10n).isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
               _pageSubtitleFor(_page, l10n),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colors.textMuted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colors.textMuted),
             ),
           ],
           const SizedBox(height: 16),
@@ -194,20 +215,20 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   String _pageTitleFor(int page, AppLocalizations l10n) => switch (page) {
-        0 => l10n.profileSetupAge,
-        1 => l10n.profileSetupUniversity,
-        2 => l10n.profileSetupIncomeType,
-        3 => l10n.profileSetupMonthlyIncome,
-        _ => '',
-      };
+    0 => l10n.profileSetupAge,
+    1 => l10n.profileSetupUniversity,
+    2 => l10n.profileSetupIncomeType,
+    3 => l10n.profileSetupMonthlyIncome,
+    _ => '',
+  };
 
   String _pageSubtitleFor(int page, AppLocalizations l10n) => switch (page) {
-        0 => l10n.profileSetupAgeHint,
-        1 => l10n.profileSetupUniversitySubtitle,
-        2 => l10n.profileSetupIncomeTypeSubtitle,
-        3 => l10n.profileSetupMonthlyIncomeHint,
-        _ => '',
-      };
+    0 => l10n.profileSetupAgeHint,
+    1 => l10n.profileSetupUniversitySubtitle,
+    2 => l10n.profileSetupIncomeTypeSubtitle,
+    3 => l10n.profileSetupMonthlyIncomeHint,
+    _ => '',
+  };
 
   Widget _buildFooter(AppLocalizations l10n) {
     final isLast = _page == 3;
@@ -220,13 +241,25 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           onPressed: _saving ? null : _next,
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           child: _saving
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
               : Text(
                   isLast ? l10n.profileSetupSave : l10n.profileSetupNext,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
         ),
       ),
@@ -245,7 +278,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           style: FilledButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: const Color(0xFF065F46),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           child: Text(
             l10n.profileSetupGoToDashboard,
@@ -293,7 +328,11 @@ class _AgePageState extends State<_AgePage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _StepperButton(icon: Icons.remove_rounded, onTap: () => _adjust(-1), filled: false),
+            _StepperButton(
+              icon: Icons.remove_rounded,
+              onTap: () => _adjust(-1),
+              filled: false,
+            ),
             const SizedBox(width: 32),
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -301,19 +340,25 @@ class _AgePageState extends State<_AgePage> {
                 Text(
                   '$_age',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colors.textPrimary,
-                        fontSize: 64,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary,
+                    fontSize: 64,
+                  ),
                 ),
                 Text(
                   l10n.profileSetupAgeStepperLabel,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colors.textMuted),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: colors.textMuted),
                 ),
               ],
             ),
             const SizedBox(width: 32),
-            _StepperButton(icon: Icons.add_rounded, onTap: () => _adjust(1), filled: true),
+            _StepperButton(
+              icon: Icons.add_rounded,
+              onTap: () => _adjust(1),
+              filled: true,
+            ),
           ],
         ),
       ),
@@ -393,18 +438,24 @@ class _UniversityPage extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             l10n.profileSetupPopularUniversities,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colors.textMuted,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: colors.textMuted,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           Expanded(
@@ -417,7 +468,10 @@ class _UniversityPage extends StatelessWidget {
                   onTap: () => controller.text = abbr,
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.card,
                       borderRadius: BorderRadius.circular(10),
@@ -426,9 +480,9 @@ class _UniversityPage extends StatelessWidget {
                     child: Text(
                       '$abbr — $name',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.textPrimary,
-                            fontWeight: FontWeight.w400,
-                          ),
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ),
                 );
@@ -452,25 +506,25 @@ class _IncomeTypePage extends StatelessWidget {
   final AppLocalizations l10n;
 
   String _labelFor(IncomeType t, AppLocalizations l10n) => switch (t) {
-        IncomeType.scholarship => l10n.incomeTypeScholarship,
-        IncomeType.partTime => l10n.incomeTypePartTime,
-        IncomeType.family => l10n.incomeTypeFamily,
-        IncomeType.mixed => l10n.incomeTypeMixed,
-      };
+    IncomeType.scholarship => l10n.incomeTypeScholarship,
+    IncomeType.partTime => l10n.incomeTypePartTime,
+    IncomeType.family => l10n.incomeTypeFamily,
+    IncomeType.mixed => l10n.incomeTypeMixed,
+  };
 
   String _subtitleFor(IncomeType t, AppLocalizations l10n) => switch (t) {
-        IncomeType.scholarship => l10n.incomeTypeScholarshipSub,
-        IncomeType.partTime => l10n.incomeTypePartTimeSub,
-        IncomeType.family => l10n.incomeTypeFamilySub,
-        IncomeType.mixed => l10n.incomeTypeMixedSub,
-      };
+    IncomeType.scholarship => l10n.incomeTypeScholarshipSub,
+    IncomeType.partTime => l10n.incomeTypePartTimeSub,
+    IncomeType.family => l10n.incomeTypeFamilySub,
+    IncomeType.mixed => l10n.incomeTypeMixedSub,
+  };
 
   IconData _iconFor(IncomeType t) => switch (t) {
-        IncomeType.scholarship => Icons.school_outlined,
-        IncomeType.partTime => Icons.work_outline_rounded,
-        IncomeType.family => Icons.people_outline_rounded,
-        IncomeType.mixed => Icons.shuffle_rounded,
-      };
+    IncomeType.scholarship => Icons.school_outlined,
+    IncomeType.partTime => Icons.work_outline_rounded,
+    IncomeType.family => Icons.people_outline_rounded,
+    IncomeType.mixed => Icons.shuffle_rounded,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -486,7 +540,10 @@ class _IncomeTypePage extends StatelessWidget {
               onTap: () => onSelect(t),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.primary.withValues(alpha: 0.08)
@@ -514,7 +571,9 @@ class _IncomeTypePage extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
-                              color: isSelected ? AppColors.primary : colors.textPrimary,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -576,10 +635,12 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
     final l10n = widget.l10n;
     final colors = context.colors;
     final displayVal = double.tryParse(widget.controller.text.trim()) ?? 0.0;
-    final displayText = displayVal == 0.0 ? '0' : _formatNumber(displayVal.toStringAsFixed(0));
+    final displayText = displayVal == 0.0
+        ? '0'
+        : _formatNumber(displayVal.toStringAsFixed(0));
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -605,10 +666,10 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                 Text(
                   displayText,
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colors.textPrimary,
-                        fontSize: 56,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary,
+                    fontSize: 56,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -616,6 +677,43 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                   style: TextStyle(fontSize: 13, color: colors.textMuted),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: widget.controller,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (raw) {
+              final value = double.tryParse(raw.trim());
+              setState(() {
+                _selected = value != null && _quickValues.contains(value)
+                    ? value
+                    : null;
+              });
+            },
+            decoration: InputDecoration(
+              labelText: l10n.profileSetupMonthlyIncomeInputLabel,
+              hintText: l10n.profileSetupMonthlyIncomeInputHint,
+              prefixText: 'S/ ',
+              filled: true,
+              fillColor: colors.card,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: colors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: colors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -628,7 +726,10 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                 child: GestureDetector(
                   onTap: () => _pickQuick(v),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected ? AppColors.primary : colors.card,
                       borderRadius: BorderRadius.circular(20),

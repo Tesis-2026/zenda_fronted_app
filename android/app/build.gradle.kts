@@ -6,8 +6,6 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // Reads google-services.json to wire FCM credentials at build time.
-    id("com.google.gms.google-services")
 }
 
 // Release signing is driven by android/key.properties (NOT committed to git).
@@ -21,12 +19,27 @@ if (hasReleaseSigning) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
+// FCM is optional in local dev. Apply the Google Services plugin only when the
+// Firebase config exists; otherwise the app still builds and runs inbox-only.
+val googleServicesCandidates = listOf(
+    file("google-services.json"),
+    file("src/dev/google-services.json"),
+    file("src/devDebug/google-services.json"),
+    file("src/debug/google-services.json"),
+    file("src/prod/google-services.json"),
+    file("src/prodRelease/google-services.json"),
+)
+if (googleServicesCandidates.any { it.exists() }) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.zenda.zenda_fronted"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -93,4 +106,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

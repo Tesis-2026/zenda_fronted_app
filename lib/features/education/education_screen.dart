@@ -65,7 +65,11 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department_rounded, size: 16, color: Color(0xFFD97706)),
+                const Icon(
+                  Icons.local_fire_department_rounded,
+                  size: 16,
+                  color: Color(0xFFD97706),
+                ),
                 const SizedBox(width: 2),
                 Text(
                   l10n.streakLabel(streakDays),
@@ -111,102 +115,106 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
     final l10n = context.l10n;
     final topicsAsync = ref.watch(topicsProvider);
     return topicsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(l10n.educationErrorLoad),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(topicsProvider),
-                child: Text(l10n.commonRetry),
-              ),
-            ],
-          ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(l10n.educationErrorLoad),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => ref.invalidate(topicsProvider),
+              child: Text(l10n.commonRetry),
+            ),
+          ],
         ),
-        data: (topics) {
-          final filtered = _applyFilters(topics);
-          final featured = filtered.firstOrNull;
-          final rest = filtered.length > 1 ? filtered.sublist(1) : <EducationTopic>[];
+      ),
+      data: (topics) {
+        final filtered = _applyFilters(topics);
+        final featured = filtered.firstOrNull;
+        final rest = filtered.length > 1
+            ? filtered.sublist(1)
+            : <EducationTopic>[];
 
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(topicsProvider),
-            child: CustomScrollView(
-              slivers: [
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(topicsProvider),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _query = v),
+                    decoration: InputDecoration(
+                      hintText: l10n.educationSearchHint,
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF3F4F6),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF34D399),
+                          width: 1.5,
+                        ),
+                      ),
+                      suffixIcon: _query.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded, size: 18),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _query = '');
+                              },
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(child: _PersonalizedSection()),
+              if (featured != null) ...[
+                SliverToBoxAdapter(
+                  child: _FeaturedCard(
+                    topic: featured,
+                    onTap: () => context.push('/education/${featured.id}'),
+                  ),
+                ),
+                SliverList.builder(
+                  itemCount: rest.length,
+                  itemBuilder: (_, i) => _TopicCard(
+                    topic: rest[i],
+                    onTap: () => context.push('/education/${rest[i].id}'),
+                  ),
+                ),
+              ] else
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (v) => setState(() => _query = v),
-                      decoration: InputDecoration(
-                        hintText: l10n.educationSearchHint,
-                        prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
-                        filled: true,
-                        fillColor: const Color(0xFFF3F4F6),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                              color: Color(0xFF34D399), width: 1.5),
-                        ),
-                        suffixIcon: _query.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _query = '');
-                                },
-                              )
-                            : null,
+                    padding: const EdgeInsets.all(48),
+                    child: Center(
+                      child: Text(
+                        l10n.educationErrorLoad,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
                   ),
                 ),
-                if (featured != null) ...[
-                  SliverToBoxAdapter(
-                    child: _FeaturedCard(
-                      topic: featured,
-                      onTap: () => context.push('/education/${featured.id}'),
-                    ),
-                  ),
-                  SliverList.builder(
-                    itemCount: rest.length,
-                    itemBuilder: (_, i) => _TopicCard(
-                      topic: rest[i],
-                      onTap: () => context.push('/education/${rest[i].id}'),
-                    ),
-                  ),
-                ] else
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(48),
-                      child: Center(
-                        child: Text(
-                          l10n.educationErrorLoad,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                    ),
-                  ),
-                SliverToBoxAdapter(
-                  child: _PersonalizedSection(),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
-              ],
-            ),
-          );
-        },
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -242,8 +250,10 @@ class _SectionTabs extends StatelessWidget {
                 onTap: () => onSelect(i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: selected == i
                         ? const Color(0xFF34D399)
@@ -258,9 +268,7 @@ class _SectionTabs extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: selected == i
-                          ? Colors.white
-                          : AppColors.textMuted,
+                      color: selected == i ? Colors.white : AppColors.textMuted,
                     ),
                   ),
                 ),
@@ -294,7 +302,6 @@ class _FeaturedCard extends StatelessWidget {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -319,8 +326,10 @@ class _FeaturedCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF34D399).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
@@ -337,8 +346,11 @@ class _FeaturedCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (topic.isCompleted)
-                  const Icon(Icons.check_circle_rounded,
-                      color: Color(0xFF34D399), size: 18),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: Color(0xFF34D399),
+                    size: 18,
+                  ),
               ],
             ),
             const SizedBox(height: 14),
@@ -353,8 +365,11 @@ class _FeaturedCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: Icon(_categoryIcon(topic.category),
-                        size: 24, color: Colors.white70),
+                    child: Icon(
+                      _categoryIcon(topic.category),
+                      size: 24,
+                      color: Colors.white70,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -390,8 +405,11 @@ class _FeaturedCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Icon(Icons.access_time_rounded,
-                    color: Colors.white.withValues(alpha: 0.55), size: 14),
+                Icon(
+                  Icons.access_time_rounded,
+                  color: Colors.white.withValues(alpha: 0.55),
+                  size: 14,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   l10n.educationMinRead(topic.readingTimeMinutes),
@@ -402,8 +420,11 @@ class _FeaturedCard extends StatelessWidget {
                 ),
                 if (topic.questionCount > 0) ...[
                   const SizedBox(width: 14),
-                  Icon(Icons.edit_outlined,
-                      color: Colors.white.withValues(alpha: 0.55), size: 14),
+                  Icon(
+                    Icons.edit_outlined,
+                    color: Colors.white.withValues(alpha: 0.55),
+                    size: 14,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     l10n.educationQuestions(topic.questionCount),
@@ -506,8 +527,11 @@ class _TopicCard extends StatelessWidget {
                           color: AppColors.textMuted,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.lock_rounded,
-                            color: Colors.white, size: 10),
+                        child: const Icon(
+                          Icons.lock_rounded,
+                          color: Colors.white,
+                          size: 10,
+                        ),
                       ),
                     ),
                 ],
@@ -531,14 +555,18 @@ class _TopicCard extends StatelessWidget {
                         Text(
                           l10n.educationMinRead(topic.readingTimeMinutes),
                           style: const TextStyle(
-                              fontSize: 11, color: Color(0xFF9CA3AF)),
+                            fontSize: 11,
+                            color: Color(0xFF9CA3AF),
+                          ),
                         ),
                         if (topic.questionCount > 0) ...[
                           const SizedBox(width: 8),
                           Text(
                             l10n.educationQuestions(topic.questionCount),
                             style: const TextStyle(
-                                fontSize: 11, color: Color(0xFF9CA3AF)),
+                              fontSize: 11,
+                              color: Color(0xFF9CA3AF),
+                            ),
                           ),
                         ],
                       ],
@@ -566,14 +594,23 @@ class _TopicCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               if (isLocked)
-                const Icon(Icons.lock_outline_rounded,
-                    color: Color(0xFF9CA3AF), size: 18)
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  color: Color(0xFF9CA3AF),
+                  size: 18,
+                )
               else if (topic.isCompleted)
-                const Icon(Icons.check_circle_rounded,
-                    color: Color(0xFF34D399), size: 20)
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF34D399),
+                  size: 20,
+                )
               else
-                const Icon(Icons.chevron_right,
-                    color: Color(0xFF9CA3AF), size: 20),
+                const Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFF9CA3AF),
+                  size: 20,
+                ),
             ],
           ),
         ),
@@ -597,7 +634,8 @@ class _PersonalizedSection extends StatelessWidget {
         color: const Color(0xFFF5F3FF),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: const Color(0xFF818CF8).withValues(alpha: 0.2)),
+          color: const Color(0xFF818CF8).withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -613,7 +651,11 @@ class _PersonalizedSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              const Icon(Icons.auto_awesome_rounded, size: 16, color: Color(0xFF818CF8)),
+              const Icon(
+                Icons.auto_awesome_rounded,
+                size: 16,
+                color: Color(0xFF818CF8),
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -625,8 +667,7 @@ class _PersonalizedSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () =>
-                  context.push('/education/quiz/personalized'),
+              onPressed: () => context.push('/education/quiz/personalized'),
               icon: const Icon(Icons.auto_awesome, size: 16),
               label: Text(l10n.quizPersonalizedButton),
               style: ElevatedButton.styleFrom(
@@ -635,7 +676,8 @@ class _PersonalizedSection extends StatelessWidget {
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
