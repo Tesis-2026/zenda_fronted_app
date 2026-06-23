@@ -171,7 +171,7 @@
   "categorySelectHint": "Select a category",
   "txBudgetLabel": "Budget",
   "txBudgetHint": "Select a budget",
-  "txNoBudgetsHint": "You don't have budgets yet. Create one to start recording.",
+  "txNoBudgetsHint": "No budgets found for the selected date. Create one or change the expense date.",
   "txAddButton": "+ Add",
   "txAddCustomCategory": "New category",
   "txNoteLabel": "Note (optional)",

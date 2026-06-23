@@ -941,7 +941,7 @@ abstract class AppLocalizations {
   /// No description provided for @txNoBudgetsHint.
   ///
   /// In en, this message translates to:
-  /// **'You don\'t have budgets yet. Create one to start recording.'**
+  /// **'No budgets found for the selected date. Create one or change the expense date.'**
   String get txNoBudgetsHint;
 
   /// No description provided for @txAddButton.

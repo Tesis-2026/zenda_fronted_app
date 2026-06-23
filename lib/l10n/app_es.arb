@@ -171,7 +171,7 @@
   "categorySelectHint": "Selecciona una categoría",
   "txBudgetLabel": "Presupuesto",
   "txBudgetHint": "Selecciona un presupuesto",
-  "txNoBudgetsHint": "Aún no tienes presupuestos. Crea uno para poder registrar.",
+  "txNoBudgetsHint": "No hay presupuestos para la fecha seleccionada. Crea uno o cambia la fecha del gasto.",
   "txAddButton": "+ Agregar",
   "txAddCustomCategory": "Nueva categoría",
   "txNoteLabel": "Nota (opcional)",

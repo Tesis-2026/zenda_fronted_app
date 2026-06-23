@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/models/budget.dart';
 import '../../core/models/transaction.dart';
 import '../../core/services/transaction_api_service.dart'
     show categoryToApiName;
@@ -82,13 +83,52 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     });
   }
 
+  void _syncBudgetSelection(List<Budget> budgets, NewTransactionState state) {
+    final hasValidSelection =
+        state.selectedBudgetId != null &&
+        budgets.any((budget) => budget.id == state.selectedBudgetId);
+
+    if (hasValidSelection) return;
+
+    final nextBudgetId = _preferredBudgetId(budgets, state.category);
+    if (nextBudgetId == null && state.selectedBudgetId == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final controller = ref.read(newTransactionControllerProvider.notifier);
+      if (nextBudgetId == null) {
+        controller.clearBudget();
+      } else {
+        controller.setBudget(nextBudgetId);
+      }
+    });
+  }
+
+  String? _preferredBudgetId(
+    List<Budget> budgets,
+    TransactionCategory? category,
+  ) {
+    if (budgets.isEmpty) return null;
+    if (budgets.length == 1) return budgets.first.id;
+
+    if (category == null) return null;
+    final categoryName = categoryToApiName(category).toLowerCase();
+    for (final budget in budgets) {
+      if ((budget.categoryName ?? '').toLowerCase() == categoryName) {
+        return budget.id;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(newTransactionControllerProvider);
     final controller = ref.read(newTransactionControllerProvider.notifier);
     final colors = context.colors;
     final l10n = context.l10n;
-    final budgetsAsync = ref.watch(currentMonthBudgetsProvider);
+    final budgetPeriod = (month: state.date.month, year: state.date.year);
+    final budgetsAsync = ref.watch(budgetsForPeriodProvider(budgetPeriod));
 
     ref.listen<NewTransactionState>(newTransactionControllerProvider, (
       prev,
@@ -169,225 +209,239 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     final formContent = Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Expense / Income 2-tab toggle
+                KindToggle(
+                  selected: state.kind,
+                  onChanged: controller.setKind,
+                  expenseLabel: l10n.txExpense,
+                  incomeLabel: l10n.txIncome,
+                ),
+                const SizedBox(height: 16),
+
+                // Amount input
+                Text(
+                  l10n.txAmountLabel,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                AmountInputField(
+                  controller: _amountController,
+                  onChanged: controller.setAmountFromText,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 18),
+
+                // Note
+                Text(
+                  l10n.txNoteLabel,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                AppTextField(
+                  controller: _noteController,
+                  hintText: l10n.txNoteHint,
+                  textInputAction: TextInputAction.done,
+                  onChanged: (val) {
+                    controller.setNote(val);
+                    // Editing the note invalidates a prior AI suggestion;
+                    // the user must request a fresh one.
+                    if (_aiSuggestion != null) {
+                      setState(() => _aiSuggestion = null);
+                    }
+                  },
+                ),
+
+                const SizedBox(height: 18),
+                Text(
+                  l10n.txDateLabel,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                AppDateField(
+                  value: state.date,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: state.date,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (picked != null) controller.setDate(picked);
+                  },
+                ),
+                const SizedBox(height: 18),
+                // Categoría (clasificación) — obligatoria
+                Row(
                   children: [
-                    // Expense / Income 2-tab toggle
-                    KindToggle(
-                      selected: state.kind,
-                      onChanged: controller.setKind,
-                      expenseLabel: l10n.txExpense,
-                      incomeLabel: l10n.txIncome,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Amount input
-                    Text(
-                      l10n.txAmountLabel,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    AmountInputField(
-                      controller: _amountController,
-                      onChanged: controller.setAmountFromText,
-                      textInputAction: TextInputAction.next,
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Note
-                    Text(
-                      l10n.txNoteLabel,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    AppTextField(
-                      controller: _noteController,
-                      hintText: l10n.txNoteHint,
-                      textInputAction: TextInputAction.done,
-                      onChanged: (val) {
-                        controller.setNote(val);
-                        // Editing the note invalidates a prior AI suggestion;
-                        // the user must request a fresh one.
-                        if (_aiSuggestion != null) {
-                          setState(() => _aiSuggestion = null);
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 18),
-                    Text(
-                      l10n.txDateLabel,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    AppDateField(
-                      value: state.date,
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: state.date,
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime.now().add(
-                            const Duration(days: 365),
-                          ),
-                        );
-                        if (picked != null) controller.setDate(picked);
-                      },
-                    ),
-                    const SizedBox(height: 18),
-                    // Categoría (clasificación) — obligatoria
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l10n.txCategoryLabel,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: colors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        if (state.bucket != null)
-                          _BucketChip(bucket: state.bucket!),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    CategoryDropdownField<TransactionCategory>(
-                      value: state.category,
-                      hintText: l10n.categorySelectHint,
-                      sheetTitle: l10n.txCategoryLabel,
-                      onChanged: controller.setCategory,
-                      options: [
-                        for (final c in TransactionCategory.values)
-                          CategoryOption<TransactionCategory>(
-                            value: c,
-                            label: CategorySelector.labelFor(context, c),
-                            icon: CategoryUtils.iconForCategory(c.name),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    // AI categorization helper — sits next to the category
-                    // field and is only triggered when the user asks for it.
-                    _AiCategoryHelper(
-                      isLoading: _isClassifying,
-                      suggestion: _aiSuggestion,
-                      canRequest: state.note.trim().length >= 3 &&
-                          state.amount != null &&
-                          state.amount! > 0,
-                      onRequest: _requestAiSuggestion,
-                      onApply: () {
-                        if (_aiSuggestion != null) {
-                          controller.setCategory(_aiSuggestion!);
-                          setState(() => _aiSuggestion = null);
-                        }
-                      },
-                    ),
-                    // El presupuesto es un límite de gasto: solo aplica a gastos.
-                    // Un ingreso no "engorda" un límite, así que el campo se
-                    // omite para ingresos (presupuesto opcional a nivel backend).
-                    if (state.kind == TransactionKind.expense) ...[
-                      const SizedBox(height: 18),
-                      Text(
-                        l10n.txBudgetLabel,
+                    Expanded(
+                      child: Text(
+                        l10n.txCategoryLabel,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           color: colors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      budgetsAsync.when(
-                        loading: () => const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                        error: (_, _) => Text(
-                          l10n.budgetErrorLoad,
-                          style: const TextStyle(color: Color(0xFFEF4444)),
-                        ),
-                        data: (budgets) {
-                          if (budgets.isEmpty) return const _NoBudgetsHint();
-                          final selectedId =
-                              budgets.any((b) => b.id == state.selectedBudgetId)
-                                  ? state.selectedBudgetId
-                                  : null;
-                          // Standardized picker (same bordered field + bottom-sheet
-                          // pattern as category selection).
-                          return CategoryDropdownField<String>(
-                            value: selectedId,
-                            hintText: l10n.txBudgetHint,
-                            sheetTitle: l10n.txBudgetLabel,
-                            onChanged: controller.setBudget,
-                            options: [
-                              for (final b in budgets)
-                                CategoryOption<String>(
-                                  value: b.id,
-                                  label: (b.name != null && b.name!.isNotEmpty)
-                                      ? b.name!
-                                      : CategoryUtils.labelEs(b.categoryName),
-                                  icon: CategoryUtils.iconForCategory(
-                                      b.categoryName),
-                                  trailing:
-                                      'S/ ${b.available.toStringAsFixed(0)}',
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-
-                    if (state.error != null) ...[
-                      const SizedBox(height: 14),
-                      Text(
-                        context.l10n.resolveError(state.error!),
-                        style: const TextStyle(
-                          color: Color(0xFFEF4444),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            SafeArea(
-              top: false,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colors.card,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 16,
-                      offset: const Offset(0, -4),
                     ),
+                    if (state.bucket != null)
+                      _BucketChip(bucket: state.bucket!),
                   ],
                 ),
-                child: AppPrimaryButton(
-                  label: l10n.txSaveButton,
-                  isLoading: state.isSaving,
-                  onPressed: () async {
-                    await controller.save();
+                const SizedBox(height: 10),
+                CategoryDropdownField<TransactionCategory>(
+                  value: state.category,
+                  hintText: l10n.categorySelectHint,
+                  sheetTitle: l10n.txCategoryLabel,
+                  onChanged: controller.setCategory,
+                  options: [
+                    for (final c in TransactionCategory.values)
+                      CategoryOption<TransactionCategory>(
+                        value: c,
+                        label: CategorySelector.labelFor(context, c),
+                        icon: CategoryUtils.iconForCategory(c.name),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // AI categorization helper — sits next to the category
+                // field and is only triggered when the user asks for it.
+                _AiCategoryHelper(
+                  isLoading: _isClassifying,
+                  suggestion: _aiSuggestion,
+                  canRequest:
+                      state.note.trim().length >= 3 &&
+                      state.amount != null &&
+                      state.amount! > 0,
+                  onRequest: _requestAiSuggestion,
+                  onApply: () {
+                    if (_aiSuggestion != null) {
+                      controller.setCategory(_aiSuggestion!);
+                      setState(() => _aiSuggestion = null);
+                    }
                   },
                 ),
-              ),
+                // El presupuesto es un límite de gasto: solo aplica a gastos.
+                // Un ingreso no "engorda" un límite, así que el campo se
+                // omite para ingresos (presupuesto opcional a nivel backend).
+                if (state.kind == TransactionKind.expense) ...[
+                  const SizedBox(height: 18),
+                  Text(
+                    l10n.txBudgetLabel,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  budgetsAsync.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (_, _) => _BudgetLoadError(
+                      onRetry: () => ref.invalidate(
+                        budgetsForPeriodProvider(budgetPeriod),
+                      ),
+                    ),
+                    data: (budgets) {
+                      _syncBudgetSelection(budgets, state);
+                      if (budgets.isEmpty) {
+                        return _NoBudgetsHint(
+                          onRetry: () => ref.invalidate(
+                            budgetsForPeriodProvider(budgetPeriod),
+                          ),
+                          onManage: () {
+                            final router = GoRouter.of(context);
+                            if (widget.isSheet) {
+                              Navigator.of(context).pop();
+                            }
+                            router.push('/budgets');
+                          },
+                        );
+                      }
+                      final selectedId =
+                          budgets.any((b) => b.id == state.selectedBudgetId)
+                          ? state.selectedBudgetId
+                          : null;
+                      // Standardized picker (same bordered field + bottom-sheet
+                      // pattern as category selection).
+                      return CategoryDropdownField<String>(
+                        value: selectedId,
+                        hintText: l10n.txBudgetHint,
+                        sheetTitle: l10n.txBudgetLabel,
+                        onChanged: controller.setBudget,
+                        options: [
+                          for (final b in budgets)
+                            CategoryOption<String>(
+                              value: b.id,
+                              label: (b.name != null && b.name!.isNotEmpty)
+                                  ? b.name!
+                                  : CategoryUtils.labelEs(b.categoryName),
+                              icon: CategoryUtils.iconForCategory(
+                                b.categoryName,
+                              ),
+                              trailing: 'S/ ${b.available.toStringAsFixed(0)}',
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+
+                if (state.error != null) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    context.l10n.resolveError(state.error!),
+                    style: const TextStyle(
+                      color: Color(0xFFEF4444),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
-        );
+          ),
+        ),
+        SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colors.card,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: AppPrimaryButton(
+              label: l10n.txSaveButton,
+              isLoading: state.isSaving,
+              onPressed: () async {
+                await controller.save();
+              },
+            ),
+          ),
+        ),
+      ],
+    );
 
     if (widget.isSheet) {
       return Container(
@@ -423,9 +477,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.txNewTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.txNewTitle)),
       body: SafeArea(child: formContent),
     );
   }
@@ -452,17 +504,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: names
-              .map((name) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle_rounded,
-                            color: Color(0xFF34D399), size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(name)),
-                      ],
-                    ),
-                  ))
+              .map(
+                (name) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: Color(0xFF34D399),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(name)),
+                    ],
+                  ),
+                ),
+              )
               .toList(),
         ),
         actionsAlignment: MainAxisAlignment.center,
@@ -479,9 +536,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       ),
     );
   }
-
 }
-
 
 /// AI categorization helper shown right below the category dropdown.
 ///
@@ -656,35 +711,139 @@ class _BucketChip extends StatelessWidget {
 
 /// Shown when the user has no budgets yet — registering needs at least one.
 class _NoBudgetsHint extends StatelessWidget {
-  const _NoBudgetsHint();
+  const _NoBudgetsHint({required this.onRetry, required this.onManage});
+
+  final VoidCallback onRetry;
+  final VoidCallback onManage;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push('/budgets'),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.add_circle_outline,
-                color: Color(0xFF34D399), size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                context.l10n.txNoBudgetsHint,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF374151)),
+    final l10n = context.l10n;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.add_circle_outline,
+                color: Color(0xFF34D399),
+                size: 18,
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.txNoBudgetsHint,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(l10n.commonRetry),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF374151),
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  side: const BorderSide(color: Color(0xFFD1D5DB)),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+              FilledButton.icon(
+                onPressed: onManage,
+                icon: const Icon(
+                  Icons.account_balance_wallet_rounded,
+                  size: 18,
+                ),
+                label: Text(l10n.budgetTitle),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF34D399),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
+class _BudgetLoadError extends StatelessWidget {
+  const _BudgetLoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFFECACA)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Color(0xFFDC2626),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.budgetErrorLoad,
+                  style: const TextStyle(
+                    color: Color(0xFF991B1B),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: Text(l10n.commonRetry),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFDC2626),
+              minimumSize: const Size(0, 44),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              side: const BorderSide(color: Color(0xFFFCA5A5)),
+              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

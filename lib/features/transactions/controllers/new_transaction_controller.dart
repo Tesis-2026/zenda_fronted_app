@@ -16,6 +16,7 @@ class NewTransactionState {
   final double? amount;
   final TransactionCategory? category;
   final String? customCategoryName;
+
   /// Budget the expense draws from (only required/sent for expenses). Income is
   /// never linked to a budget. Independent of the category.
   final String? selectedBudgetId;
@@ -26,8 +27,10 @@ class NewTransactionState {
   final String? error;
   final int saveTick;
   final String? budgetAlert; // category name at ≥80% after save (US-020)
-  final String? anomalyAlert; // category name when spending >20% over avg (US-016)
-  final List<String> completedChallengeNames; // titles of auto-completed challenges
+  final String?
+  anomalyAlert; // category name when spending >20% over avg (US-016)
+  final List<String>
+  completedChallengeNames; // titles of auto-completed challenges
   // AI provenance (Integration fix #4). When the user accepted an AI
   // classify suggestion during this draft, we keep the original name +
   // confidence so they survive subsequent category overrides — the
@@ -96,6 +99,7 @@ class NewTransactionState {
     bool clearError = false,
     bool clearCategory = false,
     bool clearCustomCategory = false,
+    bool clearBudget = false,
     bool clearBudgetAlert = false,
     bool clearAnomalyAlert = false,
     bool clearAiSuggestion = false,
@@ -104,8 +108,12 @@ class NewTransactionState {
       kind: kind ?? this.kind,
       amount: amount ?? this.amount,
       category: clearCategory ? null : (category ?? this.category),
-      customCategoryName: clearCustomCategory ? null : (customCategoryName ?? this.customCategoryName),
-      selectedBudgetId: selectedBudgetId ?? this.selectedBudgetId,
+      customCategoryName: clearCustomCategory
+          ? null
+          : (customCategoryName ?? this.customCategoryName),
+      selectedBudgetId: clearBudget
+          ? null
+          : (selectedBudgetId ?? this.selectedBudgetId),
       note: note ?? this.note,
       date: date ?? this.date,
       source: source ?? this.source,
@@ -113,13 +121,17 @@ class NewTransactionState {
       error: clearError ? null : (error ?? this.error),
       saveTick: saveTick ?? this.saveTick,
       budgetAlert: clearBudgetAlert ? null : (budgetAlert ?? this.budgetAlert),
-      anomalyAlert: clearAnomalyAlert ? null : (anomalyAlert ?? this.anomalyAlert),
-      completedChallengeNames: completedChallengeNames ?? this.completedChallengeNames,
+      anomalyAlert: clearAnomalyAlert
+          ? null
+          : (anomalyAlert ?? this.anomalyAlert),
+      completedChallengeNames:
+          completedChallengeNames ?? this.completedChallengeNames,
       aiSuggestedCategoryName: clearAiSuggestion
           ? null
           : (aiSuggestedCategoryName ?? this.aiSuggestedCategoryName),
-      aiConfidence:
-          clearAiSuggestion ? null : (aiConfidence ?? this.aiConfidence),
+      aiConfidence: clearAiSuggestion
+          ? null
+          : (aiConfidence ?? this.aiConfidence),
     );
   }
 }
@@ -152,15 +164,27 @@ class NewTransactionController extends Notifier<NewTransactionState> {
     // an AI suggestion earlier and then changes their mind, the BE
     // needs both `suggestedCategoryId` and the (different) `categoryId`
     // to derive `categorySource = AI_OVERRIDDEN`.
-    state = state.copyWith(category: category, clearCustomCategory: true, clearError: true);
+    state = state.copyWith(
+      category: category,
+      clearCustomCategory: true,
+      clearError: true,
+    );
   }
 
   void setCustomCategory(String name) {
-    state = state.copyWith(customCategoryName: name, clearCategory: true, clearError: true);
+    state = state.copyWith(
+      customCategoryName: name,
+      clearCategory: true,
+      clearError: true,
+    );
   }
 
   void setBudget(String budgetId) {
     state = state.copyWith(selectedBudgetId: budgetId, clearError: true);
+  }
+
+  void clearBudget() {
+    state = state.copyWith(clearBudget: true, clearError: true);
   }
 
   /// Records that the AI suggested a category for the current draft.
@@ -201,8 +225,9 @@ class NewTransactionController extends Notifier<NewTransactionState> {
 
     // Budget is a spending limit, so it only applies to expenses. Income does
     // not draw from / inflate a budget, so it is neither required nor sent.
-    final budgetId =
-        kind == TransactionKind.expense ? state.selectedBudgetId : null;
+    final budgetId = kind == TransactionKind.expense
+        ? state.selectedBudgetId
+        : null;
     if (kind == TransactionKind.expense &&
         (budgetId == null || budgetId.isEmpty)) {
       // Reuses the (now account-free) source error slot to mean "no budget".
@@ -277,18 +302,20 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       } catch (_) {
         // Offline or unreachable — enqueue for retry when connectivity returns.
         final queue = ref.read(pendingTransactionQueueProvider);
-        await queue.enqueue(PendingSyncEntry(
-          txId: tx.id,
-          kind: kind,
-          amount: amount,
-          category: effectiveCategory,
-          budgetId: budgetId,
-          occurredAt: state.date,
-          description: state.note.isEmpty ? null : state.note,
-          customCategoryName: customName,
-          aiSuggestedCategoryName: state.aiSuggestedCategoryName,
-          aiConfidence: state.aiConfidence,
-        ));
+        await queue.enqueue(
+          PendingSyncEntry(
+            txId: tx.id,
+            kind: kind,
+            amount: amount,
+            category: effectiveCategory,
+            budgetId: budgetId,
+            occurredAt: state.date,
+            description: state.note.isEmpty ? null : state.note,
+            customCategoryName: customName,
+            aiSuggestedCategoryName: state.aiSuggestedCategoryName,
+            aiConfidence: state.aiConfidence,
+          ),
+        );
       }
 
       // Update streak only on save.
@@ -301,6 +328,12 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       ref.invalidate(weekSummaryProvider);
       ref.invalidate(monthSummaryProvider);
       ref.invalidate(budgetSummaryProvider);
+      ref.invalidate(
+        budgetsForPeriodProvider((
+          month: state.date.month,
+          year: state.date.year,
+        )),
+      );
 
       state = state.copyWith(
         isSaving: false,

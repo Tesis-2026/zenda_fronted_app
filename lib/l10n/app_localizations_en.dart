@@ -458,7 +458,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txNoBudgetsHint =>
-      'You don\'t have budgets yet. Create one to start recording.';
+      'No budgets found for the selected date. Create one or change the expense date.';
 
   @override
   String get txAddButton => '+ Add';

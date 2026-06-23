@@ -25,8 +25,16 @@ int _isoWeekNumber(DateTime date) {
   if (woy > 52) {
     // Check whether week 53 is valid for this year (Dec 28 is always in last week).
     final dec28 = DateTime(date.year, 12, 28);
-    final dec28Woy = ((dec28.difference(DateTime(dec28.year, 1, 1)).inDays + 1 - dec28.weekday + 10) / 7).floor();
-    if (woy > dec28Woy) return 1; // Beyond last valid week → week 1 of next year.
+    final dec28Woy =
+        ((dec28.difference(DateTime(dec28.year, 1, 1)).inDays +
+                    1 -
+                    dec28.weekday +
+                    10) /
+                7)
+            .floor();
+    if (woy > dec28Woy) {
+      return 1; // Beyond last valid week → week 1 of next year.
+    }
   }
   return woy;
 }
@@ -42,10 +50,9 @@ final daySummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
 
 final weekSummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
   final now = DateTime.now();
-  return ref.read(insightsApiServiceProvider).getWeekSummary(
-        year: now.year,
-        week: _isoWeekNumber(now),
-      );
+  return ref
+      .read(insightsApiServiceProvider)
+      .getWeekSummary(year: now.year, week: _isoWeekNumber(now));
 });
 
 final monthSummaryProvider = FutureProvider.autoDispose<PeriodSummary>((ref) {
@@ -68,8 +75,9 @@ class BudgetTotals {
   double get available => total - spent;
 }
 
-final budgetSummaryProvider =
-    FutureProvider.autoDispose<BudgetTotals>((ref) async {
+final budgetSummaryProvider = FutureProvider.autoDispose<BudgetTotals>((
+  ref,
+) async {
   final now = DateTime.now();
   final budgets = await ref
       .read(budgetServiceProvider)
@@ -84,20 +92,37 @@ final budgetSummaryProvider =
 });
 
 /// The user's budgets for the current month — used as the required selector when
-/// registering a transaction (which budget the money comes from / goes to).
-final currentMonthBudgetsProvider =
-    FutureProvider.autoDispose<List<Budget>>((ref) async {
+typedef BudgetPeriod = ({int month, int year});
+
+/// The user's budgets for a specific month/year. Transaction creation uses the
+/// expense date, not the device's current date, so backdated expenses can pick
+/// the right budget period.
+final budgetsForPeriodProvider = FutureProvider.autoDispose
+    .family<List<Budget>, BudgetPeriod>((ref, period) async {
+      return ref
+          .read(budgetServiceProvider)
+          .getAll(month: period.month, year: period.year);
+    });
+
+/// The user's budgets for the current month.
+final currentMonthBudgetsProvider = FutureProvider.autoDispose<List<Budget>>((
+  ref,
+) async {
   final now = DateTime.now();
-  return ref
-      .read(budgetServiceProvider)
-      .getAll(month: now.month, year: now.year);
+  return ref.watch(
+    budgetsForPeriodProvider((month: now.month, year: now.year)).future,
+  );
 });
 
-final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>((ref) async {
-  return ref.watch(transactionsRepositoryProvider).getTransactions();
-});
+final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>(
+  (ref) async {
+    return ref.watch(transactionsRepositoryProvider).getTransactions();
+  },
+);
 
-final streakStateProvider = FutureProvider.autoDispose<StreakState>((ref) async {
+final streakStateProvider = FutureProvider.autoDispose<StreakState>((
+  ref,
+) async {
   return ref.watch(streakRepositoryProvider).getStreak();
 });
 
@@ -137,7 +162,8 @@ final budgetBreakdownProvider = Provider<BudgetBreakdown503020>((ref) {
   double aho = 0;
 
   for (final item in summary.topCategories) {
-    final category = categoryFromApiName(item.name) ?? TransactionCategory.otros;
+    final category =
+        categoryFromApiName(item.name) ?? TransactionCategory.otros;
     switch (bucketForCategory(category)) {
       case Bucket503020.necesidad:
         nec += item.amount;
@@ -167,10 +193,9 @@ final recommendationsProvider = FutureProvider<List<Recommendation>>((ref) {
 });
 
 final aiAdviceProvider = Provider.family<String, AppLocalizations>((ref, l10n) {
-  final recs = ref.watch(recommendationsProvider).maybeWhen(
-        data: (list) => list,
-        orElse: () => const <Recommendation>[],
-      );
+  final recs = ref
+      .watch(recommendationsProvider)
+      .maybeWhen(data: (list) => list, orElse: () => const <Recommendation>[]);
 
   if (recs.isNotEmpty) {
     final r = recs.first;

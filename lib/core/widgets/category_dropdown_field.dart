@@ -121,6 +121,20 @@ class CategoryDropdownField<T> extends StatelessWidget {
                 ),
               ),
             ),
+            if (hasValue && selected.trailing != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                selected.trailing!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textMuted,
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             Icon(Icons.expand_more_rounded, size: 20, color: colors.textMuted),
           ],
         ),
@@ -171,10 +185,7 @@ class _CategoryPickerSheet<T> extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SheetHeader(
-            title: title,
-            onClose: () => Navigator.of(context).pop(),
-          ),
+          SheetHeader(title: title, onClose: () => Navigator.of(context).pop()),
           const SizedBox(height: 12),
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: maxHeight),
