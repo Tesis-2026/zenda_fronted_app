@@ -22,6 +22,14 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Zenda usa la camara para escanear boletas y completar un borrador de gasto.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Zenda usa tu galeria para leer imagenes de boletas y completar un borrador de gasto.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Zenda usa el microfono para convertir tu voz en un borrador de transaccion.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Zenda usa reconocimiento de voz para completar tus gastos o ingresos dictados.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

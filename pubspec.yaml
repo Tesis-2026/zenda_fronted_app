@@ -52,6 +52,9 @@ dependencies:
   # Image picker for OCR stub
   image_picker: ^1.2.1
 
+  # Speech recognition for voice transaction drafts
+  speech_to_text: ^7.4.0
+
   # Formatting
   intl: ^0.20.2
 
@@ -63,6 +66,7 @@ dependencies:
 
   # HTTP client for API calls
   http: ^1.2.2
+  http_parser: ^4.0.2
 
   # Connectivity detection for offline sync queue
   connectivity_plus: ^6.0.5

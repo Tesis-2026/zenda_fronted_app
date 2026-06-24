@@ -24,19 +24,24 @@ class MockInsightsApiService extends InsightsApiService {
       DemoData.daySummary;
 
   @override
-  Future<PeriodSummary> getWeekSummary({required int year, required int week}) async =>
-      DemoData.weekSummary;
+  Future<PeriodSummary> getWeekSummary({
+    required int year,
+    required int week,
+  }) async => DemoData.weekSummary;
 
   @override
-  Future<PeriodSummary> getMonthSummary({required int year, required int month}) async =>
-      DemoData.monthSummary;
+  Future<PeriodSummary> getMonthSummary({
+    required int year,
+    required int month,
+  }) async => DemoData.monthSummary;
 
   @override
   Future<ProgressSummary> getProgress() async => DemoData.progressSummary;
 
   @override
-  Future<List<MonthComparisonEntry>> getComparison({required int months}) async =>
-      DemoData.monthComparison;
+  Future<List<MonthComparisonEntry>> getComparison({
+    required int months,
+  }) async => DemoData.monthComparison;
 
   @override
   Future<List<int>> downloadPdfReport({
@@ -183,12 +188,18 @@ class MockBudgetApiService extends BudgetApiService {
       final b = _budgets[idx];
       final newLimit = amountLimit ?? b.amountLimit;
       final updated = Budget(
-        id: b.id, userId: b.userId, categoryId: b.categoryId,
+        id: b.id,
+        userId: b.userId,
+        categoryId: b.categoryId,
         name: name ?? b.name,
-        categoryName: b.categoryName, amountLimit: newLimit,
-        month: b.month, year: b.year, currentSpent: b.currentSpent,
+        categoryName: b.categoryName,
+        amountLimit: newLimit,
+        month: b.month,
+        year: b.year,
+        currentSpent: b.currentSpent,
         percentageUsed: (b.currentSpent / newLimit * 100).clamp(0, 100),
-        createdAt: b.createdAt, updatedAt: DateTime.now().toIso8601String(),
+        createdAt: b.createdAt,
+        updatedAt: DateTime.now().toIso8601String(),
       );
       _budgets[idx] = updated;
       return updated;
@@ -218,7 +229,9 @@ class MockEducationApiService extends EducationApiService {
   Future<void> completeTopic(String id) async {}
 
   @override
-  Future<PersonalizedQuizResult> getPersonalizedQuiz({String language = 'es'}) async {
+  Future<PersonalizedQuizResult> getPersonalizedQuiz({
+    String language = 'es',
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return const PersonalizedQuizResult(
       attemptsRemainingToday: 3,
@@ -226,7 +239,8 @@ class MockEducationApiService extends EducationApiService {
         PersonalizedQuizQuestion(
           id: 'pq-1',
           difficulty: 'Intermedio',
-          text: 'Tu gasto en comida este mes es S/ 116 de un presupuesto de S/ 150 (77%). ¿Qué acción es más efectiva para los 8 días que quedan?',
+          text:
+              'Tu gasto en comida este mes es S/ 116 de un presupuesto de S/ 150 (77%). ¿Qué acción es más efectiva para los 8 días que quedan?',
           options: [
             'Cocinar en casa 3 veces esta semana',
             'Cambiar a un supermercado más barato',
@@ -237,7 +251,8 @@ class MockEducationApiService extends EducationApiService {
         PersonalizedQuizQuestion(
           id: 'pq-2',
           difficulty: 'Principiante',
-          text: 'Tu meta de Fondo de Emergencia está al 28% (S/ 850 de S/ 3 000). Al ritmo actual la alcanzarás en diciembre. ¿Qué te llevaría a alcanzarla 3 meses antes?',
+          text:
+              'Tu meta de Fondo de Emergencia está al 28% (S/ 850 de S/ 3 000). Al ritmo actual la alcanzarás en diciembre. ¿Qué te llevaría a alcanzarla 3 meses antes?',
           options: [
             'Aportar S/ 50 extra al mes',
             'Aportar S/ 150 extra al mes',
@@ -248,13 +263,15 @@ class MockEducationApiService extends EducationApiService {
         PersonalizedQuizQuestion(
           id: 'pq-3',
           difficulty: 'Intermedio',
-          text: 'Tienes una tarjeta de crédito Visa con S/ 1 150 disponibles. Tu tasa de utilización actual es de aproximadamente 23%. ¿Cuál es la utilización máxima recomendada para proteger tu score crediticio?',
+          text:
+              'Tienes una tarjeta de crédito Visa con S/ 1 150 disponibles. Tu tasa de utilización actual es de aproximadamente 23%. ¿Cuál es la utilización máxima recomendada para proteger tu score crediticio?',
           options: ['10%', '30%', '50%', '70%'],
         ),
         PersonalizedQuizQuestion(
           id: 'pq-4',
           difficulty: 'Principiante',
-          text: 'Mirando tu presupuesto de mayo: ingreso S/ 1 200, gastos S/ 481, neto S/ 719. ¿Qué porcentaje de tu ingreso estás ahorrando?',
+          text:
+              'Mirando tu presupuesto de mayo: ingreso S/ 1 200, gastos S/ 481, neto S/ 719. ¿Qué porcentaje de tu ingreso estás ahorrando?',
           options: ['30%', '40%', '50%', '60%'],
         ),
       ],
@@ -306,8 +323,7 @@ class MockUserApiService extends UserApiService {
     FinancialLiteracyLevel? financialLiteracyLevel,
     bool? profileCompleted,
     String? currency,
-  }) async =>
-      DemoData.user;
+  }) async => DemoData.user;
 }
 
 class MockQuizApiService extends QuizApiService {
@@ -316,13 +332,15 @@ class MockQuizApiService extends QuizApiService {
     await Future.delayed(const Duration(milliseconds: 400));
     final entries = DemoData.quizData[topicId] ?? DemoData.quizData['topic-1']!;
     return entries
-        .map((e) => QuizQuestion(
-              id: e.id,
-              difficulty: e.difficulty,
-              text: e.text,
-              options: List<String>.from(e.options),
-              explanation: e.explanation,
-            ))
+        .map(
+          (e) => QuizQuestion(
+            id: e.id,
+            difficulty: e.difficulty,
+            text: e.text,
+            options: List<String>.from(e.options),
+            explanation: e.explanation,
+          ),
+        )
         .toList();
   }
 
@@ -340,11 +358,13 @@ class MockQuizApiService extends QuizApiService {
       final correctAnswer = entry.options[entry.correctIndex];
       final isCorrect = given == correctAnswer;
       if (isCorrect) correct++;
-      feedback.add(QuizFeedback(
-        questionId: entry.id,
-        correct: isCorrect,
-        correctAnswer: correctAnswer,
-      ));
+      feedback.add(
+        QuizFeedback(
+          questionId: entry.id,
+          correct: isCorrect,
+          correctAnswer: correctAnswer,
+        ),
+      );
     }
     final total = entries.length;
     final score = total > 0 ? ((correct / total) * 100).round() : 0;
@@ -352,7 +372,11 @@ class MockQuizApiService extends QuizApiService {
       score: score,
       correctCount: correct,
       totalCount: total,
-      level: score >= 80 ? 'Avanzado' : score >= 50 ? 'Intermedio' : 'Principiante',
+      level: score >= 80
+          ? 'Avanzado'
+          : score >= 50
+          ? 'Intermedio'
+          : 'Principiante',
       feedback: feedback,
     );
   }
@@ -411,13 +435,15 @@ class MockSurveysApiService extends SurveysApiService {
         const SurveyQuestion(
           id: 'sus-4',
           order: 4,
-          text: 'Necesitaría el apoyo de una persona técnica para poder usar esta aplicación.',
+          text:
+              'Necesitaría el apoyo de una persona técnica para poder usar esta aplicación.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
           id: 'sus-5',
           order: 5,
-          text: 'Encontré que las distintas funciones de la aplicación estaban bien integradas.',
+          text:
+              'Encontré que las distintas funciones de la aplicación estaban bien integradas.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
@@ -429,7 +455,8 @@ class MockSurveysApiService extends SurveysApiService {
         const SurveyQuestion(
           id: 'sus-7',
           order: 7,
-          text: 'Imagino que la mayoría de las personas aprenderían a usar esta aplicación rápidamente.',
+          text:
+              'Imagino que la mayoría de las personas aprenderían a usar esta aplicación rápidamente.',
           options: ['1', '2', '3', '4', '5'],
         ),
         const SurveyQuestion(
@@ -447,7 +474,8 @@ class MockSurveysApiService extends SurveysApiService {
         const SurveyQuestion(
           id: 'sus-10',
           order: 10,
-          text: 'Necesité aprender muchas cosas antes de poder usar esta aplicación.',
+          text:
+              'Necesité aprender muchas cosas antes de poder usar esta aplicación.',
           options: ['1', '2', '3', '4', '5'],
         ),
       ],
@@ -460,10 +488,10 @@ class MockSurveysApiService extends SurveysApiService {
 
   @override
   Future<SurveyComparison> getComparison() async => const SurveyComparison(
-        preScore: 72.0,
-        postScore: 85.0,
-        improvementPercentage: 18.1,
-      );
+    preScore: 72.0,
+    postScore: 85.0,
+    improvementPercentage: 18.1,
+  );
 }
 
 class MockAiChatApiService extends AiChatApiService {
@@ -499,7 +527,9 @@ class MockAiChatApiService extends AiChatApiService {
     if (input.contains('budget') || input.contains('presupuesto')) {
       return DemoData.aiChatResponses['budget']!;
     }
-    if (input.contains('sav') || input.contains('ahorro') || input.contains('save')) {
+    if (input.contains('sav') ||
+        input.contains('ahorro') ||
+        input.contains('save')) {
       return DemoData.aiChatResponses['save']!;
     }
     if (input.contains('goal') || input.contains('meta')) {
@@ -508,13 +538,21 @@ class MockAiChatApiService extends AiChatApiService {
     if (input.contains('invest') || input.contains('invert')) {
       return DemoData.aiChatResponses['invest']!;
     }
-    if (input.contains('spend') || input.contains('gast') || input.contains('expense')) {
+    if (input.contains('spend') ||
+        input.contains('gast') ||
+        input.contains('expense')) {
       return DemoData.aiChatResponses['spend']!;
     }
-    if (input.contains('debt') || input.contains('credit') || input.contains('card') || input.contains('deuda')) {
+    if (input.contains('debt') ||
+        input.contains('credit') ||
+        input.contains('card') ||
+        input.contains('deuda')) {
       return DemoData.aiChatResponses['debt']!;
     }
-    if (input.contains('analiz') || input.contains('analys') || input.contains('overview') || input.contains('summary')) {
+    if (input.contains('analiz') ||
+        input.contains('analys') ||
+        input.contains('overview') ||
+        input.contains('summary')) {
       return DemoData.aiChatResponses['analyze']!;
     }
     return DemoData.aiChatResponses['default']!;
@@ -534,6 +572,7 @@ class MockTransactionApiService extends TransactionApiService {
     String? from,
     String? to,
     String? categoryId,
+    String? accountId,
   }) async {
     if (type == null) return List.unmodifiable(_txs);
     return _txs.where((tx) {
@@ -549,6 +588,7 @@ class MockTransactionApiService extends TransactionApiService {
     required TransactionCategory category,
     required DateTime occurredAt,
     String? budgetId,
+    String? accountId,
     String? description,
     String? customCategoryName,
     String? aiSuggestedCategoryName,
@@ -566,6 +606,7 @@ class MockTransactionApiService extends TransactionApiService {
     required TransactionCategory category,
     required DateTime occurredAt,
     String? description,
+    String? accountId,
   }) async {}
 
   @override
@@ -590,46 +631,76 @@ class MockTransactionApiService extends TransactionApiService {
   }
 
   TransactionCategory? _matchCategory(String d) {
-    if (d.contains('food') || d.contains('lunch') || d.contains('dinner') ||
-        d.contains('breakfast') || d.contains('groceries') ||
-        d.contains('supermarket') || d.contains('restaurant') ||
-        d.contains('cafe') || d.contains('comida')) {
+    if (d.contains('food') ||
+        d.contains('lunch') ||
+        d.contains('dinner') ||
+        d.contains('breakfast') ||
+        d.contains('groceries') ||
+        d.contains('supermarket') ||
+        d.contains('restaurant') ||
+        d.contains('cafe') ||
+        d.contains('comida')) {
       return TransactionCategory.comida;
     }
-    if (d.contains('uber') || d.contains('taxi') || d.contains('bus') ||
-        d.contains('transport') || d.contains('metro') || d.contains('ride')) {
+    if (d.contains('uber') ||
+        d.contains('taxi') ||
+        d.contains('bus') ||
+        d.contains('transport') ||
+        d.contains('metro') ||
+        d.contains('ride')) {
       return TransactionCategory.transporte;
     }
-    if (d.contains('rent') || d.contains('housing') || d.contains('alquiler') ||
-        d.contains('apartment') || d.contains('flat')) {
+    if (d.contains('rent') ||
+        d.contains('housing') ||
+        d.contains('alquiler') ||
+        d.contains('apartment') ||
+        d.contains('flat')) {
       return TransactionCategory.vivienda;
     }
-    if (d.contains('internet') || d.contains('electricity') ||
-        d.contains('water') || d.contains('bill') ||
-        d.contains('utility') || d.contains('phone')) {
+    if (d.contains('internet') ||
+        d.contains('electricity') ||
+        d.contains('water') ||
+        d.contains('bill') ||
+        d.contains('utility') ||
+        d.contains('phone')) {
       return TransactionCategory.servicios;
     }
-    if (d.contains('doctor') || d.contains('gym') || d.contains('pharmacy') ||
-        d.contains('health') || d.contains('medicine') ||
+    if (d.contains('doctor') ||
+        d.contains('gym') ||
+        d.contains('pharmacy') ||
+        d.contains('health') ||
+        d.contains('medicine') ||
         d.contains('hospital')) {
       return TransactionCategory.salud;
     }
-    if (d.contains('cinema') || d.contains('movie') || d.contains('concert') ||
-        d.contains('entertainment') || d.contains('bar') ||
+    if (d.contains('cinema') ||
+        d.contains('movie') ||
+        d.contains('concert') ||
+        d.contains('entertainment') ||
+        d.contains('bar') ||
         d.contains('club')) {
       return TransactionCategory.ocio;
     }
-    if (d.contains('clothes') || d.contains('shopping') ||
-        d.contains('amazon') || d.contains('store') || d.contains('mall')) {
+    if (d.contains('clothes') ||
+        d.contains('shopping') ||
+        d.contains('amazon') ||
+        d.contains('store') ||
+        d.contains('mall')) {
       return TransactionCategory.compras;
     }
-    if (d.contains('netflix') || d.contains('spotify') ||
-        d.contains('subscription') || d.contains('prime') ||
-        d.contains('hbo') || d.contains('disney')) {
+    if (d.contains('netflix') ||
+        d.contains('spotify') ||
+        d.contains('subscription') ||
+        d.contains('prime') ||
+        d.contains('hbo') ||
+        d.contains('disney')) {
       return TransactionCategory.suscripciones;
     }
-    if (d.contains('coffee') || d.contains('snack') || d.contains('dessert') ||
-        d.contains('candy') || d.contains('ice cream')) {
+    if (d.contains('coffee') ||
+        d.contains('snack') ||
+        d.contains('dessert') ||
+        d.contains('candy') ||
+        d.contains('ice cream')) {
       return TransactionCategory.antojos;
     }
     if (d.contains('saving') || d.contains('ahorro') || d.contains('invest')) {
@@ -643,16 +714,66 @@ class MockCategoryApiService extends CategoryApiService {
   static final _custom = <CategoryModel>[];
 
   static const _system = <CategoryModel>[
-    CategoryModel(id: 'cat-food', name: 'Comida', type: CategoryType.system, icon: 'food'),
-    CategoryModel(id: 'cat-transport', name: 'Transporte', type: CategoryType.system, icon: 'transport'),
-    CategoryModel(id: 'cat-housing', name: 'Vivienda', type: CategoryType.system, icon: 'housing'),
-    CategoryModel(id: 'cat-utilities', name: 'Servicios', type: CategoryType.system, icon: 'utilities'),
-    CategoryModel(id: 'cat-health', name: 'Salud', type: CategoryType.system, icon: 'health'),
-    CategoryModel(id: 'cat-entertainment', name: 'Entretenimiento', type: CategoryType.system, icon: 'entertainment'),
-    CategoryModel(id: 'cat-shopping', name: 'Compras', type: CategoryType.system, icon: 'shopping'),
-    CategoryModel(id: 'cat-subscriptions', name: 'Suscripciones', type: CategoryType.system, icon: 'subscriptions'),
-    CategoryModel(id: 'cat-savings', name: 'Ahorro', type: CategoryType.system, icon: 'savings'),
-    CategoryModel(id: 'cat-other', name: 'Otros', type: CategoryType.system, icon: 'other'),
+    CategoryModel(
+      id: 'cat-food',
+      name: 'Comida',
+      type: CategoryType.system,
+      icon: 'food',
+    ),
+    CategoryModel(
+      id: 'cat-transport',
+      name: 'Transporte',
+      type: CategoryType.system,
+      icon: 'transport',
+    ),
+    CategoryModel(
+      id: 'cat-housing',
+      name: 'Vivienda',
+      type: CategoryType.system,
+      icon: 'housing',
+    ),
+    CategoryModel(
+      id: 'cat-utilities',
+      name: 'Servicios',
+      type: CategoryType.system,
+      icon: 'utilities',
+    ),
+    CategoryModel(
+      id: 'cat-health',
+      name: 'Salud',
+      type: CategoryType.system,
+      icon: 'health',
+    ),
+    CategoryModel(
+      id: 'cat-entertainment',
+      name: 'Entretenimiento',
+      type: CategoryType.system,
+      icon: 'entertainment',
+    ),
+    CategoryModel(
+      id: 'cat-shopping',
+      name: 'Compras',
+      type: CategoryType.system,
+      icon: 'shopping',
+    ),
+    CategoryModel(
+      id: 'cat-subscriptions',
+      name: 'Suscripciones',
+      type: CategoryType.system,
+      icon: 'subscriptions',
+    ),
+    CategoryModel(
+      id: 'cat-savings',
+      name: 'Ahorro',
+      type: CategoryType.system,
+      icon: 'savings',
+    ),
+    CategoryModel(
+      id: 'cat-other',
+      name: 'Otros',
+      type: CategoryType.system,
+      icon: 'other',
+    ),
   ];
 
   @override
@@ -673,14 +794,19 @@ class MockCategoryApiService extends CategoryApiService {
   Future<CategoryModel> rename(String id, String name) async {
     final idx = _custom.indexWhere((c) => c.id == id);
     if (idx != -1) {
-      _custom[idx] = CategoryModel(id: id, name: name, type: CategoryType.custom);
+      _custom[idx] = CategoryModel(
+        id: id,
+        name: name,
+        type: CategoryType.custom,
+      );
       return _custom[idx];
     }
     return CategoryModel(id: id, name: name, type: CategoryType.custom);
   }
 
   @override
-  Future<void> delete(String id) async => _custom.removeWhere((c) => c.id == id);
+  Future<void> delete(String id) async =>
+      _custom.removeWhere((c) => c.id == id);
 }
 
 class MockNotificationsApiService extends NotificationsApiService {

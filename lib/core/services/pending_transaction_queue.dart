@@ -13,6 +13,8 @@ class PendingSyncEntry {
   final TransactionCategory category;
   final DateTime occurredAt;
   final String? budgetId;
+  final String? accountId;
+  final String? toAccountId;
   final String? description;
   final String? customCategoryName;
   // AI provenance — preserved across the offline queue so retries still
@@ -27,6 +29,8 @@ class PendingSyncEntry {
     required this.category,
     required this.occurredAt,
     this.budgetId,
+    this.accountId,
+    this.toAccountId,
     this.description,
     this.customCategoryName,
     this.aiSuggestedCategoryName,
@@ -40,6 +44,8 @@ class PendingSyncEntry {
     'category': category.name,
     'occurredAt': occurredAt.toUtc().toIso8601String(),
     if (budgetId != null) 'budgetId': budgetId,
+    if (accountId != null) 'accountId': accountId,
+    if (toAccountId != null) 'toAccountId': toAccountId,
     if (description != null) 'description': description,
     if (customCategoryName != null) 'customCategoryName': customCategoryName,
     if (aiSuggestedCategoryName != null)
@@ -55,6 +61,8 @@ class PendingSyncEntry {
       category: TransactionCategory.values.byName(json['category'] as String),
       occurredAt: DateTime.parse(json['occurredAt'] as String),
       budgetId: json['budgetId'] as String?,
+      accountId: json['accountId'] as String?,
+      toAccountId: json['toAccountId'] as String?,
       description: json['description'] as String?,
       customCategoryName: json['customCategoryName'] as String?,
       aiSuggestedCategoryName: json['aiSuggestedCategoryName'] as String?,
@@ -73,7 +81,11 @@ class PendingTransactionQueue {
     if (decoded is! List) return [];
     return decoded
         .whereType<Map>()
-        .map((m) => PendingSyncEntry.fromJson(m.map((k, v) => MapEntry(k.toString(), v))))
+        .map(
+          (m) => PendingSyncEntry.fromJson(
+            m.map((k, v) => MapEntry(k.toString(), v)),
+          ),
+        )
         .toList();
   }
 

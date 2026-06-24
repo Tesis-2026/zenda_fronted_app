@@ -5,8 +5,11 @@ import '../core/services/local_kv_store.dart';
 import '../core/services/transactions_repository.dart';
 import '../core/services/streak_repository.dart';
 import '../core/services/transaction_api_service.dart';
+import '../core/services/account_api_service.dart';
 import '../core/services/category_api_service.dart';
 import '../core/services/user_api_service.dart';
+import '../core/services/ocr_service.dart';
+import '../core/services/voice_transaction_service.dart';
 import '../core/services/pending_transaction_queue.dart';
 import '../core/services/sync_service.dart';
 import '../core/services/fcm_service.dart';
@@ -27,6 +30,10 @@ final transactionApiServiceProvider = Provider<TransactionApiService>((ref) {
   return TransactionApiService();
 });
 
+final accountApiServiceProvider = Provider<AccountApiService>((ref) {
+  return AccountApiService();
+});
+
 final categoryApiServiceProvider = Provider<CategoryApiService>((ref) {
   return CategoryApiService();
 });
@@ -35,7 +42,19 @@ final notificationsServiceProvider = Provider<NotificationsApiService>((ref) {
   return NotificationsApiService();
 });
 
-final pendingTransactionQueueProvider = Provider<PendingTransactionQueue>((ref) {
+final ocrServiceProvider = Provider<OcrService>((ref) {
+  return ApiOcrService();
+});
+
+final voiceTransactionServiceProvider = Provider<VoiceTransactionService>((
+  ref,
+) {
+  return ApiVoiceTransactionService();
+});
+
+final pendingTransactionQueueProvider = Provider<PendingTransactionQueue>((
+  ref,
+) {
   return PendingTransactionQueue();
 });
 
@@ -78,8 +97,8 @@ class NumberFormatNotifier extends AsyncNotifier<NumberFormatPref> {
 
 final numberFormatProvider =
     AsyncNotifierProvider<NumberFormatNotifier, NumberFormatPref>(
-  NumberFormatNotifier.new,
-);
+      NumberFormatNotifier.new,
+    );
 
 // ── FCM service provider (Phase 11) ──────────────────────────────────
 // Singleton wrapping firebase-admin on the device. The real instance is

@@ -55,7 +55,8 @@ abstract final class CategoryUtils {
       'other' => 'Otros',
       'scholarship' => 'Beca',
       'part-time work' => 'Trabajo part-time',
-      'family' => 'Familia',
+      'part time work' => 'Trabajo part-time',
+      'family' => 'Apoyo familiar',
       'freelance' => 'Freelance',
       _ => name,
     };
@@ -86,6 +87,15 @@ abstract final class CategoryUtils {
       'cravings' || 'antojos' => Icons.icecream_rounded,
       'savings' || 'ahorro' => Icons.savings_rounded,
       'education' || 'educación' || 'educacion' => Icons.school_rounded,
+      'scholarship' || 'beca' => Icons.school_rounded,
+      'part-time work' ||
+      'part time work' ||
+      'trabajoparttime' ||
+      'trabajo part time' => Icons.work_rounded,
+      'family' ||
+      'familia' ||
+      'apoyo familiar' => Icons.family_restroom_rounded,
+      'freelance' => Icons.laptop_mac_rounded,
       'other' || 'otros' => Icons.category_rounded,
       // Unknown name (a custom category) → single default icon.
       _ => customCategoryIcon,
@@ -141,12 +151,20 @@ abstract final class CategoryUtils {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: bgColorForCategory(categoryName, isIncome: isIncome, isCustom: isCustom),
+        color: bgColorForCategory(
+          categoryName,
+          isIncome: isIncome,
+          isCustom: isCustom,
+        ),
         borderRadius: BorderRadius.circular(size * 0.32),
       ),
       child: Icon(
         iconForCategory(categoryName, iconKey: iconKey, isCustom: isCustom),
-        color: iconColorForCategory(categoryName, isIncome: isIncome, isCustom: isCustom),
+        color: iconColorForCategory(
+          categoryName,
+          isIncome: isIncome,
+          isCustom: isCustom,
+        ),
         size: iconSize,
       ),
     );
