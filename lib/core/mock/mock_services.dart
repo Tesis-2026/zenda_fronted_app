@@ -277,6 +277,71 @@ class MockEducationApiService extends EducationApiService {
       ],
     );
   }
+
+  @override
+  Future<PersonalizedLearningPath> getPersonalizedLearningPath({
+    String language = 'es',
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 450));
+    final topics = DemoData.educationTopics;
+    final steps = <LearningPathStep>[
+      if (topics.isNotEmpty)
+        LearningPathStep(
+          id: 'topic_${topics[0].id}',
+          kind: 'topic',
+          topicId: topics[0].id,
+          title: topics[0].title,
+          reason: 'Empieza por ordenar tus gastos y prioridades mensuales.',
+          focus: 'Presupuesto y control de gastos.',
+          difficulty: topics[0].difficulty,
+          status: topics[0].isCompleted
+              ? 'completed'
+              : topics[0].isRead
+              ? 'read'
+              : 'pending',
+          order: 1,
+          estimatedMinutes: 8,
+          quizMode: 'app_topic_quiz',
+        ),
+      const LearningPathStep(
+        id: 'personalized_quiz_2',
+        kind: 'personalized_quiz',
+        title: 'Quiz personalizado con IA',
+        reason: 'Practica con preguntas adaptadas a tus habitos.',
+        focus: 'Ingresos, gastos y metas reales.',
+        difficulty: 'INTERMEDIATE',
+        status: 'pending',
+        order: 2,
+        estimatedMinutes: 6,
+        quizMode: 'ai_personalized_quiz',
+      ),
+      if (topics.length > 1)
+        LearningPathStep(
+          id: 'topic_${topics[1].id}',
+          kind: 'topic',
+          topicId: topics[1].id,
+          title: topics[1].title,
+          reason: 'Refuerza habitos para ahorrar con constancia.',
+          focus: 'Metas y fondo de emergencia.',
+          difficulty: topics[1].difficulty,
+          status: topics[1].isCompleted
+              ? 'completed'
+              : topics[1].isRead
+              ? 'read'
+              : 'pending',
+          order: 3,
+          estimatedMinutes: 7,
+          quizMode: 'app_topic_quiz',
+        ),
+    ];
+
+    return PersonalizedLearningPath(
+      generatedAt: DateTime.now(),
+      source: 'fallback',
+      summary: 'Ruta demo con temas del app y un quiz personalizado.',
+      steps: steps,
+    );
+  }
 }
 
 class MockChallengesApiService extends ChallengesApiService {
