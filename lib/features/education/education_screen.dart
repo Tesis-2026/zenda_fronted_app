@@ -100,7 +100,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
               index: _tab,
               children: [
                 _buildLearnTab(context),
-                const LearningPathScreen(embedded: true),
+                LearningPathScreen(embedded: true, active: _tab == 1),
                 const ChallengesScreen(embedded: true),
                 const BadgesScreen(embedded: true),
               ],

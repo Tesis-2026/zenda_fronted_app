@@ -9,38 +9,51 @@ class KindToggle extends StatelessWidget {
     required this.onChanged,
     required this.expenseLabel,
     required this.incomeLabel,
+    this.transferLabel,
   });
 
   final TransactionKind selected;
   final ValueChanged<TransactionKind> onChanged;
   final String expenseLabel;
   final String incomeLabel;
+  final String? transferLabel;
 
   @override
   Widget build(BuildContext context) {
+    final options = [
+      (
+        kind: TransactionKind.expense,
+        label: expenseLabel,
+        color: const Color(0xFFEF4444),
+      ),
+      (
+        kind: TransactionKind.income,
+        label: incomeLabel,
+        color: const Color(0xFF34D399),
+      ),
+      if (transferLabel != null)
+        (
+          kind: TransactionKind.transfer,
+          label: transferLabel!,
+          color: const Color(0xFF2563EB),
+        ),
+    ];
+
     return Row(
       children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () => onChanged(TransactionKind.expense),
-            child: _KindChip(
-              label: expenseLabel,
-              isSelected: selected == TransactionKind.expense,
-              activeColor: const Color(0xFFEF4444),
+        for (final option in options) ...[
+          Expanded(
+            child: GestureDetector(
+              onTap: () => onChanged(option.kind),
+              child: _KindChip(
+                label: option.label,
+                isSelected: selected == option.kind,
+                activeColor: option.color,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: GestureDetector(
-            onTap: () => onChanged(TransactionKind.income),
-            child: _KindChip(
-              label: incomeLabel,
-              isSelected: selected == TransactionKind.income,
-              activeColor: const Color(0xFF34D399),
-            ),
-          ),
-        ),
+          if (option != options.last) const SizedBox(width: 10),
+        ],
       ],
     );
   }

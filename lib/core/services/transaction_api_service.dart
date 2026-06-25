@@ -14,25 +14,79 @@ String categoryToApiName(TransactionCategory c) {
     TransactionCategory.suscripciones => 'Subscriptions',
     TransactionCategory.antojos => 'Cravings',
     TransactionCategory.ahorro => 'Savings',
+    TransactionCategory.beca => 'Scholarship',
+    TransactionCategory.trabajoPartTime => 'Part-time work',
+    TransactionCategory.familia => 'Family',
+    TransactionCategory.freelance => 'Freelance',
     TransactionCategory.otros => 'Other',
   };
 }
 
 TransactionCategory? categoryFromApiName(String? name) {
   if (name == null) return null;
-  return switch (name.toLowerCase()) {
-    'food' => TransactionCategory.comida,
-    'transportation' => TransactionCategory.transporte,
-    'housing' => TransactionCategory.vivienda,
-    'utilities' => TransactionCategory.servicios,
-    'health' => TransactionCategory.salud,
-    'entertainment' => TransactionCategory.ocio,
-    'shopping' => TransactionCategory.compras,
-    'subscriptions' => TransactionCategory.suscripciones,
-    'cravings' => TransactionCategory.antojos,
-    'savings' => TransactionCategory.ahorro,
+  return switch (_normalizeCategoryName(name)) {
+    'food' ||
+    'comida' ||
+    'alimentacion' ||
+    'alimentos' => TransactionCategory.comida,
+    'transportation' ||
+    'transport' ||
+    'transporte' ||
+    'movilidad' => TransactionCategory.transporte,
+    'housing' || 'vivienda' || 'alquiler' => TransactionCategory.vivienda,
+    'utilities' ||
+    'servicios' ||
+    'servicios basicos' => TransactionCategory.servicios,
+    'health' || 'salud' => TransactionCategory.salud,
+    'entertainment' || 'entretenimiento' || 'ocio' => TransactionCategory.ocio,
+    'shopping' || 'compras' || 'ropa' => TransactionCategory.compras,
+    'subscriptions' ||
+    'suscripciones' ||
+    'subscripciones' => TransactionCategory.suscripciones,
+    'cravings' ||
+    'antojos' ||
+    'snack' ||
+    'snacks' ||
+    'bebida' ||
+    'bebidas' => TransactionCategory.antojos,
+    'savings' || 'ahorro' || 'ahorros' => TransactionCategory.ahorro,
+    'scholarship' || 'beca' => TransactionCategory.beca,
+    'part time work' ||
+    'part-time work' ||
+    'trabajo part time' ||
+    'trabajo medio tiempo' ||
+    'sueldo' ||
+    'salario' => TransactionCategory.trabajoPartTime,
+    'family' ||
+    'familia' ||
+    'apoyo familiar' ||
+    'mesada' => TransactionCategory.familia,
+    'freelance' || 'honorarios' || 'cachuelo' => TransactionCategory.freelance,
     _ => TransactionCategory.otros,
   };
+}
+
+String _normalizeCategoryName(String value) {
+  const accents = {
+    'á': 'a',
+    'é': 'e',
+    'í': 'i',
+    'ó': 'o',
+    'ú': 'u',
+    'Á': 'a',
+    'É': 'e',
+    'Í': 'i',
+    'Ó': 'o',
+    'Ú': 'u',
+  };
+  return value
+      .split('')
+      .map((char) => accents[char] ?? char)
+      .join()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 typedef CreateTransactionResult = ({
@@ -76,6 +130,7 @@ class TransactionApiService {
     required TransactionCategory category,
     required DateTime occurredAt,
     String? budgetId,
+    String? accountId,
     String? description,
     String? customCategoryName,
     // AI provenance (Integration fix #4). When the user accepted an AI
@@ -85,6 +140,7 @@ class TransactionApiService {
     // or AI_OVERRIDDEN (user later changed the category).
     String? aiSuggestedCategoryName,
     double? aiConfidence,
+
     /// Stable key for safe retries (Integration fix #6). Pass the local
     /// transaction id so any automatic retry (offline-queue flush,
     /// network blip) replays the cached response instead of creating
@@ -114,6 +170,9 @@ class TransactionApiService {
     if (budgetId != null) {
       body['budgetId'] = budgetId;
     }
+    if (accountId != null && accountId.isNotEmpty) {
+      body['accountId'] = accountId;
+    }
 
     // suggestedCategoryId + aiConfidence MUST be sent together (the
     // backend rejects with 400 when only one is present). We can only
@@ -136,15 +195,19 @@ class TransactionApiService {
     );
 
     final rawChallenges = json['newlyCompletedChallenges'];
-    final completedChallenges =
-        rawChallenges is List ? rawChallenges.cast<String>() : <String>[];
+    final completedChallenges = rawChallenges is List
+        ? rawChallenges.cast<String>()
+        : <String>[];
 
     final rawAnomaly = json['anomalyAlert'];
     final anomalyAlert = rawAnomaly is Map
         ? rawAnomaly['categoryName'] as String?
         : null;
 
-    return (completedChallenges: completedChallenges, anomalyAlert: anomalyAlert);
+    return (
+      completedChallenges: completedChallenges,
+      anomalyAlert: anomalyAlert,
+    );
   }
 
   Future<List<Map<String, dynamic>>> getAll({
@@ -152,12 +215,14 @@ class TransactionApiService {
     String? from,
     String? to,
     String? categoryId,
+    String? accountId,
   }) async {
     final params = <String, String>{};
     if (type != null) params['type'] = type;
     if (from != null) params['from'] = from;
     if (to != null) params['to'] = to;
     if (categoryId != null) params['categoryId'] = categoryId;
+    if (accountId != null) params['accountId'] = accountId;
 
     final query = params.isEmpty
         ? ''
@@ -173,6 +238,7 @@ class TransactionApiService {
     required TransactionCategory category,
     required DateTime occurredAt,
     String? description,
+    String? accountId,
   }) async {
     if (kind == TransactionKind.transfer) return;
 
@@ -191,6 +257,9 @@ class TransactionApiService {
     } else {
       body['newCategoryName'] = apiName;
     }
+    if (accountId != null && accountId.isNotEmpty) {
+      body['accountId'] = accountId;
+    }
 
     await ApiClient.put('/transactions/$id', body);
   }
@@ -204,11 +273,10 @@ class TransactionApiService {
     required double amount,
   }) async {
     try {
-      final json = await ApiClient.post(
-        '/transactions/classify',
-        {'description': description, 'amount': amount},
-        authenticated: true,
-      );
+      final json = await ApiClient.post('/transactions/classify', {
+        'description': description,
+        'amount': amount,
+      }, authenticated: true);
       final name = json['categoryName'] as String?;
       if (name == null) return null;
       final confidence = (json['confidence'] as num?)?.toDouble() ?? 0.0;

@@ -9,8 +9,8 @@ import '../../providers/repositories_providers.dart';
 
 final _preferencesProvider =
     FutureProvider.autoDispose<List<NotificationPreference>>((ref) {
-  return ref.read(notificationsServiceProvider).getPreferences();
-});
+      return ref.read(notificationsServiceProvider).getPreferences();
+    });
 
 class NotificationPreferencesScreen extends ConsumerWidget {
   const NotificationPreferencesScreen({super.key});
@@ -35,7 +35,12 @@ class NotificationPreferencesScreen extends ConsumerWidget {
             NotificationPreference(type: 'CHALLENGE_REMINDER', enabled: false),
             NotificationPreference(type: 'DAILY_REMINDER', enabled: false),
           ];
-          return _PrefsBody(prefs: demoPrefs, ref: ref, l10n: l10n, readonly: true);
+          return _PrefsBody(
+            prefs: demoPrefs,
+            ref: ref,
+            l10n: l10n,
+            readonly: true,
+          );
         },
         data: (prefs) =>
             _PrefsBody(prefs: prefs, ref: ref, l10n: l10n, readonly: false),
@@ -66,7 +71,8 @@ class _PrefsBody extends StatelessWidget {
         // Master toggle card
         Card(
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: SwitchListTile(
             title: Text(
               l10n.notificationsMasterTitle,
@@ -78,10 +84,7 @@ class _PrefsBody extends StatelessWidget {
             ),
             subtitle: Text(
               l10n.notificationsMasterSubtitle,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF6B7280),
-              ),
+              style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
             ),
             value: masterEnabled,
             activeTrackColor: const Color(0xFF34D399),
@@ -112,17 +115,19 @@ class _PrefsBody extends StatelessWidget {
           ),
         ),
         // Individual preference tiles
-        ...prefs.map((pref) => _PreferenceTile(
-              pref: pref,
-              onToggle: readonly
-                  ? (_) async {}
-                  : (enabled) async {
-                      await ref
-                          .read(notificationsServiceProvider)
-                          .updatePreference(pref.type, enabled: enabled);
-                      ref.invalidate(_preferencesProvider);
-                    },
-            )),
+        ...prefs.map(
+          (pref) => _PreferenceTile(
+            pref: pref,
+            onToggle: readonly
+                ? (_) async {}
+                : (enabled) async {
+                    await ref
+                        .read(notificationsServiceProvider)
+                        .updatePreference(pref.type, enabled: enabled);
+                    ref.invalidate(_preferencesProvider);
+                  },
+          ),
+        ),
       ],
     );
   }
@@ -135,6 +140,8 @@ class _PreferenceTile extends StatelessWidget {
 
   IconData _iconForType(String type) {
     switch (type) {
+      case 'TRANSACTION_RECORDED':
+        return Icons.receipt_long_outlined;
       case 'BUDGET_ALERT':
         return Icons.pie_chart_outline;
       case 'ANOMALY_ALERT':
@@ -155,6 +162,8 @@ class _PreferenceTile extends StatelessWidget {
   String _labelForType(BuildContext context, String type) {
     final l10n = context.l10n;
     switch (type) {
+      case 'TRANSACTION_RECORDED':
+        return 'Gasto registrado';
       case 'BUDGET_ALERT':
         return l10n.notificationTypeBudgetAlert;
       case 'ANOMALY_ALERT':
@@ -175,6 +184,8 @@ class _PreferenceTile extends StatelessWidget {
   String _subtitleForType(BuildContext context, String type) {
     final l10n = context.l10n;
     switch (type) {
+      case 'TRANSACTION_RECORDED':
+        return 'Confirmacion al guardar un gasto';
       case 'BUDGET_ALERT':
         return l10n.notificationSubtypeBudgetAlert;
       case 'ANOMALY_ALERT':
@@ -210,10 +221,7 @@ class _PreferenceTile extends StatelessWidget {
       ),
       subtitle: Text(
         _subtitleForType(context, pref.type),
-        style: const TextStyle(
-          fontSize: 12,
-          color: Color(0xFF6B7280),
-        ),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
       ),
       value: pref.enabled,
       activeTrackColor: const Color(0xFF34D399),

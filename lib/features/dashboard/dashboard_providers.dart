@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/budget.dart';
+import '../../core/models/account.dart';
 import '../../core/models/transaction.dart';
 import '../../core/models/breakdown_503020.dart';
 import '../../core/models/summary_models.dart';
@@ -119,6 +120,21 @@ final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>(
     return ref.watch(transactionsRepositoryProvider).getTransactions();
   },
 );
+
+final accountsProvider = FutureProvider.autoDispose<List<FinancialAccount>>((
+  ref,
+) async {
+  return ref.watch(accountApiServiceProvider).getAll();
+});
+
+typedef AccountReportPeriod = ({int month, int year});
+
+final accountReportProvider = FutureProvider.autoDispose
+    .family<AccountReport, AccountReportPeriod>((ref, period) async {
+      return ref
+          .watch(accountApiServiceProvider)
+          .getReport(month: period.month, year: period.year);
+    });
 
 final streakStateProvider = FutureProvider.autoDispose<StreakState>((
   ref,

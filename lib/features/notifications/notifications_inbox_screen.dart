@@ -93,7 +93,11 @@ class _NotificationCard extends StatelessWidget {
                   color: iconColor.withAlpha(30),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(_iconForType(notification.type), size: 20, color: iconColor),
+                child: Icon(
+                  _iconForType(notification.type),
+                  size: 20,
+                  color: iconColor,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -129,7 +133,11 @@ class _NotificationCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       notification.body,
-                      style: TextStyle(fontSize: 13, color: subColor, height: 1.35),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: subColor,
+                        height: 1.35,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -167,7 +175,11 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'No tienes notificaciones',
-              style: TextStyle(fontSize: 15, color: subColor, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 15,
+                color: subColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -217,6 +229,8 @@ class _ErrorState extends StatelessWidget {
 
 IconData _iconForType(String type) {
   switch (type) {
+    case 'TRANSACTION_RECORDED':
+      return Icons.receipt_long_outlined;
     case 'BUDGET_ALERT':
       return Icons.pie_chart_outline;
     case 'ANOMALY_ALERT':
@@ -236,6 +250,8 @@ IconData _iconForType(String type) {
 
 Color _accentForType(String type) {
   switch (type) {
+    case 'TRANSACTION_RECORDED':
+      return const Color(0xFF10B981);
     case 'BUDGET_ALERT':
       return const Color(0xFFF59E0B);
     case 'ANOMALY_ALERT':

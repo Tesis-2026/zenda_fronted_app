@@ -194,8 +194,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage1Title => 'Record your expenses in seconds';
 
   @override
-  String get onboardingPage1Subtitle =>
-      'Log with a tap or scan a receipt (demo).';
+  String get onboardingPage1Subtitle => 'Log with a tap or scan a receipt.';
 
   @override
   String get onboardingPage1Micro => 'Less friction, more control.';
@@ -418,7 +417,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txNewTitle => 'New transaction';
 
   @override
-  String get txScanReceipt => 'Scan receipt (demo)';
+  String get txScanReceipt => 'Scan receipt';
+
+  @override
+  String get txScanReceiptCamera => 'Take photo';
+
+  @override
+  String get txScanReceiptGallery => 'Choose image';
+
+  @override
+  String get txScanningReceipt => 'Reading receipt...';
+
+  @override
+  String get txReceiptApplied => 'Details detected. Review them before saving.';
+
+  @override
+  String get txReceiptScanFailed =>
+      'Could not read the receipt. Please try again.';
+
+  @override
+  String get txVoiceTransaction => 'Dictate';
+
+  @override
+  String get txParsingVoice => 'Preparing draft...';
+
+  @override
+  String get txVoiceSheetTitle => 'Dictate transaction';
+
+  @override
+  String get txVoiceIdle => 'Ready to listen';
+
+  @override
+  String get txVoiceListening => 'Listening...';
+
+  @override
+  String get txVoiceTranscriptLabel => 'Recognized text';
+
+  @override
+  String get txVoiceStart => 'Start';
+
+  @override
+  String get txVoiceStop => 'Stop';
+
+  @override
+  String get txVoiceUse => 'Use text';
+
+  @override
+  String get txVoiceUnavailable =>
+      'Voice recognition is not available on this device.';
+
+  @override
+  String get txVoiceEmpty => 'No voice text was detected.';
+
+  @override
+  String get txVoiceApplied => 'Voice draft ready. Review it before saving.';
+
+  @override
+  String get txVoiceDraftFailed =>
+      'Could not prepare the voice draft. Please try again.';
 
   @override
   String get txExpense => 'Expense';
@@ -451,14 +507,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySelectHint => 'Select a category';
 
   @override
-  String get txBudgetLabel => 'Budget';
+  String get txBudgetLabel => 'Budget (optional)';
 
   @override
-  String get txBudgetHint => 'Select a budget';
+  String get txBudgetHint => 'No budget';
+
+  @override
+  String get txBudgetNone => 'No budget';
 
   @override
   String get txNoBudgetsHint =>
-      'No budgets found for the selected date. Create one or change the expense date.';
+      'No budgets found for the selected date. You can still save the expense or create one to track limits.';
 
   @override
   String get txAddButton => '+ Add';
@@ -524,6 +583,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txCategorySavings => 'Savings';
+
+  @override
+  String get txCategoryScholarship => 'Scholarship';
+
+  @override
+  String get txCategoryPartTimeWork => 'Part-time work';
+
+  @override
+  String get txCategoryFamilyIncome => 'Family support';
+
+  @override
+  String get txCategoryFreelance => 'Freelance';
 
   @override
   String get txCategoryOther => 'Other';
@@ -1143,7 +1214,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorNoConnection => 'Could not connect to the server.';
 
   @override
-  String get errorTxNoSourceAccount => 'Select a budget.';
+  String get errorTxNoSourceAccount => 'Select a valid option.';
 
   @override
   String get errorTxInvalidAmount => 'Enter an amount greater than 0.';
