@@ -9,8 +9,7 @@ import '../../l10n/l10n_extension.dart';
 class _ChatBubble {
   final String text;
   final bool isUser;
-  final bool isWelcome;
-  _ChatBubble({required this.text, required this.isUser, this.isWelcome = false});
+  _ChatBubble({required this.text, required this.isUser});
 }
 
 class AiChatScreen extends ConsumerStatefulWidget {
@@ -29,41 +28,24 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch the server-persisted history first; fall back to a welcome
-    // bubble (UI-only, not persisted) when the user has no prior session.
+    // Fetch the server-persisted history first. New users start with an empty
+    // chat until they ask something; no fake assistant message is shown.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       try {
         final active = await ref.read(aiChatServiceProvider).getActive();
-        if (!mounted) return;
-        if (active.messages.isEmpty) {
-          setState(() => _messages.add(
-                _ChatBubble(
-                  text: context.l10n.aiChatWelcomeDemo,
-                  isUser: false,
-                  isWelcome: true,
-                ),
-              ));
-        } else {
-          setState(() {
-            _messages.addAll(active.messages.map(
+        if (!mounted || active.messages.isEmpty) return;
+        setState(() {
+          _messages.addAll(
+            active.messages.map(
               (m) => _ChatBubble(text: m.content, isUser: m.role == 'user'),
-            ));
-          });
-          _scrollToBottom();
-        }
+            ),
+          );
+        });
+        _scrollToBottom();
       } catch (_) {
-        if (!mounted) return;
-        // Best-effort — show the welcome bubble if /active fails (e.g.
-        // offline, expired token). The next sendMessage will recreate
-        // the conversation server-side.
-        setState(() => _messages.add(
-              _ChatBubble(
-                text: context.l10n.aiChatWelcomeDemo,
-                isUser: false,
-                isWelcome: true,
-              ),
-            ));
+        // Best-effort: the next sendMessage will recreate the conversation
+        // server-side. Do not show a fake assistant message.
       }
     });
   }
@@ -91,12 +73,18 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
       // user message; the server appends it + the assistant reply.
       final result = await ref.read(aiChatServiceProvider).sendMessage(text);
       if (mounted) {
-        setState(() => _messages.add(_ChatBubble(text: result.reply, isUser: false)));
+        setState(
+          () => _messages.add(_ChatBubble(text: result.reply, isUser: false)),
+        );
         _scrollToBottom();
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _messages.add(_ChatBubble(text: context.l10n.aiChatError, isUser: false)));
+        setState(
+          () => _messages.add(
+            _ChatBubble(text: context.l10n.aiChatError, isUser: false),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -136,7 +124,11 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                 shape: BoxShape.circle,
                 color: AppColors.primary,
               ),
-              child: const Icon(Icons.psychology_rounded, size: 22, color: Colors.white),
+              child: const Icon(
+                Icons.psychology_rounded,
+                size: 22,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -254,7 +246,9 @@ class _MessageBubble extends StatelessWidget {
         alignment: Alignment.centerRight,
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
-          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.72,
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: const BoxDecoration(
             color: AppColors.primary,
@@ -286,12 +280,18 @@ class _MessageBubble extends StatelessWidget {
               shape: BoxShape.circle,
               color: AppColors.primary,
             ),
-            child: const Icon(Icons.psychology_rounded, size: 18, color: Colors.white),
+            child: const Icon(
+              Icons.psychology_rounded,
+              size: 18,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(width: 8),
           Flexible(
             child: Container(
-              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.72,
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: colors.card,
@@ -344,7 +344,10 @@ class _TypingBubble extends StatelessWidget {
         child: const SizedBox(
           width: 40,
           height: 16,
-          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primary,
+          ),
         ),
       ),
     );
@@ -367,25 +370,24 @@ class _QuickActions extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: labels
-              .map((label) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ActionChip(
-                      label: Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colors.primary,
-                        ),
-                      ),
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-                      side: BorderSide(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                      ),
-                      onPressed: () => onTap(label),
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              .map(
+                (label) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ActionChip(
+                    label: Text(
+                      label,
+                      style: TextStyle(fontSize: 12, color: colors.primary),
                     ),
-                  ))
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                    side: BorderSide(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                    ),
+                    onPressed: () => onTap(label),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              )
               .toList(),
         ),
       ),
@@ -434,7 +436,10 @@ class _InputBar extends StatelessWidget {
                 textInputAction: TextInputAction.send,
                 decoration: InputDecoration(
                   hintText: hint,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,

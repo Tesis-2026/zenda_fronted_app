@@ -73,6 +73,7 @@ class SyncService {
           amount: entry.amount,
           category: entry.category,
           budgetId: entry.budgetId,
+          accountId: entry.accountId,
           occurredAt: entry.occurredAt,
           description: entry.description,
           customCategoryName: entry.customCategoryName,

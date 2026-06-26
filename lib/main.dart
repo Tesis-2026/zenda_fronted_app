@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,11 +31,7 @@ Future<void> main() async {
     overlays: SystemUiOverlay.values,
   );
 
-  // Firebase + FCM setup runs before runApp so the background handler is
-  // registered. Falls back silently to inbox-only mode if google-services.json
-  // is missing or Firebase init fails.
   final fcm = FcmService(NotificationsApiService());
-  await fcm.initialize();
 
   runApp(
     ProviderScope(
@@ -45,4 +43,8 @@ Future<void> main() async {
       child: const App(),
     ),
   );
+
+  // FCM is optional in local dev. Initialize it after the first frame so a
+  // missing Firebase config can never block the app on a black native screen.
+  unawaited(fcm.initialize());
 }

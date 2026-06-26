@@ -50,6 +50,85 @@ class EducationTopic {
   }
 }
 
+class LearningPathStep {
+  final String id;
+  final String kind;
+  final String? topicId;
+  final String title;
+  final String reason;
+  final String focus;
+  final String difficulty;
+  final String status;
+  final int order;
+  final int estimatedMinutes;
+  final String quizMode;
+
+  const LearningPathStep({
+    required this.id,
+    required this.kind,
+    this.topicId,
+    required this.title,
+    required this.reason,
+    required this.focus,
+    required this.difficulty,
+    required this.status,
+    required this.order,
+    required this.estimatedMinutes,
+    required this.quizMode,
+  });
+
+  bool get isTopic => kind == 'topic';
+  bool get isPersonalizedQuiz => kind == 'personalized_quiz';
+  bool get isCompleted => status == 'completed';
+  bool get isRead => status == 'read';
+
+  factory LearningPathStep.fromJson(Map<String, dynamic> json) {
+    return LearningPathStep(
+      id: json['id'] as String,
+      kind: json['kind'] as String,
+      topicId: json['topicId'] as String?,
+      title: json['title'] as String,
+      reason: json['reason'] as String? ?? '',
+      focus: json['focus'] as String? ?? '',
+      difficulty: json['difficulty'] as String? ?? 'BEGINNER',
+      status: json['status'] as String? ?? 'pending',
+      order: (json['order'] as num?)?.toInt() ?? 0,
+      estimatedMinutes: (json['estimatedMinutes'] as num?)?.toInt() ?? 6,
+      quizMode: json['quizMode'] as String? ?? 'app_topic_quiz',
+    );
+  }
+}
+
+class PersonalizedLearningPath {
+  final DateTime? generatedAt;
+  final String source;
+  final String summary;
+  final List<LearningPathStep> steps;
+
+  const PersonalizedLearningPath({
+    this.generatedAt,
+    required this.source,
+    required this.summary,
+    required this.steps,
+  });
+
+  bool get usedAgent => source == 'agent';
+
+  factory PersonalizedLearningPath.fromJson(Map<String, dynamic> json) {
+    return PersonalizedLearningPath(
+      generatedAt: json['generatedAt'] != null
+          ? DateTime.tryParse(json['generatedAt'] as String)
+          : null,
+      source: json['source'] as String? ?? 'fallback',
+      summary: json['summary'] as String? ?? '',
+      steps: (json['steps'] as List<dynamic>? ?? const [])
+          .cast<Map<String, dynamic>>()
+          .map(LearningPathStep.fromJson)
+          .toList(),
+    );
+  }
+}
+
 class EducationApiService {
   Future<List<EducationTopic>> listTopics() async {
     final list = await ApiClient.getList('/education/topics');
@@ -79,6 +158,15 @@ class EducationApiService {
       '/education/quiz/personalized?language=$language',
     );
     return PersonalizedQuizResult.fromJson(data);
+  }
+
+  Future<PersonalizedLearningPath> getPersonalizedLearningPath({
+    String language = 'es',
+  }) async {
+    final data = await ApiClient.get(
+      '/education/learning-path/personalized?language=$language',
+    );
+    return PersonalizedLearningPath.fromJson(data);
   }
 
   Future<Map<String, dynamic>> submitPersonalizedQuiz(

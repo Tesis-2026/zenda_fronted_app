@@ -195,7 +195,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingPage1Subtitle =>
-      'Registra con un toque o escanea un recibo (demo).';
+      'Registra con un toque o escanea una boleta.';
 
   @override
   String get onboardingPage1Micro => 'Menos fricción, más control.';
@@ -417,7 +417,66 @@ class AppLocalizationsEs extends AppLocalizations {
   String get txNewTitle => 'Nueva transacción';
 
   @override
-  String get txScanReceipt => 'Escanear recibo (demo)';
+  String get txScanReceipt => 'Escanear boleta';
+
+  @override
+  String get txScanReceiptCamera => 'Tomar foto';
+
+  @override
+  String get txScanReceiptGallery => 'Elegir imagen';
+
+  @override
+  String get txScanningReceipt => 'Leyendo boleta...';
+
+  @override
+  String get txReceiptApplied =>
+      'Datos detectados. Revisalos antes de guardar.';
+
+  @override
+  String get txReceiptScanFailed =>
+      'No se pudo leer la boleta. Intenta nuevamente.';
+
+  @override
+  String get txVoiceTransaction => 'Dictar';
+
+  @override
+  String get txParsingVoice => 'Preparando borrador...';
+
+  @override
+  String get txVoiceSheetTitle => 'Dictar transaccion';
+
+  @override
+  String get txVoiceIdle => 'Listo para escuchar';
+
+  @override
+  String get txVoiceListening => 'Escuchando...';
+
+  @override
+  String get txVoiceTranscriptLabel => 'Texto reconocido';
+
+  @override
+  String get txVoiceStart => 'Iniciar';
+
+  @override
+  String get txVoiceStop => 'Detener';
+
+  @override
+  String get txVoiceUse => 'Usar texto';
+
+  @override
+  String get txVoiceUnavailable =>
+      'El reconocimiento de voz no esta disponible en este dispositivo.';
+
+  @override
+  String get txVoiceEmpty => 'No se detecto texto por voz.';
+
+  @override
+  String get txVoiceApplied =>
+      'Borrador por voz listo. Revisalo antes de guardar.';
+
+  @override
+  String get txVoiceDraftFailed =>
+      'No se pudo preparar el borrador por voz. Intenta nuevamente.';
 
   @override
   String get txExpense => 'Gasto';
@@ -450,14 +509,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categorySelectHint => 'Selecciona una categoría';
 
   @override
-  String get txBudgetLabel => 'Presupuesto';
+  String get txBudgetLabel => 'Presupuesto (opcional)';
 
   @override
-  String get txBudgetHint => 'Selecciona un presupuesto';
+  String get txBudgetHint => 'Sin presupuesto';
+
+  @override
+  String get txBudgetNone => 'Sin presupuesto';
 
   @override
   String get txNoBudgetsHint =>
-      'Aún no tienes presupuestos. Crea uno para poder registrar.';
+      'No hay presupuestos para la fecha seleccionada. Puedes guardar el gasto igual o crear uno para controlar límites.';
 
   @override
   String get txAddButton => '+ Agregar';
@@ -523,6 +585,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get txCategorySavings => 'Ahorros';
+
+  @override
+  String get txCategoryScholarship => 'Beca';
+
+  @override
+  String get txCategoryPartTimeWork => 'Trabajo part-time';
+
+  @override
+  String get txCategoryFamilyIncome => 'Apoyo familiar';
+
+  @override
+  String get txCategoryFreelance => 'Freelance';
 
   @override
   String get txCategoryOther => 'Otro';
@@ -1144,7 +1218,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorNoConnection => 'No se pudo conectar con el servidor.';
 
   @override
-  String get errorTxNoSourceAccount => 'Selecciona un presupuesto.';
+  String get errorTxNoSourceAccount => 'Selecciona una opción válida.';
 
   @override
   String get errorTxInvalidAmount => 'Ingresa un monto mayor a 0.';

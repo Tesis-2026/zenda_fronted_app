@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../core/models/account.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
@@ -40,6 +41,10 @@ class _InicioSection extends ConsumerWidget {
 
     final budgetSummaryAsync = ref.watch(budgetSummaryProvider);
     final monthSummaryAsync = ref.watch(monthSummaryProvider);
+    final now = DateTime.now();
+    final accountReportAsync = ref.watch(
+      accountReportProvider((month: now.month, year: now.year)),
+    );
 
     final streak = ref.watch(streakProvider);
     final advice = ref.watch(aiAdviceProvider(l10n));
@@ -62,6 +67,10 @@ class _InicioSection extends ConsumerWidget {
         ref.invalidate(daySummaryProvider);
         ref.invalidate(weekSummaryProvider);
         ref.invalidate(monthSummaryProvider);
+        ref.invalidate(accountsProvider);
+        ref.invalidate(
+          accountReportProvider((month: now.month, year: now.year)),
+        );
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -106,6 +115,10 @@ class _InicioSection extends ConsumerWidget {
 
             // Total money = sum of registered budgets
             _TotalMoneyCard(summary: budgetSummaryAsync),
+
+            const SizedBox(height: 12),
+
+            _AccountReportCard(report: accountReportAsync),
 
             const SizedBox(height: 12),
 
@@ -167,8 +180,11 @@ class _TotalMoneyCard extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () => context.push('/budgets'),
-                child: const Icon(Icons.add_circle_outline,
-                    color: Color(0xFF34D399), size: 20),
+                child: const Icon(
+                  Icons.add_circle_outline,
+                  color: Color(0xFF34D399),
+                  size: 20,
+                ),
               ),
             ],
           ),
@@ -189,7 +205,9 @@ class _TotalMoneyCard extends StatelessWidget {
                   child: Text(
                     '${l10n.dashboardAvailableLabel}: S/ ${available.toStringAsFixed(2)}   ·   ${l10n.dashboardSpentLabel}: S/ ${spent.toStringAsFixed(2)}',
                     style: const TextStyle(
-                        color: Color(0xFF9CA3AF), fontSize: 12),
+                      color: Color(0xFF9CA3AF),
+                      fontSize: 12,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -197,7 +215,10 @@ class _TotalMoneyCard extends StatelessWidget {
                   onTap: () => context.push('/budgets'),
                   child: Text(
                     '▶  ${l10n.dashboardViewAll}',
-                    style: const TextStyle(color: Color(0xFF34D399), fontSize: 12),
+                    style: const TextStyle(
+                      color: Color(0xFF34D399),
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
@@ -212,6 +233,153 @@ class _TotalMoneyCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _AccountReportCard extends StatelessWidget {
+  const _AccountReportCard({required this.report});
+
+  final AsyncValue<AccountReport> report;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final data = report.asData?.value;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: colors.border),
+      ),
+      child: report.when(
+        loading: () => const SizedBox(
+          height: 88,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        error: (_, _) => const Text(
+          'No se pudieron cargar las cuentas.',
+          style: TextStyle(
+            color: Color(0xFFDC2626),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        data: (_) {
+          final accounts = data?.accounts.take(4).toList() ?? const [];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.account_balance_wallet_rounded,
+                    color: Color(0xFF2563EB),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Cuentas',
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Disponible S/ ${(data?.totalAssets ?? 0).toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      color: Color(0xFF059669),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              if ((data?.totalCreditDebt ?? 0) > 0) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Deuda de tarjeta S/ ${data!.totalCreditDebt.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    color: Color(0xFFDC2626),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+              for (final account in accounts) ...[
+                _AccountMiniRow(account: account),
+                const SizedBox(height: 8),
+              ],
+              if ((data?.insights ?? const []).isNotEmpty) ...[
+                const SizedBox(height: 4),
+                for (final insight in data!.insights.take(2))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      insight,
+                      style: TextStyle(
+                        color: colors.textMuted,
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AccountMiniRow extends StatelessWidget {
+  const _AccountMiniRow({required this.account});
+
+  final AccountReportItem account;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCredit = account.type == AccountType.creditCard;
+    final amount = isCredit ? account.debt : account.currentBalance;
+    final color = isCredit ? const Color(0xFFDC2626) : const Color(0xFF111827);
+    return Row(
+      children: [
+        Icon(
+          accountTypeIcon(account.type),
+          size: 18,
+          color: const Color(0xFF6B7280),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            account.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF374151),
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        Text(
+          isCredit
+              ? 'S/ ${amount.toStringAsFixed(0)} deuda'
+              : 'S/ ${amount.toStringAsFixed(0)}',
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w800,
+            fontSize: 13,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -239,7 +407,10 @@ class _SummaryCards extends StatelessWidget {
               children: [
                 Text(
                   '↑  ${l10n.dashboardMonthlyIncome}',
-                  style: const TextStyle(color: Color(0xFF059669), fontSize: 12),
+                  style: const TextStyle(
+                    color: Color(0xFF059669),
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -267,7 +438,10 @@ class _SummaryCards extends StatelessWidget {
               children: [
                 Text(
                   '↓  ${l10n.dashboardMonthlyExpense}',
-                  style: const TextStyle(color: Color(0xFFDC2626), fontSize: 12),
+                  style: const TextStyle(
+                    color: Color(0xFFDC2626),
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -329,10 +503,7 @@ class _BudgetRuleCard extends StatelessWidget {
               ),
               Text(
                 month,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: colors.textMuted,
-                ),
+                style: TextStyle(fontSize: 13, color: colors.textMuted),
               ),
             ],
           ),
@@ -374,7 +545,10 @@ class _BudgetRuleCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _LegendDot(color: AppColors.primary, label: '${l10n.dashboardNeeds} 50%'),
+              _LegendDot(
+                color: AppColors.primary,
+                label: '${l10n.dashboardNeeds} 50%',
+              ),
               GestureDetector(
                 onTap: () => context.push('/budgets'),
                 child: const Text(
@@ -407,7 +581,10 @@ class _LegendDot extends StatelessWidget {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(5)),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(5),
+          ),
         ),
         const SizedBox(width: 5),
         Text(
@@ -439,8 +616,11 @@ class _DashboardBell extends ConsumerWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: colors.border),
             ),
-            child: Icon(Icons.notifications_outlined,
-                size: 20, color: colors.iconStrong),
+            child: Icon(
+              Icons.notifications_outlined,
+              size: 20,
+              color: colors.iconStrong,
+            ),
           ),
           if (unread > 0)
             Positioned(

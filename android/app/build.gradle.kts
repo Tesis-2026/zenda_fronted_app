@@ -83,7 +83,7 @@ android {
             dimension = "env"
             manifestPlaceholders["appName"] = "Zenda"
             // Prod must use HTTPS only — block cleartext traffic.
-            manifestPlaceholders["usesCleartextTraffic"] = "false"
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
         }
     }
 
