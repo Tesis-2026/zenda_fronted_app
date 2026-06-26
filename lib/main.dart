@@ -9,6 +9,7 @@ import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/mock/demo_overrides.dart';
 import 'core/services/fcm_service.dart';
+import 'core/services/study_analytics_service.dart';
 import 'core/services/user_api_service.dart';
 import 'providers/repositories_providers.dart';
 
@@ -23,6 +24,10 @@ Future<void> main() async {
   // pick Spanish even when callers don't pass a locale explicitly.
   Intl.defaultLocale = 'es';
   await initializeDateFormatting('es');
+  await StudyAnalyticsService.initialize(
+    appEnv: AppConfig.env.name,
+    betaDistributionId: AppConfig.betaDistributionId,
+  );
   // Keep status bar and system navigation bar visible, and reserve their
   // space so they never overlay app content (Android 15+ defaults to
   // edge-to-edge, which would otherwise draw under the nav bar).

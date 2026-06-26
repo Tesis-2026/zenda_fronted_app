@@ -157,12 +157,17 @@ class RecommendationsApiService {
 // ── AI Chat ───────────────────────────────────────────────────────────────────
 
 class ChatMessage {
+  final String? id;
   final String role;
   final String content;
 
-  const ChatMessage({required this.role, required this.content});
+  const ChatMessage({this.id, required this.role, required this.content});
 
-  Map<String, dynamic> toJson() => {'role': role, 'content': content};
+  Map<String, dynamic> toJson() => {
+    if (id != null) 'id': id,
+    'role': role,
+    'content': content,
+  };
 }
 
 /// Reply returned by `POST /ai/chat`. The backend persists the user
@@ -170,9 +175,14 @@ class ChatMessage {
 /// is returned so a follow-up screen could deep-link to a transcript.
 class ChatReply {
   final String conversationId;
+  final String? assistantMessageId;
   final String reply;
 
-  const ChatReply({required this.conversationId, required this.reply});
+  const ChatReply({
+    required this.conversationId,
+    this.assistantMessageId,
+    required this.reply,
+  });
 }
 
 /// Snapshot of the user's active AI conversation. `conversationId` is
@@ -203,6 +213,16 @@ abstract class AiChatApiService {
   /// Marks the active conversation CLOSED. Messages stay in the DB and can be
   /// reopened by the backend if the user continues chatting later.
   Future<void> closeActive();
+
+  /// Stores a lightweight 1-5 user rating for a specific assistant answer.
+  Future<void> submitMessageFeedback(
+    String messageId, {
+    required int rating,
+    bool? helpful,
+    bool? clear,
+    bool? personalized,
+    String? comment,
+  });
 }
 
 class LiveAiChatApiService extends AiChatApiService {
@@ -215,6 +235,7 @@ class LiveAiChatApiService extends AiChatApiService {
               .cast<Map<String, dynamic>>()
               .map(
                 (m) => ChatMessage(
+                  id: m['id'] as String?,
                   role: m['role'] as String,
                   content: m['content'] as String,
                 ),
@@ -234,6 +255,7 @@ class LiveAiChatApiService extends AiChatApiService {
     }, authenticated: true);
     return ChatReply(
       conversationId: (body['conversationId'] as String?) ?? '',
+      assistantMessageId: body['assistantMessageId'] as String?,
       reply: (body['reply'] as String?) ?? 'No se recibió respuesta.',
     );
   }
@@ -241,6 +263,24 @@ class LiveAiChatApiService extends AiChatApiService {
   @override
   Future<void> closeActive() async {
     await ApiClient.post('/ai/chat/close', {}, authenticated: true);
+  }
+
+  @override
+  Future<void> submitMessageFeedback(
+    String messageId, {
+    required int rating,
+    bool? helpful,
+    bool? clear,
+    bool? personalized,
+    String? comment,
+  }) async {
+    await ApiClient.post('/ai/chat/messages/$messageId/feedback', {
+      'rating': rating,
+      'helpful': ?helpful,
+      'clear': ?clear,
+      'personalized': ?personalized,
+      'comment': ?comment,
+    }, authenticated: true);
   }
 }
 

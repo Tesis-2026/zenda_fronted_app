@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/education_api_service.dart';
+import '../../core/services/study_telemetry_service.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
@@ -30,17 +31,35 @@ class _SusScreenState extends ConsumerState<SusScreen> {
 
   Future<void> _submit(List<SurveyQuestion> questions) async {
     if (_ratings.length < questions.length) {
-      showAppToast(context, context.l10n.surveyAnswerAll, type: ToastType.warning);
+      showAppToast(
+        context,
+        context.l10n.surveyAnswerAll,
+        type: ToastType.warning,
+      );
       return;
     }
     setState(() => _submitting = true);
+    StudyTelemetryService.track(
+      'sus_submit_started',
+      metadata: {'answers_count': _ratings.length},
+    );
     try {
       final answers = {
         for (final q in questions) q.id: _ratings[q.id]!.toString(),
       };
-      final result = await ref.read(susSurveyServiceProvider).submitSus(answers);
+      final result = await ref
+          .read(susSurveyServiceProvider)
+          .submitSus(answers);
+      StudyTelemetryService.track(
+        'sus_submit_success',
+        metadata: {'sus_score': result.susScore, 'grade': result.grade},
+      );
       if (mounted) setState(() => _result = result);
     } catch (e) {
+      StudyTelemetryService.track(
+        'sus_submit_failed',
+        metadata: {'error': e.toString()},
+      );
       if (mounted) {
         final l10n = context.l10n;
         final message = e.toString().contains('409')
@@ -69,16 +88,71 @@ class _SusScreenState extends ConsumerState<SusScreen> {
             id: 'sus-fallback',
             type: 'SUS',
             questions: [
-              SurveyQuestion(id: 'sus-1', order: 1, text: 'Creo que me gustaría usar este sistema con frecuencia.', options: []),
-              SurveyQuestion(id: 'sus-2', order: 2, text: 'Encontré el sistema innecesariamente complejo.', options: []),
-              SurveyQuestion(id: 'sus-3', order: 3, text: 'Me pareció que el sistema era fácil de usar.', options: []),
-              SurveyQuestion(id: 'sus-4', order: 4, text: 'Creo que necesitaría el apoyo de una persona técnica para poder usar este sistema.', options: []),
-              SurveyQuestion(id: 'sus-5', order: 5, text: 'Encontré que las distintas funciones de este sistema estaban bien integradas.', options: []),
-              SurveyQuestion(id: 'sus-6', order: 6, text: 'Pensé que había demasiada inconsistencia en este sistema.', options: []),
-              SurveyQuestion(id: 'sus-7', order: 7, text: 'Imagino que la mayoría de las personas aprenderían a usar este sistema muy rápidamente.', options: []),
-              SurveyQuestion(id: 'sus-8', order: 8, text: 'Encontré el sistema muy engorroso de usar.', options: []),
-              SurveyQuestion(id: 'sus-9', order: 9, text: 'Me sentí muy seguro usando el sistema.', options: []),
-              SurveyQuestion(id: 'sus-10', order: 10, text: 'Necesité aprender muchas cosas antes de poder empezar a usar este sistema.', options: []),
+              SurveyQuestion(
+                id: 'sus-1',
+                order: 1,
+                text: 'Creo que me gustaría usar este sistema con frecuencia.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-2',
+                order: 2,
+                text: 'Encontré el sistema innecesariamente complejo.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-3',
+                order: 3,
+                text: 'Me pareció que el sistema era fácil de usar.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-4',
+                order: 4,
+                text:
+                    'Creo que necesitaría el apoyo de una persona técnica para poder usar este sistema.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-5',
+                order: 5,
+                text:
+                    'Encontré que las distintas funciones de este sistema estaban bien integradas.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-6',
+                order: 6,
+                text:
+                    'Pensé que había demasiada inconsistencia en este sistema.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-7',
+                order: 7,
+                text:
+                    'Imagino que la mayoría de las personas aprenderían a usar este sistema muy rápidamente.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-8',
+                order: 8,
+                text: 'Encontré el sistema muy engorroso de usar.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-9',
+                order: 9,
+                text: 'Me sentí muy seguro usando el sistema.',
+                options: [],
+              ),
+              SurveyQuestion(
+                id: 'sus-10',
+                order: 10,
+                text:
+                    'Necesité aprender muchas cosas antes de poder empezar a usar este sistema.',
+                options: [],
+              ),
             ],
           );
           if (_result != null) return _ResultView(result: _result!);
@@ -131,19 +205,23 @@ class _SurveyForm extends StatelessWidget {
         Text(
           l10n.susSurveyDescription,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('1', style: Theme.of(context).textTheme.labelSmall),
-            Text(l10n.susSurveyStronglyDisagree,
-                style: Theme.of(context).textTheme.labelSmall),
+            Text(
+              l10n.susSurveyStronglyDisagree,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
             const Spacer(),
-            Text(l10n.susSurveyStronglyAgree,
-                style: Theme.of(context).textTheme.labelSmall),
+            Text(
+              l10n.susSurveyStronglyAgree,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
             Text('5', style: Theme.of(context).textTheme.labelSmall),
           ],
         ),
@@ -165,7 +243,9 @@ class _SurveyForm extends StatelessWidget {
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : Text(l10n.susSurveySubmit),
           ),
@@ -203,39 +283,36 @@ class _QuestionRow extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(
-                  5,
-                  (i) {
-                    final value = i + 1;
-                    final isSelected = selectedValue == value;
-                    return GestureDetector(
-                      onTap: () => onChanged(value),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
+                children: List.generate(5, (i) {
+                  final value = i + 1;
+                  final isSelected = selectedValue == value;
+                  return GestureDetector(
+                    onTap: () => onChanged(value),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '$value',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
                           color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '$value',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.onSurface,
-                          ),
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -255,8 +332,8 @@ class _ResultView extends StatelessWidget {
     final color = result.susScore >= 70
         ? Colors.green
         : result.susScore >= 50
-            ? Colors.orange
-            : Colors.red;
+        ? Colors.orange
+        : Colors.red;
 
     return Center(
       child: Padding(
@@ -270,9 +347,9 @@ class _ResultView extends StatelessWidget {
               child: Text(
                 '${result.susScore}',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -289,9 +366,9 @@ class _ResultView extends StatelessWidget {
             Text(
               l10n.susSurveyResultGrade(result.grade),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 32),
             SizedBox(
