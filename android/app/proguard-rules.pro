@@ -19,3 +19,9 @@
 -keepattributes Signature
 -keepattributes InnerClasses
 -keepattributes EnclosingMethod
+
+# Flutter's PlayStoreDeferredComponentManager references legacy Play Core task
+# classes even when the app does not use deferred components. Play Feature
+# Delivery 2.1.0 supplies the splitinstall APIs; these task references are
+# unreachable in this app, so suppress R8 missing-class warnings for release.
+-dontwarn com.google.android.play.core.tasks.**
