@@ -47,6 +47,13 @@ class AppConfig {
             ? _legacyZendaApiBaseUrl
             : 'http://localhost:3000/api');
 
+  /// Identifier of the beta distributed to pilot testers. It is attached to
+  /// analytics events so thesis exports can separate cohorts/builds.
+  static const String betaDistributionId = String.fromEnvironment(
+    'BETA_DISTRIBUTION_ID',
+    defaultValue: 'local',
+  );
+
   /// When true, every API service is replaced by an in-memory mock (no backend).
   static const bool isDemo = bool.fromEnvironment('DEMO', defaultValue: false);
 }

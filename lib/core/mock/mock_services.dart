@@ -577,15 +577,40 @@ class MockAiChatApiService extends AiChatApiService {
   @override
   Future<ChatReply> sendMessage(String message) async {
     await Future.delayed(const Duration(milliseconds: 800));
-    _history.add(ChatMessage(role: 'user', content: message));
+    _history.add(
+      ChatMessage(
+        id: 'mock-user-${_history.length + 1}',
+        role: 'user',
+        content: message,
+      ),
+    );
     final reply = _respond(message.toLowerCase());
-    _history.add(ChatMessage(role: 'assistant', content: reply));
-    return ChatReply(conversationId: 'mock-conversation', reply: reply);
+    final assistantId = 'mock-assistant-${_history.length + 1}';
+    _history.add(
+      ChatMessage(id: assistantId, role: 'assistant', content: reply),
+    );
+    return ChatReply(
+      conversationId: 'mock-conversation',
+      assistantMessageId: assistantId,
+      reply: reply,
+    );
   }
 
   @override
   Future<void> closeActive() async {
     _history.clear();
+  }
+
+  @override
+  Future<void> submitMessageFeedback(
+    String messageId, {
+    required int rating,
+    bool? helpful,
+    bool? clear,
+    bool? personalized,
+    String? comment,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 150));
   }
 
   String _respond(String input) {

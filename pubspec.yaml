@@ -84,6 +84,9 @@ dependencies:
   # Renders system notifications when an FCM message arrives while the app is
   # in foreground (FCM does not show notifications automatically in foreground).
   flutter_local_notifications: ^18.0.1
+  firebase_analytics: ^11.6.0
+  firebase_crashlytics: ^4.3.10
+  firebase_remote_config: ^5.5.0
 
 dev_dependencies:
   flutter_test:

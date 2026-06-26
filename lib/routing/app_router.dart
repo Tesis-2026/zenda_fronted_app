@@ -38,6 +38,7 @@ import '../features/management/management_screen.dart';
 import '../features/surveys/survey_screen.dart';
 import '../features/surveys/survey_comparison_screen.dart';
 import '../features/surveys/sus_screen.dart';
+import '../features/surveys/satisfaction_screen.dart';
 import '../features/surveys/research_screen.dart';
 import '../providers/pre_survey_provider.dart';
 import '../features/notifications/notification_preferences_screen.dart';
@@ -72,7 +73,15 @@ const _profileSetupExempt = {
 };
 
 // Routes exempt from the pre-survey redirect.
-const _preSurveyExempt = {'/surveys/pre', '/surveys/post', '/surveys/comparison', '/surveys/sus', '/profile-setup', '/research'};
+const _preSurveyExempt = {
+  '/surveys/pre',
+  '/surveys/post',
+  '/surveys/comparison',
+  '/surveys/sus',
+  '/surveys/satisfaction',
+  '/profile-setup',
+  '/research',
+};
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
@@ -145,10 +154,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const SplashDecider(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const SplashDecider()),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) {
@@ -195,10 +201,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // Legacy login route
-      GoRoute(
-        path: '/login',
-        redirect: (context, state) => '/auth/login',
-      ),
+      GoRoute(path: '/login', redirect: (context, state) => '/auth/login'),
 
       // Profile setup (shown after registration when profileCompleted == false)
       GoRoute(
@@ -271,9 +274,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: ':id',
-            builder: (context, state) => TopicDetailScreen(
-              topicId: state.pathParameters['id']!,
-            ),
+            builder: (context, state) =>
+                TopicDetailScreen(topicId: state.pathParameters['id']!),
             routes: [
               GoRoute(
                 path: 'quiz',
@@ -326,6 +328,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/surveys/sus',
         builder: (context, state) => const SusScreen(),
+      ),
+      GoRoute(
+        path: '/surveys/satisfaction',
+        builder: (context, state) => const SatisfactionScreen(),
       ),
       GoRoute(
         path: '/notifications',

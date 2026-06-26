@@ -13,6 +13,7 @@ import 'widgets/zenda_ai_card.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 import '../notifications/notifications_inbox_providers.dart';
+import '../surveys/sus_prompt_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -112,6 +113,8 @@ class _InicioSection extends ConsumerWidget {
             ),
 
             const SizedBox(height: 20),
+
+            const SusPromptCard(),
 
             // Total money = sum of registered budgets
             _TotalMoneyCard(summary: budgetSummaryAsync),

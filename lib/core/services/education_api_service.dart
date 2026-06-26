@@ -289,6 +289,90 @@ class SusResult {
   }
 }
 
+class SatisfactionResult {
+  final int score;
+  final double averageLikert;
+  final int likertCount;
+
+  const SatisfactionResult({
+    required this.score,
+    required this.averageLikert,
+    required this.likertCount,
+  });
+
+  factory SatisfactionResult.fromJson(Map<String, dynamic> json) {
+    return SatisfactionResult(
+      score: (json['score'] as num?)?.toInt() ?? 0,
+      averageLikert: (json['averageLikert'] as num?)?.toDouble() ?? 0,
+      likertCount: (json['likertCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class SusPromptMetrics {
+  final int sessionsCount;
+  final int transactionsCount;
+  final int chatMessagesCount;
+  final int daysSinceFirstEvent;
+  final DateTime? lastDismissedAt;
+
+  const SusPromptMetrics({
+    required this.sessionsCount,
+    required this.transactionsCount,
+    required this.chatMessagesCount,
+    required this.daysSinceFirstEvent,
+    this.lastDismissedAt,
+  });
+
+  factory SusPromptMetrics.fromJson(Map<String, dynamic> json) {
+    return SusPromptMetrics(
+      sessionsCount: (json['sessionsCount'] as num?)?.toInt() ?? 0,
+      transactionsCount: (json['transactionsCount'] as num?)?.toInt() ?? 0,
+      chatMessagesCount: (json['chatMessagesCount'] as num?)?.toInt() ?? 0,
+      daysSinceFirstEvent: (json['daysSinceFirstEvent'] as num?)?.toInt() ?? 0,
+      lastDismissedAt: json['lastDismissedAt'] != null
+          ? DateTime.tryParse(json['lastDismissedAt'] as String)
+          : null,
+    );
+  }
+}
+
+class SusPromptStatus {
+  final String surveyId;
+  final bool completed;
+  final DateTime? completedAt;
+  final int? susScore;
+  final bool shouldPrompt;
+  final String reason;
+  final SusPromptMetrics metrics;
+
+  const SusPromptStatus({
+    required this.surveyId,
+    required this.completed,
+    this.completedAt,
+    this.susScore,
+    required this.shouldPrompt,
+    required this.reason,
+    required this.metrics,
+  });
+
+  factory SusPromptStatus.fromJson(Map<String, dynamic> json) {
+    return SusPromptStatus(
+      surveyId: json['surveyId'] as String? ?? '',
+      completed: json['completed'] as bool? ?? false,
+      completedAt: json['completedAt'] != null
+          ? DateTime.tryParse(json['completedAt'] as String)
+          : null,
+      susScore: (json['susScore'] as num?)?.toInt(),
+      shouldPrompt: json['shouldPrompt'] as bool? ?? false,
+      reason: json['reason'] as String? ?? 'unknown',
+      metrics: SusPromptMetrics.fromJson(
+        (json['metrics'] as Map<String, dynamic>?) ?? const {},
+      ),
+    );
+  }
+}
+
 class SurveyComparison {
   final double? preScore;
   final double? postScore;
@@ -345,11 +429,30 @@ class SurveysApiService {
     return Survey.fromJson(data);
   }
 
+  Future<SusPromptStatus> getSusStatus() async {
+    final data = await ApiClient.get('/surveys/sus/status');
+    return SusPromptStatus.fromJson(data);
+  }
+
   Future<SusResult> submitSus(Map<String, String> answers) async {
     final data = await ApiClient.post('/surveys/sus/response', {
       'answers': answers,
     }, authenticated: true);
     return SusResult.fromJson(data);
+  }
+
+  Future<Survey> getSatisfactionSurvey() async {
+    final data = await ApiClient.get('/surveys/satisfaction');
+    return Survey.fromJson(data);
+  }
+
+  Future<SatisfactionResult> submitSatisfaction(
+    Map<String, String> answers,
+  ) async {
+    final data = await ApiClient.post('/surveys/satisfaction/response', {
+      'answers': answers,
+    }, authenticated: true);
+    return SatisfactionResult.fromJson(data);
   }
 }
 

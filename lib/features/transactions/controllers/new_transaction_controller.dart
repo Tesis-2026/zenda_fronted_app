@@ -5,6 +5,7 @@ import '../../../core/errors/error_codes.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/services/pending_transaction_queue.dart';
 import '../../../core/services/streak_repository.dart';
+import '../../../core/services/study_telemetry_service.dart';
 import '../../../providers/repositories_providers.dart';
 import '../../auth/auth_controller.dart';
 import '../../budget/budget_screen.dart';
@@ -462,6 +463,16 @@ class NewTransactionController extends Notifier<NewTransactionState> {
 
       // Update streak only on save.
       await streakRepo.updateOnTransaction(state.date);
+      StudyTelemetryService.track(
+        'transaction_created',
+        metadata: {
+          'kind': kind.name,
+          'source': state.source.name,
+          'has_account': accountId != null && accountId.isNotEmpty,
+          'has_budget': budgetId != null && budgetId.isNotEmpty,
+        },
+        backend: false,
+      );
 
       // Trigger dashboard refresh (providers are currently FutureProviders).
       ref.invalidate(transactionsProvider);
