@@ -5,6 +5,7 @@ import '../../core/services/study_telemetry_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../l10n/l10n_extension.dart';
 
 class _ChatBubble {
@@ -12,25 +13,20 @@ class _ChatBubble {
   final String text;
   final bool isUser;
   final bool feedbackSubmitted;
-  final int? feedbackRating;
 
-  _ChatBubble({
+  const _ChatBubble({
     this.id,
     required this.text,
     required this.isUser,
     this.feedbackSubmitted = false,
-    this.feedbackRating,
   });
 
-  _ChatBubble copyWith({bool? feedbackSubmitted, int? feedbackRating}) {
-    return _ChatBubble(
-      id: id,
-      text: text,
-      isUser: isUser,
-      feedbackSubmitted: feedbackSubmitted ?? this.feedbackSubmitted,
-      feedbackRating: feedbackRating ?? this.feedbackRating,
-    );
-  }
+  _ChatBubble copyWith({bool? feedbackSubmitted}) => _ChatBubble(
+    id: id,
+    text: text,
+    isUser: isUser,
+    feedbackSubmitted: feedbackSubmitted ?? this.feedbackSubmitted,
+  );
 }
 
 class AiChatScreen extends ConsumerStatefulWidget {
@@ -45,6 +41,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   final _scrollController = ScrollController();
   final _messages = <_ChatBubble>[];
   bool _loading = false;
+  String? _submittingFeedbackMessageId;
 
   @override
   void initState() {
@@ -127,45 +124,59 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
     }
   }
 
-  Future<void> _submitFeedback(int index, int rating) async {
-    if (index < 0 || index >= _messages.length) return;
-    final bubble = _messages[index];
+  Future<void> _openFeedbackSheet(_ChatBubble bubble) async {
     final messageId = bubble.id;
-    if (bubble.isUser || messageId == null || bubble.feedbackSubmitted) return;
+    if (messageId == null || _submittingFeedbackMessageId != null) return;
 
-    setState(() {
-      _messages[index] = bubble.copyWith(
-        feedbackSubmitted: true,
-        feedbackRating: rating,
-      );
-    });
-    StudyTelemetryService.track(
-      'ai_answer_feedback',
-      metadata: {'rating': rating, 'source': 'ai_chat'},
-      backend: false,
+    final feedback = await showModalBottomSheet<_AiFeedbackDraft>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const _AiFeedbackSheet(),
     );
+    if (feedback == null || !mounted) return;
 
+    setState(() => _submittingFeedbackMessageId = messageId);
     try {
+      StudyTelemetryService.track(
+        'ai_answer_feedback',
+        metadata: {'rating': feedback.rating, 'source': 'ai_chat'},
+        backend: false,
+      );
       await ref
           .read(aiChatServiceProvider)
-          .submitMessageFeedback(
-            messageId,
-            rating: rating,
-            helpful: rating >= 4,
-            clear: rating >= 4,
-            personalized: rating >= 4,
+          .submitFeedback(
+            messageId: messageId,
+            rating: feedback.rating,
+            helpful: feedback.helpful,
+            clear: feedback.clear,
+            personalized: feedback.personalized,
+            comment: feedback.comment,
           );
-    } catch (_) {
       if (!mounted) return;
       setState(() {
-        _messages[index] = bubble.copyWith(
-          feedbackSubmitted: false,
-          feedbackRating: null,
+        final index = _messages.indexWhere(
+          (message) => message.id == messageId,
         );
+        if (index >= 0) {
+          _messages[index] = _messages[index].copyWith(feedbackSubmitted: true);
+        }
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo guardar la evaluación.')),
+      showAppToast(
+        context,
+        'Gracias, tu calificación ayuda a mejorar Zenda AI.',
+        type: ToastType.success,
       );
+    } catch (_) {
+      if (!mounted) return;
+      showAppToast(
+        context,
+        'No se pudo enviar la calificación. Inténtalo de nuevo.',
+        type: ToastType.error,
+      );
+    } finally {
+      if (mounted) setState(() => _submittingFeedbackMessageId = null);
     }
   }
 
@@ -280,9 +291,17 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                 if (i == _messages.length) {
                   return const _TypingBubble();
                 }
+                final bubble = _messages[i];
                 return _MessageBubble(
-                  bubble: _messages[i],
-                  onFeedback: (rating) => _submitFeedback(i, rating),
+                  bubble: bubble,
+                  isSubmittingFeedback:
+                      bubble.id == _submittingFeedbackMessageId,
+                  onFeedback:
+                      !bubble.isUser &&
+                          bubble.id != null &&
+                          !bubble.feedbackSubmitted
+                      ? () => _openFeedbackSheet(bubble)
+                      : null,
                 );
               },
             ),
@@ -314,9 +333,15 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.bubble, required this.onFeedback});
+  const _MessageBubble({
+    required this.bubble,
+    required this.isSubmittingFeedback,
+    this.onFeedback,
+  });
+
   final _ChatBubble bubble;
-  final ValueChanged<int> onFeedback;
+  final bool isSubmittingFeedback;
+  final VoidCallback? onFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -370,45 +395,47 @@ class _MessageBubble extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.72,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.72,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(4),
+                  topRight: Radius.circular(18),
+                  bottomLeft: Radius.circular(18),
+                  bottomRight: Radius.circular(18),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.card,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(4),
-                      topRight: Radius.circular(18),
-                      bottomLeft: Radius.circular(18),
-                      bottomRight: Radius.circular(18),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
                     bubble.text,
                     style: TextStyle(color: colors.textPrimary, height: 1.5),
                   ),
-                ),
-                if (bubble.id != null)
-                  _AssistantFeedbackBar(
-                    submitted: bubble.feedbackSubmitted,
-                    rating: bubble.feedbackRating,
-                    onFeedback: onFeedback,
-                  ),
-              ],
+                  if (bubble.feedbackSubmitted) ...[
+                    const SizedBox(height: 10),
+                    const _FeedbackSubmittedBadge(),
+                  ] else if (onFeedback != null) ...[
+                    const SizedBox(height: 10),
+                    _FeedbackButton(
+                      loading: isSubmittingFeedback,
+                      onPressed: onFeedback,
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ],
@@ -417,86 +444,284 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-class _AssistantFeedbackBar extends StatelessWidget {
-  const _AssistantFeedbackBar({
-    required this.submitted,
+class _FeedbackButton extends StatelessWidget {
+  const _FeedbackButton({required this.loading, required this.onPressed});
+
+  final bool loading;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: loading ? null : onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        minimumSize: const Size(44, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+      ),
+      icon: loading
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primary,
+              ),
+            )
+          : const Icon(Icons.star_outline_rounded, size: 18),
+      label: Text(
+        loading ? 'Enviando...' : 'Calificar respuesta',
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _FeedbackSubmittedBadge extends StatelessWidget {
+  const _FeedbackSubmittedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.check_circle_rounded, size: 16, color: AppColors.primary),
+          SizedBox(width: 6),
+          Text(
+            'Calificación enviada',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AiFeedbackDraft {
+  const _AiFeedbackDraft({
     required this.rating,
-    required this.onFeedback,
+    required this.helpful,
+    required this.clear,
+    required this.personalized,
+    required this.comment,
   });
 
-  final bool submitted;
-  final int? rating;
-  final ValueChanged<int> onFeedback;
+  final int rating;
+  final bool helpful;
+  final bool clear;
+  final bool personalized;
+  final String comment;
+}
+
+class _AiFeedbackSheet extends StatefulWidget {
+  const _AiFeedbackSheet();
+
+  @override
+  State<_AiFeedbackSheet> createState() => _AiFeedbackSheetState();
+}
+
+class _AiFeedbackSheetState extends State<_AiFeedbackSheet> {
+  final _commentController = TextEditingController();
+  int _rating = 0;
+  bool _helpful = true;
+  bool _clear = true;
+  bool _personalized = true;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    if (submitted) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.check_circle_rounded,
-              size: 16,
-              color: AppColors.primary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'Gracias por evaluar (${rating ?? '-'}/5)',
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '¿Qué tan útil fue esta respuesta?',
-            style: TextStyle(
-              color: colors.textMuted,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: List.generate(5, (index) {
-              final value = index + 1;
-              return SizedBox(
-                width: 44,
-                height: 44,
-                child: OutlinedButton(
-                  onPressed: () => onFeedback(value),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    foregroundColor: colors.textPrimary,
-                    side: BorderSide(color: colors.border),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colors.border,
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  child: Text(
-                    value.toString(),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Califica esta respuesta',
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Cerrar',
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.close_rounded, color: colors.textMuted),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Tu evaluación ayuda a medir calidad, claridad y personalización del agente para el piloto.',
+                  style: TextStyle(
+                    color: colors.textMuted,
+                    fontSize: 13,
+                    height: 1.4,
                   ),
                 ),
-              );
-            }),
+                const SizedBox(height: 18),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    final value = index + 1;
+                    final selected = value <= _rating;
+                    return IconButton(
+                      tooltip: '$value estrellas',
+                      constraints: const BoxConstraints(
+                        minWidth: 44,
+                        minHeight: 44,
+                      ),
+                      onPressed: () => setState(() => _rating = value),
+                      icon: Icon(
+                        selected
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        size: 34,
+                        color: selected
+                            ? const Color(0xFFF59E0B)
+                            : colors.textMuted,
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _FeedbackChip(
+                      label: 'Útil',
+                      selected: _helpful,
+                      onSelected: (value) => setState(() => _helpful = value),
+                    ),
+                    _FeedbackChip(
+                      label: 'Clara',
+                      selected: _clear,
+                      onSelected: (value) => setState(() => _clear = value),
+                    ),
+                    _FeedbackChip(
+                      label: 'Personalizada',
+                      selected: _personalized,
+                      onSelected: (value) =>
+                          setState(() => _personalized = value),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _commentController,
+                  maxLines: 3,
+                  textInputAction: TextInputAction.newline,
+                  decoration: InputDecoration(
+                    labelText: 'Comentario opcional',
+                    hintText: '¿Qué fue útil o qué debería mejorar?',
+                    alignLabelWithHint: true,
+                    filled: true,
+                    fillColor: colors.fill,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                FilledButton(
+                  onPressed: _rating == 0
+                      ? null
+                      : () => Navigator.of(context).pop(
+                          _AiFeedbackDraft(
+                            rating: _rating,
+                            helpful: _helpful,
+                            clear: _clear,
+                            personalized: _personalized,
+                            comment: _commentController.text,
+                          ),
+                        ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    backgroundColor: AppColors.primary,
+                  ),
+                  child: const Text('Enviar calificación'),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FeedbackChip extends StatelessWidget {
+  const _FeedbackChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final ValueChanged<bool> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: onSelected,
+      checkmarkColor: AppColors.primary,
+      selectedColor: AppColors.primary.withValues(alpha: 0.12),
+      side: BorderSide(
+        color: selected
+            ? AppColors.primary.withValues(alpha: 0.4)
+            : context.colors.border,
+      ),
+      labelStyle: TextStyle(
+        color: selected ? AppColors.primary : context.colors.textMuted,
+        fontWeight: FontWeight.w700,
       ),
     );
   }

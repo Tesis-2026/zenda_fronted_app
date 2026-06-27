@@ -564,6 +564,7 @@ class MockAiChatApiService extends AiChatApiService {
   // history persists across sends within the same app run, and is
   // wiped on closeActive().
   final List<ChatMessage> _history = [];
+  int _nextMessageId = 1;
 
   @override
   Future<ActiveConversation> getActive() async {
@@ -579,13 +580,13 @@ class MockAiChatApiService extends AiChatApiService {
     await Future.delayed(const Duration(milliseconds: 800));
     _history.add(
       ChatMessage(
-        id: 'mock-user-${_history.length + 1}',
+        id: 'mock-${_nextMessageId++}',
         role: 'user',
         content: message,
       ),
     );
     final reply = _respond(message.toLowerCase());
-    final assistantId = 'mock-assistant-${_history.length + 1}';
+    final assistantId = 'mock-${_nextMessageId++}';
     _history.add(
       ChatMessage(id: assistantId, role: 'assistant', content: reply),
     );
@@ -602,15 +603,15 @@ class MockAiChatApiService extends AiChatApiService {
   }
 
   @override
-  Future<void> submitMessageFeedback(
-    String messageId, {
+  Future<void> submitFeedback({
+    required String messageId,
     required int rating,
     bool? helpful,
     bool? clear,
     bool? personalized,
     String? comment,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 150));
+    await Future.delayed(const Duration(milliseconds: 200));
   }
 
   String _respond(String input) {

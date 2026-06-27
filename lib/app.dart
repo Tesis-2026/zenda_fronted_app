@@ -54,6 +54,7 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       'app_session_started',
       metadata: {'source': 'resume', 'app_env': AppConfig.env.name},
     );
+    unawaited(ref.read(fcmServiceProvider).registerWithBackend());
   }
 
   @override

@@ -49,7 +49,10 @@ class FcmService {
     try {
       await Firebase.initializeApp();
     } catch (e) {
-      developer.log('Firebase.initializeApp failed: $e — push disabled', name: 'fcm');
+      developer.log(
+        'Firebase.initializeApp failed: $e — push disabled',
+        name: 'fcm',
+      );
       _initialized = false;
       return;
     }
@@ -77,7 +80,8 @@ class FcmService {
     await _localNotifications.initialize(initSettings);
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(_androidChannel);
 
     _foregroundSub = FirebaseMessaging.onMessage.listen(_onForegroundMessage);
@@ -96,6 +100,9 @@ class FcmService {
   /// Reads the current FCM token and POSTs it to the backend. Requires the
   /// user to be authenticated (the ApiClient injects the JWT).
   Future<void> registerWithBackend() async {
+    if (!_initialized) {
+      await initialize();
+    }
     if (!_initialized) return;
     try {
       final token = _cachedToken ?? await FirebaseMessaging.instance.getToken();
@@ -138,7 +145,7 @@ class FcmService {
           channelDescription: _androidChannel.description,
           importance: Importance.high,
           priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+          icon: 'ic_launcher',
         ),
         iOS: const DarwinNotificationDetails(
           presentAlert: true,

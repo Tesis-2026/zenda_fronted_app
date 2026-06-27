@@ -40,7 +40,6 @@ class _InicioSection extends ConsumerWidget {
     final onSurface = colors.textPrimary;
     final onSurfaceMuted = colors.textMuted;
 
-    final budgetSummaryAsync = ref.watch(budgetSummaryProvider);
     final monthSummaryAsync = ref.watch(monthSummaryProvider);
     final now = DateTime.now();
     final accountReportAsync = ref.watch(
@@ -116,8 +115,7 @@ class _InicioSection extends ConsumerWidget {
 
             const SusPromptCard(),
 
-            // Total money = sum of registered budgets
-            _TotalMoneyCard(summary: budgetSummaryAsync),
+            _TotalMoneyCard(report: accountReportAsync),
 
             const SizedBox(height: 12),
 
@@ -151,18 +149,21 @@ class _InicioSection extends ConsumerWidget {
 /// plus how much is available vs. spent. Money is tracked through budgets;
 /// there are no accounts. Tapping routes to the budgets manager.
 class _TotalMoneyCard extends StatelessWidget {
-  final AsyncValue<BudgetTotals> summary;
+  final AsyncValue<AccountReport> report;
 
-  const _TotalMoneyCard({required this.summary});
+  const _TotalMoneyCard({required this.report});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final totals = summary.asData?.value;
-    final total = totals?.total ?? 0.0;
-    final available = totals?.available ?? 0.0;
-    final spent = totals?.spent ?? 0.0;
-    final hasBudgets = total > 0;
+    final data = report.asData?.value;
+    final total = data?.totalAssets ?? 0.0;
+    final debt = data?.totalCreditDebt ?? 0.0;
+    final available = total;
+    final spent = debt;
+    final hasAccounts = (data?.accounts ?? const []).isNotEmpty;
+    final isLoading = report.isLoading && data == null;
+    final hasError = report.hasError && data == null;
 
     return Container(
       width: double.infinity,
@@ -182,7 +183,7 @@ class _TotalMoneyCard extends StatelessWidget {
                 style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
               ),
               GestureDetector(
-                onTap: () => context.push('/budgets'),
+                onTap: () => context.push('/add-transaction'),
                 child: const Icon(
                   Icons.add_circle_outline,
                   color: Color(0xFF34D399),
@@ -192,16 +193,31 @@ class _TotalMoneyCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            'S/ ${total.toStringAsFixed(2)}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
+          if (isLoading)
+            const SizedBox(
+              width: 38,
+              height: 38,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.6,
+                color: Colors.white,
+              ),
+            )
+          else
+            Text(
+              hasError ? 'S/ --' : 'S/ ${total.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ),
           const SizedBox(height: 8),
-          if (hasBudgets)
+          if (hasError)
+            const Text(
+              'No se pudo cargar tu saldo. Desliza hacia abajo para actualizar.',
+              style: TextStyle(color: Color(0xFFFCA5A5), fontSize: 12),
+            )
+          else if (hasAccounts)
             Row(
               children: [
                 Expanded(
@@ -215,7 +231,7 @@ class _TotalMoneyCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: () => context.push('/budgets'),
+                  onTap: () => context.push('/transactions'),
                   child: Text(
                     '▶  ${l10n.dashboardViewAll}',
                     style: const TextStyle(
@@ -228,9 +244,9 @@ class _TotalMoneyCard extends StatelessWidget {
             )
           else
             GestureDetector(
-              onTap: () => context.push('/budgets'),
+              onTap: () => context.push('/add-transaction'),
               child: Text(
-                '+  ${l10n.budgetEmptySubtitle}',
+                '+ Registra un ingreso para ver tu dinero disponible',
                 style: const TextStyle(color: Color(0xFF34D399), fontSize: 12),
               ),
             ),

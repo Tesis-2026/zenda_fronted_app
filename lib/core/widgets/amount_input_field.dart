@@ -13,18 +13,21 @@ class AmountInputField extends StatelessWidget {
     required this.controller,
     this.onChanged,
     this.autofocus = false,
+    this.focusNode,
     this.textInputAction,
   });
 
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
   final bool autofocus;
+  final FocusNode? focusNode;
   final TextInputAction? textInputAction;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       autofocus: autofocus,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       textInputAction: textInputAction,
@@ -37,8 +40,10 @@ class AmountInputField extends StatelessWidget {
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xFFF9FAFB),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFE5E7EB)),

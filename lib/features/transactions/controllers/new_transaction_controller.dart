@@ -183,7 +183,11 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         .replaceAll(',', '.')
         .replaceAll(RegExp(r'[^0-9\.]'), '');
     final value = double.tryParse(normalized);
-    state = state.copyWith(amount: value, clearError: true);
+    state = state.copyWith(
+      amount: value,
+      source: TransactionSource.manual,
+      clearError: true,
+    );
   }
 
   void setCategory(TransactionCategory category) {

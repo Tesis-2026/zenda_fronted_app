@@ -48,6 +48,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
 
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _amountController = TextEditingController();
+  final _amountFocusNode = FocusNode();
   final _noteController = TextEditingController();
   TransactionCategory? _aiSuggestion;
   bool _isClassifying = false;
@@ -58,6 +59,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   void dispose() {
     ref.invalidate(newTransactionControllerProvider);
     _amountController.dispose();
+    _amountFocusNode.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -370,8 +372,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     });
 
-    // Keep text controllers in sync with OCR demo/autofill.
-    if (state.amount != null) {
+    // Keep text controllers in sync with OCR/voice autofill, but never rewrite
+    // the amount while the user is typing manually. Reformatting "5" to "5.00"
+    // mid-input leaves the cursor at the end and turns the next digit into
+    // "5.001".
+    if (state.amount != null &&
+        state.source != TransactionSource.manual &&
+        !_amountFocusNode.hasFocus) {
       final desired = state.amount!.toStringAsFixed(2);
       if (_amountController.text != desired) {
         _amountController.text = desired;
@@ -436,6 +443,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 const SizedBox(height: 10),
                 AmountInputField(
                   controller: _amountController,
+                  focusNode: _amountFocusNode,
                   onChanged: controller.setAmountFromText,
                   textInputAction: TextInputAction.next,
                 ),

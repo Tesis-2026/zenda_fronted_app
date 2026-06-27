@@ -180,8 +180,8 @@ class ChatReply {
 
   const ChatReply({
     required this.conversationId,
-    this.assistantMessageId,
     required this.reply,
+    this.assistantMessageId,
   });
 }
 
@@ -214,9 +214,9 @@ abstract class AiChatApiService {
   /// reopened by the backend if the user continues chatting later.
   Future<void> closeActive();
 
-  /// Stores a lightweight 1-5 user rating for a specific assistant answer.
-  Future<void> submitMessageFeedback(
-    String messageId, {
+  /// Evaluates a persisted assistant answer for the research pilot.
+  Future<void> submitFeedback({
+    required String messageId,
     required int rating,
     bool? helpful,
     bool? clear,
@@ -266,8 +266,8 @@ class LiveAiChatApiService extends AiChatApiService {
   }
 
   @override
-  Future<void> submitMessageFeedback(
-    String messageId, {
+  Future<void> submitFeedback({
+    required String messageId,
     required int rating,
     bool? helpful,
     bool? clear,
@@ -279,7 +279,8 @@ class LiveAiChatApiService extends AiChatApiService {
       'helpful': ?helpful,
       'clear': ?clear,
       'personalized': ?personalized,
-      'comment': ?comment,
+      if (comment != null && comment.trim().isNotEmpty)
+        'comment': comment.trim(),
     }, authenticated: true);
   }
 }
