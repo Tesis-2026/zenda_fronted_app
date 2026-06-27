@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/app_config.dart';
 
@@ -136,7 +137,11 @@ class ApiClient {
     try {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } catch (_) {
-      developer.log('Non-JSON response body: ${response.body}', name: 'ApiClient', level: 800);
+      developer.log(
+        'Non-JSON response body: ${response.body}',
+        name: 'ApiClient',
+        level: 800,
+      );
       return {};
     }
   }
@@ -149,14 +154,15 @@ class ApiClient {
     final message = raw is List
         ? raw.cast<Object>().join('; ')
         : (raw as String?) ?? 'Error inesperado';
-    throw ApiException(statusCode: response.statusCode, message: message, body: body);
+    throw ApiException(
+      statusCode: response.statusCode,
+      message: message,
+      body: body,
+    );
   }
 
   static void _log(String method, String url, int statusCode) {
-    developer.log(
-      '[$method] $url → $statusCode',
-      name: 'ApiClient',
-    );
+    developer.log('[$method] $url → $statusCode', name: 'ApiClient');
   }
 
   static void _logError(String method, String url, Object error) {
@@ -197,7 +203,11 @@ class ApiClient {
         final refreshed = await _tryRefresh();
         if (refreshed) {
           response = await http
-              .post(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+              .post(
+                Uri.parse(url),
+                headers: await _authHeaders(),
+                body: jsonEncode(body),
+              )
               .timeout(_kRequestTimeout);
         }
       }
@@ -208,6 +218,55 @@ class ApiClient {
     } catch (e) {
       if (e is ApiException) rethrow;
       _logError('POST', url, e);
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required String fieldName,
+    required List<int> bytes,
+    required String filename,
+    required String contentType,
+    bool authenticated = true,
+  }) async {
+    final url = '$_kBaseUrl$path';
+
+    Future<http.Response> send() async {
+      final request = http.MultipartRequest('POST', Uri.parse(url));
+      if (authenticated) {
+        final headers = await _authHeaders();
+        headers.remove(HttpHeaders.contentTypeHeader);
+        request.headers.addAll(headers);
+      }
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          fieldName,
+          bytes,
+          filename: filename,
+          contentType: MediaType.parse(contentType),
+        ),
+      );
+      final streamed = await request.send().timeout(_kRequestTimeout);
+      return http.Response.fromStream(streamed).timeout(_kRequestTimeout);
+    }
+
+    try {
+      var response = await send();
+
+      if (response.statusCode == 401 && authenticated) {
+        final refreshed = await _tryRefresh();
+        if (refreshed) {
+          response = await send();
+        }
+      }
+
+      _log('POST(multipart)', url, response.statusCode);
+      _throwIfError(response);
+      return _parseBody(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      _logError('POST(multipart)', url, e);
       rethrow;
     }
   }
@@ -245,14 +304,22 @@ class ApiClient {
     final url = '$_kBaseUrl$path';
     try {
       var response = await http
-          .put(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+          .put(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+            body: jsonEncode(body),
+          )
           .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
           response = await http
-              .put(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+              .put(
+                Uri.parse(url),
+                headers: await _authHeaders(),
+                body: jsonEncode(body),
+              )
               .timeout(_kRequestTimeout);
         }
       }
@@ -274,14 +341,22 @@ class ApiClient {
     final url = '$_kBaseUrl$path';
     try {
       var response = await http
-          .patch(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+          .patch(
+            Uri.parse(url),
+            headers: await _authHeaders(),
+            body: jsonEncode(body),
+          )
           .timeout(_kRequestTimeout);
 
       if (response.statusCode == 401) {
         final refreshed = await _tryRefresh();
         if (refreshed) {
           response = await http
-              .patch(Uri.parse(url), headers: await _authHeaders(), body: jsonEncode(body))
+              .patch(
+                Uri.parse(url),
+                headers: await _authHeaders(),
+                body: jsonEncode(body),
+              )
               .timeout(_kRequestTimeout);
         }
       }

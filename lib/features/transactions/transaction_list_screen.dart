@@ -32,18 +32,19 @@ class _FiltersNotifier extends Notifier<_TxFilters> {
   void update(_TxFilters filters) => state = filters;
 }
 
-final _txFiltersProvider =
-    NotifierProvider<_FiltersNotifier, _TxFilters>(() => _FiltersNotifier());
+final _txFiltersProvider = NotifierProvider<_FiltersNotifier, _TxFilters>(
+  () => _FiltersNotifier(),
+);
 
 // ── Data provider ─────────────────────────────────────────────────────────────
 
 final transactionListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final f = ref.watch(_txFiltersProvider);
-  final apiService = ref.read(transactionApiServiceProvider);
-  final typeParam = f.type == 'ALL' ? null : f.type;
-  return apiService.getAll(type: typeParam);
-});
+      final f = ref.watch(_txFiltersProvider);
+      final apiService = ref.read(transactionApiServiceProvider);
+      final typeParam = f.type == 'ALL' ? null : f.type;
+      return apiService.getAll(type: typeParam);
+    });
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -148,8 +149,7 @@ class TransactionListScreen extends ConsumerWidget {
               child: Center(
                 child: Text(
                   l10n.commonUnknownError,
-                  style:
-                      TextStyle(color: onSurface.withValues(alpha: 0.75)),
+                  style: TextStyle(color: onSurface.withValues(alpha: 0.75)),
                 ),
               ),
             ),
@@ -221,23 +221,17 @@ class _TxChip extends StatelessWidget {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color:
-              selected ? AppColors.primary : Colors.white,
+          color: selected ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: selected
-              ? null
-              : Border.all(color: AppColors.border),
+          border: selected ? null : Border.all(color: AppColors.border),
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(
             fontSize: 13,
-            fontWeight:
-                selected ? FontWeight.w600 : FontWeight.normal,
-            color: selected
-                ? Colors.white
-                : AppColors.textMuted,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+            color: selected ? Colors.white : AppColors.textMuted,
           ),
         ),
       ),
@@ -269,21 +263,37 @@ class _TransactionRow extends ConsumerWidget {
     final category = tx['category'] as Map<String, dynamic>?;
     final categoryName = category?['name'] as String?;
     final categoryIconKey = category?['icon'] as String?;
+    final account = tx['account'] as Map<String, dynamic>?;
+    final toAccount = tx['toAccount'] as Map<String, dynamic>?;
+    final accountName = account?['name'] as String?;
+    final toAccountName = toAccount?['name'] as String?;
 
     DateTime? parsedDate;
     if (occurredAt != null) {
       parsedDate = DateTime.tryParse(occurredAt)?.toLocal();
     }
 
-    final isIncome = type.toLowerCase() == 'income';
-    final amountColor =
-        isIncome ? AppColors.income : AppColors.danger;
-    final amountSign = isIncome ? '+' : '-';
-    final bgColor = CategoryUtils.bgColorForCategory(categoryName, isIncome: isIncome);
-    final iconColor = CategoryUtils.iconColorForCategory(categoryName, isIncome: isIncome);
+    final normalizedType = type.toLowerCase();
+    final isIncome = normalizedType == 'income';
+    final isTransfer = normalizedType == 'transfer';
+    final amountColor = isTransfer
+        ? const Color(0xFF2563EB)
+        : isIncome
+        ? AppColors.income
+        : AppColors.danger;
+    final amountSign = isTransfer ? '' : (isIncome ? '+' : '-');
+    final bgColor = isTransfer
+        ? const Color(0xFFEFF6FF)
+        : CategoryUtils.bgColorForCategory(categoryName, isIncome: isIncome);
+    final iconColor = isTransfer
+        ? const Color(0xFF2563EB)
+        : CategoryUtils.iconColorForCategory(categoryName, isIncome: isIncome);
 
-    final displayLabel =
-        description.isNotEmpty ? description : CategoryUtils.labelEs(categoryName);
+    final displayLabel = isTransfer
+        ? (description.isNotEmpty ? description : 'Transferencia')
+        : (description.isNotEmpty
+              ? description
+              : CategoryUtils.labelEs(categoryName));
     String relativeDay(DateTime d) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -299,7 +309,13 @@ class _TransactionRow extends ConsumerWidget {
         : '';
     // Always translate the backend category name to Spanish (the backend
     // seeds system categories in English, e.g. 'Food'); the app is es-only.
-    final categoryDisplay = CategoryUtils.labelEs(categoryName);
+    final transferAccounts = [
+      accountName,
+      toAccountName,
+    ].whereType<String>().join(' → ');
+    final categoryDisplay = isTransfer
+        ? transferAccounts
+        : CategoryUtils.labelEs(categoryName);
     final dateLabel = parsedDate != null
         ? '${relativeDay(parsedDate)}, $timeStr${categoryDisplay.isNotEmpty ? ' · $categoryDisplay' : ''}'
         : '';
@@ -322,8 +338,12 @@ class _TransactionRow extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
-                CategoryUtils.iconForCategory(categoryName,
-                    iconKey: categoryIconKey),
+                isTransfer
+                    ? Icons.swap_horiz_rounded
+                    : CategoryUtils.iconForCategory(
+                        categoryName,
+                        iconKey: categoryIconKey,
+                      ),
                 color: iconColor,
                 size: 20,
               ),
@@ -388,7 +408,10 @@ class _TransactionRow extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(
-      BuildContext context, WidgetRef ref, String id) async {
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+  ) async {
     final l10n = context.l10n;
     final confirmed = await showDeleteConfirmSheet(
       context,

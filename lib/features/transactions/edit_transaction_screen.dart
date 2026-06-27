@@ -58,8 +58,9 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
     super.initState();
     final tx = widget.transaction;
     final typeStr = (tx['type'] as String? ?? 'expense').toLowerCase();
-    _kind =
-        typeStr == 'income' ? TransactionKind.income : TransactionKind.expense;
+    _kind = typeStr == 'income'
+        ? TransactionKind.income
+        : TransactionKind.expense;
 
     final catName =
         (tx['category'] as Map<String, dynamic>?)?['name'] as String?;
@@ -96,6 +97,11 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
       'subscriptions' => TransactionCategory.suscripciones,
       'cravings' => TransactionCategory.antojos,
       'savings' => TransactionCategory.ahorro,
+      'scholarship' => TransactionCategory.beca,
+      'part-time work' ||
+      'part time work' => TransactionCategory.trabajoPartTime,
+      'family' => TransactionCategory.familia,
+      'freelance' => TransactionCategory.freelance,
       _ => TransactionCategory.otros,
     };
   }
@@ -108,13 +114,15 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      setState(() => _date = DateTime(
-            picked.year,
-            picked.month,
-            picked.day,
-            _date.hour,
-            _date.minute,
-          ));
+      setState(
+        () => _date = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          _date.hour,
+          _date.minute,
+        ),
+      );
     }
   }
 
@@ -131,7 +139,9 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
     }
 
     try {
-      await ref.read(transactionApiServiceProvider).update(
+      await ref
+          .read(transactionApiServiceProvider)
+          .update(
             id: id,
             kind: _kind,
             amount: amount,
@@ -158,7 +168,13 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
       children: [
         KindToggle(
           selected: _kind,
-          onChanged: (k) => setState(() => _kind = k),
+          onChanged: (k) => setState(() {
+            _kind = k;
+            final options = categoriesForTransactionKind(k);
+            if (!options.contains(_category)) {
+              _category = options.first;
+            }
+          }),
           expenseLabel: l10n.txExpense,
           incomeLabel: l10n.txIncome,
         ),
@@ -173,10 +189,7 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
         const SizedBox(height: 16),
         FieldLabel(l10n.txDateLabel),
         const SizedBox(height: 6),
-        AppDateField(
-          value: _date,
-          onTap: () => _pickDate(context),
-        ),
+        AppDateField(value: _date, onTap: () => _pickDate(context)),
         const SizedBox(height: 16),
         FieldLabel(l10n.txCategoryLabel),
         const SizedBox(height: 8),
@@ -186,7 +199,7 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
           sheetTitle: l10n.txCategoryLabel,
           onChanged: (c) => setState(() => _category = c),
           options: [
-            for (final c in TransactionCategory.values)
+            for (final c in categoriesForTransactionKind(_kind))
               CategoryOption<TransactionCategory>(
                 value: c,
                 label: CategorySelector.labelFor(context, c),

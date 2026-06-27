@@ -14,17 +14,17 @@ enum TransactionKind { expense, income, transfer }
 enum CategorySource { ai, aiOverridden, user }
 
 CategorySource? categorySourceFromApi(String? value) => switch (value) {
-      'AI' => CategorySource.ai,
-      'AI_OVERRIDDEN' => CategorySource.aiOverridden,
-      'USER' => CategorySource.user,
-      _ => null,
-    };
+  'AI' => CategorySource.ai,
+  'AI_OVERRIDDEN' => CategorySource.aiOverridden,
+  'USER' => CategorySource.user,
+  _ => null,
+};
 
 String categorySourceToApi(CategorySource source) => switch (source) {
-      CategorySource.ai => 'AI',
-      CategorySource.aiOverridden => 'AI_OVERRIDDEN',
-      CategorySource.user => 'USER',
-    };
+  CategorySource.ai => 'AI',
+  CategorySource.aiOverridden => 'AI_OVERRIDDEN',
+  CategorySource.user => 'USER',
+};
 
 enum TransactionCategory {
   comida,
@@ -37,7 +37,36 @@ enum TransactionCategory {
   suscripciones,
   antojos,
   ahorro,
+  beca,
+  trabajoPartTime,
+  familia,
+  freelance,
   otros,
+}
+
+List<TransactionCategory> categoriesForTransactionKind(TransactionKind kind) {
+  return switch (kind) {
+    TransactionKind.income => const [
+      TransactionCategory.beca,
+      TransactionCategory.trabajoPartTime,
+      TransactionCategory.familia,
+      TransactionCategory.freelance,
+      TransactionCategory.otros,
+    ],
+    TransactionKind.expense || TransactionKind.transfer => const [
+      TransactionCategory.comida,
+      TransactionCategory.transporte,
+      TransactionCategory.vivienda,
+      TransactionCategory.servicios,
+      TransactionCategory.salud,
+      TransactionCategory.ocio,
+      TransactionCategory.compras,
+      TransactionCategory.suscripciones,
+      TransactionCategory.antojos,
+      TransactionCategory.ahorro,
+      TransactionCategory.otros,
+    ],
+  };
 }
 
 enum Bucket503020 { necesidad, deseo, ahorro }
@@ -175,14 +204,17 @@ class TransactionModel {
 
   /// Parses a backend `TransactionResponseDto` payload from
   /// `GET/POST/PUT /api/transactions`. Different shape from local storage:
-  /// `type` instead of `kind` (uppercase), `categoryId` instead of accountId,
-  /// `occurredAt` instead of `timestamp`, etc.
+  /// `type` instead of `kind`, `occurredAt` instead of `timestamp`, etc.
   ///
   /// Bucket is inferred from category via [bucketForCategory] since the
   /// backend does not send it.
   factory TransactionModel.fromApiJson(Map<String, dynamic> json) {
     final typeStr = (json['type'] as String?)?.toUpperCase();
-    final kind = typeStr == 'INCOME' ? TransactionKind.income : TransactionKind.expense;
+    final kind = switch (typeStr) {
+      'INCOME' => TransactionKind.income,
+      'TRANSFER' => TransactionKind.transfer,
+      _ => TransactionKind.expense,
+    };
     final categoryNode = json['category'];
     final categoryName = categoryNode is Map<String, dynamic>
         ? categoryNode['name'] as String?
@@ -191,13 +223,16 @@ class TransactionModel {
     return TransactionModel(
       id: json['id'] as String,
       userId: json['userId'] as String?,
-      accountId: '', // backend does not model accounts; UI groups by source.
+      accountId: (json['accountId'] as String?) ?? '',
+      toAccountId: json['toAccountId'] as String?,
       kind: kind,
       amount: (json['amount'] as num).toDouble(),
       currency: (json['currency'] as String?) ?? 'PEN',
       category: category,
       bucket: bucketForCategory(category),
-      timestamp: DateTime.parse((json['occurredAt'] ?? json['createdAt']) as String),
+      timestamp: DateTime.parse(
+        (json['occurredAt'] ?? json['createdAt']) as String,
+      ),
       note: json['description'] as String?,
       source: TransactionSource.manual,
       suggestedCategoryId: json['suggestedCategoryId'] as String?,
@@ -220,9 +255,11 @@ class TransactionModel {
       'timestamp': timestamp.toIso8601String(),
       'note': note,
       'source': source.toString(),
-      if (suggestedCategoryId != null) 'suggestedCategoryId': suggestedCategoryId,
+      if (suggestedCategoryId != null)
+        'suggestedCategoryId': suggestedCategoryId,
       if (aiConfidence != null) 'aiConfidence': aiConfidence,
-      if (categorySource != null) 'categorySource': categorySourceToApi(categorySource!),
+      if (categorySource != null)
+        'categorySource': categorySourceToApi(categorySource!),
     };
   }
 }
@@ -240,6 +277,14 @@ TransactionCategory _categoryFromApiName(String? name) {
     'subscriptions' || 'suscripciones' => TransactionCategory.suscripciones,
     'cravings' || 'antojos' => TransactionCategory.antojos,
     'savings' || 'ahorro' => TransactionCategory.ahorro,
+    'scholarship' || 'beca' => TransactionCategory.beca,
+    'part-time work' ||
+    'part time work' ||
+    'trabajo part time' ||
+    'sueldo' ||
+    'salario' => TransactionCategory.trabajoPartTime,
+    'family' || 'familia' || 'apoyo familiar' => TransactionCategory.familia,
+    'freelance' || 'honorarios' => TransactionCategory.freelance,
     _ => TransactionCategory.otros,
   };
 }
@@ -260,6 +305,10 @@ Bucket503020 bucketForCategory(TransactionCategory category) {
       return Bucket503020.deseo;
     case TransactionCategory.ahorro:
       return Bucket503020.ahorro;
+    case TransactionCategory.beca:
+    case TransactionCategory.trabajoPartTime:
+    case TransactionCategory.familia:
+    case TransactionCategory.freelance:
     case TransactionCategory.otros:
       return Bucket503020.deseo;
   }

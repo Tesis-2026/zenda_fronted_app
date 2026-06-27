@@ -455,7 +455,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPage1Subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Log with a tap or scan a receipt (demo).'**
+  /// **'Log with a tap or scan a receipt.'**
   String get onboardingPage1Subtitle;
 
   /// No description provided for @onboardingPage1Micro.
@@ -863,8 +863,116 @@ abstract class AppLocalizations {
   /// No description provided for @txScanReceipt.
   ///
   /// In en, this message translates to:
-  /// **'Scan receipt (demo)'**
+  /// **'Scan receipt'**
   String get txScanReceipt;
+
+  /// No description provided for @txScanReceiptCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get txScanReceiptCamera;
+
+  /// No description provided for @txScanReceiptGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose image'**
+  String get txScanReceiptGallery;
+
+  /// No description provided for @txScanningReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading receipt...'**
+  String get txScanningReceipt;
+
+  /// No description provided for @txReceiptApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Details detected. Review them before saving.'**
+  String get txReceiptApplied;
+
+  /// No description provided for @txReceiptScanFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read the receipt. Please try again.'**
+  String get txReceiptScanFailed;
+
+  /// No description provided for @txVoiceTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate'**
+  String get txVoiceTransaction;
+
+  /// No description provided for @txParsingVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing draft...'**
+  String get txParsingVoice;
+
+  /// No description provided for @txVoiceSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate transaction'**
+  String get txVoiceSheetTitle;
+
+  /// No description provided for @txVoiceIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to listen'**
+  String get txVoiceIdle;
+
+  /// No description provided for @txVoiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening...'**
+  String get txVoiceListening;
+
+  /// No description provided for @txVoiceTranscriptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognized text'**
+  String get txVoiceTranscriptLabel;
+
+  /// No description provided for @txVoiceStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get txVoiceStart;
+
+  /// No description provided for @txVoiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get txVoiceStop;
+
+  /// No description provided for @txVoiceUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use text'**
+  String get txVoiceUse;
+
+  /// No description provided for @txVoiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice recognition is not available on this device.'**
+  String get txVoiceUnavailable;
+
+  /// No description provided for @txVoiceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No voice text was detected.'**
+  String get txVoiceEmpty;
+
+  /// No description provided for @txVoiceApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice draft ready. Review it before saving.'**
+  String get txVoiceApplied;
+
+  /// No description provided for @txVoiceDraftFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare the voice draft. Please try again.'**
+  String get txVoiceDraftFailed;
 
   /// No description provided for @txExpense.
   ///
@@ -929,19 +1037,25 @@ abstract class AppLocalizations {
   /// No description provided for @txBudgetLabel.
   ///
   /// In en, this message translates to:
-  /// **'Budget'**
+  /// **'Budget (optional)'**
   String get txBudgetLabel;
 
   /// No description provided for @txBudgetHint.
   ///
   /// In en, this message translates to:
-  /// **'Select a budget'**
+  /// **'No budget'**
   String get txBudgetHint;
+
+  /// No description provided for @txBudgetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No budget'**
+  String get txBudgetNone;
 
   /// No description provided for @txNoBudgetsHint.
   ///
   /// In en, this message translates to:
-  /// **'You don\'t have budgets yet. Create one to start recording.'**
+  /// **'No budgets found for the selected date. You can still save the expense or create one to track limits.'**
   String get txNoBudgetsHint;
 
   /// No description provided for @txAddButton.
@@ -1069,6 +1183,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Savings'**
   String get txCategorySavings;
+
+  /// No description provided for @txCategoryScholarship.
+  ///
+  /// In en, this message translates to:
+  /// **'Scholarship'**
+  String get txCategoryScholarship;
+
+  /// No description provided for @txCategoryPartTimeWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Part-time work'**
+  String get txCategoryPartTimeWork;
+
+  /// No description provided for @txCategoryFamilyIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Family support'**
+  String get txCategoryFamilyIncome;
+
+  /// No description provided for @txCategoryFreelance.
+  ///
+  /// In en, this message translates to:
+  /// **'Freelance'**
+  String get txCategoryFreelance;
 
   /// No description provided for @txCategoryOther.
   ///
@@ -2147,7 +2285,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorTxNoSourceAccount.
   ///
   /// In en, this message translates to:
-  /// **'Select a budget.'**
+  /// **'Select a valid option.'**
   String get errorTxNoSourceAccount;
 
   /// No description provided for @errorTxInvalidAmount.

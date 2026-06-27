@@ -24,6 +24,10 @@ abstract final class CategorySelector {
       TransactionCategory.suscripciones => l10n.txCategorySubscriptions,
       TransactionCategory.antojos => l10n.txCategoryCravings,
       TransactionCategory.ahorro => l10n.txCategorySavings,
+      TransactionCategory.beca => l10n.txCategoryScholarship,
+      TransactionCategory.trabajoPartTime => l10n.txCategoryPartTimeWork,
+      TransactionCategory.familia => l10n.txCategoryFamilyIncome,
+      TransactionCategory.freelance => l10n.txCategoryFreelance,
       TransactionCategory.otros => l10n.txCategoryOther,
     };
   }
