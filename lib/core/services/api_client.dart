@@ -68,6 +68,12 @@ class ApiClient {
   static Future<String?> getRefreshToken() =>
       _storage.read(key: _kRefreshTokenKey);
 
+  static Future<bool> hasStoredSession() async {
+    final token = await getToken();
+    final refreshToken = await getRefreshToken();
+    return token != null || refreshToken != null;
+  }
+
   static Future<void> deleteTokens() async {
     await Future.wait([
       _storage.delete(key: _kAccessTokenKey),
@@ -121,6 +127,8 @@ class ApiClient {
     _sessionExpiredController.add(null);
     return false;
   }
+
+  static Future<bool> refreshSession() => _tryRefresh();
 
   // ── Request helpers ──────────────────────────────────────────────
 

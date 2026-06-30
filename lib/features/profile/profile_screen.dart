@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/user.dart';
+import '../../core/services/biometric_auth_service.dart';
 import '../../core/services/user_api_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
@@ -15,10 +16,16 @@ import '../auth/auth_controller.dart';
 import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
 
-final profileUserServiceProvider = Provider<UserApiService>((_) => UserApiService());
+final profileUserServiceProvider = Provider<UserApiService>(
+  (_) => UserApiService(),
+);
 
 final _profileProvider = FutureProvider<User>((ref) async {
   return ref.read(profileUserServiceProvider).getProfile();
+});
+
+final _biometricStatusProvider = FutureProvider<BiometricStatus>((ref) async {
+  return ref.read(biometricAuthServiceProvider).getStatus();
 });
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -31,6 +38,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isEditing = false;
   bool _isSaving = false;
+  bool _isBiometricSaving = false;
   String _currency = 'PEN';
 
   late TextEditingController _nameController;
@@ -64,21 +72,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _saveEdit() async {
     setState(() => _isSaving = true);
     try {
-      await ref.read(profileUserServiceProvider).updateProfile(
-        fullName: _nameController.text.trim().isEmpty
-            ? null
-            : _nameController.text.trim(),
-        age: int.tryParse(_ageController.text),
-        university: _universityController.text.trim().isEmpty
-            ? null
-            : _universityController.text.trim(),
-        currency: _currency,
-      );
+      await ref
+          .read(profileUserServiceProvider)
+          .updateProfile(
+            fullName: _nameController.text.trim().isEmpty
+                ? null
+                : _nameController.text.trim(),
+            age: int.tryParse(_ageController.text),
+            university: _universityController.text.trim().isEmpty
+                ? null
+                : _universityController.text.trim(),
+            currency: _currency,
+          );
       ref.invalidate(_profileProvider);
       if (mounted) setState(() => _isEditing = false);
     } catch (_) {
       if (mounted) {
-        showAppToast(context, context.l10n.profileErrorSave, type: ToastType.error);
+        showAppToast(
+          context,
+          context.l10n.profileErrorSave,
+          type: ToastType.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -98,6 +112,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (confirmed && mounted) {
       await ref.read(authNotifierProvider.notifier).logout();
       if (mounted) context.go('/auth/login');
+    }
+  }
+
+  Future<void> _toggleBiometrics(bool enabled) async {
+    setState(() => _isBiometricSaving = true);
+    try {
+      if (enabled) {
+        final activated = await ref
+            .read(authNotifierProvider.notifier)
+            .enableBiometricsForCurrentUser();
+        if (!mounted) return;
+        showAppToast(
+          context,
+          activated
+              ? 'Huella digital activada.'
+              : 'No se pudo validar la huella digital.',
+          type: activated ? ToastType.success : ToastType.error,
+        );
+      } else {
+        await ref.read(authNotifierProvider.notifier).disableBiometrics();
+        if (!mounted) return;
+        showAppToast(
+          context,
+          'Huella digital desactivada.',
+          type: ToastType.info,
+        );
+      }
+      ref.invalidate(_biometricStatusProvider);
+    } finally {
+      if (mounted) setState(() => _isBiometricSaving = false);
     }
   }
 
@@ -126,7 +170,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   String _currencyDisplay(BuildContext context, String currency) {
-    if (currency == 'PEN' || currency.isEmpty) return context.l10n.profileCurrencyPEN;
+    if (currency == 'PEN' || currency.isEmpty) {
+      return context.l10n.profileCurrencyPEN;
+    }
     if (currency == 'USD') return context.l10n.profileCurrencyUSD;
     return currency;
   }
@@ -139,7 +185,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       appBar: ZendaAppBar(
         title: l10n.profileTitle,
-        onLeadingPressed: _isEditing ? () => setState(() => _isEditing = false) : null,
+        onLeadingPressed: _isEditing
+            ? () => setState(() => _isEditing = false)
+            : null,
         actions: [
           if (!_isEditing)
             Padding(
@@ -150,11 +198,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.edit_outlined, color: context.colors.icon, size: 20),
-                  onPressed: () => profileAsync.whenData((user) => _startEdit(user)),
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    color: context.colors.icon,
+                    size: 20,
+                  ),
+                  onPressed: () =>
+                      profileAsync.whenData((user) => _startEdit(user)),
                   tooltip: l10n.profileEdit,
                   padding: const EdgeInsets.all(8),
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
                 ),
               ),
             ),
@@ -183,6 +239,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildReadView(User user) {
     final l10n = context.l10n;
+    final biometricStatus = ref.watch(_biometricStatusProvider);
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       children: [
@@ -193,7 +250,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: Text(
               _initials(user.name),
               style: const TextStyle(
-                  fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold),
+                fontSize: 28,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -201,18 +261,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Center(
           child: Text(
             user.name,
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         Center(
           child: Text(
             user.email,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ),
         const SizedBox(height: 32),
@@ -249,6 +308,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 24),
+        _buildBiometricSection(biometricStatus),
+        const SizedBox(height: 16),
         // ── Finanzas ──────────────────────────────────────────────────────────
         _NavSection(
           label: l10n.profileSectionFinance,
@@ -318,6 +379,108 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  Widget _buildBiometricSection(AsyncValue<BiometricStatus> statusAsync) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionLabel('Seguridad'),
+        const SizedBox(height: 8),
+        AppCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: statusAsync.when(
+            loading: () => const Row(
+              children: [
+                Icon(Icons.fingerprint_rounded, color: AppColors.textSubtle),
+                SizedBox(width: 12),
+                Expanded(child: Text('Revisando biometria...')),
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ],
+            ),
+            error: (_, _) => Row(
+              children: [
+                const Icon(
+                  Icons.fingerprint_rounded,
+                  color: AppColors.textSubtle,
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text('No se pudo revisar la huella digital.'),
+                ),
+                IconButton(
+                  onPressed: () => ref.invalidate(_biometricStatusProvider),
+                  icon: const Icon(Icons.refresh_rounded),
+                  tooltip: context.l10n.commonRetry,
+                ),
+              ],
+            ),
+            data: (status) {
+              final canChange =
+                  !_isBiometricSaving && (status.canEnable || status.enabled);
+              final subtitle = status.enabled
+                  ? status.canEnable
+                        ? 'Activa para este dispositivo.'
+                        : 'Activa, pero no disponible en este momento.'
+                  : status.canEnable
+                  ? 'Usa tu ${status.methodLabel} al abrir Zenda.'
+                  : 'Configura una huella en tu dispositivo para activarla.';
+
+              return Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.fingerprint_rounded,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Huella digital',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: status.enabled,
+                    onChanged: canChange ? _toggleBiometrics : null,
+                    activeThumbColor: AppColors.primary,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   void _showFeedback(BuildContext context) {
     FeedbackModal.show(context, screenName: 'profile');
   }
@@ -349,14 +512,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           initialValue: _currency,
           decoration: InputDecoration(
             labelText: l10n.profileCurrency,
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           items: [
             DropdownMenuItem(
-                value: 'PEN', child: Text(l10n.profileCurrencyPEN)),
+              value: 'PEN',
+              child: Text(l10n.profileCurrencyPEN),
+            ),
             DropdownMenuItem(
-                value: 'USD', child: Text(l10n.profileCurrencyUSD)),
+              value: 'USD',
+              child: Text(l10n.profileCurrencyUSD),
+            ),
           ],
           onChanged: (v) {
             if (v != null) setState(() => _currency = v);
@@ -367,10 +533,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed:
-                    _isSaving ? null : () => setState(() => _isEditing = false),
-                style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 52)),
+                onPressed: _isSaving
+                    ? null
+                    : () => setState(() => _isEditing = false),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 52)),
                 child: Text(l10n.commonCancel),
               ),
             ),
@@ -387,7 +553,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
                     : Text(l10n.commonSave),
               ),
@@ -404,7 +572,11 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -466,8 +638,7 @@ class _NavSection extends StatelessWidget {
           child: Column(
             children: [
               for (int i = 0; i < items.length; i++) ...[
-                if (i > 0)
-                  const Divider(height: 1, indent: 56),
+                if (i > 0) const Divider(height: 1, indent: 56),
                 _NavRow(item: items[i]),
               ],
             ],
@@ -511,12 +682,14 @@ class _NavRow extends StatelessWidget {
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.textSubtle),
+            const Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: AppColors.textSubtle,
+            ),
           ],
         ),
       ),
     );
   }
 }
-

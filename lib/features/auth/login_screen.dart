@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/errors/error_codes.dart';
+import '../../core/models/user.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_toast.dart';
 import 'auth_controller.dart';
@@ -21,6 +22,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _biometricSupported = false;
+  bool _biometricEnabled = false;
+  bool _biometricLoading = false;
+  String _biometricLabel = 'huella digital';
+  String? _biometricEmail;
 
   /// Server-authoritative lockout deadline (B11/B14). Set when the login
   /// 401 response carries `lockedUntil`. Null when not locked.
@@ -37,6 +43,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (until == null) return 0;
     final remaining = until.difference(DateTime.now()).inSeconds;
     return remaining > 0 ? remaining : 0;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadBiometricStatus());
+  }
+
+  Future<void> _loadBiometricStatus() async {
+    final status = await ref.read(biometricAuthServiceProvider).getStatus();
+    if (!mounted) return;
+    setState(() {
+      _biometricSupported = status.canEnable;
+      _biometricEnabled = status.enabled;
+      _biometricLabel = status.methodLabel;
+      _biometricEmail = status.maskedEmail;
+    });
   }
 
   void _applyLockout(DateTime lockedUntil) {
@@ -83,9 +106,76 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final authState = ref.read(authNotifierProvider);
     if (authState.isAuthenticated && mounted) {
+      await _maybeOfferBiometrics(authState.user);
+      if (!mounted) return;
       final profileCompleted = authState.user?.profileCompleted ?? true;
       context.go(profileCompleted ? '/dashboard' : '/profile-setup');
     }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _biometricLoading = true);
+    await ref.read(authNotifierProvider.notifier).loginWithBiometrics();
+    if (!mounted) return;
+    setState(() => _biometricLoading = false);
+
+    final authState = ref.read(authNotifierProvider);
+    if (authState.isAuthenticated && mounted) {
+      final profileCompleted = authState.user?.profileCompleted ?? true;
+      context.go(profileCompleted ? '/dashboard' : '/profile-setup');
+    } else {
+      await _loadBiometricStatus();
+    }
+  }
+
+  Future<void> _maybeOfferBiometrics(User? user) async {
+    if (user == null) return;
+    final status = await ref.read(biometricAuthServiceProvider).getStatus();
+    if (!status.canEnable || status.enabled || !mounted) return;
+
+    final shouldEnable = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Activar huella digital'),
+        content: Text(
+          'Puedes usar tu ${status.methodLabel} para abrir Zenda sin escribir tu contrasena en este dispositivo.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: Text(context.l10n.commonCancel),
+          ),
+          FilledButton.icon(
+            onPressed: () => context.pop(true),
+            icon: const Icon(Icons.fingerprint_rounded, size: 18),
+            label: const Text('Activar'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldEnable != true || !mounted) return;
+    final enabled = await ref
+        .read(authNotifierProvider.notifier)
+        .enableBiometricsForCurrentUser();
+    if (!mounted) return;
+    await _loadBiometricStatus();
+    if (!mounted) return;
+    showAppToast(
+      context,
+      enabled
+          ? 'Huella digital activada en este dispositivo.'
+          : 'No se pudo activar la huella digital.',
+      type: enabled ? ToastType.success : ToastType.error,
+    );
   }
 
   @override
@@ -99,7 +189,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               title: Text(l10n.authAccountNotFound),
               content: Text(l10n.authAccountNotFoundMessage),
               actions: [
@@ -114,7 +206,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: Text(l10n.authSignUp),
                 ),
@@ -127,11 +221,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           // an older backend response didn't include the field.
           final serverLockedUntil = next.lockout?.lockedUntil;
           _applyLockout(
-            serverLockedUntil ?? DateTime.now().add(const Duration(minutes: 15)),
+            serverLockedUntil ??
+                DateTime.now().add(const Duration(minutes: 15)),
           );
-          showAppToast(context, l10n.authLockedAccount, type: ToastType.warning);
+          showAppToast(
+            context,
+            l10n.authLockedAccount,
+            type: ToastType.warning,
+          );
         } else {
-          showAppToast(context, l10n.resolveError(next.error!), type: ToastType.error);
+          showAppToast(
+            context,
+            l10n.resolveError(next.error!),
+            type: ToastType.error,
+          );
         }
         ref.read(authNotifierProvider.notifier).clearError();
       }
@@ -153,7 +256,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Center(
                   child: GestureDetector(
                     onLongPress: () {
-                      showAppToast(context, l10n.authOnboardingReset, type: ToastType.info);
+                      showAppToast(
+                        context,
+                        l10n.authOnboardingReset,
+                        type: ToastType.info,
+                      );
                     },
                     child: Container(
                       width: 80,
@@ -193,10 +300,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 Text(
                   l10n.authLoginSubtitle,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 15, color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
 
@@ -212,7 +316,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     filled: true,
                     fillColor: AppColors.cardBackground,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(color: AppColors.border),
@@ -224,15 +330,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                          color: AppColors.primary, width: 2),
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return l10n.validationEnterEmail;
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(value)) {
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
                       return l10n.validationInvalidEmail;
                     }
                     return null;
@@ -251,7 +360,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     filled: true,
                     fillColor: AppColors.cardBackground,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(color: AppColors.border),
@@ -263,7 +374,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(
-                          color: AppColors.primary, width: 2),
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -293,7 +406,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () => context.go('/auth/forgot-password'),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 8),
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
                     ),
                     child: Text(
                       l10n.authForgotLink,
@@ -310,7 +425,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (_lockoutSeconds > 0) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.warning.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
@@ -320,13 +437,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.lock_clock,
-                            color: AppColors.warning, size: 20),
+                        const Icon(
+                          Icons.lock_clock,
+                          color: AppColors.warning,
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             l10n.authLockedCountdown(
-                                _formatCountdown(_lockoutSeconds)),
+                              _formatCountdown(_lockoutSeconds),
+                            ),
                             style: const TextStyle(
                               color: AppColors.warning,
                               fontSize: 13,
@@ -355,8 +476,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      disabledBackgroundColor:
-                          AppColors.primary.withValues(alpha: 0.5),
+                      disabledBackgroundColor: AppColors.primary.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
@@ -364,25 +486,60 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : _lockoutSeconds > 0
-                            ? Text(
-                                _formatCountdown(_lockoutSeconds),
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              )
-                            : Text(
-                                l10n.authSignInButton,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                        ? Text(
+                            _formatCountdown(_lockoutSeconds),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : Text(
+                            l10n.authSignInButton,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
+
+                if (_biometricSupported && _biometricEnabled) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      onPressed: (authState.isLoading || _biometricLoading)
+                          ? null
+                          : _handleBiometricLogin,
+                      icon: _biometricLoading
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.fingerprint_rounded, size: 22),
+                      label: Text(
+                        _biometricEmail == null
+                            ? 'Entrar con $_biometricLabel'
+                            : 'Entrar con $_biometricLabel ($_biometricEmail)',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
 
                 const SizedBox(height: 28),
 
@@ -395,8 +552,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     TextButton(
-                      onPressed: () =>
-                          context.go('/onboarding?flow=register'),
+                      onPressed: () => context.go('/onboarding?flow=register'),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 6),
                       ),
