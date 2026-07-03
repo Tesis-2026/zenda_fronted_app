@@ -32,6 +32,7 @@ class NewTransactionState {
   final String? budgetAlert; // category name at ≥80% after save (US-020)
   final String?
   anomalyAlert; // category name when spending >20% over avg (US-016)
+  final String? anomalyAlertExplanation;
   final List<String>
   completedChallengeNames; // titles of auto-completed challenges
   // AI provenance (Integration fix #4). When the user accepted an AI
@@ -57,6 +58,7 @@ class NewTransactionState {
     required this.saveTick,
     this.budgetAlert,
     this.anomalyAlert,
+    this.anomalyAlertExplanation,
     this.completedChallengeNames = const [],
     this.aiSuggestedCategoryName,
     this.aiConfidence,
@@ -77,6 +79,7 @@ class NewTransactionState {
     saveTick: 0,
     budgetAlert: null,
     anomalyAlert: null,
+    anomalyAlertExplanation: null,
     completedChallengeNames: const [],
   );
 
@@ -103,6 +106,7 @@ class NewTransactionState {
     int? saveTick,
     String? budgetAlert,
     String? anomalyAlert,
+    String? anomalyAlertExplanation,
     List<String>? completedChallengeNames,
     String? aiSuggestedCategoryName,
     double? aiConfidence,
@@ -142,6 +146,9 @@ class NewTransactionState {
       anomalyAlert: clearAnomalyAlert
           ? null
           : (anomalyAlert ?? this.anomalyAlert),
+      anomalyAlertExplanation: clearAnomalyAlert
+          ? null
+          : (anomalyAlertExplanation ?? this.anomalyAlertExplanation),
       completedChallengeNames:
           completedChallengeNames ?? this.completedChallengeNames,
       aiSuggestedCategoryName: clearAiSuggestion
@@ -391,6 +398,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       // Sync to backend; enqueue for retry if offline or unreachable.
       String? budgetAlertName;
       String? anomalyAlertName;
+      String? anomalyAlertExplanation;
       List<String> completedNames = [];
       try {
         if (kind == TransactionKind.transfer) {
@@ -427,6 +435,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           // US-016: anomaly alert returned directly from the create endpoint.
           if (kind == TransactionKind.expense) {
             anomalyAlertName = result.anomalyAlert;
+            anomalyAlertExplanation = result.anomalyAlertExplanation;
           }
 
           // US-020: check if any budget just reached ≥80% after this expense.
@@ -501,6 +510,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         saveTick: state.saveTick + 1,
         budgetAlert: budgetAlertName,
         anomalyAlert: anomalyAlertName,
+        anomalyAlertExplanation: anomalyAlertExplanation,
         completedChallengeNames: completedNames,
       );
     } catch (_) {

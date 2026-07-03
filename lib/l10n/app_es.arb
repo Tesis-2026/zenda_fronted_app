@@ -345,6 +345,7 @@
   "profileBudgets": "Presupuestos",
   "profileGoals": "Metas de ahorro",
   "profileSectionFinance": "Finanzas",
+  "profileSectionPreferences": "Preferencias",
   "profileSectionLearnGrow": "Aprende y Crece",
   "profileSectionSurveys": "Encuestas",
   "profileSectionSupport": "Soporte",
@@ -526,6 +527,7 @@
 
   "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
   "errorAuthEmailTaken": "Este correo ya está registrado.",
+  "errorAuthEmailNotVerified": "Tu cuenta aún no está verificada. Revisa tu correo e ingresa el código enviado.",
   "errorAuthTokenExpired": "El enlace es inválido o ha expirado.",
   "errorAuthBadRequest": "Revisa tus datos e inténtalo de nuevo.",
   "errorServerError": "Error inesperado. Inténtalo de nuevo.",
@@ -919,17 +921,17 @@
     }
   },
 
-  "emailVerifTitle": "Revisa tu correo",
-  "emailVerifSubtitle": "Enviamos un enlace de verificación a {email}",
+  "emailVerifTitle": "Verifica tu correo",
+  "emailVerifSubtitle": "Enviamos un código de 6 dígitos a {email}",
   "@emailVerifSubtitle": {
     "placeholders": {
       "email": { "type": "String" }
     }
   },
   "emailVerifStep1": "Abre el correo de Zenda",
-  "emailVerifStep2": "Haz clic en el enlace de verificación",
-  "emailVerifStep3": "Vuelve a la app para continuar",
-  "emailVerifOpenApp": "Abrir app de correo",
+  "emailVerifStep2": "Copia el código de 6 dígitos",
+  "emailVerifStep3": "Ingresa el código aquí para activar tu cuenta",
+  "emailVerifOpenApp": "Verificar cuenta",
   "emailVerifResendText": "¿No lo recibiste?",
   "emailVerifResendAction": "Reenviar",
 

@@ -52,11 +52,16 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<String?> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null, clearLockout: true);
     final authService = ref.read(authServiceProvider);
 
     final result = await authService.login(email: email, password: password);
+
+    if (result.requiresEmailVerification) {
+      state = const AuthState.unauthenticated();
+      return result.pendingVerificationEmail;
+    }
 
     if (result.isSuccess && result.user != null) {
       state = AuthState.authenticated(result.user!);
@@ -67,9 +72,10 @@ class AuthNotifier extends Notifier<AuthState> {
         lockout: result.lockout,
       );
     }
+    return null;
   }
 
-  Future<void> register(String name, String email, String password) async {
+  Future<String?> register(String name, String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     final authService = ref.read(authServiceProvider);
 
@@ -79,6 +85,11 @@ class AuthNotifier extends Notifier<AuthState> {
       password: password,
     );
 
+    if (result.requiresEmailVerification) {
+      state = const AuthState.unauthenticated();
+      return result.pendingVerificationEmail;
+    }
+
     if (result.isSuccess && result.user != null) {
       state = AuthState.authenticated(result.user!);
     } else {
@@ -87,6 +98,26 @@ class AuthNotifier extends Notifier<AuthState> {
         error: result.error ?? 'Error desconocido',
       );
     }
+    return null;
+  }
+
+  Future<bool> verifyEmail(String email, String code) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await ref.read(authServiceProvider).verifyEmail(
+          email: email,
+          code: code,
+        );
+
+    if (result.isSuccess && result.user != null) {
+      state = AuthState.authenticated(result.user!);
+      return true;
+    }
+
+    state = state.copyWith(
+      isLoading: false,
+      error: result.error ?? AuthErrorCode.badRequest,
+    );
+    return false;
   }
 
   Future<void> loginWithBiometrics() async {
@@ -178,6 +209,11 @@ class AuthNotifier extends Notifier<AuthState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  void updateCurrentUser(User user) {
+    if (!state.isAuthenticated) return;
+    state = AuthState.authenticated(user);
   }
 }
 

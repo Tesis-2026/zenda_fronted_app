@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/models/account.dart';
+import '../../core/models/user.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
@@ -14,6 +15,7 @@ import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 import '../notifications/notifications_inbox_providers.dart';
 import '../surveys/sus_prompt_card.dart';
+import '../../providers/pre_survey_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -68,6 +70,7 @@ class _InicioSection extends ConsumerWidget {
         ref.invalidate(weekSummaryProvider);
         ref.invalidate(monthSummaryProvider);
         ref.invalidate(accountsProvider);
+        ref.invalidate(postSurveyProvider);
         ref.invalidate(
           accountReportProvider((month: now.month, year: now.year)),
         );
@@ -115,6 +118,8 @@ class _InicioSection extends ConsumerWidget {
 
             const SusPromptCard(),
 
+            _PostSurveyBanner(user: user),
+
             _TotalMoneyCard(report: accountReportAsync),
 
             const SizedBox(height: 12),
@@ -138,6 +143,109 @@ class _InicioSection extends ConsumerWidget {
             const SizedBox(height: 16),
 
             ZendaAiCard(advice: advice),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PostSurveyBanner extends ConsumerWidget {
+  const _PostSurveyBanner({required this.user});
+
+  final User? user;
+
+  bool get _isDue {
+    final createdAtRaw = user?.createdAt;
+    if (createdAtRaw == null || createdAtRaw.isEmpty) return false;
+    final createdAt = DateTime.tryParse(createdAtRaw);
+    if (createdAt == null) return false;
+    return DateTime.now().difference(createdAt).inDays >= 30;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!_isDue) return const SizedBox.shrink();
+
+    final completedAsync = ref.watch(postSurveyProvider);
+    final completed = completedAsync.asData?.value ?? true;
+    if (completed || completedAsync.isLoading) return const SizedBox.shrink();
+
+    final l10n = context.l10n;
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFECFDF5),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFA7F3D0)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.assignment_turned_in_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.dashboardPostSurveyBannerTitle,
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.dashboardPostSurveyBannerBody,
+                        style: TextStyle(
+                          color: colors.textMuted,
+                          fontSize: 13,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push('/surveys/post'),
+                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                label: Text(l10n.dashboardPostSurveyBannerAction),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(46),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -36,13 +36,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     FocusScope.of(context).unfocus();
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
-    await authNotifier.register(
+    final pendingEmail = await authNotifier.register(
       _nameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
     );
 
     final authState = ref.read(authNotifierProvider);
+    if (pendingEmail != null && mounted) {
+      context.go('/auth/email-sent', extra: pendingEmail);
+      return;
+    }
+
     if (authState.isAuthenticated && mounted) {
       await _maybeOfferBiometrics();
       if (!mounted) return;

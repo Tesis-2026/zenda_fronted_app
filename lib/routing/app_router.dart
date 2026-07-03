@@ -140,8 +140,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Authenticated user who has not completed the pre-survey → pre-survey.
-      final preSurveyDone =
-          container.read(preSurveyProvider).asData?.value ?? false;
+      final preSurveyState = container.read(preSurveyProvider);
+      if (auth.isAuthenticated && preSurveyState.isLoading) return null;
+      final preSurveyDone = preSurveyState.asData?.value ?? true;
       if (auth.isAuthenticated &&
           (auth.user?.profileCompleted ?? true) &&
           !preSurveyDone &&
@@ -197,7 +198,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/auth/email-sent',
-        builder: (context, state) => const EmailSentScreen(),
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return EmailSentScreen(email: email);
+        },
       ),
 
       // Legacy login route
