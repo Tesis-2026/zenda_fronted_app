@@ -359,11 +359,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         // Show spending anomaly alert (US-016) after pop.
         if (next.anomalyAlert != null) {
           final categoryName = next.anomalyAlert!;
+          final explanation = next.anomalyAlertExplanation;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
               showAppToast(
                 context,
-                l10n.txAnomalyAlert(categoryName),
+                explanation?.isNotEmpty == true
+                    ? explanation!
+                    : l10n.txAnomalyAlert(categoryName),
                 type: ToastType.error,
               );
             }
