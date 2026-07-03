@@ -56,6 +56,9 @@ class AuthResult {
 }
 
 class AuthApiService {
+  static const String _privacyPolicyVersion = 'privacy-2026-07-03';
+  static const String _termsVersion = 'terms-2026-07-03';
+
   Future<AuthResult> register({
     required String name,
     required String email,
@@ -66,6 +69,9 @@ class AuthApiService {
         'fullName': name,
         'email': email,
         'password': password,
+        'consentGiven': true,
+        'privacyPolicyVersion': _privacyPolicyVersion,
+        'termsVersion': _termsVersion,
       });
 
       await ApiClient.saveTokens(
