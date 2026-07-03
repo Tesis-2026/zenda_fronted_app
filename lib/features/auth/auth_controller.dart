@@ -172,6 +172,11 @@ class AuthNotifier extends Notifier<AuthState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
+  void updateCurrentUser(User user) {
+    if (!state.isAuthenticated) return;
+    state = AuthState.authenticated(user);
+  }
 }
 
 // Auth state provider

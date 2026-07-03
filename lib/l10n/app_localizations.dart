@@ -1718,6 +1718,12 @@ abstract class AppLocalizations {
   /// **'Finance'**
   String get profileSectionFinance;
 
+  /// No description provided for @profileSectionPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get profileSectionPreferences;
+
   /// No description provided for @profileSectionLearnGrow.
   ///
   /// In en, this message translates to:

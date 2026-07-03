@@ -879,6 +879,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileSectionFinance => 'Finanzas';
 
   @override
+  String get profileSectionPreferences => 'Preferencias';
+
+  @override
   String get profileSectionLearnGrow => 'Aprende y Crece';
 
   @override

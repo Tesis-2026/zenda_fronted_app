@@ -12,6 +12,7 @@ import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/section_label.dart';
 import '../../core/widgets/zenda_app_bar.dart';
+import '../../providers/repositories_providers.dart';
 import '../auth/auth_controller.dart';
 import '../feedback/feedback_modal.dart';
 import '../../l10n/l10n_extension.dart';
@@ -38,6 +39,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isEditing = false;
   bool _isSaving = false;
+  bool _isPreferenceSaving = false;
   bool _isBiometricSaving = false;
   String _currency = 'PEN';
 
@@ -96,6 +98,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _saveCurrencyPreference(User user, String currency) async {
+    if (currency == user.currency || _isPreferenceSaving) return;
+    setState(() => _isPreferenceSaving = true);
+    try {
+      final updated = await ref
+          .read(profileUserServiceProvider)
+          .updateProfile(currency: currency);
+      ref.read(authNotifierProvider.notifier).updateCurrentUser(updated);
+      ref.invalidate(_profileProvider);
+      if (!mounted) return;
+      showAppToast(context, 'Moneda guardada.', type: ToastType.success);
+    } catch (_) {
+      if (!mounted) return;
+      showAppToast(
+        context,
+        context.l10n.profileErrorSave,
+        type: ToastType.error,
+      );
+    } finally {
+      if (mounted) setState(() => _isPreferenceSaving = false);
+    }
+  }
+
+  Future<void> _saveNumberFormatPreference(String format) async {
+    if (_isPreferenceSaving) return;
+    setState(() => _isPreferenceSaving = true);
+    try {
+      await ref.read(numberFormatProvider.notifier).setFormat(format);
+      if (!mounted) return;
+      showAppToast(
+        context,
+        context.l10n.profileNumberFormatSaved,
+        type: ToastType.success,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      showAppToast(
+        context,
+        context.l10n.profileErrorSave,
+        type: ToastType.error,
+      );
+    } finally {
+      if (mounted) setState(() => _isPreferenceSaving = false);
     }
   }
 
@@ -308,6 +356,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 24),
+        _buildPreferencesSection(user),
+        const SizedBox(height: 24),
         _buildBiometricSection(biometricStatus),
         const SizedBox(height: 16),
         // ── Finanzas ──────────────────────────────────────────────────────────
@@ -475,6 +525,91 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               );
             },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPreferencesSection(User user) {
+    final l10n = context.l10n;
+    final numberFormatAsync = ref.watch(numberFormatProvider);
+    final numberFormat = numberFormatAsync.asData?.value ?? 'dot';
+    final isLoadingFormat =
+        numberFormatAsync.isLoading && !numberFormatAsync.hasValue;
+    final disabled = _isPreferenceSaving || isLoadingFormat;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionLabel(l10n.profileSectionPreferences),
+        const SizedBox(height: 8),
+        AppCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              DropdownButtonFormField<String>(
+                key: ValueKey('currency-${user.currency}'),
+                initialValue: user.currency.isEmpty ? 'PEN' : user.currency,
+                decoration: InputDecoration(
+                  labelText: l10n.profileCurrency,
+                  prefixIcon: const Icon(Icons.monetization_on_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'PEN',
+                    child: Text(l10n.profileCurrencyPEN),
+                  ),
+                  DropdownMenuItem(
+                    value: 'USD',
+                    child: Text(l10n.profileCurrencyUSD),
+                  ),
+                ],
+                onChanged: disabled
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          _saveCurrencyPreference(user, value);
+                        }
+                      },
+              ),
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                key: ValueKey('number-format-$numberFormat'),
+                initialValue: numberFormat,
+                decoration: InputDecoration(
+                  labelText: l10n.profileNumberFormat,
+                  prefixIcon: const Icon(Icons.pin_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'dot',
+                    child: Text(l10n.profileNumberFormatDot),
+                  ),
+                  DropdownMenuItem(
+                    value: 'comma',
+                    child: Text(l10n.profileNumberFormatComma),
+                  ),
+                ],
+                onChanged: disabled
+                    ? null
+                    : (value) {
+                        if (value != null && value != numberFormat) {
+                          _saveNumberFormatPreference(value);
+                        }
+                      },
+              ),
+              if (_isPreferenceSaving) ...[
+                const SizedBox(height: 12),
+                const LinearProgressIndicator(minHeight: 2),
+              ],
+            ],
           ),
         ),
       ],

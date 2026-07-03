@@ -140,8 +140,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Authenticated user who has not completed the pre-survey → pre-survey.
-      final preSurveyDone =
-          container.read(preSurveyProvider).asData?.value ?? false;
+      final preSurveyState = container.read(preSurveyProvider);
+      if (auth.isAuthenticated && preSurveyState.isLoading) return null;
+      final preSurveyDone = preSurveyState.asData?.value ?? true;
       if (auth.isAuthenticated &&
           (auth.user?.profileCompleted ?? true) &&
           !preSurveyDone &&
