@@ -34,7 +34,7 @@ class AuthNotifier extends Notifier<AuthState> {
     final authService = ref.read(authServiceProvider);
     final biometricService = ref.read(biometricAuthServiceProvider);
     final biometricStatus = await biometricService.getStatus();
-    if (biometricStatus.canAuthenticate && await ApiClient.hasStoredSession()) {
+    if (biometricStatus.canAuthenticate && await ApiClient.hasAccessToken()) {
       final unlocked = await biometricService.authenticate(
         reason: 'Confirma tu huella digital para abrir Zenda.',
       );
@@ -150,8 +150,15 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<void> logout() async {
     final authService = ref.read(authServiceProvider);
-    await authService.logout();
-    await ref.read(biometricAuthServiceProvider).disable();
+    final biometricService = ref.read(biometricAuthServiceProvider);
+    final biometricStatus = await biometricService.getStatus();
+    final keepBiometricSession =
+        biometricStatus.canAuthenticate && await ApiClient.hasStoredSession();
+
+    await authService.logout(preserveBiometricSession: keepBiometricSession);
+    if (!keepBiometricSession) {
+      await biometricService.disable();
+    }
     _clearDataProviders();
     state = const AuthState.unauthenticated();
   }

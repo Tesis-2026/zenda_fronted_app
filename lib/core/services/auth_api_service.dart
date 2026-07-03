@@ -147,7 +147,12 @@ class AuthApiService {
     return user != null;
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool preserveBiometricSession = false}) async {
+    if (preserveBiometricSession) {
+      await ApiClient.deleteAccessToken();
+      return;
+    }
+
     try {
       // Revoke all refresh tokens on the server before clearing local storage
       await ApiClient.post('/auth/logout', {}, authenticated: true);
