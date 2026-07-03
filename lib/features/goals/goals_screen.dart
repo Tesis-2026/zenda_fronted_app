@@ -43,62 +43,60 @@ class GoalsScreen extends ConsumerWidget {
     final goalsAsync = ref.watch(goalsListProvider);
 
     final content = goalsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(l10n.goalsErrorLoad),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(goalsListProvider),
-                child: Text(l10n.commonRetry),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(l10n.goalsErrorLoad),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => ref.invalidate(goalsListProvider),
+              child: Text(l10n.commonRetry),
+            ),
+          ],
+        ),
+      ),
+      data: (goals) {
+        final active = goals.where((g) => g.progressPercent < 100).toList();
+        final completed = goals.where((g) => g.progressPercent >= 100).toList();
+
+        if (goals.isEmpty) {
+          return _EmptyState(
+            title: l10n.goalsEmptyTitle,
+            subtitle: l10n.goalsEmptySubtitle,
+          );
+        }
+
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            if (active.isNotEmpty) ...[
+              _SectionHeader(title: l10n.goalsActiveSection),
+              ...active.map(
+                (goal) => _GoalCard(
+                  goal: goal,
+                  onTap: () => context.push('/goals/${goal.id}', extra: goal),
+                  onEdit: () => _showEditSheet(context, ref, goal),
+                  onDelete: () => _deleteGoal(context, ref, goal),
+                ),
               ),
             ],
-          ),
-        ),
-        data: (goals) {
-          final active = goals.where((g) => g.progressPercent < 100).toList();
-          final completed = goals.where((g) => g.progressPercent >= 100).toList();
-
-          if (goals.isEmpty) {
-            return _EmptyState(
-              title: l10n.goalsEmptyTitle,
-              subtitle: l10n.goalsEmptySubtitle,
-            );
-          }
-
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (active.isNotEmpty) ...[
-                _SectionHeader(title: l10n.goalsActiveSection),
-                ...active.map((goal) => _GoalCard(
-                      goal: goal,
-                      onTap: () => context.push(
-                        '/goals/${goal.id}',
-                        extra: goal,
-                      ),
-                      onEdit: () => _showEditSheet(context, ref, goal),
-                      onDelete: () => _deleteGoal(context, ref, goal),
-                    )),
-              ],
-              if (completed.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                _SectionHeader(title: l10n.goalsCompletedSection),
-                ...completed.map((goal) => _GoalCard(
-                      goal: goal,
-                      onTap: () => context.push(
-                        '/goals/${goal.id}',
-                        extra: goal,
-                      ),
-                      onEdit: () => _showEditSheet(context, ref, goal),
-                      onDelete: () => _deleteGoal(context, ref, goal),
-                    )),
-              ],
+            if (completed.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              _SectionHeader(title: l10n.goalsCompletedSection),
+              ...completed.map(
+                (goal) => _GoalCard(
+                  goal: goal,
+                  onTap: () => context.push('/goals/${goal.id}', extra: goal),
+                  onEdit: () => _showEditSheet(context, ref, goal),
+                  onDelete: () => _deleteGoal(context, ref, goal),
+                ),
+              ),
             ],
-          );
-        },
+          ],
+        );
+      },
     );
 
     final newButton = GreenPillButton(
@@ -112,9 +110,7 @@ class GoalsScreen extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Row(
-              children: [const Spacer(), newButton],
-            ),
+            child: Row(children: [const Spacer(), newButton]),
           ),
           Expanded(child: content),
         ],
@@ -126,10 +122,7 @@ class GoalsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.goalsTitle),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 0),
-            child: newButton,
-          ),
+          Padding(padding: const EdgeInsets.only(right: 0), child: newButton),
           const Padding(
             padding: EdgeInsets.only(right: 12),
             child: UserMenuButton(),
@@ -154,7 +147,9 @@ class GoalsScreen extends ConsumerWidget {
         final name = st.nameCtrl.text.trim();
         final target = double.tryParse(st.targetCtrl.text.trim());
         if (name.isEmpty || target == null || target <= 0) return false;
-        await ref.read(goalsServiceProvider).create(
+        await ref
+            .read(goalsServiceProvider)
+            .create(
               name: name,
               targetAmount: target,
               dueDate: st.dueDate?.toIso8601String(),
@@ -166,7 +161,10 @@ class GoalsScreen extends ConsumerWidget {
   }
 
   Future<void> _showEditSheet(
-      BuildContext context, WidgetRef ref, SavingsGoal goal) async {
+    BuildContext context,
+    WidgetRef ref,
+    SavingsGoal goal,
+  ) async {
     final l10n = context.l10n;
     final key = GlobalKey<_EditGoalBodyState>();
     await showAppFormSheet(
@@ -181,7 +179,9 @@ class GoalsScreen extends ConsumerWidget {
         final target = double.tryParse(st.targetCtrl.text.trim());
         if (name.isEmpty || target == null || target <= 0) return false;
         try {
-          await ref.read(goalsServiceProvider).update(
+          await ref
+              .read(goalsServiceProvider)
+              .update(
                 goal.id,
                 name: name,
                 targetAmount: target,
@@ -191,8 +191,11 @@ class GoalsScreen extends ConsumerWidget {
           return true;
         } on Exception catch (_) {
           if (context.mounted) {
-            showAppToast(context, l10n.commonUnknownError,
-                type: ToastType.error);
+            showAppToast(
+              context,
+              l10n.commonUnknownError,
+              type: ToastType.error,
+            );
           }
           return false;
         }
@@ -201,7 +204,10 @@ class GoalsScreen extends ConsumerWidget {
   }
 
   Future<void> _deleteGoal(
-      BuildContext context, WidgetRef ref, SavingsGoal goal) async {
+    BuildContext context,
+    WidgetRef ref,
+    SavingsGoal goal,
+  ) async {
     final l10n = context.l10n;
     final confirmed = await showDeleteConfirmSheet(
       context,
@@ -220,7 +226,6 @@ class GoalsScreen extends ConsumerWidget {
   }
 }
 
-
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader({required this.title});
@@ -232,9 +237,9 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
-              fontWeight: FontWeight.w600,
-            ),
+          color: Theme.of(context).colorScheme.outline,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -269,8 +274,8 @@ class _EmptyState extends StatelessWidget {
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                color: Theme.of(context).colorScheme.outline,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -299,9 +304,9 @@ class _CompletedOnLabel extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           context.l10n.goalCompletedOn(formatted),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF10B981),
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: const Color(0xFF10B981)),
         ),
       ],
     );
@@ -369,6 +374,7 @@ class _GoalCard extends StatelessWidget {
     final isComplete = pct >= 100;
     final color = _progressColor(pct);
     final dueDateStr = _dueDateLabel(context);
+    final daysRemaining = goal.daysRemaining();
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -389,9 +395,7 @@ class _GoalCard extends StatelessWidget {
                   color: _bgColor(),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Center(
-                  child: Icon(_icon(), size: 24, color: color),
-                ),
+                child: Center(child: Icon(_icon(), size: 24, color: color)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -431,6 +435,31 @@ class _GoalCard extends StatelessWidget {
                           fontSize: 12,
                           color: colors.textSubtle,
                         ),
+                      ),
+                    ],
+                    if (daysRemaining != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.schedule_rounded,
+                            size: 14,
+                            color: daysRemaining <= 7
+                                ? const Color(0xFFF59E0B)
+                                : colors.textMuted,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.goalsDaysLeft(daysRemaining),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: daysRemaining <= 7
+                                  ? const Color(0xFFF59E0B)
+                                  : colors.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                     const SizedBox(height: 10),
@@ -577,8 +606,9 @@ class _EditGoalBodyState extends State<_EditGoalBody> {
   void initState() {
     super.initState();
     nameCtrl = TextEditingController(text: widget.goal.name);
-    targetCtrl =
-        TextEditingController(text: widget.goal.targetAmount.toStringAsFixed(2));
+    targetCtrl = TextEditingController(
+      text: widget.goal.targetAmount.toStringAsFixed(2),
+    );
     dueDate = AppDateFormatter.tryParse(widget.goal.dueDate);
   }
 
