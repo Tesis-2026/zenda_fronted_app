@@ -35,6 +35,7 @@ class User {
   final String id;
   final String name;
   final String email;
+  final String? emailVerifiedAt;
   final int? age;
   final String? university;
   final IncomeType? incomeType;
@@ -53,6 +54,7 @@ class User {
     required this.id,
     required this.name,
     required this.email,
+    this.emailVerifiedAt,
     this.age,
     this.university,
     this.incomeType,
@@ -73,6 +75,7 @@ class User {
       'id': id,
       'name': name,
       'email': email,
+      if (emailVerifiedAt != null) 'emailVerifiedAt': emailVerifiedAt,
       if (age != null) 'age': age,
       if (university != null) 'university': university,
       if (incomeType != null) 'incomeType': incomeTypeToString(incomeType!),
@@ -97,6 +100,7 @@ class User {
       // Backend returns 'fullName'; local storage may use 'name'
       name: (json['fullName'] ?? json['name']) as String,
       email: json['email'] as String,
+      emailVerifiedAt: json['emailVerifiedAt'] as String?,
       age: json['age'] as int?,
       university: json['university'] as String?,
       incomeType: _incomeTypeFromString(json['incomeType'] as String?),
@@ -119,6 +123,7 @@ class User {
     String? id,
     String? name,
     String? email,
+    String? emailVerifiedAt,
     int? age,
     String? university,
     IncomeType? incomeType,
@@ -137,6 +142,7 @@ class User {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
+      emailVerifiedAt: emailVerifiedAt ?? this.emailVerifiedAt,
       age: age ?? this.age,
       university: university ?? this.university,
       incomeType: incomeType ?? this.incomeType,

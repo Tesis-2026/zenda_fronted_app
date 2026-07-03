@@ -198,7 +198,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/auth/email-sent',
-        builder: (context, state) => const EmailSentScreen(),
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return EmailSentScreen(email: email);
+        },
       ),
 
       // Legacy login route

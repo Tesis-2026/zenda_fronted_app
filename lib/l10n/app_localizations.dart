@@ -2264,6 +2264,12 @@ abstract class AppLocalizations {
   /// **'This email is already registered.'**
   String get errorAuthEmailTaken;
 
+  /// No description provided for @errorAuthEmailNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not verified yet. Check your email and enter the code we sent.'**
+  String get errorAuthEmailNotVerified;
+
   /// No description provided for @errorAuthTokenExpired.
   ///
   /// In en, this message translates to:
@@ -3687,13 +3693,13 @@ abstract class AppLocalizations {
   /// No description provided for @emailVerifTitle.
   ///
   /// In en, this message translates to:
-  /// **'Check your email'**
+  /// **'Verify your email'**
   String get emailVerifTitle;
 
   /// No description provided for @emailVerifSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'We sent a verification link to {email}'**
+  /// **'We sent a 6-digit code to {email}'**
   String emailVerifSubtitle(String email);
 
   /// No description provided for @emailVerifStep1.
@@ -3705,19 +3711,19 @@ abstract class AppLocalizations {
   /// No description provided for @emailVerifStep2.
   ///
   /// In en, this message translates to:
-  /// **'Click the verification link'**
+  /// **'Copy the 6-digit code'**
   String get emailVerifStep2;
 
   /// No description provided for @emailVerifStep3.
   ///
   /// In en, this message translates to:
-  /// **'Return to the app to continue'**
+  /// **'Enter the code here to activate your account'**
   String get emailVerifStep3;
 
   /// No description provided for @emailVerifOpenApp.
   ///
   /// In en, this message translates to:
-  /// **'Open Email App'**
+  /// **'Verify account'**
   String get emailVerifOpenApp;
 
   /// No description provided for @emailVerifResendText.

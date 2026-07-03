@@ -99,10 +99,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     FocusScope.of(context).unfocus();
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
-    await authNotifier.login(
+    final pendingEmail = await authNotifier.login(
       _emailController.text.trim(),
       _passwordController.text,
     );
+
+    if (pendingEmail != null && mounted) {
+      context.go('/auth/email-sent', extra: pendingEmail);
+      return;
+    }
 
     final authState = ref.read(authNotifierProvider);
     if (authState.isAuthenticated && mounted) {

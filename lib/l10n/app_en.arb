@@ -527,6 +527,7 @@
 
   "errorAuthInvalidCredentials": "Incorrect email or password.",
   "errorAuthEmailTaken": "This email is already registered.",
+  "errorAuthEmailNotVerified": "Your account is not verified yet. Check your email and enter the code we sent.",
   "errorAuthTokenExpired": "Reset link is invalid or has expired.",
   "errorAuthBadRequest": "Check your details and try again.",
   "errorServerError": "Unexpected error. Please try again.",
@@ -920,17 +921,17 @@
     }
   },
 
-  "emailVerifTitle": "Check your email",
-  "emailVerifSubtitle": "We sent a verification link to {email}",
+  "emailVerifTitle": "Verify your email",
+  "emailVerifSubtitle": "We sent a 6-digit code to {email}",
   "@emailVerifSubtitle": {
     "placeholders": {
       "email": { "type": "String" }
     }
   },
   "emailVerifStep1": "Open the email from Zenda",
-  "emailVerifStep2": "Click the verification link",
-  "emailVerifStep3": "Return to the app to continue",
-  "emailVerifOpenApp": "Open Email App",
+  "emailVerifStep2": "Copy the 6-digit code",
+  "emailVerifStep3": "Enter the code here to activate your account",
+  "emailVerifOpenApp": "Verify account",
   "emailVerifResendText": "Didn't receive it?",
   "emailVerifResendAction": "Resend",
 
