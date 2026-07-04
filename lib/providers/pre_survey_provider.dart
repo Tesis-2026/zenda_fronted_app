@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/services/education_api_service.dart';
+import '../core/services/pending_survey_queue.dart';
 import '../features/auth/auth_controller.dart';
 
 // Survey completion state comes from `/surveys/comparison`.
@@ -33,6 +34,7 @@ class PreSurveyNotifier extends AsyncNotifier<bool> {
     if (await _SurveySkipStore.isSkipped(userId, 'pre')) return true;
 
     try {
+      await PendingSurveyQueue.flushForUser(userId: userId);
       final comparison = await SurveysApiService().getComparison();
       return comparison.preScore != null;
     } catch (_) {
@@ -69,6 +71,7 @@ class PostSurveyNotifier extends AsyncNotifier<bool> {
     if (await _SurveySkipStore.isSkipped(userId, 'post')) return true;
 
     try {
+      await PendingSurveyQueue.flushForUser(userId: userId);
       final comparison = await SurveysApiService().getComparison();
       return comparison.postScore != null;
     } catch (_) {

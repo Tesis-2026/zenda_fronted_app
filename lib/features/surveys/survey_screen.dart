@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/services/education_api_service.dart';
+import '../../core/services/pending_survey_queue.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
+import '../auth/auth_controller.dart';
 import '../../providers/pre_survey_provider.dart';
 
 const _surveyLoadTimeout = Duration(seconds: 12);
@@ -229,11 +231,34 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         return;
       }
       if (mounted) {
-        showAppToast(
-          context,
-          context.l10n.surveySubmitError,
-          type: ToastType.error,
-        );
+        final userId = ref.read(authNotifierProvider).user?.id;
+        final shouldQueue = e is! ApiException || e.statusCode >= 500;
+        if (userId != null && shouldQueue) {
+          await PendingSurveyQueue.save(
+            userId: userId,
+            type: widget.isPre ? 'PRE' : 'POST',
+            answers: _answers,
+          );
+          if (widget.isPre) {
+            await ref.read(preSurveyProvider.notifier).skipForNow();
+          } else {
+            await ref.read(postSurveyProvider.notifier).skipForNow();
+          }
+          if (mounted) {
+            showAppToast(
+              context,
+              'Guardamos tus respuestas y las reintentaremos en segundo plano.',
+              type: ToastType.info,
+            );
+            context.go('/dashboard');
+          }
+          return;
+        }
+
+        final message = e is ApiException
+            ? 'No se pudo enviar: ${e.message}'
+            : context.l10n.surveySubmitError;
+        showAppToast(context, message, type: ToastType.error);
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
