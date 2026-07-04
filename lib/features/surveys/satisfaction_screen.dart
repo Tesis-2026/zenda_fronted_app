@@ -26,7 +26,7 @@ class _SatisfactionScreenState extends State<SatisfactionScreen> {
   @override
   void initState() {
     super.initState();
-    _surveyFuture = _service.getSatisfactionSurvey();
+    _surveyFuture = _loadSurvey();
     StudyTelemetryService.screen('satisfaction_survey');
   }
 
@@ -73,6 +73,12 @@ class _SatisfactionScreenState extends State<SatisfactionScreen> {
     }
   }
 
+  Future<Survey> _loadSurvey() {
+    return _service.getSatisfactionSurvey().timeout(
+      const Duration(seconds: 12),
+    );
+  }
+
   bool _allAnswered(Survey survey) {
     return survey.questions.every((question) {
       final answer = _answers[question.id]?.trim();
@@ -96,7 +102,7 @@ class _SatisfactionScreenState extends State<SatisfactionScreen> {
           if (snapshot.hasError) {
             return _ErrorState(
               onRetry: () => setState(() {
-                _surveyFuture = _service.getSatisfactionSurvey();
+                _surveyFuture = _loadSurvey();
               }),
             );
           }

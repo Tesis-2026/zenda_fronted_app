@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/services/api_client.dart';
 import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
@@ -10,16 +11,24 @@ import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import '../../providers/pre_survey_provider.dart';
 
+const _surveyLoadTimeout = Duration(seconds: 12);
+
 final surveysServiceProvider = Provider<SurveysApiService>(
   (_) => SurveysApiService(),
 );
 
 final _preSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
-  return ref.read(surveysServiceProvider).getPreSurvey();
+  return ref
+      .read(surveysServiceProvider)
+      .getPreSurvey()
+      .timeout(_surveyLoadTimeout);
 });
 
 final _postSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
-  return ref.read(surveysServiceProvider).getPostSurvey();
+  return ref
+      .read(surveysServiceProvider)
+      .getPostSurvey()
+      .timeout(_surveyLoadTimeout);
 });
 
 /// [isPre] determines which survey (pre vs post) to load and submit.
@@ -44,120 +53,144 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         ? ref.watch(_preSurveyProvider)
         : ref.watch(_postSurveyProvider);
 
-    return Scaffold(
-      backgroundColor: context.colors.bg,
-      appBar: ZendaAppBar(
-        title: widget.isPre ? l10n.surveyPreTitle : l10n.surveyPostTitle,
-        actions: [
-          TextButton(
-            onPressed: () => context.go('/dashboard'),
-            child: Text(
-              l10n.surveySkipButton,
-              style: const TextStyle(
-                color: Color(0xFF10B981),
-                fontWeight: FontWeight.w600,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _skipSurvey();
+      },
+      child: Scaffold(
+        backgroundColor: context.colors.bg,
+        appBar: ZendaAppBar(
+          title: widget.isPre ? l10n.surveyPreTitle : l10n.surveyPostTitle,
+          actions: [
+            TextButton(
+              onPressed: _skipSurvey,
+              child: Text(
+                l10n.surveySkipButton,
+                style: const TextStyle(
+                  color: Color(0xFF10B981),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      body: surveyAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) {
-          // Hardcoded fallback with 5 financial literacy questions
-          final fallbackSurvey = Survey(
-            id: widget.isPre ? 'pre-fallback' : 'post-fallback',
-            type: widget.isPre ? 'PRE' : 'POST',
-            questions: const [
-              SurveyQuestion(
-                id: 'fl-1',
-                order: 1,
-                text: '¿Qué porcentaje de tus ingresos deberías ahorrar cada mes según la regla 50/30/20?',
-                options: ['10%', '20%', '30%', '50%'],
-              ),
-              SurveyQuestion(
-                id: 'fl-2',
-                order: 2,
-                text: '¿Qué es el interés compuesto?',
-                options: [
-                  'Interés solo sobre el capital',
-                  'Interés sobre el capital más los intereses acumulados',
-                  'Una comisión mensual fija',
-                  'Un tipo de fondo de inversión',
-                ],
-              ),
-              SurveyQuestion(
-                id: 'fl-3',
-                order: 3,
-                text: '¿Qué es un fondo de emergencia?',
-                options: [
-                  'Dinero para vacaciones',
-                  'De 3 a 6 meses de gastos ahorrados',
-                  'Una cuenta de jubilación',
-                  'El límite de una tarjeta de crédito',
-                ],
-              ),
-              SurveyQuestion(
-                id: 'fl-4',
-                order: 4,
-                text: '¿Cuál de estos es una "Necesidad" según la regla 50/30/20?',
-                options: [
-                  'Servicios de streaming',
-                  'Cenas en restaurantes',
-                  'Alquiler y servicios básicos',
-                  'Ropa nueva',
-                ],
-              ),
-              SurveyQuestion(
-                id: 'fl-5',
-                order: 5,
-                text: '¿Qué significan las siglas TEA (Tasa Efectiva Anual)?',
-                options: [
-                  'Tasa Efectiva Anual',
-                  'Tasa Esperada Acumulada',
-                  'Tope Efectivo Anual',
-                  'Tasa de Equilibrio Anual',
-                ],
-              ),
-            ],
-          );
-          if (_result != null) {
-            return _ResultView(result: _result!, isPre: widget.isPre);
-          }
-          return _SurveyForm(
-            survey: fallbackSurvey,
-            currentIndex: _currentIndex,
-            answers: _answers,
-            submitting: _submitting,
-            onAnswerChanged: (questionId, answer) {
-              setState(() => _answers[questionId] = answer);
-            },
-            onNext: () {
-              setState(() => _currentIndex++);
-            },
-            onSubmit: () => _submit(fallbackSurvey),
-          );
-        },
-        data: (survey) {
-          if (_result != null) {
-            return _ResultView(result: _result!, isPre: widget.isPre);
-          }
-          return _SurveyForm(
-            survey: survey,
-            currentIndex: _currentIndex,
-            answers: _answers,
-            submitting: _submitting,
-            onAnswerChanged: (questionId, answer) {
-              setState(() => _answers[questionId] = answer);
-            },
-            onNext: () {
-              setState(() => _currentIndex++);
-            },
-            onSubmit: () => _submit(survey),
-          );
-        },
+          ],
+        ),
+        body: surveyAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) {
+            // Hardcoded fallback with 5 financial literacy questions
+            final fallbackSurvey = Survey(
+              id: widget.isPre ? 'pre-fallback' : 'post-fallback',
+              type: widget.isPre ? 'PRE' : 'POST',
+              questions: const [
+                SurveyQuestion(
+                  id: 'fl-1',
+                  order: 1,
+                  text:
+                      '¿Qué porcentaje de tus ingresos deberías ahorrar cada mes según la regla 50/30/20?',
+                  options: ['10%', '20%', '30%', '50%'],
+                ),
+                SurveyQuestion(
+                  id: 'fl-2',
+                  order: 2,
+                  text: '¿Qué es el interés compuesto?',
+                  options: [
+                    'Interés solo sobre el capital',
+                    'Interés sobre el capital más los intereses acumulados',
+                    'Una comisión mensual fija',
+                    'Un tipo de fondo de inversión',
+                  ],
+                ),
+                SurveyQuestion(
+                  id: 'fl-3',
+                  order: 3,
+                  text: '¿Qué es un fondo de emergencia?',
+                  options: [
+                    'Dinero para vacaciones',
+                    'De 3 a 6 meses de gastos ahorrados',
+                    'Una cuenta de jubilación',
+                    'El límite de una tarjeta de crédito',
+                  ],
+                ),
+                SurveyQuestion(
+                  id: 'fl-4',
+                  order: 4,
+                  text:
+                      '¿Cuál de estos es una "Necesidad" según la regla 50/30/20?',
+                  options: [
+                    'Servicios de streaming',
+                    'Cenas en restaurantes',
+                    'Alquiler y servicios básicos',
+                    'Ropa nueva',
+                  ],
+                ),
+                SurveyQuestion(
+                  id: 'fl-5',
+                  order: 5,
+                  text: '¿Qué significan las siglas TEA (Tasa Efectiva Anual)?',
+                  options: [
+                    'Tasa Efectiva Anual',
+                    'Tasa Esperada Acumulada',
+                    'Tope Efectivo Anual',
+                    'Tasa de Equilibrio Anual',
+                  ],
+                ),
+              ],
+            );
+            if (_result != null) {
+              return _ResultView(result: _result!, isPre: widget.isPre);
+            }
+            return _SurveyForm(
+              survey: fallbackSurvey,
+              currentIndex: _currentIndex,
+              answers: _answers,
+              submitting: _submitting,
+              onAnswerChanged: (questionId, answer) {
+                setState(() => _answers[questionId] = answer);
+              },
+              onNext: () {
+                setState(() => _currentIndex++);
+              },
+              onSubmit: () {
+                showAppToast(
+                  context,
+                  'No se pudo conectar con la encuesta. Puedes responderla luego.',
+                  type: ToastType.warning,
+                );
+                _skipSurvey();
+              },
+            );
+          },
+          data: (survey) {
+            if (_result != null) {
+              return _ResultView(result: _result!, isPre: widget.isPre);
+            }
+            return _SurveyForm(
+              survey: survey,
+              currentIndex: _currentIndex,
+              answers: _answers,
+              submitting: _submitting,
+              onAnswerChanged: (questionId, answer) {
+                setState(() => _answers[questionId] = answer);
+              },
+              onNext: () {
+                setState(() => _currentIndex++);
+              },
+              onSubmit: () => _submit(survey),
+            );
+          },
+        ),
       ),
     );
+  }
+
+  Future<void> _skipSurvey() async {
+    if (widget.isPre) {
+      await ref.read(preSurveyProvider.notifier).skipForNow();
+    } else {
+      await ref.read(postSurveyProvider.notifier).skipForNow();
+    }
+    if (mounted) context.go('/dashboard');
   }
 
   Future<void> _submit(Survey survey) async {
@@ -179,8 +212,28 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
 
       if (mounted) setState(() => _result = result);
     } catch (e) {
+      if (e is ApiException && e.statusCode == 409) {
+        if (widget.isPre) {
+          await ref.read(preSurveyProvider.notifier).markCompleted();
+        } else {
+          await ref.read(postSurveyProvider.notifier).markCompleted();
+        }
+        if (mounted) {
+          showAppToast(
+            context,
+            'Esta encuesta ya fue enviada.',
+            type: ToastType.info,
+          );
+          context.go('/dashboard');
+        }
+        return;
+      }
       if (mounted) {
-        showAppToast(context, context.l10n.surveySubmitError, type: ToastType.error);
+        showAppToast(
+          context,
+          context.l10n.surveySubmitError,
+          type: ToastType.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -220,10 +273,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         title: Text(title),
         content: Text(body),
         actions: [
-          FilledButton(
-            onPressed: () => ctx.pop(),
-            child: Text(l10n.commonOk),
-          ),
+          FilledButton(onPressed: () => ctx.pop(), child: Text(l10n.commonOk)),
         ],
       ),
     );
@@ -274,9 +324,9 @@ class _SurveyForm extends StatelessWidget {
             children: [
               Text(
                 '${currentIndex + 1} ${l10n.surveyProgressOf} $total',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF6B7280),
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: const Color(0xFF6B7280)),
               ),
             ],
           ),
@@ -302,14 +352,17 @@ class _SurveyForm extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF34D399),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     child: submitting
                         ? const SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : Text(l10n.surveySubmitButton),
                   )
@@ -318,7 +371,8 @@ class _SurveyForm extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF34D399),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     child: Text('${l10n.surveyNextButton} →'),
                   ),
@@ -347,17 +401,20 @@ class _QuestionContent extends StatelessWidget {
       children: [
         // Optional category icon
         const SizedBox(height: 8),
-        const Icon(Icons.monetization_on_outlined,
-            size: 40, color: Color(0xFF9CA3AF)),
+        const Icon(
+          Icons.monetization_on_outlined,
+          size: 40,
+          color: Color(0xFF9CA3AF),
+        ),
         const SizedBox(height: 20),
         // Large question text (no card wrapper)
         Text(
           question.text,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1F2937),
-                height: 1.3,
-              ),
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF1F2937),
+            height: 1.3,
+          ),
         ),
         const SizedBox(height: 24),
         // Full-width option tiles
@@ -368,12 +425,9 @@ class _QuestionContent extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               margin: const EdgeInsets.only(bottom: 10),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF34D399)
-                    : Colors.white,
+                color: isSelected ? const Color(0xFF34D399) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected
@@ -388,9 +442,7 @@ class _QuestionContent extends StatelessWidget {
                     height: 20,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.transparent,
+                      color: isSelected ? Colors.white : Colors.transparent,
                       border: Border.all(
                         color: isSelected
                             ? Colors.white
@@ -449,14 +501,18 @@ class _ResultView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Celebration icon
-          const Icon(Icons.celebration_rounded, size: 64, color: Color(0xFF34D399)),
+          const Icon(
+            Icons.celebration_rounded,
+            size: 64,
+            color: Color(0xFF34D399),
+          ),
           const SizedBox(height: 20),
           Text(
             l10n.surveyCompleteTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
-                ),
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1F2937),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -471,8 +527,7 @@ class _ResultView extends StatelessWidget {
           if (badgeUnlocked != null) ...[
             const SizedBox(height: 28),
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
                 color: const Color(0xFF34D399).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
@@ -480,8 +535,11 @@ class _ResultView extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.military_tech_rounded,
-                      size: 16, color: Color(0xFF10B981)),
+                  const Icon(
+                    Icons.military_tech_rounded,
+                    size: 16,
+                    color: Color(0xFF10B981),
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     '$badgeUnlocked ${l10n.surveyBadgeUnlocked}',
@@ -537,7 +595,8 @@ class _ResultView extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF34D399),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               child: Text('${l10n.surveyResultContinue} →'),
             ),

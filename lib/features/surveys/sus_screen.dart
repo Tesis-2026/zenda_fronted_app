@@ -13,8 +13,13 @@ final susSurveyServiceProvider = Provider<SurveysApiService>(
   (_) => SurveysApiService(),
 );
 
+const _susSurveyLoadTimeout = Duration(seconds: 12);
+
 final _susSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
-  return ref.read(susSurveyServiceProvider).getSusSurvey();
+  return ref
+      .read(susSurveyServiceProvider)
+      .getSusSurvey()
+      .timeout(_susSurveyLoadTimeout);
 });
 
 class SusScreen extends ConsumerStatefulWidget {
@@ -162,7 +167,14 @@ class _SusScreenState extends ConsumerState<SusScreen> {
             submitting: _submitting,
             onRatingChanged: (questionId, value) =>
                 setState(() => _ratings[questionId] = value),
-            onSubmit: () => _submit(fallbackSurvey.questions),
+            onSubmit: () {
+              showAppToast(
+                context,
+                'No se pudo conectar con la encuesta SUS. Intenta nuevamente.',
+                type: ToastType.warning,
+              );
+              ref.invalidate(_susSurveyProvider);
+            },
           );
         },
         data: (survey) {
