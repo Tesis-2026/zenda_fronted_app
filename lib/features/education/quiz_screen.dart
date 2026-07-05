@@ -21,9 +21,9 @@ import 'topic_detail_screen.dart';
 
 final _quizProvider = FutureProvider.autoDispose
     .family<List<QuizQuestion>, ({String topicId, String language})>(
-  (ref, args) =>
-      ref.read(quizServiceProvider).getQuiz(args.topicId, args.language),
-);
+      (ref, args) =>
+          ref.read(quizServiceProvider).getQuiz(args.topicId, args.language),
+    );
 
 // ─────────────────────────────────────────────────────────────────
 // Screen state machine
@@ -66,8 +66,9 @@ class _QuizState {
       questions: questions,
       currentIndex: currentIndex ?? this.currentIndex,
       answers: answers ?? this.answers,
-      selectedOption:
-          clearSelection ? null : (selectedOption ?? this.selectedOption),
+      selectedOption: clearSelection
+          ? null
+          : (selectedOption ?? this.selectedOption),
       phase: phase ?? this.phase,
       result: result ?? this.result,
       submitting: submitting ?? this.submitting,
@@ -94,8 +95,9 @@ class QuizScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final language = _deviceLanguage(context);
-    final quizAsync =
-        ref.watch(_quizProvider((topicId: topicId, language: language)));
+    final quizAsync = ref.watch(
+      _quizProvider((topicId: topicId, language: language)),
+    );
 
     return Scaffold(
       backgroundColor: context.colors.bg,
@@ -196,7 +198,7 @@ class _QuizBodyState extends State<_QuizBody> {
     });
   }
 
-  void _confirmAnswer() {
+  Future<void> _confirmAnswer() async {
     final selected = _state.selectedOption;
     if (selected == null) return;
     _timer?.cancel();
@@ -204,20 +206,12 @@ class _QuizBodyState extends State<_QuizBody> {
     final newAnswers = Map<String, String>.from(_state.answers)
       ..[_state.current.id] = selected;
 
-    setState(() {
-      _state = _state.copyWith(
-        answers: newAnswers,
-        phase: _QuizPhase.reviewing,
-      );
-    });
-  }
-
-  Future<void> _next() async {
     if (_state.isLast) {
-      await _submit();
+      await _submit(newAnswers);
     } else {
       setState(() {
         _state = _state.copyWith(
+          answers: newAnswers,
           currentIndex: _state.currentIndex + 1,
           phase: _QuizPhase.answering,
           clearSelection: true,
@@ -227,18 +221,27 @@ class _QuizBodyState extends State<_QuizBody> {
     }
   }
 
-  Future<void> _submit() async {
-    setState(() =>
-        _state = _state.copyWith(submitting: true, phase: _QuizPhase.results));
+  Future<void> _submit(Map<String, String> answers) async {
+    setState(
+      () => _state = _state.copyWith(
+        answers: answers,
+        submitting: true,
+        phase: _QuizPhase.results,
+      ),
+    );
     try {
-      final result =
-          await widget.service.submitQuiz(widget.topicId, _state.answers);
+      final result = await widget.service.submitQuiz(widget.topicId, answers);
       setState(
-          () => _state = _state.copyWith(result: result, submitting: false));
+        () => _state = _state.copyWith(result: result, submitting: false),
+      );
       widget.onCompleted();
     } catch (_) {
-      setState(() => _state =
-          _state.copyWith(submitting: false, phase: _QuizPhase.reviewing));
+      setState(
+        () => _state = _state.copyWith(
+          submitting: false,
+          phase: _QuizPhase.answering,
+        ),
+      );
     }
   }
 
@@ -262,7 +265,6 @@ class _QuizBodyState extends State<_QuizBody> {
               state: _state,
               onSelectOption: _selectOption,
               onConfirm: _confirmAnswer,
-              onNext: _next,
             ),
           ),
         ),
@@ -303,13 +305,15 @@ class _ProgressBar extends StatelessWidget {
               Text(
                 l10n.quizQuestionOf(current + 1, total),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: isLow
                       ? Colors.red.withValues(alpha: 0.08)
@@ -364,13 +368,11 @@ class _QuestionView extends StatelessWidget {
     required this.state,
     required this.onSelectOption,
     required this.onConfirm,
-    required this.onNext,
   });
 
   final _QuizState state;
   final void Function(String) onSelectOption;
-  final VoidCallback onConfirm;
-  final Future<void> Function() onNext;
+  final Future<void> Function() onConfirm;
 
   Color _difficultyColor(String diff) {
     return switch (diff.toLowerCase()) {
@@ -401,7 +403,10 @@ class _QuestionView extends StatelessWidget {
           child: Text(
             difficultyEs(q.difficulty),
             style: TextStyle(
-                color: diffColor, fontSize: 12, fontWeight: FontWeight.w600),
+              color: diffColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -411,14 +416,14 @@ class _QuestionView extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         ...q.options.asMap().entries.map(
-              (entry) => _OptionTile(
-                option: entry.value,
-                index: entry.key,
-                isSelected: state.selectedOption == entry.value,
-                isReviewing: reviewing,
-                onTap: reviewing ? null : () => onSelectOption(entry.value),
-              ),
-            ),
+          (entry) => _OptionTile(
+            option: entry.value,
+            index: entry.key,
+            isSelected: state.selectedOption == entry.value,
+            isReviewing: reviewing,
+            onTap: reviewing ? null : () => onSelectOption(entry.value),
+          ),
+        ),
         if (reviewing) ...[
           const SizedBox(height: 4),
           Container(
@@ -427,13 +432,17 @@ class _QuestionView extends StatelessWidget {
               color: const Color(0xFFECFDF5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: const Color(0xFF34D399).withValues(alpha: 0.3)),
+                color: const Color(0xFF34D399).withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.check_circle_rounded,
-                    color: Color(0xFF34D399), size: 18),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF34D399),
+                  size: 18,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -451,32 +460,21 @@ class _QuestionView extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 20),
-        if (!reviewing)
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: state.selectedOption != null ? onConfirm : null,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: state.selectedOption != null && !state.submitting
+                ? () => onConfirm()
+                : null,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Text(l10n.quizSubmit),
             ),
-          )
-        else
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => onNext(),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-              ),
-              child: Text(state.isLast ? l10n.quizFinish : l10n.quizNext),
-            ),
+            child: Text(state.isLast ? l10n.quizFinish : l10n.quizNext),
           ),
+        ),
         const SizedBox(height: 16),
       ],
     );
@@ -507,10 +505,10 @@ class _OptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = index < _labels.length ? _labels[index] : '${index + 1}';
-    final Color bgColor =
-        isSelected ? const Color(0xFFECFDF5) : Colors.white;
-    final Color borderColor =
-        isSelected ? const Color(0xFF34D399) : const Color(0xFFE5E7EB);
+    final Color bgColor = isSelected ? const Color(0xFFECFDF5) : Colors.white;
+    final Color borderColor = isSelected
+        ? const Color(0xFF34D399)
+        : const Color(0xFFE5E7EB);
     final double borderWidth = isSelected ? 1.5 : 1.0;
 
     return Padding(
@@ -544,8 +542,9 @@ class _OptionTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color:
-                          isSelected ? Colors.white : const Color(0xFF6B7280),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF6B7280),
                     ),
                   ),
                 ),
@@ -556,8 +555,7 @@ class _OptionTile extends StatelessWidget {
                   option,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: const Color(0xFF1F2937),
                   ),
                 ),
@@ -621,27 +619,26 @@ class _ResultsView extends StatelessWidget {
               child: Text(
                 '${result.score}%',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: scoreColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: scoreColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
             l10n.quizResult(result.score),
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             '${result.correctCount} / ${result.totalCount} correctas',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 32),
           _ReviewList(questions: state.questions, feedback: result.feedback),
@@ -675,10 +672,9 @@ class _ReviewList extends StatelessWidget {
       children: [
         Text(
           'Revisión',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         ...questions.map((q) {
@@ -713,10 +709,8 @@ class _ReviewList extends StatelessWidget {
                       Expanded(
                         child: Text(
                           q.text,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
@@ -726,8 +720,8 @@ class _ReviewList extends StatelessWidget {
                     Text(
                       'Correcto: ${fb.correctAnswer}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.green.shade700,
-                          ),
+                        color: Colors.green.shade700,
+                      ),
                     ),
                   ],
                 ],

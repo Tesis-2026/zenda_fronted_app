@@ -26,6 +26,17 @@ class ManagementScreen extends StatefulWidget {
 class _ManagementScreenState extends State<ManagementScreen> {
   late int _tab = widget.initialTab.clamp(0, 3);
 
+  String _hintForCurrentTab() {
+    return switch (_tab) {
+      0 =>
+        'Revisa como se distribuye tu dinero entre necesidades, deseos y ahorro.',
+      1 =>
+        'Crea limites mensuales por categoria. Los gastos registrados actualizan el consumo automaticamente.',
+      2 => 'Usa Metas para agregar dinero a tus ahorros y ver tu avance.',
+      _ => 'Registra ingresos desde Movimientos para que se reflejen aqui.',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -82,6 +93,11 @@ class _ManagementScreenState extends State<ManagementScreen> {
               ),
             ),
             const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _ManagementHintCard(text: _hintForCurrentTab()),
+            ),
+            const SizedBox(height: 8),
             // Active sub-view (kept alive via IndexedStack)
             Expanded(
               child: IndexedStack(
@@ -95,6 +111,35 @@ class _ManagementScreenState extends State<ManagementScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ManagementHintCard extends StatelessWidget {
+  const _ManagementHintCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colors.border),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          height: 1.35,
+          fontWeight: FontWeight.w500,
+          color: colors.textMuted,
         ),
       ),
     );
