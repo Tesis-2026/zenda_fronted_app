@@ -111,13 +111,17 @@ class TransactionApiService {
   // transaction write by sending categoryId directly.
   static Map<String, String>? _categoryIdCache;
 
+  static void invalidateCategoryCache() {
+    _categoryIdCache = null;
+  }
+
   static Future<Map<String, String>> _getCategoryCache() async {
     if (_categoryIdCache != null) return _categoryIdCache!;
     try {
       final list = await ApiClient.getList('/categories');
       _categoryIdCache = {
         for (final item in list.cast<Map<String, dynamic>>())
-          (item['name'] as String).toLowerCase(): item['id'] as String,
+          _normalizeCategoryName(item['name'] as String): item['id'] as String,
       };
     } catch (_) {
       _categoryIdCache = {};
@@ -159,7 +163,7 @@ class TransactionApiService {
 
     final apiName = customCategoryName ?? categoryToApiName(category);
     final cache = await _getCategoryCache();
-    final categoryId = cache[apiName.toLowerCase()];
+    final categoryId = cache[_normalizeCategoryName(apiName)];
 
     final body = <String, dynamic>{
       'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
@@ -185,7 +189,8 @@ class TransactionApiService {
     // for AI suggestions that map to a brand-new category we silently
     // drop the suggestion fields to avoid the paired-field violation.
     if (aiSuggestedCategoryName != null && aiConfidence != null) {
-      final suggestedId = cache[aiSuggestedCategoryName.toLowerCase()];
+      final suggestedId =
+          cache[_normalizeCategoryName(aiSuggestedCategoryName)];
       if (suggestedId != null) {
         body['suggestedCategoryId'] = suggestedId;
         body['aiConfidence'] = aiConfidence;
@@ -257,7 +262,7 @@ class TransactionApiService {
 
     final apiName = categoryToApiName(category);
     final cache = await _getCategoryCache();
-    final categoryId = cache[apiName.toLowerCase()];
+    final categoryId = cache[_normalizeCategoryName(apiName)];
 
     final body = <String, dynamic>{
       'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',

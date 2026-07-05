@@ -310,6 +310,23 @@ class TransactionListScreen extends ConsumerWidget {
                               ref.invalidate(weekSummaryProvider);
                               ref.invalidate(monthSummaryProvider);
                               ref.invalidate(transactionsProvider);
+                              ref.invalidate(budgetSummaryProvider);
+                              ref.invalidate(currentMonthBudgetsProvider);
+                              ref.invalidate(accountsProvider);
+                              ref.invalidate(recommendationsProvider);
+                              final now = DateTime.now();
+                              ref.invalidate(
+                                accountReportProvider((
+                                  month: now.month,
+                                  year: now.year,
+                                )),
+                              );
+                              ref.invalidate(
+                                budgetsForPeriodProvider((
+                                  month: now.month,
+                                  year: now.year,
+                                )),
+                              );
                             },
                           ),
                       ],

@@ -121,6 +121,9 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
           picked.day,
           _date.hour,
           _date.minute,
+          _date.second,
+          _date.millisecond,
+          _date.microsecond,
         ),
       );
     }

@@ -1,5 +1,6 @@
 import 'api_client.dart';
 import '../models/category.dart';
+import 'transaction_api_service.dart';
 
 class CategoryApiService {
   Future<List<CategoryModel>> getAll() async {
@@ -11,20 +12,21 @@ class CategoryApiService {
   }
 
   Future<CategoryModel> create(String name) async {
-    final json = await ApiClient.post(
-      '/categories',
-      {'name': name},
-      authenticated: true,
-    );
+    final json = await ApiClient.post('/categories', {
+      'name': name,
+    }, authenticated: true);
+    TransactionApiService.invalidateCategoryCache();
     return CategoryModel.fromJson(json);
   }
 
   Future<CategoryModel> rename(String id, String name) async {
     final json = await ApiClient.put('/categories/$id', {'name': name});
+    TransactionApiService.invalidateCategoryCache();
     return CategoryModel.fromJson(json);
   }
 
   Future<void> delete(String id) async {
     await ApiClient.delete('/categories/$id');
+    TransactionApiService.invalidateCategoryCache();
   }
 }
