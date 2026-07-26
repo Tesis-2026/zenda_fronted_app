@@ -15,6 +15,7 @@ import '../../core/utils/category_utils.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_date_field.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_text_field.dart';
@@ -90,6 +91,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _aiSuggestion = result?.category;
       _isClassifying = false;
     });
+  }
+
+  void _leaveFullScreenFlow() {
+    if (widget.isSheet) {
+      context.pop();
+    } else {
+      context.go('/transactions');
+    }
   }
 
   Future<void> _showVoiceDraftSheet() async {
@@ -753,9 +762,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.txNewTitle)),
-      body: SafeArea(child: formContent),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _leaveFullScreenFlow();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.txNewTitle),
+          leading: IconButton(
+            tooltip: 'Volver a movimientos',
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: _leaveFullScreenFlow,
+          ),
+        ),
+        body: SafeArea(child: formContent),
+        bottomNavigationBar: const AppBottomNav(activeIndex: 1),
+      ),
     );
   }
 
