@@ -109,15 +109,16 @@ class _DemoAuthNotifier extends AuthNotifier {
   }
 
   @override
-  Future<void> login(String email, String password) async {
+  Future<String?> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     await Future.delayed(const Duration(milliseconds: 700));
     _state = AuthState.authenticated(DemoData.user);
     state = _state;
+    return null;
   }
 
   @override
-  Future<void> register(String name, String email, String password) async {
+  Future<String?> register(String name, String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     await Future.delayed(const Duration(milliseconds: 700));
     _state = AuthState.authenticated(
@@ -129,6 +130,7 @@ class _DemoAuthNotifier extends AuthNotifier {
       ),
     );
     state = _state;
+    return null;
   }
 
   @override

@@ -30,6 +30,8 @@
 	<string>Zenda usa el microfono para convertir tu voz en un borrador de transaccion.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Zenda usa reconocimiento de voz para completar tus gastos o ingresos dictados.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Zenda usa Face ID o biometria para proteger el acceso a tu cuenta.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

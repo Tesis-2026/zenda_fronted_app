@@ -13,6 +13,9 @@ abstract final class AuthErrorCode {
   /// Email is already registered.
   static const emailTaken = 'auth.emailTaken';
 
+  /// Credentials are correct, but the account still needs email verification.
+  static const emailNotVerified = 'auth.emailNotVerified';
+
   /// Password-reset token is invalid or has expired.
   static const tokenExpired = 'auth.tokenExpired';
 

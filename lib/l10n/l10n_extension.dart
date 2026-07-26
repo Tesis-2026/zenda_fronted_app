@@ -22,6 +22,7 @@ extension ErrorL10n on AppLocalizations {
       // ── Auth ────────────────────────────────────────────────────────────
       AuthErrorCode.invalidCredentials => errorAuthInvalidCredentials,
       AuthErrorCode.emailTaken => errorAuthEmailTaken,
+      AuthErrorCode.emailNotVerified => errorAuthEmailNotVerified,
       AuthErrorCode.tokenExpired => errorAuthTokenExpired,
       AuthErrorCode.badRequest => payload ?? errorAuthBadRequest,
       AuthErrorCode.serverError => errorServerError,

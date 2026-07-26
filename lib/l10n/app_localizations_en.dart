@@ -876,6 +876,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSectionFinance => 'Finance';
 
   @override
+  String get profileSectionPreferences => 'Preferences';
+
+  @override
   String get profileSectionLearnGrow => 'Learn & Grow';
 
   @override
@@ -1200,6 +1203,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorAuthEmailTaken => 'This email is already registered.';
+
+  @override
+  String get errorAuthEmailNotVerified =>
+      'Your account is not verified yet. Check your email and enter the code we sent.';
 
   @override
   String get errorAuthTokenExpired => 'Reset link is invalid or has expired.';
@@ -2008,24 +2015,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get emailVerifTitle => 'Check your email';
+  String get emailVerifTitle => 'Verify your email';
 
   @override
   String emailVerifSubtitle(String email) {
-    return 'We sent a verification link to $email';
+    return 'We sent a 6-digit code to $email';
   }
 
   @override
   String get emailVerifStep1 => 'Open the email from Zenda';
 
   @override
-  String get emailVerifStep2 => 'Click the verification link';
+  String get emailVerifStep2 => 'Copy the 6-digit code';
 
   @override
-  String get emailVerifStep3 => 'Return to the app to continue';
+  String get emailVerifStep3 => 'Enter the code here to activate your account';
 
   @override
-  String get emailVerifOpenApp => 'Open Email App';
+  String get emailVerifOpenApp => 'Verify account';
 
   @override
   String get emailVerifResendText => 'Didn\'t receive it?';

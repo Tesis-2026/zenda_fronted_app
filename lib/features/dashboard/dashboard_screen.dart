@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/models/account.dart';
+import '../../core/models/user.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
@@ -13,6 +14,8 @@ import 'widgets/zenda_ai_card.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
 import '../notifications/notifications_inbox_providers.dart';
+import '../surveys/sus_prompt_card.dart';
+import '../../providers/pre_survey_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -39,7 +42,6 @@ class _InicioSection extends ConsumerWidget {
     final onSurface = colors.textPrimary;
     final onSurfaceMuted = colors.textMuted;
 
-    final budgetSummaryAsync = ref.watch(budgetSummaryProvider);
     final monthSummaryAsync = ref.watch(monthSummaryProvider);
     final now = DateTime.now();
     final accountReportAsync = ref.watch(
@@ -68,6 +70,7 @@ class _InicioSection extends ConsumerWidget {
         ref.invalidate(weekSummaryProvider);
         ref.invalidate(monthSummaryProvider);
         ref.invalidate(accountsProvider);
+        ref.invalidate(postSurveyProvider);
         ref.invalidate(
           accountReportProvider((month: now.month, year: now.year)),
         );
@@ -113,8 +116,11 @@ class _InicioSection extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
-            // Total money = sum of registered budgets
-            _TotalMoneyCard(summary: budgetSummaryAsync),
+            const SusPromptCard(),
+
+            _PostSurveyBanner(user: user),
+
+            _TotalMoneyCard(report: accountReportAsync),
 
             const SizedBox(height: 12),
 
@@ -144,22 +150,128 @@ class _InicioSection extends ConsumerWidget {
   }
 }
 
+class _PostSurveyBanner extends ConsumerWidget {
+  const _PostSurveyBanner({required this.user});
+
+  final User? user;
+
+  bool get _isDue {
+    final createdAtRaw = user?.createdAt;
+    if (createdAtRaw == null || createdAtRaw.isEmpty) return false;
+    final createdAt = DateTime.tryParse(createdAtRaw);
+    if (createdAt == null) return false;
+    return DateTime.now().difference(createdAt).inDays >= 30;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!_isDue) return const SizedBox.shrink();
+
+    final completedAsync = ref.watch(postSurveyProvider);
+    final completed = completedAsync.asData?.value ?? true;
+    if (completed || completedAsync.isLoading) return const SizedBox.shrink();
+
+    final l10n = context.l10n;
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFECFDF5),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFA7F3D0)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.assignment_turned_in_outlined,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.dashboardPostSurveyBannerTitle,
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.dashboardPostSurveyBannerBody,
+                        style: TextStyle(
+                          color: colors.textMuted,
+                          fontSize: 13,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push('/surveys/post'),
+                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                label: Text(l10n.dashboardPostSurveyBannerAction),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(46),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Shows the user's total money — the sum of their registered category budgets —
 /// plus how much is available vs. spent. Money is tracked through budgets;
 /// there are no accounts. Tapping routes to the budgets manager.
 class _TotalMoneyCard extends StatelessWidget {
-  final AsyncValue<BudgetTotals> summary;
+  final AsyncValue<AccountReport> report;
 
-  const _TotalMoneyCard({required this.summary});
+  const _TotalMoneyCard({required this.report});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final totals = summary.asData?.value;
-    final total = totals?.total ?? 0.0;
-    final available = totals?.available ?? 0.0;
-    final spent = totals?.spent ?? 0.0;
-    final hasBudgets = total > 0;
+    final data = report.asData?.value;
+    final total = data?.totalAssets ?? 0.0;
+    final debt = data?.totalCreditDebt ?? 0.0;
+    final available = total;
+    final spent = debt;
+    final hasAccounts = (data?.accounts ?? const []).isNotEmpty;
+    final isLoading = report.isLoading && data == null;
+    final hasError = report.hasError && data == null;
 
     return Container(
       width: double.infinity,
@@ -179,7 +291,7 @@ class _TotalMoneyCard extends StatelessWidget {
                 style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
               ),
               GestureDetector(
-                onTap: () => context.push('/budgets'),
+                onTap: () => context.push('/add-transaction'),
                 child: const Icon(
                   Icons.add_circle_outline,
                   color: Color(0xFF34D399),
@@ -189,16 +301,31 @@ class _TotalMoneyCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            'S/ ${total.toStringAsFixed(2)}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
+          if (isLoading)
+            const SizedBox(
+              width: 38,
+              height: 38,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.6,
+                color: Colors.white,
+              ),
+            )
+          else
+            Text(
+              hasError ? 'S/ --' : 'S/ ${total.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ),
           const SizedBox(height: 8),
-          if (hasBudgets)
+          if (hasError)
+            const Text(
+              'No se pudo cargar tu saldo. Desliza hacia abajo para actualizar.',
+              style: TextStyle(color: Color(0xFFFCA5A5), fontSize: 12),
+            )
+          else if (hasAccounts)
             Row(
               children: [
                 Expanded(
@@ -212,7 +339,7 @@ class _TotalMoneyCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: () => context.push('/budgets'),
+                  onTap: () => context.push('/transactions'),
                   child: Text(
                     '▶  ${l10n.dashboardViewAll}',
                     style: const TextStyle(
@@ -225,9 +352,9 @@ class _TotalMoneyCard extends StatelessWidget {
             )
           else
             GestureDetector(
-              onTap: () => context.push('/budgets'),
+              onTap: () => context.push('/add-transaction'),
               child: Text(
-                '+  ${l10n.budgetEmptySubtitle}',
+                '+ Registra un ingreso para ver tu dinero disponible',
                 style: const TextStyle(color: Color(0xFF34D399), fontSize: 12),
               ),
             ),

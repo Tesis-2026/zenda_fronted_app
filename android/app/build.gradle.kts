@@ -31,6 +31,7 @@ val googleServicesCandidates = listOf(
 )
 if (googleServicesCandidates.any { it.exists() }) {
     apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 android {
@@ -83,7 +84,7 @@ android {
             dimension = "env"
             manifestPlaceholders["appName"] = "Zenda"
             // Prod must use HTTPS only — block cleartext traffic.
-            manifestPlaceholders["usesCleartextTraffic"] = "true"
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
         }
     }
 
@@ -110,4 +111,5 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("com.google.android.play:feature-delivery:2.1.0")
 }

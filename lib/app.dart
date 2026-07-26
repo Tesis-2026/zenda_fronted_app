@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'core/config/app_config.dart';
+import 'core/services/study_analytics_service.dart';
+import 'core/services/study_telemetry_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/auth_controller.dart';
 import 'features/notifications/notifications_inbox_providers.dart';
@@ -18,12 +21,13 @@ class App extends ConsumerStatefulWidget {
   ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends ConsumerState<App> {
+class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   StreamSubscription<RemoteMessage>? _tapSub;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Open the inbox when the user taps a notification (background/terminated).
     final fcm = ref.read(fcmServiceProvider);
     _tapSub = fcm.onMessageTap.listen((_) {
@@ -36,8 +40,21 @@ class _AppState extends ConsumerState<App> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tapSub?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final auth = ref.read(authNotifierProvider);
+    if (!auth.isAuthenticated) return;
+    StudyTelemetryService.track(
+      'app_session_started',
+      metadata: {'source': 'resume', 'app_env': AppConfig.env.name},
+    );
+    unawaited(ref.read(fcmServiceProvider).registerWithBackend());
   }
 
   @override
@@ -50,8 +67,17 @@ class _AppState extends ConsumerState<App> {
       final fcm = ref.read(fcmServiceProvider);
       final wasAuth = prev?.isAuthenticated ?? false;
       if (next.isAuthenticated && !wasAuth) {
+        StudyAnalyticsService.setUserId(next.user?.id);
+        StudyTelemetryService.track(
+          'app_session_started',
+          metadata: {
+            'source': 'auth_transition',
+            'app_env': AppConfig.env.name,
+          },
+        );
         fcm.registerWithBackend();
       } else if (!next.isAuthenticated && wasAuth) {
+        StudyAnalyticsService.setUserId(null);
         fcm.unregisterFromBackend();
       }
     });

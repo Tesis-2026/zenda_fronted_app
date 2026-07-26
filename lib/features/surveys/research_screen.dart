@@ -48,6 +48,14 @@ class ResearchScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1, indent: 70, color: Color(0xFFF3F4F6)),
                 _ResearchTile(
+                  icon: Icons.rate_review_outlined,
+                  title: 'Satisfacción final',
+                  subtitle:
+                      'Utilidad, claridad del asistente e intención de uso',
+                  onTap: () => context.push('/surveys/satisfaction'),
+                ),
+                const Divider(height: 1, indent: 70, color: Color(0xFFF3F4F6)),
+                _ResearchTile(
                   icon: Icons.compare_arrows_rounded,
                   title: l10n.settingsSurveyComparisonLabel,
                   subtitle: l10n.settingsSurveyComparisonSubtitle,
@@ -114,7 +122,11 @@ class _ResearchTile extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, size: 20, color: colors.textSubtle),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: colors.textSubtle,
+            ),
           ],
         ),
       ),

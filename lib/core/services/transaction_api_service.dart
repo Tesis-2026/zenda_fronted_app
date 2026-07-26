@@ -92,6 +92,7 @@ String _normalizeCategoryName(String value) {
 typedef CreateTransactionResult = ({
   List<String> completedChallenges,
   String? anomalyAlert,
+  String? anomalyAlertExplanation,
 });
 
 /// Raw output of the AI classify call. The screen uses [category] to
@@ -149,7 +150,11 @@ class TransactionApiService {
   }) async {
     // Transfers are local-only; no backend call needed.
     if (kind == TransactionKind.transfer) {
-      return (completedChallenges: <String>[], anomalyAlert: null);
+      return (
+        completedChallenges: <String>[],
+        anomalyAlert: null,
+        anomalyAlertExplanation: null,
+      );
     }
 
     final apiName = customCategoryName ?? categoryToApiName(category);
@@ -203,10 +208,14 @@ class TransactionApiService {
     final anomalyAlert = rawAnomaly is Map
         ? rawAnomaly['categoryName'] as String?
         : null;
+    final anomalyAlertExplanation = rawAnomaly is Map
+        ? rawAnomaly['explanation'] as String?
+        : null;
 
     return (
       completedChallenges: completedChallenges,
       anomalyAlert: anomalyAlert,
+      anomalyAlertExplanation: anomalyAlertExplanation,
     );
   }
 
@@ -216,6 +225,8 @@ class TransactionApiService {
     String? to,
     String? categoryId,
     String? accountId,
+    double? minAmount,
+    double? maxAmount,
   }) async {
     final params = <String, String>{};
     if (type != null) params['type'] = type;
@@ -223,10 +234,12 @@ class TransactionApiService {
     if (to != null) params['to'] = to;
     if (categoryId != null) params['categoryId'] = categoryId;
     if (accountId != null) params['accountId'] = accountId;
+    if (minAmount != null) params['minAmount'] = minAmount.toStringAsFixed(2);
+    if (maxAmount != null) params['maxAmount'] = maxAmount.toStringAsFixed(2);
 
     final query = params.isEmpty
         ? ''
-        : '?${params.entries.map((e) => '${e.key}=${e.value}').join('&')}';
+        : '?${Uri(queryParameters: params).query}';
     final body = await ApiClient.getList('/transactions$query');
     return body.cast<Map<String, dynamic>>();
   }

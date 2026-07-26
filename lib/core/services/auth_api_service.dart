@@ -24,7 +24,8 @@ class LockoutInfo {
   /// Parses the 401 body produced by `POST /auth/login` (B14). Returns null
   /// when the body has no lockout fields.
   static LockoutInfo? fromErrorBody(Map<String, dynamic> body) {
-    final hasAny = body.containsKey('failedAttempts') ||
+    final hasAny =
+        body.containsKey('failedAttempts') ||
         body.containsKey('attemptsRemaining') ||
         body.containsKey('lockedUntil');
     if (!hasAny) return null;
@@ -44,32 +45,57 @@ class AuthResult {
   final String? error;
   final bool isSuccess;
   final LockoutInfo? lockout;
+  final String? pendingVerificationEmail;
 
-  AuthResult._({this.user, this.error, required this.isSuccess, this.lockout});
+  AuthResult._({
+    this.user,
+    this.error,
+    required this.isSuccess,
+    this.lockout,
+    this.pendingVerificationEmail,
+  });
 
   factory AuthResult.success(User user) =>
       AuthResult._(user: user, isSuccess: true);
 
+  factory AuthResult.emailVerificationRequired(String email) =>
+      AuthResult._(isSuccess: true, pendingVerificationEmail: email);
+
   factory AuthResult.error(String message, {LockoutInfo? lockout}) =>
       AuthResult._(error: message, isSuccess: false, lockout: lockout);
+
+  bool get requiresEmailVerification => pendingVerificationEmail != null;
 }
 
 class AuthApiService {
+  static const String _privacyPolicyVersion = 'privacy-2026-07-03';
+  static const String _termsVersion = 'terms-2026-07-03';
+
   Future<AuthResult> register({
     required String name,
     required String email,
     required String password,
   }) async {
     try {
-      final tokenBody = await ApiClient.post('/auth/register', {
+      final body = await ApiClient.post('/auth/register', {
         'fullName': name,
         'email': email,
         'password': password,
+        'consentGiven': true,
+        'privacyPolicyVersion': _privacyPolicyVersion,
+        'termsVersion': _termsVersion,
       });
 
+      if (body['requiresEmailVerification'] == true) {
+        return AuthResult.emailVerificationRequired(
+          (body['email'] as String?) ?? email,
+        );
+      }
+
+      // Backward compatibility for older backend builds.
       await ApiClient.saveTokens(
-        accessToken: tokenBody['accessToken'] as String,
-        refreshToken: tokenBody['refreshToken'] as String,
+        accessToken: body['accessToken'] as String,
+        refreshToken: body['refreshToken'] as String,
       );
 
       final profileBody = await ApiClient.get('/users/me');
@@ -99,10 +125,17 @@ class AuthApiService {
       final profileBody = await ApiClient.get('/users/me');
       return AuthResult.success(User.fromJson(profileBody));
     } on ApiException catch (e) {
+      if (e.statusCode == 403 && e.body['code'] == 'EMAIL_NOT_VERIFIED') {
+        return AuthResult.emailVerificationRequired(
+          (e.body['email'] as String?) ?? email,
+        );
+      }
       // 401 may carry lockout state (failedAttempts/attemptsRemaining/
       // lockedUntil) per B14 — surface it so the login screen can render
       // a server-authoritative countdown (B11).
-      final lockout = e.statusCode == 401 ? LockoutInfo.fromErrorBody(e.body) : null;
+      final lockout = e.statusCode == 401
+          ? LockoutInfo.fromErrorBody(e.body)
+          : null;
       return AuthResult.error(_mapError(e), lockout: lockout);
     } catch (_) {
       return AuthResult.error(AuthErrorCode.noConnection);
@@ -120,12 +153,36 @@ class AuthApiService {
     }
   }
 
+  Future<AuthResult> restoreStoredSession() async {
+    try {
+      final hasSession = await ApiClient.hasStoredSession();
+      if (!hasSession) return AuthResult.error(AuthErrorCode.tokenExpired);
+
+      var user = await getCurrentUser();
+      if (user != null) return AuthResult.success(user);
+
+      final refreshed = await ApiClient.refreshSession();
+      if (!refreshed) return AuthResult.error(AuthErrorCode.tokenExpired);
+
+      user = await getCurrentUser();
+      if (user != null) return AuthResult.success(user);
+      return AuthResult.error(AuthErrorCode.tokenExpired);
+    } catch (_) {
+      return AuthResult.error(AuthErrorCode.noConnection);
+    }
+  }
+
   Future<bool> isLoggedIn() async {
     final user = await getCurrentUser();
     return user != null;
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool preserveBiometricSession = false}) async {
+    if (preserveBiometricSession) {
+      await ApiClient.deleteAccessToken();
+      return;
+    }
+
     try {
       // Revoke all refresh tokens on the server before clearing local storage
       await ApiClient.post('/auth/logout', {}, authenticated: true);
@@ -138,9 +195,7 @@ class AuthApiService {
   Future<AuthResult> forgotPassword(String email) async {
     try {
       await ApiClient.post('/auth/forgot-password', {'email': email});
-      return AuthResult.success(
-        User(id: '', name: '', email: email),
-      );
+      return AuthResult.success(User(id: '', name: '', email: email));
     } on ApiException catch (e) {
       return AuthResult.error(_mapError(e));
     } catch (_) {
@@ -159,10 +214,51 @@ class AuthApiService {
     }
   }
 
-  /// Returns the resetToken on success (store it for the reset-password step).
-  Future<String?> verifyOtp({required String email, required String code}) async {
+  Future<AuthResult> resendEmailVerification(String email) async {
     try {
-      final response = await ApiClient.post('/auth/verify-otp', {'email': email, 'code': code});
+      await ApiClient.post('/auth/resend-verification', {'email': email});
+      return AuthResult.emailVerificationRequired(email);
+    } on ApiException catch (e) {
+      return AuthResult.error(_mapError(e));
+    } catch (_) {
+      return AuthResult.error(AuthErrorCode.noConnection);
+    }
+  }
+
+  Future<AuthResult> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final tokenBody = await ApiClient.post('/auth/verify-email', {
+        'email': email,
+        'code': code,
+      });
+
+      await ApiClient.saveTokens(
+        accessToken: tokenBody['accessToken'] as String,
+        refreshToken: tokenBody['refreshToken'] as String,
+      );
+
+      final profileBody = await ApiClient.get('/users/me');
+      return AuthResult.success(User.fromJson(profileBody));
+    } on ApiException catch (e) {
+      return AuthResult.error(_mapError(e));
+    } catch (_) {
+      return AuthResult.error(AuthErrorCode.noConnection);
+    }
+  }
+
+  /// Returns the resetToken on success (store it for the reset-password step).
+  Future<String?> verifyOtp({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await ApiClient.post('/auth/verify-otp', {
+        'email': email,
+        'code': code,
+      });
       return response['resetToken'] as String?;
     } catch (_) {
       return null;
@@ -204,10 +300,14 @@ class AuthApiService {
     }
     return switch (e.statusCode) {
       409 => AuthErrorCode.emailTaken,
+      403 => e.body['code'] == 'EMAIL_NOT_VERIFIED'
+          ? AuthErrorCode.emailNotVerified
+          : AuthErrorCode.serverError,
       404 => AuthErrorCode.tokenExpired,
-      400 => e.message.toLowerCase().contains('locked')
-          ? AuthErrorCode.accountLocked
-          : '${AuthErrorCode.badRequest}|${e.message}',
+      400 =>
+        e.message.toLowerCase().contains('locked')
+            ? AuthErrorCode.accountLocked
+            : '${AuthErrorCode.badRequest}|${e.message}',
       _ => AuthErrorCode.serverError,
     };
   }

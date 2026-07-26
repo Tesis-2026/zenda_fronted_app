@@ -564,6 +564,7 @@ class MockAiChatApiService extends AiChatApiService {
   // history persists across sends within the same app run, and is
   // wiped on closeActive().
   final List<ChatMessage> _history = [];
+  int _nextMessageId = 1;
 
   @override
   Future<ActiveConversation> getActive() async {
@@ -577,15 +578,40 @@ class MockAiChatApiService extends AiChatApiService {
   @override
   Future<ChatReply> sendMessage(String message) async {
     await Future.delayed(const Duration(milliseconds: 800));
-    _history.add(ChatMessage(role: 'user', content: message));
+    _history.add(
+      ChatMessage(
+        id: 'mock-${_nextMessageId++}',
+        role: 'user',
+        content: message,
+      ),
+    );
     final reply = _respond(message.toLowerCase());
-    _history.add(ChatMessage(role: 'assistant', content: reply));
-    return ChatReply(conversationId: 'mock-conversation', reply: reply);
+    final assistantId = 'mock-${_nextMessageId++}';
+    _history.add(
+      ChatMessage(id: assistantId, role: 'assistant', content: reply),
+    );
+    return ChatReply(
+      conversationId: 'mock-conversation',
+      assistantMessageId: assistantId,
+      reply: reply,
+    );
   }
 
   @override
   Future<void> closeActive() async {
     _history.clear();
+  }
+
+  @override
+  Future<void> submitFeedback({
+    required String messageId,
+    required int rating,
+    bool? helpful,
+    bool? clear,
+    bool? personalized,
+    String? comment,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 200));
   }
 
   String _respond(String input) {
@@ -638,11 +664,52 @@ class MockTransactionApiService extends TransactionApiService {
     String? to,
     String? categoryId,
     String? accountId,
+    double? minAmount,
+    double? maxAmount,
   }) async {
-    if (type == null) return List.unmodifiable(_txs);
+    CategoryModel? category;
+    if (categoryId != null) {
+      for (final c in [
+        ...MockCategoryApiService._system,
+        ...MockCategoryApiService._custom,
+      ]) {
+        if (c.id == categoryId) {
+          category = c;
+          break;
+        }
+      }
+    }
+    final fromDate = from == null ? null : DateTime.tryParse(from);
+    final toDate = to == null ? null : DateTime.tryParse(to);
     return _txs.where((tx) {
       final txType = tx['type'] as String;
-      return txType.toUpperCase() == type.toUpperCase();
+      if (type != null && txType.toUpperCase() != type.toUpperCase()) {
+        return false;
+      }
+
+      final amount = (tx['amount'] as num?)?.toDouble() ?? 0;
+      if (minAmount != null && amount < minAmount) return false;
+      if (maxAmount != null && amount > maxAmount) return false;
+
+      final occurredAt = DateTime.tryParse(tx['occurredAt'] as String? ?? '');
+      if (fromDate != null &&
+          (occurredAt == null || occurredAt.isBefore(fromDate))) {
+        return false;
+      }
+      if (toDate != null &&
+          (occurredAt == null || occurredAt.isAfter(toDate))) {
+        return false;
+      }
+
+      if (category != null) {
+        final txCategory = tx['category'] as Map<String, dynamic>?;
+        final txCategoryName = txCategory?['name'] as String?;
+        if (txCategoryName?.toLowerCase() != category.name.toLowerCase()) {
+          return false;
+        }
+      }
+
+      return true;
     }).toList();
   }
 
@@ -660,7 +727,11 @@ class MockTransactionApiService extends TransactionApiService {
     double? aiConfidence,
     String? idempotencyKey,
   }) async {
-    return (completedChallenges: <String>[], anomalyAlert: null);
+    return (
+      completedChallenges: <String>[],
+      anomalyAlert: null,
+      anomalyAlertExplanation: null,
+    );
   }
 
   @override

@@ -36,16 +36,69 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     FocusScope.of(context).unfocus();
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
-    await authNotifier.register(
+    final pendingEmail = await authNotifier.register(
       _nameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
     );
 
     final authState = ref.read(authNotifierProvider);
+    if (pendingEmail != null && mounted) {
+      context.go('/auth/email-sent', extra: pendingEmail);
+      return;
+    }
+
     if (authState.isAuthenticated && mounted) {
+      await _maybeOfferBiometrics();
+      if (!mounted) return;
       context.go('/auth/email-sent');
     }
+  }
+
+  Future<void> _maybeOfferBiometrics() async {
+    final status = await ref.read(biometricAuthServiceProvider).getStatus();
+    if (!status.canEnable || status.enabled || !mounted) return;
+
+    final shouldEnable = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Activar huella digital'),
+        content: Text(
+          'Puedes proteger tu cuenta y abrir Zenda con tu ${status.methodLabel} en este dispositivo.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: Text(context.l10n.commonCancel),
+          ),
+          FilledButton.icon(
+            onPressed: () => context.pop(true),
+            icon: const Icon(Icons.fingerprint_rounded, size: 18),
+            label: const Text('Activar'),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF34D399),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldEnable != true || !mounted) return;
+    final enabled = await ref
+        .read(authNotifierProvider.notifier)
+        .enableBiometricsForCurrentUser();
+    if (!mounted) return;
+    showAppToast(
+      context,
+      enabled
+          ? 'Huella digital activada en este dispositivo.'
+          : 'No se pudo activar la huella digital.',
+      type: enabled ? ToastType.success : ToastType.error,
+    );
   }
 
   @override
@@ -55,7 +108,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.error != null) {
-        showAppToast(context, l10n.resolveError(next.error!), type: ToastType.error);
+        showAppToast(
+          context,
+          l10n.resolveError(next.error!),
+          type: ToastType.error,
+        );
         ref.read(authNotifierProvider.notifier).clearError();
       }
     });
@@ -66,7 +123,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.colors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: context.colors.textPrimary,
+          ),
           onPressed: () => context.go('/auth/login'),
         ),
       ),
@@ -94,7 +154,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 Text(
                   l10n.authRegisterSubtitle,
-                  style: TextStyle(fontSize: 15, color: context.colors.textMuted),
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: context.colors.textMuted,
+                  ),
                 ),
 
                 const SizedBox(height: 32),
@@ -123,8 +186,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     if (value == null || value.trim().isEmpty) {
                       return l10n.validationEnterEmail;
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(value)) {
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
                       return l10n.validationInvalidEmail;
                     }
                     return null;
@@ -147,8 +211,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         size: 20,
                         color: Colors.grey[500],
                       ),
-                      onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   validator: (value) {
@@ -204,8 +268,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      disabledBackgroundColor:
-                          const Color(0xFF34D399).withValues(alpha: 0.5),
+                      disabledBackgroundColor: const Color(
+                        0xFF34D399,
+                      ).withValues(alpha: 0.5),
                     ),
                     child: authState.isLoading
                         ? const SizedBox(
@@ -213,8 +278,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : Text(
@@ -239,8 +305,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     TextButton(
                       onPressed: () => context.go('/auth/login'),
                       style: TextButton.styleFrom(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
                       ),
                       child: Text(
                         l10n.authSignIn,
@@ -270,8 +335,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       hintStyle: TextStyle(color: colors.textMuted),
       filled: true,
       fillColor: colors.card,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: colors.border),

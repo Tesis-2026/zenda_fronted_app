@@ -32,6 +32,24 @@ class SavingsGoal {
 
   bool get isComplete => isCompleted || progressPercent >= 100;
 
+  DateTime? get dueDateValue {
+    final raw = dueDate;
+    if (raw == null) return null;
+    return DateTime.tryParse(raw)?.toLocal();
+  }
+
+  int? daysRemaining({DateTime? now}) {
+    if (isCompleted) return null;
+    final due = dueDateValue;
+    if (due == null) return null;
+
+    final base = now ?? DateTime.now();
+    final today = DateTime(base.year, base.month, base.day);
+    final dueDay = DateTime(due.year, due.month, due.day);
+    final days = dueDay.difference(today).inDays;
+    return days < 0 ? 0 : days;
+  }
+
   factory SavingsGoal.fromJson(Map<String, dynamic> json) {
     return SavingsGoal(
       id: json['id'] as String,

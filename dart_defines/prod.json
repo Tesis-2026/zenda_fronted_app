@@ -1,5 +1,7 @@
 {
   "APP_ENV": "prod",
-  "API_BASE_URL": "https://api.zenda.app/api",
+  "API_BASE_URL": "https://zendaapilinuxtesis-hyb8dabvh2hpdgan.centralus-01.azurewebsites.net/api",
+  "API_DOCS_URL": "https://zendaapilinuxtesis-hyb8dabvh2hpdgan.centralus-01.azurewebsites.net/api/docs",
+  "BETA_DISTRIBUTION_ID": "firebase-zenda-pilot-v1",
   "DEMO": false
 }

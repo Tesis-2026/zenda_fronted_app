@@ -15,6 +15,7 @@ import '../../core/utils/category_utils.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
+import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_date_field.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_text_field.dart';
@@ -48,6 +49,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
 
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _amountController = TextEditingController();
+  final _amountFocusNode = FocusNode();
   final _noteController = TextEditingController();
   TransactionCategory? _aiSuggestion;
   bool _isClassifying = false;
@@ -58,6 +60,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   void dispose() {
     ref.invalidate(newTransactionControllerProvider);
     _amountController.dispose();
+    _amountFocusNode.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -88,6 +91,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _aiSuggestion = result?.category;
       _isClassifying = false;
     });
+  }
+
+  void _leaveFullScreenFlow() {
+    if (widget.isSheet) {
+      context.pop();
+    } else {
+      context.go('/transactions');
+    }
   }
 
   Future<void> _showVoiceDraftSheet() async {
@@ -357,11 +368,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         // Show spending anomaly alert (US-016) after pop.
         if (next.anomalyAlert != null) {
           final categoryName = next.anomalyAlert!;
+          final explanation = next.anomalyAlertExplanation;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
               showAppToast(
                 context,
-                l10n.txAnomalyAlert(categoryName),
+                explanation?.isNotEmpty == true
+                    ? explanation!
+                    : l10n.txAnomalyAlert(categoryName),
                 type: ToastType.error,
               );
             }
@@ -370,8 +384,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     });
 
-    // Keep text controllers in sync with OCR demo/autofill.
-    if (state.amount != null) {
+    // Keep text controllers in sync with OCR/voice autofill, but never rewrite
+    // the amount while the user is typing manually. Reformatting "5" to "5.00"
+    // mid-input leaves the cursor at the end and turns the next digit into
+    // "5.001".
+    if (state.amount != null &&
+        state.source != TransactionSource.manual &&
+        !_amountFocusNode.hasFocus) {
       final desired = state.amount!.toStringAsFixed(2);
       if (_amountController.text != desired) {
         _amountController.text = desired;
@@ -436,6 +455,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 const SizedBox(height: 10),
                 AmountInputField(
                   controller: _amountController,
+                  focusNode: _amountFocusNode,
                   onChanged: controller.setAmountFromText,
                   textInputAction: TextInputAction.next,
                 ),
@@ -742,9 +762,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.txNewTitle)),
-      body: SafeArea(child: formContent),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _leaveFullScreenFlow();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.txNewTitle),
+          leading: IconButton(
+            tooltip: 'Volver a movimientos',
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: _leaveFullScreenFlow,
+          ),
+        ),
+        body: SafeArea(child: formContent),
+        bottomNavigationBar: const AppBottomNav(activeIndex: 1),
+      ),
     );
   }
 
