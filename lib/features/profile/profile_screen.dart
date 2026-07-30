@@ -212,9 +212,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   String _literacyLabel(FinancialLiteracyLevel? level) {
-    if (level == null) return context.l10n.commonNotSet;
-    final name = level.name;
-    return name[0].toUpperCase() + name.substring(1);
+    final l10n = context.l10n;
+    return switch (level) {
+      null => l10n.commonNotSet,
+      FinancialLiteracyLevel.beginner => l10n.literacyLevelLow,
+      FinancialLiteracyLevel.intermediate => l10n.literacyLevelMedium,
+      FinancialLiteracyLevel.advanced => l10n.literacyLevelHigh,
+    };
   }
 
   String _currencyDisplay(BuildContext context, String currency) {

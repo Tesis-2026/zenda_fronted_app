@@ -17,6 +17,9 @@ enum ConfirmTone {
 /// See `lib/core/widgets/README.md`. Use this for every delete, sign-out, or
 /// irreversible confirmation instead of an ad-hoc [AlertDialog]. Returns `true`
 /// when the user confirms, `false`/`null` otherwise.
+///
+/// For purely informational sheets (acknowledge-only, e.g. survey results)
+/// pass [showCancel] `false` to render a single primary action.
 Future<bool> showConfirmSheet(
   BuildContext context, {
   required String title,
@@ -25,6 +28,7 @@ Future<bool> showConfirmSheet(
   String? cancelLabel,
   ConfirmTone tone = ConfirmTone.destructive,
   IconData? icon,
+  bool showCancel = true,
 }) async {
   final result = await showModalBottomSheet<bool>(
     context: context,
@@ -37,6 +41,7 @@ Future<bool> showConfirmSheet(
       cancelLabel: cancelLabel,
       tone: tone,
       icon: icon,
+      showCancel: showCancel,
     ),
   );
   return result == true;
@@ -65,6 +70,7 @@ class _ConfirmSheet extends StatelessWidget {
     required this.tone,
     this.cancelLabel,
     this.icon,
+    this.showCancel = true,
   });
 
   final String title;
@@ -73,6 +79,7 @@ class _ConfirmSheet extends StatelessWidget {
   final String? cancelLabel;
   final ConfirmTone tone;
   final IconData? icon;
+  final bool showCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -161,28 +168,30 @@ class _ConfirmSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.fillLight,
-                      foregroundColor: AppColors.textDark,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                if (showCancel) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppColors.fillLight,
+                        foregroundColor: AppColors.textDark,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      cancelLabel ?? l10n.commonCancel,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        cancelLabel ?? l10n.commonCancel,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

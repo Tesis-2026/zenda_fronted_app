@@ -8,6 +8,7 @@ import '../../core/services/education_api_service.dart';
 import '../../core/services/pending_survey_queue.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/delete_confirm_sheet.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import '../auth/auth_controller.dart';
@@ -209,7 +210,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       }
 
       if (mounted) {
-        await _showResultSummaryDialog(result);
+        await _showResultSummarySheet(result);
       }
 
       if (mounted) setState(() => _result = result);
@@ -265,9 +266,21 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
     }
   }
 
-  Future<void> _showResultSummaryDialog(SurveyResult result) async {
+  /// The backend reports the literacy level as a raw enum code
+  /// (`LOW` / `MEDIUM` / `HIGH`) — always localize before display.
+  String _literacyLevelLabel(String? code) {
     final l10n = context.l10n;
-    final level = result.level ?? '—';
+    return switch (code) {
+      'LOW' => l10n.literacyLevelLow,
+      'MEDIUM' => l10n.literacyLevelMedium,
+      'HIGH' => l10n.literacyLevelHigh,
+      _ => '—',
+    };
+  }
+
+  Future<void> _showResultSummarySheet(SurveyResult result) async {
+    final l10n = context.l10n;
+    final level = _literacyLevelLabel(result.level);
     final score = result.score.toStringAsFixed(0);
 
     final bool isPostWithImprovement =
@@ -292,15 +305,14 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       body = l10n.surveyResultDialogBody(level, score);
     }
 
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          FilledButton(onPressed: () => ctx.pop(), child: Text(l10n.commonOk)),
-        ],
-      ),
+    await showConfirmSheet(
+      context,
+      title: title,
+      message: body,
+      confirmLabel: l10n.commonOk,
+      tone: ConfirmTone.neutral,
+      icon: Icons.school_outlined,
+      showCancel: false,
     );
   }
 }
