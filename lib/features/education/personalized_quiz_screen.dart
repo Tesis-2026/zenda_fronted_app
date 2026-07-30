@@ -235,7 +235,7 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
             ),
             const SizedBox(height: 8),
             Text(
-              '$correct / $total correct',
+              l10n.quizCorrectCount(correct, total),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

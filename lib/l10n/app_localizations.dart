@@ -3314,6 +3314,12 @@ abstract class AppLocalizations {
   /// **'You scored {score}%'**
   String quizResult(int score);
 
+  /// No description provided for @quizCorrectCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct} of {total} correct'**
+  String quizCorrectCount(int correct, int total);
+
   /// No description provided for @quizFinish.
   ///
   /// In en, this message translates to:
@@ -3439,6 +3445,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your financial literacy level: {level} ({score}/100)'**
   String surveyResultDialogBody(String level, String score);
+
+  /// No description provided for @literacyLevelLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get literacyLevelLow;
+
+  /// No description provided for @literacyLevelMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Intermediate'**
+  String get literacyLevelMedium;
+
+  /// No description provided for @literacyLevelHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get literacyLevelHigh;
 
   /// No description provided for @surveyImprovementDialogTitle.
   ///

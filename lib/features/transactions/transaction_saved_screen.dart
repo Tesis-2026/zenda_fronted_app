@@ -22,12 +22,12 @@ class TransactionSavedScreen extends StatelessWidget {
   });
 
   static const _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
   ];
 
   String _formattedDate() =>
-      '${_months[date.month - 1]} ${date.day}, ${date.year}';
+      '${date.day} de ${_months[date.month - 1]} de ${date.year}';
 
   String _formattedAmount() {
     final sign = kind == TransactionKind.income ? '+ S/' : '- S/';

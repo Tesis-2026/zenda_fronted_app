@@ -791,6 +791,13 @@
       "score": { "type": "int" }
     }
   },
+  "quizCorrectCount": "{correct} de {total} correctas",
+  "@quizCorrectCount": {
+    "placeholders": {
+      "correct": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
   "quizFinish": "Ver resultados",
   "quizNext": "Siguiente pregunta",
 
@@ -855,6 +862,9 @@
       "score": { "type": "String" }
     }
   },
+  "literacyLevelLow": "Básico",
+  "literacyLevelMedium": "Intermedio",
+  "literacyLevelHigh": "Avanzado",
   "surveyImprovementDialogTitle": "¡Progreso medido!",
   "surveyImprovementDialogBody": "Puntaje: {postScore}/100. Anterior: {preScore}/100. ¡Mejoraste {improvement} puntos!",
   "@surveyImprovementDialogBody": {

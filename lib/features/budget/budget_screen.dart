@@ -269,9 +269,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           if (!context.mounted) return false;
           final err = e.toString();
           final String msg;
-          if (err.contains('limit') || err.contains('maximum')) {
+          if (err.contains('Limite') || err.contains('maximo')) {
             msg = l10n.budgetLimitReached;
-          } else if (err.contains('409') || err.contains('already exists')) {
+          } else if (err.contains('409') || err.contains('Ya existe')) {
             msg = l10n.budgetDuplicate;
           } else {
             msg = l10n.commonUnknownError;

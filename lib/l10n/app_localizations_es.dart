@@ -1797,6 +1797,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String quizCorrectCount(int correct, int total) {
+    return '$correct de $total correctas';
+  }
+
+  @override
   String get quizFinish => 'Ver resultados';
 
   @override
@@ -1884,6 +1889,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String surveyResultDialogBody(String level, String score) {
     return 'Nivel de educación financiera: $level ($score/100)';
   }
+
+  @override
+  String get literacyLevelLow => 'Básico';
+
+  @override
+  String get literacyLevelMedium => 'Intermedio';
+
+  @override
+  String get literacyLevelHigh => 'Avanzado';
 
   @override
   String get surveyImprovementDialogTitle => '¡Progreso medido!';
