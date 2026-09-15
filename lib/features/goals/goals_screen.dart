@@ -21,6 +21,7 @@ import '../../core/widgets/green_pill_button.dart';
 import '../../core/widgets/icon_action_button.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../l10n/l10n_extension.dart';
+import '../progress/progress_screen.dart';
 
 final goalsServiceProvider = Provider<GoalsApiService>((ref) {
   return GoalsApiService();
@@ -40,6 +41,7 @@ class GoalsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final colors = context.colors;
     final goalsAsync = ref.watch(goalsListProvider);
 
     final content = goalsAsync.when(
@@ -71,12 +73,40 @@ class GoalsScreen extends ConsumerWidget {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.savings_outlined, size: 20, color: colors.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Ahorro (20%): Agrega dinero a tus metas para sumar a tu ahorro mensual.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             if (active.isNotEmpty) ...[
               _SectionHeader(title: l10n.goalsActiveSection),
               ...active.map(
                 (goal) => _GoalCard(
                   goal: goal,
                   onTap: () => context.push('/goals/${goal.id}', extra: goal),
+                  onContribute: () => _showContributeSheet(context, ref, goal),
                   onEdit: () => _showEditSheet(context, ref, goal),
                   onDelete: () => _deleteGoal(context, ref, goal),
                 ),
@@ -89,6 +119,7 @@ class GoalsScreen extends ConsumerWidget {
                 (goal) => _GoalCard(
                   goal: goal,
                   onTap: () => context.push('/goals/${goal.id}', extra: goal),
+                  onContribute: null,
                   onEdit: () => _showEditSheet(context, ref, goal),
                   onDelete: () => _deleteGoal(context, ref, goal),
                 ),
@@ -224,6 +255,51 @@ class GoalsScreen extends ConsumerWidget {
       }
     }
   }
+
+  Future<void> _showContributeSheet(
+    BuildContext context,
+    WidgetRef ref,
+    SavingsGoal goal,
+  ) async {
+    final l10n = context.l10n;
+    final ctrl = TextEditingController();
+    await showAppFormSheet(
+      context,
+      title: l10n.goalsContributeTitle,
+      subtitle: goal.name,
+      primaryLabel: 'Agregar dinero',
+      body: _ContributeGoalSheetBody(goal: goal, controller: ctrl),
+      onSubmit: () async {
+        final amount = double.tryParse(ctrl.text.trim());
+        if (amount == null || amount <= 0) return false;
+        try {
+          await ref
+              .read(goalsServiceProvider)
+              .contribute(goal.id, amount: amount);
+          ref.invalidate(goalsListProvider);
+          ref.invalidate(progressProvider);
+          if (context.mounted) {
+            showAppToast(
+              context,
+              'Se agregaron S/ ${amount.toStringAsFixed(2)} a ${goal.name}',
+              type: ToastType.success,
+            );
+          }
+          return true;
+        } catch (_) {
+          if (context.mounted) {
+            showAppToast(
+              context,
+              l10n.commonUnknownError,
+              type: ToastType.error,
+            );
+          }
+          return false;
+        }
+      },
+    );
+    ctrl.dispose();
+  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -316,12 +392,14 @@ class _CompletedOnLabel extends StatelessWidget {
 class _GoalCard extends StatelessWidget {
   final SavingsGoal goal;
   final VoidCallback onTap;
+  final VoidCallback? onContribute;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _GoalCard({
     required this.goal,
     required this.onTap,
+    this.onContribute,
     required this.onEdit,
     required this.onDelete,
   });
@@ -492,6 +570,32 @@ class _GoalCard extends StatelessWidget {
                     if (isComplete) ...[
                       const SizedBox(height: 6),
                       _CompletedOnLabel(updatedAt: goal.updatedAt),
+                    ] else if (onContribute != null) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 32,
+                        child: OutlinedButton.icon(
+                          onPressed: onContribute,
+                          icon: const Icon(Icons.add_circle_outline, size: 16),
+                          label: const Text(
+                            'Agregar dinero',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: color,
+                            side: BorderSide(
+                              color: color.withValues(alpha: 0.5),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -656,6 +760,66 @@ class _EditGoalBodyState extends State<_EditGoalBody> {
             );
             if (picked != null) setState(() => dueDate = picked);
           },
+        ),
+      ],
+    );
+  }
+}
+
+class _ContributeGoalSheetBody extends StatelessWidget {
+  final SavingsGoal goal;
+  final TextEditingController controller;
+
+  const _ContributeGoalSheetBody({
+    required this.goal,
+    required this.controller,
+  });
+
+  void _quickPick(double value) {
+    final text = value.toStringAsFixed(0);
+    controller.text = text;
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: text.length),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final pct = goal.progressPercent.clamp(0.0, 100.0);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AppProgressBar(value: pct / 100, height: 8, color: colors.primary),
+        const SizedBox(height: 20),
+        FieldLabel(l10n.goalsContributeLabel),
+        const SizedBox(height: 8),
+        AmountInputField(controller: controller, autofocus: true),
+        const SizedBox(height: 12),
+        Row(
+          children: [50.0, 100.0, 200.0].map((v) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: OutlinedButton(
+                onPressed: () => _quickPick(v),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  side: BorderSide(color: colors.primary),
+                  foregroundColor: colors.primary,
+                ),
+                child: Text('S/ ${v.toStringAsFixed(0)}'),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );

@@ -416,13 +416,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (next.saveTick != prevTick) {
         if (!context.mounted) return;
         final savedExtra = {
-          'amount': next.amount ?? 0.0,
+          'amount': prev?.amount ?? next.amount ?? 0.0,
           'categoryName': next.category != null
               ? categoryToApiName(next.category!)
               : 'Other',
           'date': next.date,
           'kind': next.kind,
         };
+        _amountController.clear();
+        _noteController.clear();
 
         if (next.completedChallengeNames.isNotEmpty) {
           // Show celebration dialog; navigate to saved screen after dismiss.

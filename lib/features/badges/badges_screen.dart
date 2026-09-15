@@ -66,7 +66,7 @@ class BadgesScreen extends ConsumerWidget {
               slivers: [
                 // AppBar action: "N earned" chip is handled below as inline header
                 // Earned section header
-                if (earnedBadges.isNotEmpty)
+                if (earnedBadges.isNotEmpty) ...[
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -79,7 +79,6 @@ class BadgesScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                if (earnedBadges.isNotEmpty)
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     sliver: SliverGrid.builder(
@@ -93,6 +92,42 @@ class BadgesScreen extends ConsumerWidget {
                       itemCount: earnedBadges.length,
                       itemBuilder: (context, index) =>
                           _BadgeTile(badge: earnedBadges[index]),
+                    ),
+                  ),
+                ] else
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFE5E7EB),
+                          ),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.emoji_events_outlined,
+                              color: Color(0xFF9CA3AF),
+                              size: 24,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Aún no tienes insignias. Completa retos para ganarlas.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFF6B7280),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 // Locked section header

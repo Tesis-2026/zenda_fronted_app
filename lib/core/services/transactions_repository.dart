@@ -24,4 +24,10 @@ class TransactionsRepository {
     txs.insert(0, tx);
     await saveTransactions(txs);
   }
+
+  Future<void> deleteTransaction(String id) async {
+    final txs = await getTransactions();
+    txs.removeWhere((t) => t.id == id);
+    await saveTransactions(txs);
+  }
 }

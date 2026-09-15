@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/transaction.dart';
+import '../../core/utils/category_utils.dart';
 import '../../l10n/l10n_extension.dart';
 
 class TransactionSavedScreen extends StatelessWidget {
@@ -22,12 +23,22 @@ class TransactionSavedScreen extends StatelessWidget {
   });
 
   static const _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'enero',
+    'febrero',
+    'marzo',
+    'abril',
+    'mayo',
+    'junio',
+    'julio',
+    'agosto',
+    'setiembre',
+    'octubre',
+    'noviembre',
+    'diciembre',
   ];
 
   String _formattedDate() =>
-      '${_months[date.month - 1]} ${date.day}, ${date.year}';
+      '${date.day} de ${_months[date.month - 1]}, ${date.year}';
 
   String _formattedAmount() {
     final sign = kind == TransactionKind.income ? '+ S/' : '- S/';
@@ -97,7 +108,7 @@ class TransactionSavedScreen extends StatelessWidget {
                     Divider(height: 1, color: Theme.of(context).dividerColor),
                     _SummaryRow(
                       label: l10n.txSavedLabelCategory,
-                      value: categoryName,
+                      value: CategoryUtils.labelEs(categoryName),
                     ),
                     Divider(height: 1, color: Theme.of(context).dividerColor),
                     _SummaryRow(

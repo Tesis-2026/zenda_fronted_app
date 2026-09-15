@@ -29,11 +29,13 @@ class _ManagementScreenState extends State<ManagementScreen> {
   String _hintForCurrentTab() {
     return switch (_tab) {
       0 =>
-        'Revisa como se distribuye tu dinero entre necesidades, deseos y ahorro.',
+        'Revisa cómo se distribuye tu dinero entre necesidades (50%), deseos (30%) y ahorro (20%).',
       1 =>
-        'Crea limites mensuales por categoria. Los gastos registrados actualizan el consumo automaticamente.',
-      2 => 'Usa Metas para agregar dinero a tus ahorros y ver tu avance.',
-      _ => 'Registra ingresos desde Movimientos para que se reflejen aqui.',
+        'Para tus necesidades y deseos: define límites mensuales. Los gastos registrados actualizan el consumo.',
+      2 =>
+        'Para tu ahorro (20%): usa el botón "Agregar dinero" en tus metas para sumar aportes a tu ahorro.',
+      _ =>
+        'Registra tus ingresos desde Movimientos para calcular tu distribución 50/30/20.',
     };
   }
 

@@ -106,27 +106,19 @@ typedef ClassifyResult = ({
 });
 
 class TransactionApiService {
-  // Cache of lowercase category name → category UUID from the backend.
-  // Populated once per app session; prevents a name-based DB lookup on every
-  // transaction write by sending categoryId directly.
-  static Map<String, String>? _categoryIdCache;
+  // Fetch under the current session: never reuse another participant's catalog.
+  static void invalidateCategoryCache() {}
 
-  static void invalidateCategoryCache() {
-    _categoryIdCache = null;
-  }
-
-  static Future<Map<String, String>> _getCategoryCache() async {
-    if (_categoryIdCache != null) return _categoryIdCache!;
-    try {
-      final list = await ApiClient.getList('/categories');
-      _categoryIdCache = {
-        for (final item in list.cast<Map<String, dynamic>>())
+  static Future<Map<String, String>> _getCategoryCache(
+    TransactionKind kind,
+  ) async {
+    final list = await ApiClient.getList('/categories');
+    final type = kind == TransactionKind.income ? 'INCOME' : 'EXPENSE';
+    return {
+      for (final item in list.cast<Map<String, dynamic>>())
+        if (item['transactionType'] == null || item['transactionType'] == type)
           _normalizeCategoryName(item['name'] as String): item['id'] as String,
-      };
-    } catch (_) {
-      _categoryIdCache = {};
-    }
-    return _categoryIdCache!;
+    };
   }
 
   Future<CreateTransactionResult> create({
@@ -162,7 +154,7 @@ class TransactionApiService {
     }
 
     final apiName = customCategoryName ?? categoryToApiName(category);
-    final cache = await _getCategoryCache();
+    final cache = await _getCategoryCache(kind);
     final categoryId = cache[_normalizeCategoryName(apiName)];
 
     final body = <String, dynamic>{
@@ -242,11 +234,16 @@ class TransactionApiService {
     if (minAmount != null) params['minAmount'] = minAmount.toStringAsFixed(2);
     if (maxAmount != null) params['maxAmount'] = maxAmount.toStringAsFixed(2);
 
-    final query = params.isEmpty
-        ? ''
-        : '?${Uri(queryParameters: params).query}';
-    final body = await ApiClient.getList('/transactions$query');
-    return body.cast<Map<String, dynamic>>();
+    const pageSize = 100;
+    final rows = <Map<String, dynamic>>[];
+    for (var skip = 0; ; skip += pageSize) {
+      final query = Uri(
+        queryParameters: {...params, 'take': '$pageSize', 'skip': '$skip'},
+      ).query;
+      final page = await ApiClient.getList('/transactions?$query');
+      rows.addAll(page.cast<Map<String, dynamic>>());
+      if (page.length < pageSize) return rows;
+    }
   }
 
   Future<void> update({
@@ -257,12 +254,14 @@ class TransactionApiService {
     required DateTime occurredAt,
     String? description,
     String? accountId,
+    String? existingCategoryId,
   }) async {
     if (kind == TransactionKind.transfer) return;
 
     final apiName = categoryToApiName(category);
-    final cache = await _getCategoryCache();
-    final categoryId = cache[_normalizeCategoryName(apiName)];
+    final cache = await _getCategoryCache(kind);
+    final categoryId =
+        existingCategoryId ?? cache[_normalizeCategoryName(apiName)];
 
     final body = <String, dynamic>{
       'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',

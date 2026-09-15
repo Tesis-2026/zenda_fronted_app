@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/transaction.dart';
+import '../../core/services/transaction_api_service.dart';
 import '../../core/utils/category_utils.dart';
 import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
@@ -52,6 +53,7 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
   late TransactionKind _kind;
   late TransactionCategory _category;
   late DateTime _date;
+  bool _categoryChanged = false;
 
   @override
   void initState() {
@@ -64,7 +66,7 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
 
     final catName =
         (tx['category'] as Map<String, dynamic>?)?['name'] as String?;
-    _category = _categoryFromApiName(catName);
+    _category = categoryFromApiName(catName) ?? TransactionCategory.otros;
 
     final amount = (tx['amount'] as num?)?.toDouble() ?? 0.0;
     _amountController = TextEditingController(text: amount.toStringAsFixed(2));
@@ -83,27 +85,6 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
-  }
-
-  TransactionCategory _categoryFromApiName(String? name) {
-    return switch ((name ?? '').toLowerCase()) {
-      'food' => TransactionCategory.comida,
-      'transportation' => TransactionCategory.transporte,
-      'housing' => TransactionCategory.vivienda,
-      'utilities' => TransactionCategory.servicios,
-      'health' => TransactionCategory.salud,
-      'entertainment' => TransactionCategory.ocio,
-      'shopping' => TransactionCategory.compras,
-      'subscriptions' => TransactionCategory.suscripciones,
-      'cravings' => TransactionCategory.antojos,
-      'savings' => TransactionCategory.ahorro,
-      'scholarship' => TransactionCategory.beca,
-      'part-time work' ||
-      'part time work' => TransactionCategory.trabajoPartTime,
-      'family' => TransactionCategory.familia,
-      'freelance' => TransactionCategory.freelance,
-      _ => TransactionCategory.otros,
-    };
   }
 
   Future<void> _pickDate(BuildContext context) async {
@@ -136,7 +117,7 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
     if (id.isEmpty) return false;
 
     final amount = double.tryParse(_amountController.text.trim()) ?? 0;
-    if (amount <= 0) {
+    if (!amount.isFinite || amount <= 0) {
       showAppToast(context, l10n.errorTxInvalidAmount, type: ToastType.error);
       return false;
     }
@@ -149,6 +130,9 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
             kind: _kind,
             amount: amount,
             category: _category,
+            existingCategoryId: _categoryChanged
+                ? null
+                : widget.transaction['categoryId'] as String?,
             occurredAt: _date,
             description: _noteController.text.trim(),
           );
@@ -173,6 +157,7 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
           selected: _kind,
           onChanged: (k) => setState(() {
             _kind = k;
+            _categoryChanged = true;
             final options = categoriesForTransactionKind(k);
             if (!options.contains(_category)) {
               _category = options.first;
@@ -200,7 +185,10 @@ class _EditTransactionBodyState extends ConsumerState<_EditTransactionBody> {
           value: _category,
           hintText: l10n.categorySelectHint,
           sheetTitle: l10n.txCategoryLabel,
-          onChanged: (c) => setState(() => _category = c),
+          onChanged: (c) => setState(() {
+            _category = c;
+            _categoryChanged = true;
+          }),
           options: [
             for (final c in categoriesForTransactionKind(_kind))
               CategoryOption<TransactionCategory>(

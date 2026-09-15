@@ -18,7 +18,7 @@ class _MonthlyIncome {
   const _MonthlyIncome({required this.total, required this.entries});
 }
 
-final _monthlyIncomeProvider = FutureProvider.autoDispose<_MonthlyIncome>((
+final monthlyIncomeProvider = FutureProvider.autoDispose<_MonthlyIncome>((
   ref,
 ) async {
   final now = DateTime.now();
@@ -50,10 +50,10 @@ class IncomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final incomeAsync = ref.watch(_monthlyIncomeProvider);
+    final incomeAsync = ref.watch(monthlyIncomeProvider);
 
     final body = RefreshIndicator(
-      onRefresh: () async => ref.invalidate(_monthlyIncomeProvider),
+      onRefresh: () async => ref.invalidate(monthlyIncomeProvider),
       child: incomeAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => ListView(

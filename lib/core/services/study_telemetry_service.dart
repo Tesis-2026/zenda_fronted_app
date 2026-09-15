@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import '../config/app_config.dart';
 import 'api_client.dart';
 import 'study_analytics_service.dart';
+import 'telemetry_policy.dart';
 
 class StudyTelemetryService {
   StudyTelemetryService._();
@@ -13,6 +14,7 @@ class StudyTelemetryService {
     Map<String, Object?> metadata = const {},
     bool backend = true,
   }) {
+    if (!StudyAnalyticsService.consentGiven) return;
     unawaited(StudyAnalyticsService.logEvent(eventType, parameters: metadata));
     if (!backend) return;
     unawaited(_sendToBackend(eventType, metadata));
@@ -29,11 +31,14 @@ class StudyTelemetryService {
     try {
       await ApiClient.post('/analytics/events', {
         'eventType': eventType,
-        'metadata': _jsonMetadata(metadata),
+        'metadata': safeTelemetryParameters(_jsonMetadata(metadata)),
       }, authenticated: true);
     } catch (e) {
       // Offline / unauthenticated sessions should never block the UX.
-      developer.log('Backend analytics event skipped: $e', name: 'study');
+      developer.log(
+        'Backend analytics event skipped: ${e.runtimeType}',
+        name: 'study',
+      );
     }
   }
 

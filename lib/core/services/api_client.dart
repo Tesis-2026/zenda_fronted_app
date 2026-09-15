@@ -86,19 +86,23 @@ class ApiClient {
 
   // ── Token refresh ────────────────────────────────────────────────
 
-  static bool _refreshInProgress = false;
+  static Future<bool>? _refreshFuture;
 
   /// Attempts to exchange the stored refresh token for a new token pair.
   /// Returns true and saves new tokens on success; returns false on failure.
-  static Future<bool> _tryRefresh() async {
-    if (_refreshInProgress) return false;
+  static Future<bool> _tryRefresh() {
+    return _refreshFuture ??= _performRefresh().whenComplete(() {
+      _refreshFuture = null;
+    });
+  }
+
+  static Future<bool> _performRefresh() async {
     final refreshToken = await getRefreshToken();
     if (refreshToken == null) {
       _sessionExpiredController.add(null);
       return false;
     }
 
-    _refreshInProgress = true;
     try {
       final response = await http
           .post(
@@ -116,10 +120,19 @@ class ApiClient {
         );
         return true;
       }
+      if (response.statusCode != 401 && response.statusCode != 403) {
+        throw const ApiException(
+          statusCode: 0,
+          message: 'No se pudo renovar la sesion. Reintenta.',
+        );
+      }
+    } on ApiException {
+      rethrow;
     } catch (_) {
-      // Network error during refresh — treat as failure
-    } finally {
-      _refreshInProgress = false;
+      throw const ApiException(
+        statusCode: 0,
+        message: 'Sin conexion. Tu sesion se conserva.',
+      );
     }
 
     // Refresh failed: clear tokens and notify listeners to redirect to login.
@@ -146,7 +159,7 @@ class ApiClient {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } catch (_) {
       developer.log(
-        'Non-JSON response body: ${response.body}',
+        'Invalid JSON response (${response.statusCode})',
         name: 'ApiClient',
         level: 800,
       );
@@ -175,7 +188,7 @@ class ApiClient {
 
   static void _logError(String method, String url, Object error) {
     developer.log(
-      '[$method] $url → ERROR: $error',
+      '[$method] ${Uri.parse(url).path} ERROR: ${error.runtimeType}',
       name: 'ApiClient',
       level: 900,
     );
@@ -213,7 +226,10 @@ class ApiClient {
           response = await http
               .post(
                 Uri.parse(url),
-                headers: await _authHeaders(),
+                headers: {
+                  ...await _authHeaders(),
+                  'idempotency-key': ?idempotencyKey,
+                },
                 body: jsonEncode(body),
               )
               .timeout(_kRequestTimeout);

@@ -231,14 +231,16 @@ class TransactionModel {
       accountId: (json['accountId'] as String?) ?? '',
       toAccountId: json['toAccountId'] as String?,
       kind: kind,
-      amount: (json['amount'] as num).toDouble(),
+      amount: json['amount'] is num
+          ? (json['amount'] as num).toDouble()
+          : (double.tryParse(json['amount']?.toString() ?? '') ?? 0.0),
       currency: (json['currency'] as String?) ?? 'PEN',
       category: category,
       categoryName: categoryName,
       bucket: bucketForCategory(category),
       timestamp: DateTime.parse(
-        (json['occurredAt'] ?? json['createdAt']) as String,
-      ),
+        (json['occurredAt'] ?? json['createdAt'] ?? json['date']) as String,
+      ).toLocal(),
       note: json['description'] as String?,
       source: TransactionSource.manual,
       suggestedCategoryId: json['suggestedCategoryId'] as String?,

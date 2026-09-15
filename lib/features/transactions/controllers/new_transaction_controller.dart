@@ -1,8 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/error_codes.dart';
 import '../../../core/models/transaction.dart';
+import '../../../core/models/budget.dart';
 import '../../../core/services/pending_transaction_queue.dart';
 import '../../../core/services/streak_repository.dart';
 import '../../../core/services/study_telemetry_service.dart';
@@ -10,6 +15,8 @@ import '../../../providers/repositories_providers.dart';
 import '../../auth/auth_controller.dart';
 import '../../budget/budget_screen.dart';
 import '../../dashboard/dashboard_providers.dart';
+import '../../income/income_screen.dart';
+import '../../progress/progress_screen.dart';
 
 @immutable
 class NewTransactionState {
@@ -18,7 +25,7 @@ class NewTransactionState {
   final TransactionCategory? category;
   final String? customCategoryName;
 
-  /// Budget the expense draws from (only required/sent for expenses). Income is
+  /// Optional budget for expenses. Income is
   /// never linked to a budget. Independent of the category.
   final String? selectedBudgetId;
   final String? selectedAccountId;
@@ -111,6 +118,7 @@ class NewTransactionState {
     String? aiSuggestedCategoryName,
     double? aiConfidence,
     bool clearError = false,
+    bool clearAmount = false,
     bool clearCategory = false,
     bool clearCustomCategory = false,
     bool clearBudget = false,
@@ -122,7 +130,7 @@ class NewTransactionState {
   }) {
     return NewTransactionState(
       kind: kind ?? this.kind,
-      amount: amount ?? this.amount,
+      amount: clearAmount ? null : (amount ?? this.amount),
       category: clearCategory ? null : (category ?? this.category),
       customCategoryName: clearCustomCategory
           ? null
@@ -186,12 +194,13 @@ class NewTransactionController extends Notifier<NewTransactionState> {
   }
 
   void setAmountFromText(String raw) {
-    final normalized = raw
-        .replaceAll(',', '.')
-        .replaceAll(RegExp(r'[^0-9\.]'), '');
-    final value = double.tryParse(normalized);
+    final normalized = raw.trim().replaceAll(',', '.');
+    final value = RegExp(r'^\d+(\.\d{0,2})?$').hasMatch(normalized)
+        ? double.tryParse(normalized)
+        : null;
     state = state.copyWith(
       amount: value,
+      clearAmount: value == null,
       source: TransactionSource.manual,
       clearError: true,
     );
@@ -330,8 +339,9 @@ class NewTransactionController extends Notifier<NewTransactionState> {
   }
 
   Future<void> save() async {
+    if (state.isSaving) return;
     final amount = state.amount;
-    if (amount == null || amount <= 0) {
+    if (amount == null || !amount.isFinite || amount <= 0) {
       state = state.copyWith(error: TxErrorCode.invalidAmount);
       return;
     }
@@ -391,9 +401,6 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         note: state.note.isEmpty ? null : state.note,
         source: state.source,
       );
-      if (kind != TransactionKind.transfer) {
-        await txRepo.addTransaction(tx);
-      }
 
       // Sync to backend; enqueue for retry if offline or unreachable.
       String? budgetAlertName;
@@ -443,7 +450,8 @@ class NewTransactionController extends Notifier<NewTransactionState> {
             final now = state.date;
             final budgets = await ref
                 .read(budgetServiceProvider)
-                .getAll(month: now.month, year: now.year);
+                .getAll(month: now.month, year: now.year)
+                .catchError((Object _) => <Budget>[]);
             final triggered = budgets.where(
               (b) => b.percentageUsed >= 80.0 && b.percentageUsed < 100.0,
             );
@@ -452,8 +460,13 @@ class NewTransactionController extends Notifier<NewTransactionState> {
             }
           }
         }
-      } catch (_) {
+      } catch (error) {
         if (kind == TransactionKind.transfer) rethrow;
+        if (error is! SocketException &&
+            error is! TimeoutException &&
+            error is! http.ClientException) {
+          rethrow;
+        }
         // Offline or unreachable — enqueue for retry when connectivity returns.
         final queue = ref.read(pendingTransactionQueueProvider);
         await queue.enqueue(
@@ -473,6 +486,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           ),
         );
       }
+      if (kind != TransactionKind.transfer) await txRepo.addTransaction(tx);
 
       // Update streak only on save.
       await streakRepo.updateOnTransaction(state.date);
@@ -504,9 +518,12 @@ class NewTransactionController extends Notifier<NewTransactionState> {
           year: state.date.year,
         )),
       );
+      ref.invalidate(monthlyIncomeProvider);
+      ref.invalidate(progressProvider);
 
       state = state.copyWith(
         isSaving: false,
+        clearAmount: true,
         saveTick: state.saveTick + 1,
         budgetAlert: budgetAlertName,
         anomalyAlert: anomalyAlertName,

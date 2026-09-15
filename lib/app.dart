@@ -66,8 +66,14 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
     ref.listen<AuthState>(authNotifierProvider, (prev, next) {
       final fcm = ref.read(fcmServiceProvider);
       final wasAuth = prev?.isAuthenticated ?? false;
+      if (prev?.user?.id != next.user?.id ||
+          prev?.user?.consentGiven != next.user?.consentGiven) {
+        StudyAnalyticsService.setUserId(
+          next.user?.id,
+          consent: next.user?.consentGiven ?? false,
+        );
+      }
       if (next.isAuthenticated && !wasAuth) {
-        StudyAnalyticsService.setUserId(next.user?.id);
         StudyTelemetryService.track(
           'app_session_started',
           metadata: {

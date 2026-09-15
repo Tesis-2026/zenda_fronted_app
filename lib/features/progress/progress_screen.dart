@@ -14,7 +14,7 @@ final progressServiceProvider = Provider<ProgressApiService>(
   (_) => ProgressApiService(),
 );
 
-final _progressProvider =
+final progressProvider =
     FutureProvider.autoDispose<FinancialProgress>((ref) {
   return ref.read(progressServiceProvider).getProgress();
 });
@@ -59,7 +59,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final progressAsync = ref.watch(_progressProvider);
+    final progressAsync = ref.watch(progressProvider);
 
     final body = progressAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -83,12 +83,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             balanceChangePercent: 61.7,
           );
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(_progressProvider),
+            onRefresh: () async => ref.invalidate(progressProvider),
             child: _buildContent(context, demoProgress),
           );
         },
         data: (progress) => RefreshIndicator(
-          onRefresh: () async => ref.invalidate(_progressProvider),
+          onRefresh: () async => ref.invalidate(progressProvider),
           child: _buildContent(context, progress),
         ),
     );

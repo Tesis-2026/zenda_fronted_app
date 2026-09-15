@@ -743,6 +743,7 @@ class MockTransactionApiService extends TransactionApiService {
     required DateTime occurredAt,
     String? description,
     String? accountId,
+    String? existingCategoryId,
   }) async {}
 
   @override
