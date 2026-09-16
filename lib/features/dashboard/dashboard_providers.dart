@@ -11,6 +11,7 @@ import '../../providers/repositories_providers.dart';
 import '../../providers/services_providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../budget/budget_screen.dart' show budgetServiceProvider;
+import '../auth/auth_controller.dart';
 
 // ─── ISO week helper ───────────────────────────────────────────────────────
 // Standard ISO 8601: W = floor((dayOfYear - weekday + 10) / 7)
@@ -117,7 +118,10 @@ final currentMonthBudgetsProvider = FutureProvider.autoDispose<List<Budget>>((
 
 final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>(
   (ref) async {
-    return ref.watch(transactionsRepositoryProvider).getTransactions();
+    final userId = ref.watch(authNotifierProvider.select((s) => s.user?.id));
+    if (userId == null) return [];
+    final rows = await ref.watch(transactionsRepositoryProvider).getTransactions();
+    return rows.where((row) => row.userId == userId).toList();
   },
 );
 
@@ -205,6 +209,8 @@ final _recommendationsServiceProvider = Provider<RecommendationsApiService>(
 );
 
 final recommendationsProvider = FutureProvider<List<Recommendation>>((ref) {
+  final userId = ref.watch(authNotifierProvider.select((s) => s.user?.id));
+  if (userId == null) return Future.value(<Recommendation>[]);
   return ref.read(_recommendationsServiceProvider).getAll();
 });
 

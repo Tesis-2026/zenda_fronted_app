@@ -1,4 +1,7 @@
 import 'dart:developer' as developer;
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'telemetry_policy.dart';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +13,7 @@ class StudyAnalyticsService {
   StudyAnalyticsService._();
 
   static bool _firebaseReady = false;
+  static bool consentGiven = false;
   static FirebaseRemoteConfig? _remoteConfig;
 
   static bool get firebaseReady => _firebaseReady;
@@ -22,14 +26,21 @@ class StudyAnalyticsService {
       await Firebase.initializeApp();
       _firebaseReady = true;
 
-      FlutterError.onError =
-          FirebaseCrashlytics.instance.recordFlutterFatalError;
+      FlutterError.onError = (details) {
+        FlutterError.presentError(details);
+        recordError(
+          details.exception,
+          details.stack ?? StackTrace.empty,
+          fatal: true,
+        );
+      };
       PlatformDispatcher.instance.onError = (error, stack) {
         recordError(error, stack, fatal: true);
         return true;
       };
 
-      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
       await FirebaseAnalytics.instance.setDefaultEventParameters({
         'app_env': appEnv,
         'beta_distribution_id': betaDistributionId,
@@ -93,11 +104,21 @@ class StudyAnalyticsService {
   static int get susMinChatMessages =>
       _remoteConfig?.getInt('zenda_sus_min_chat_messages') ?? 3;
 
-  static Future<void> setUserId(String? userId) async {
+  static Future<void> setUserId(String? userId, {bool consent = false}) async {
+    consentGiven = consent && userId != null;
     if (!_firebaseReady) return;
     try {
-      await FirebaseAnalytics.instance.setUserId(id: userId);
-      await FirebaseCrashlytics.instance.setUserIdentifier(userId ?? '');
+      final participantId = consentGiven
+          ? sha256.convert(utf8.encode('zenda-pilot-v1:$userId')).toString()
+          : null;
+      await FirebaseAnalytics.instance.setUserId(id: participantId);
+      await FirebaseCrashlytics.instance.setUserIdentifier(participantId ?? '');
+      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
+        consentGiven,
+      );
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+        consentGiven,
+      );
     } catch (e) {
       developer.log('Study user id failed: $e', name: 'study');
     }
@@ -107,11 +128,14 @@ class StudyAnalyticsService {
     String name, {
     Map<String, Object?> parameters = const {},
   }) async {
-    if (!_firebaseReady || !studyEnabled) return;
+    if (!_firebaseReady || !studyEnabled || !consentGiven) return;
     try {
       await FirebaseAnalytics.instance.logEvent(
         name: name,
-        parameters: _firebaseParameters(parameters),
+        parameters: safeTelemetryParameters(parameters).map(
+          (key, value) =>
+              MapEntry(key, value is bool ? (value ? 1 : 0) : value),
+        ),
       );
     } catch (e) {
       developer.log('Firebase analytics event failed: $e', name: 'study');
@@ -127,27 +151,13 @@ class StudyAnalyticsService {
     StackTrace stack, {
     bool fatal = false,
   }) {
-    if (!_firebaseReady) return;
+    if (!_firebaseReady || !consentGiven) return;
     FirebaseCrashlytics.instance
-        .recordError(error, stack, fatal: fatal)
+        .recordError(
+          error.runtimeType.toString(),
+          StackTrace.empty,
+          fatal: fatal,
+        )
         .catchError((_) {});
-  }
-
-  static Map<String, Object>? _firebaseParameters(
-    Map<String, Object?> parameters,
-  ) {
-    final sanitized = <String, Object>{};
-    for (final entry in parameters.entries) {
-      final value = entry.value;
-      if (value == null) continue;
-      if (value is String || value is num || value is bool) {
-        sanitized[entry.key] = value;
-      } else if (value is DateTime) {
-        sanitized[entry.key] = value.toIso8601String();
-      } else {
-        sanitized[entry.key] = value.toString();
-      }
-    }
-    return sanitized.isEmpty ? null : sanitized;
   }
 }

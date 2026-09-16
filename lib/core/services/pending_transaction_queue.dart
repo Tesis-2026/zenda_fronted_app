@@ -7,6 +7,8 @@ import '../models/transaction.dart';
 const _secureStorage = FlutterSecureStorage();
 
 class PendingSyncEntry {
+  // Null is reserved for legacy entries whose owner cannot be established.
+  final String? userId;
   final String txId;
   final TransactionKind kind;
   final double amount;
@@ -23,6 +25,7 @@ class PendingSyncEntry {
   final double? aiConfidence;
 
   const PendingSyncEntry({
+    this.userId,
     required this.txId,
     required this.kind,
     required this.amount,
@@ -38,6 +41,7 @@ class PendingSyncEntry {
   });
 
   Map<String, dynamic> toJson() => {
+    if (userId != null) 'userId': userId,
     'txId': txId,
     'kind': kind.name,
     'amount': amount,
@@ -55,6 +59,7 @@ class PendingSyncEntry {
 
   factory PendingSyncEntry.fromJson(Map<String, dynamic> json) {
     return PendingSyncEntry(
+      userId: json['userId'] as String?,
       txId: json['txId'] as String,
       kind: TransactionKind.values.byName(json['kind'] as String),
       amount: (json['amount'] as num).toDouble(),
@@ -73,6 +78,13 @@ class PendingSyncEntry {
 
 class PendingTransactionQueue {
   static const _key = 'zenda.pending_sync.v1';
+  Future<void> _mutation = Future.value();
+
+  Future<void> _serialize(Future<void> Function() action) {
+    final operation = _mutation.then((_) => action());
+    _mutation = operation.catchError((Object _) {});
+    return operation;
+  }
 
   Future<List<PendingSyncEntry>> getAll() async {
     final raw = await _secureStorage.read(key: _key);
@@ -89,18 +101,18 @@ class PendingTransactionQueue {
         .toList();
   }
 
-  Future<void> enqueue(PendingSyncEntry entry) async {
+  Future<void> enqueue(PendingSyncEntry entry) => _serialize(() async {
     final all = await getAll();
     if (all.any((e) => e.txId == entry.txId)) return;
     all.add(entry);
     await _save(all);
-  }
+  });
 
-  Future<void> remove(String txId) async {
+  Future<void> remove(String txId) => _serialize(() async {
     final all = await getAll();
     all.removeWhere((e) => e.txId == txId);
     await _save(all);
-  }
+  });
 
   Future<void> _save(List<PendingSyncEntry> entries) async {
     await _secureStorage.write(

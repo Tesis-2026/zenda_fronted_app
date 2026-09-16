@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 import '../../core/services/progress_api_service.dart';
 import '../../core/widgets/app_card.dart';
-import '../../core/widgets/month_navigator.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 
@@ -14,7 +13,7 @@ final progressServiceProvider = Provider<ProgressApiService>(
   (_) => ProgressApiService(),
 );
 
-final _progressProvider =
+final progressProvider =
     FutureProvider.autoDispose<FinancialProgress>((ref) {
   return ref.read(progressServiceProvider).getProgress();
 });
@@ -39,18 +38,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   }
 
-  void _prevMonth() => setState(() {
-        _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
-      });
-
-  void _nextMonth() {
-    final now = DateTime.now();
-    final next = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
-    if (!next.isAfter(DateTime(now.year, now.month))) {
-      setState(() => _selectedMonth = next);
-    }
-  }
-
   String _prevMonthLabel(BuildContext context) {
     final prev = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
     return DateFormat.MMM(Localizations.localeOf(context).languageCode).format(prev);
@@ -59,36 +46,29 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final progressAsync = ref.watch(_progressProvider);
+    final progressAsync = ref.watch(progressProvider);
 
     final body = progressAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) {
-          // Hardcoded demo fallback when API is unavailable
-          const demoProgress = FinancialProgress(
-            currentMonth: MonthFinancials(
-              income: 2000,
-              expenses: 1240,
-              balance: 760,
-              savings: 760,
-            ),
-            previousMonth: MonthFinancials(
-              income: 1850,
-              expenses: 1380,
-              balance: 470,
-              savings: 470,
-            ),
-            expensesChangePercent: -10.1,
-            savingsChangePercent: 61.7,
-            balanceChangePercent: 61.7,
-          );
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(_progressProvider),
-            child: _buildContent(context, demoProgress),
+            onRefresh: () async => ref.invalidate(progressProvider),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              children: [
+                const Text('No se pudo cargar tu progreso financiero. Intenta nuevamente.'),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () => ref.invalidate(progressProvider),
+                  child: Text(l10n.commonRetry),
+                ),
+              ],
+            ),
           );
         },
         data: (progress) => RefreshIndicator(
-          onRefresh: () async => ref.invalidate(_progressProvider),
+          onRefresh: () async => ref.invalidate(progressProvider),
           child: _buildContent(context, progress),
         ),
     );
@@ -108,17 +88,17 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       children: [
-        // Month navigator
+        // This endpoint returns the current month and its preceding month.
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: MonthNavigator(
-            label: monthLabel,
-            onPrev: _prevMonth,
-            onNext: _nextMonth,
-            trailing: Text(
+          child: Row(
+            children: [
+              Expanded(child: Text(monthLabel)),
+              Text(
               '${l10n.progressVsLabel} ${_prevMonthLabel(context)}',
               style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
-            ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),

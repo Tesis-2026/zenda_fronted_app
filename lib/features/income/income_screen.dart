@@ -7,7 +7,7 @@ import '../../core/theme/zenda_theme_x.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/widgets/category_selector.dart';
 import '../../l10n/l10n_extension.dart';
-import '../dashboard/dashboard_providers.dart';
+import '../../providers/repositories_providers.dart';
 
 /// Income is a first-class concept: it is tracked on its own and never inflates
 /// a budget (see docs/income-as-first-class-concept.md). This screen is the fixed
@@ -18,20 +18,25 @@ class _MonthlyIncome {
   const _MonthlyIncome({required this.total, required this.entries});
 }
 
-final _monthlyIncomeProvider =
-    FutureProvider.autoDispose<_MonthlyIncome>((ref) async {
-  final txs = await ref.watch(transactionsProvider.future);
+final monthlyIncomeProvider = FutureProvider.autoDispose<_MonthlyIncome>((
+  ref,
+) async {
   final now = DateTime.now();
-  final entries =
-      txs
-          .where(
-            (t) =>
-                t.kind == TransactionKind.income &&
-                t.timestamp.year == now.year &&
-                t.timestamp.month == now.month,
-          )
-          .toList()
-        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+  final from = DateTime(now.year, now.month, 1).toUtc().toIso8601String();
+  final to = DateTime(
+    now.year,
+    now.month + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  ).toUtc().toIso8601String();
+  final rows = await ref
+      .read(transactionApiServiceProvider)
+      .getAll(type: 'INCOME', from: from, to: to);
+  final entries = rows.map(TransactionModel.fromApiJson).toList()
+    ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
   final total = entries.fold<double>(0, (sum, t) => sum + t.amount);
   return _MonthlyIncome(total: total, entries: entries);
 });
@@ -45,10 +50,10 @@ class IncomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final incomeAsync = ref.watch(_monthlyIncomeProvider);
+    final incomeAsync = ref.watch(monthlyIncomeProvider);
 
     final body = RefreshIndicator(
-      onRefresh: () async => ref.invalidate(_monthlyIncomeProvider),
+      onRefresh: () async => ref.invalidate(monthlyIncomeProvider),
       child: incomeAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => ListView(
@@ -146,7 +151,9 @@ class _IncomeEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final label = CategorySelector.labelFor(context, tx.category);
+    final label = tx.categoryName != null && tx.categoryName!.isNotEmpty
+        ? CategoryUtils.labelEs(tx.categoryName)
+        : CategorySelector.labelFor(context, tx.category);
     final date = DateFormat('d MMM', 'es').format(tx.timestamp);
     final title = (tx.note != null && tx.note!.isNotEmpty) ? tx.note! : label;
     return Container(
@@ -163,7 +170,9 @@ class _IncomeEntryTile extends StatelessWidget {
             radius: 18,
             backgroundColor: const Color(0xFF059669).withValues(alpha: 0.12),
             child: Icon(
-              CategoryUtils.iconForCategory(tx.category.name),
+              CategoryUtils.iconForCategory(
+                tx.categoryName ?? tx.category.name,
+              ),
               color: const Color(0xFF059669),
               size: 18,
             ),

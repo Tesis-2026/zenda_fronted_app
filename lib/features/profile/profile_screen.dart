@@ -74,7 +74,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _saveEdit() async {
     setState(() => _isSaving = true);
     try {
-      await ref
+      final updatedUser = await ref
           .read(profileUserServiceProvider)
           .updateProfile(
             fullName: _nameController.text.trim().isEmpty
@@ -86,6 +86,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 : _universityController.text.trim(),
             currency: _currency,
           );
+      ref.read(authNotifierProvider.notifier).updateCurrentUser(updatedUser);
       ref.invalidate(_profileProvider);
       if (mounted) setState(() => _isEditing = false);
     } catch (_) {

@@ -523,63 +523,97 @@ class _SummaryCards extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFECFDF5),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
               borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '↑  ${l10n.dashboardMonthlyIncome}',
-                  style: const TextStyle(
-                    color: Color(0xFF059669),
-                    fontSize: 12,
-                  ),
+              onTap: () => context.push('/reports'),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'S/ ${income.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    color: Color(0xFF065F46),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '↑  ${l10n.dashboardMonthlyIncome}',
+                          style: const TextStyle(
+                            color: Color(0xFF059669),
+                            fontSize: 12,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 11,
+                          color: Color(0xFF059669),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'S/ ${income.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: Color(0xFF065F46),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEF2F2),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
               borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '↓  ${l10n.dashboardMonthlyExpense}',
-                  style: const TextStyle(
-                    color: Color(0xFFDC2626),
-                    fontSize: 12,
-                  ),
+              onTap: () => context.push('/reports'),
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'S/ ${expense.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    color: Color(0xFF7F1D1D),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '↓  ${l10n.dashboardMonthlyExpense}',
+                          style: const TextStyle(
+                            color: Color(0xFFDC2626),
+                            fontSize: 12,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 11,
+                          color: Color(0xFFDC2626),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'S/ ${expense.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: Color(0xFF7F1D1D),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

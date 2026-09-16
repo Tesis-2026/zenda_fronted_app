@@ -17,6 +17,8 @@ import '../../core/widgets/green_pill_button.dart';
 import '../../core/widgets/icon_action_button.dart';
 import '../../core/widgets/user_menu_button.dart';
 import '../../features/dashboard/dashboard_providers.dart';
+import '../../features/income/income_screen.dart';
+import '../../features/progress/progress_screen.dart';
 import '../../features/transactions/add_transaction_screen.dart';
 import '../../features/transactions/edit_transaction_screen.dart';
 import '../../l10n/l10n_extension.dart';
@@ -310,6 +312,25 @@ class TransactionListScreen extends ConsumerWidget {
                               ref.invalidate(weekSummaryProvider);
                               ref.invalidate(monthSummaryProvider);
                               ref.invalidate(transactionsProvider);
+                              ref.invalidate(budgetSummaryProvider);
+                              ref.invalidate(currentMonthBudgetsProvider);
+                              ref.invalidate(accountsProvider);
+                              ref.invalidate(recommendationsProvider);
+                              final now = DateTime.now();
+                              ref.invalidate(
+                                accountReportProvider((
+                                  month: now.month,
+                                  year: now.year,
+                                )),
+                              );
+                              ref.invalidate(monthlyIncomeProvider);
+                              ref.invalidate(progressProvider);
+                              ref.invalidate(
+                                budgetsForPeriodProvider((
+                                  month: now.month,
+                                  year: now.year,
+                                )),
+                              );
                             },
                           ),
                       ],
@@ -1201,6 +1222,7 @@ class _TransactionRow extends ConsumerWidget {
     if (confirmed != true) return;
     try {
       await ref.read(transactionApiServiceProvider).deleteTransaction(id);
+      await ref.read(transactionsRepositoryProvider).deleteTransaction(id);
       onDeleted();
     } catch (_) {
       if (context.mounted) {

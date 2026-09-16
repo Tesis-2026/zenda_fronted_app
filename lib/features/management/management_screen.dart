@@ -26,6 +26,19 @@ class ManagementScreen extends StatefulWidget {
 class _ManagementScreenState extends State<ManagementScreen> {
   late int _tab = widget.initialTab.clamp(0, 3);
 
+  String _hintForCurrentTab() {
+    return switch (_tab) {
+      0 =>
+        'Revisa cómo se distribuye tu dinero entre necesidades (50%), deseos (30%) y ahorro (20%).',
+      1 =>
+        'Para tus necesidades y deseos: define límites mensuales. Los gastos registrados actualizan el consumo.',
+      2 =>
+        'Para tu ahorro (20%): usa el botón "Agregar dinero" en tus metas para sumar aportes a tu ahorro.',
+      _ =>
+        'Registra tus ingresos desde Movimientos para calcular tu distribución 50/30/20.',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -82,6 +95,11 @@ class _ManagementScreenState extends State<ManagementScreen> {
               ),
             ),
             const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _ManagementHintCard(text: _hintForCurrentTab()),
+            ),
+            const SizedBox(height: 8),
             // Active sub-view (kept alive via IndexedStack)
             Expanded(
               child: IndexedStack(
@@ -95,6 +113,35 @@ class _ManagementScreenState extends State<ManagementScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ManagementHintCard extends StatelessWidget {
+  const _ManagementHintCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colors.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colors.border),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          height: 1.35,
+          fontWeight: FontWeight.w500,
+          color: colors.textMuted,
         ),
       ),
     );

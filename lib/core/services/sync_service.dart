@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+import 'api_client.dart';
 import 'pending_transaction_queue.dart';
 import 'transaction_api_service.dart';
 
-/// Maximum number of attempts per pending entry before it is dropped.
+/// Maximum automatic attempts per session. Failed entries remain recoverable.
 const _kMaxRetries = 3;
 
 class SyncService {
@@ -20,11 +19,12 @@ class SyncService {
 
   /// In-memory retry counters — reset on app restart (acceptable for this scope).
   final Map<String, int> _retryCount = {};
+  bool _flushing = false;
 
   void startListening() {
     _sub = Connectivity().onConnectivityChanged.listen((results) {
       if (_hasConnectivity(results)) {
-        _flush();
+        flushPending();
       }
     });
     // Also attempt immediately — may already be online with queued items
@@ -42,22 +42,32 @@ class SyncService {
   Future<void> _flushIfOnline() async {
     final results = await Connectivity().checkConnectivity();
     if (_hasConnectivity(results)) {
+      await flushPending();
+    }
+  }
+
+  Future<void> flushPending() async {
+    if (_flushing) return;
+    _flushing = true;
+    try {
       await _flush();
+    } finally {
+      _flushing = false;
     }
   }
 
   Future<void> _flush() async {
+    final userId = await ApiClient.currentUserId();
+    if (userId == null) return;
     final pending = await _queue.getAll();
     if (pending.isEmpty) return;
 
     for (final entry in pending) {
+      if (entry.userId != userId) continue;
       final retries = _retryCount[entry.txId] ?? 0;
 
       if (retries >= _kMaxRetries) {
-        // Drop the entry after max retries — do not keep retrying indefinitely.
-        debugPrint('SyncService: max retries reached for ${entry.txId}');
-        await _queue.remove(entry.txId);
-        _retryCount.remove(entry.txId);
+        // Keep failed/ambiguous writes for reconciliation; never discard money.
         continue;
       }
 
@@ -82,6 +92,7 @@ class SyncService {
           // Stable key per queued entry so the eventual retry replays
           // the server response instead of duplicating.
           idempotencyKey: entry.txId,
+          expectedUserId: userId,
         );
         await _queue.remove(entry.txId);
         _retryCount.remove(entry.txId);

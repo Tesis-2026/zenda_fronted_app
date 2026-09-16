@@ -726,6 +726,7 @@ class MockTransactionApiService extends TransactionApiService {
     String? aiSuggestedCategoryName,
     double? aiConfidence,
     String? idempotencyKey,
+    String? expectedUserId,
   }) async {
     return (
       completedChallenges: <String>[],
@@ -743,6 +744,7 @@ class MockTransactionApiService extends TransactionApiService {
     required DateTime occurredAt,
     String? description,
     String? accountId,
+    String? existingCategoryId,
   }) async {}
 
   @override

@@ -87,6 +87,7 @@ class TransactionModel {
   final double amount;
   final String currency;
   final TransactionCategory category;
+  final String? categoryName;
   final Bucket503020 bucket;
   final DateTime timestamp;
   final String? note;
@@ -114,6 +115,7 @@ class TransactionModel {
     required this.amount,
     this.currency = 'PEN',
     required this.category,
+    this.categoryName,
     required this.bucket,
     required this.timestamp,
     this.note,
@@ -140,6 +142,7 @@ class TransactionModel {
     double? amount,
     String? currency,
     TransactionCategory? category,
+    String? categoryName,
     Bucket503020? bucket,
     DateTime? timestamp,
     String? note,
@@ -157,6 +160,7 @@ class TransactionModel {
       amount: amount ?? this.amount,
       currency: currency ?? this.currency,
       category: category ?? this.category,
+      categoryName: categoryName ?? this.categoryName,
       bucket: bucket ?? this.bucket,
       timestamp: timestamp ?? this.timestamp,
       note: note ?? this.note,
@@ -186,6 +190,7 @@ class TransactionModel {
         (e) => e.toString() == json['category'],
         orElse: () => TransactionCategory.otros,
       ),
+      categoryName: json['categoryName'] as String?,
       bucket: Bucket503020.values.firstWhere(
         (e) => e.toString() == json['bucket'],
         orElse: () => Bucket503020.deseo,
@@ -226,13 +231,16 @@ class TransactionModel {
       accountId: (json['accountId'] as String?) ?? '',
       toAccountId: json['toAccountId'] as String?,
       kind: kind,
-      amount: (json['amount'] as num).toDouble(),
+      amount: json['amount'] is num
+          ? (json['amount'] as num).toDouble()
+          : (double.tryParse(json['amount']?.toString() ?? '') ?? 0.0),
       currency: (json['currency'] as String?) ?? 'PEN',
       category: category,
+      categoryName: categoryName,
       bucket: bucketForCategory(category),
       timestamp: DateTime.parse(
-        (json['occurredAt'] ?? json['createdAt']) as String,
-      ),
+        (json['occurredAt'] ?? json['createdAt'] ?? json['date']) as String,
+      ).toLocal(),
       note: json['description'] as String?,
       source: TransactionSource.manual,
       suggestedCategoryId: json['suggestedCategoryId'] as String?,
@@ -251,6 +259,7 @@ class TransactionModel {
       'amount': amount,
       'currency': currency,
       'category': category.toString(),
+      if (categoryName != null) 'categoryName': categoryName,
       'bucket': bucket.toString(),
       'timestamp': timestamp.toIso8601String(),
       'note': note,

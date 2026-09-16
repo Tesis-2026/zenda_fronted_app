@@ -106,23 +106,19 @@ typedef ClassifyResult = ({
 });
 
 class TransactionApiService {
-  // Cache of lowercase category name → category UUID from the backend.
-  // Populated once per app session; prevents a name-based DB lookup on every
-  // transaction write by sending categoryId directly.
-  static Map<String, String>? _categoryIdCache;
+  // Fetch under the current session: never reuse another participant's catalog.
+  static void invalidateCategoryCache() {}
 
-  static Future<Map<String, String>> _getCategoryCache() async {
-    if (_categoryIdCache != null) return _categoryIdCache!;
-    try {
-      final list = await ApiClient.getList('/categories');
-      _categoryIdCache = {
-        for (final item in list.cast<Map<String, dynamic>>())
-          (item['name'] as String).toLowerCase(): item['id'] as String,
-      };
-    } catch (_) {
-      _categoryIdCache = {};
-    }
-    return _categoryIdCache!;
+  static Future<Map<String, String>> _getCategoryCache(
+    TransactionKind kind,
+  ) async {
+    final list = await ApiClient.getList('/categories');
+    final type = kind == TransactionKind.income ? 'INCOME' : 'EXPENSE';
+    return {
+      for (final item in list.cast<Map<String, dynamic>>())
+        if (item['transactionType'] == null || item['transactionType'] == type)
+          _normalizeCategoryName(item['name'] as String): item['id'] as String,
+    };
   }
 
   Future<CreateTransactionResult> create({
@@ -147,6 +143,7 @@ class TransactionApiService {
     /// network blip) replays the cached response instead of creating
     /// a duplicate row server-side.
     String? idempotencyKey,
+    String? expectedUserId,
   }) async {
     // Transfers are local-only; no backend call needed.
     if (kind == TransactionKind.transfer) {
@@ -158,8 +155,8 @@ class TransactionApiService {
     }
 
     final apiName = customCategoryName ?? categoryToApiName(category);
-    final cache = await _getCategoryCache();
-    final categoryId = cache[apiName.toLowerCase()];
+    final cache = await _getCategoryCache(kind);
+    final categoryId = cache[_normalizeCategoryName(apiName)];
 
     final body = <String, dynamic>{
       'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',
@@ -185,7 +182,8 @@ class TransactionApiService {
     // for AI suggestions that map to a brand-new category we silently
     // drop the suggestion fields to avoid the paired-field violation.
     if (aiSuggestedCategoryName != null && aiConfidence != null) {
-      final suggestedId = cache[aiSuggestedCategoryName.toLowerCase()];
+      final suggestedId =
+          cache[_normalizeCategoryName(aiSuggestedCategoryName)];
       if (suggestedId != null) {
         body['suggestedCategoryId'] = suggestedId;
         body['aiConfidence'] = aiConfidence;
@@ -197,6 +195,7 @@ class TransactionApiService {
       body,
       authenticated: true,
       idempotencyKey: idempotencyKey,
+      expectedUserId: expectedUserId,
     );
 
     final rawChallenges = json['newlyCompletedChallenges'];
@@ -237,11 +236,16 @@ class TransactionApiService {
     if (minAmount != null) params['minAmount'] = minAmount.toStringAsFixed(2);
     if (maxAmount != null) params['maxAmount'] = maxAmount.toStringAsFixed(2);
 
-    final query = params.isEmpty
-        ? ''
-        : '?${Uri(queryParameters: params).query}';
-    final body = await ApiClient.getList('/transactions$query');
-    return body.cast<Map<String, dynamic>>();
+    const pageSize = 100;
+    final rows = <Map<String, dynamic>>[];
+    for (var skip = 0; ; skip += pageSize) {
+      final query = Uri(
+        queryParameters: {...params, 'take': '$pageSize', 'skip': '$skip'},
+      ).query;
+      final page = await ApiClient.getList('/transactions?$query');
+      rows.addAll(page.cast<Map<String, dynamic>>());
+      if (page.length < pageSize) return rows;
+    }
   }
 
   Future<void> update({
@@ -252,12 +256,14 @@ class TransactionApiService {
     required DateTime occurredAt,
     String? description,
     String? accountId,
+    String? existingCategoryId,
   }) async {
     if (kind == TransactionKind.transfer) return;
 
     final apiName = categoryToApiName(category);
-    final cache = await _getCategoryCache();
-    final categoryId = cache[apiName.toLowerCase()];
+    final cache = await _getCategoryCache(kind);
+    final categoryId =
+        existingCategoryId ?? cache[_normalizeCategoryName(apiName)];
 
     final body = <String, dynamic>{
       'type': kind == TransactionKind.income ? 'INCOME' : 'EXPENSE',

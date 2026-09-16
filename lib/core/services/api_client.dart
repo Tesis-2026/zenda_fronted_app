@@ -93,19 +93,23 @@ class ApiClient {
 
   // ── Token refresh ────────────────────────────────────────────────
 
-  static bool _refreshInProgress = false;
+  static Future<bool>? _refreshFuture;
 
   /// Attempts to exchange the stored refresh token for a new token pair.
   /// Returns true and saves new tokens on success; returns false on failure.
-  static Future<bool> _tryRefresh() async {
-    if (_refreshInProgress) return false;
+  static Future<bool> _tryRefresh() {
+    return _refreshFuture ??= _performRefresh().whenComplete(() {
+      _refreshFuture = null;
+    });
+  }
+
+  static Future<bool> _performRefresh() async {
     final refreshToken = await getRefreshToken();
     if (refreshToken == null) {
       _sessionExpiredController.add(null);
       return false;
     }
 
-    _refreshInProgress = true;
     try {
       final response = await http
           .post(
@@ -117,19 +121,30 @@ class ApiClient {
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body) as Map<String, dynamic>;
+        if (await getRefreshToken() != refreshToken) return false;
         await saveTokens(
           accessToken: body['accessToken'] as String,
           refreshToken: body['refreshToken'] as String,
         );
         return true;
       }
+      if (response.statusCode != 401 && response.statusCode != 403) {
+        throw const ApiException(
+          statusCode: 0,
+          message: 'No se pudo renovar la sesion. Reintenta.',
+        );
+      }
+    } on ApiException {
+      rethrow;
     } catch (_) {
-      // Network error during refresh — treat as failure
-    } finally {
-      _refreshInProgress = false;
+      throw const ApiException(
+        statusCode: 0,
+        message: 'Sin conexion. Tu sesion se conserva.',
+      );
     }
 
     // Refresh failed: clear tokens and notify listeners to redirect to login.
+    if (await getRefreshToken() != refreshToken) return false;
     await deleteTokens();
     _sessionExpiredController.add(null);
     return false;
@@ -139,8 +154,36 @@ class ApiClient {
 
   // ── Request helpers ──────────────────────────────────────────────
 
-  static Future<Map<String, String>> _authHeaders() async {
+  // Used only to bind local work to its owner; the server validates the JWT.
+  static String? _tokenUserId(String? token) {
+    try {
+      final payload =
+          jsonDecode(
+                utf8.decode(
+                  base64Url.decode(base64Url.normalize(token!.split('.')[1])),
+                ),
+              )
+              as Map<String, dynamic>;
+      return payload['sub'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<String?> currentUserId() async =>
+      _tokenUserId(await getToken());
+
+  static Future<Map<String, String>> _authHeaders({
+    String? expectedUserId,
+  }) async {
     final token = await getToken();
+    if (expectedUserId != null && _tokenUserId(token) != expectedUserId) {
+      throw const ApiException(
+        statusCode: 409,
+        message:
+            'La sesion cambio. Ingresa con la cuenta que registro el movimiento.',
+      );
+    }
     return {
       HttpHeaders.contentTypeHeader: 'application/json',
       if (token != null) HttpHeaders.authorizationHeader: 'Bearer $token',
@@ -153,7 +196,7 @@ class ApiClient {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } catch (_) {
       developer.log(
-        'Non-JSON response body: ${response.body}',
+        'Invalid JSON response (${response.statusCode})',
         name: 'ApiClient',
         level: 800,
       );
@@ -182,7 +225,7 @@ class ApiClient {
 
   static void _logError(String method, String url, Object error) {
     developer.log(
-      '[$method] $url → ERROR: $error',
+      '[$method] ${Uri.parse(url).path} ERROR: ${error.runtimeType}',
       name: 'ApiClient',
       level: 900,
     );
@@ -195,10 +238,11 @@ class ApiClient {
     Map<String, dynamic> body, {
     bool authenticated = false,
     String? idempotencyKey,
+    String? expectedUserId,
   }) async {
     final url = '$_kBaseUrl$path';
     final headers = authenticated
-        ? await _authHeaders()
+        ? await _authHeaders(expectedUserId: expectedUserId)
         : {HttpHeaders.contentTypeHeader: 'application/json'};
     // Idempotency-Key (B28) lets the server dedupe automatic retries —
     // a mobile network glitch that succeeds on retry should NOT create
@@ -220,7 +264,10 @@ class ApiClient {
           response = await http
               .post(
                 Uri.parse(url),
-                headers: await _authHeaders(),
+                headers: {
+                  ...await _authHeaders(expectedUserId: expectedUserId),
+                  'idempotency-key': ?idempotencyKey,
+                },
                 body: jsonEncode(body),
               )
               .timeout(_kRequestTimeout);

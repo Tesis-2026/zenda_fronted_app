@@ -7,6 +7,7 @@ import '../../core/services/api_client.dart';
 import '../../core/services/auth_api_service.dart';
 import '../../core/services/biometric_auth_service.dart';
 import '../../features/dashboard/dashboard_providers.dart';
+import '../transactions/controllers/new_transaction_controller.dart';
 
 export '../../core/services/auth_api_service.dart' show LockoutInfo;
 
@@ -205,6 +206,7 @@ class AuthNotifier extends Notifier<AuthState> {
     // Invalidate non-autoDispose providers so the next login gets fresh data.
     ref.invalidate(transactionsProvider);
     ref.invalidate(streakStateProvider);
+    ref.invalidate(newTransactionControllerProvider);
   }
 
   void clearError() {

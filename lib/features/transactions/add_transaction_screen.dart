@@ -7,10 +7,11 @@ import 'package:speech_to_text/speech_to_text.dart' as speech;
 
 import '../../core/models/budget.dart';
 import '../../core/models/account.dart';
+import '../../core/models/category.dart';
 import '../../core/models/transaction.dart';
 import '../../core/services/api_client.dart';
 import '../../core/services/transaction_api_service.dart'
-    show categoryToApiName;
+    show categoryFromApiName, categoryToApiName;
 import '../../core/utils/category_utils.dart';
 import '../dashboard/dashboard_providers.dart';
 import '../../providers/repositories_providers.dart';
@@ -27,6 +28,11 @@ import '../../core/widgets/sheet_header.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import 'controllers/new_transaction_controller.dart';
 import '../../l10n/l10n_extension.dart';
+
+final _transactionCategoriesProvider =
+    FutureProvider.autoDispose<List<CategoryModel>>((ref) {
+      return ref.read(categoryApiServiceProvider).getAll();
+    });
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   const AddTransactionScreen({super.key, this.isSheet = false});
@@ -99,6 +105,87 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     } else {
       context.go('/transactions');
     }
+  }
+
+  String? _selectedCategoryKey(NewTransactionState state) {
+    final customName = state.customCategoryName?.trim();
+    if (customName != null && customName.isNotEmpty) {
+      return 'custom:$customName';
+    }
+    final category = state.category;
+    if (category == null) return null;
+    return 'system:${categoryToApiName(category)}';
+  }
+
+  bool _categoryAppliesToKind(CategoryModel category, TransactionKind kind) {
+    if (kind == TransactionKind.transfer) return false;
+    final txType = category.transactionType;
+    if (txType == null || txType.isEmpty) return true;
+    return kind == TransactionKind.income
+        ? txType == 'INCOME'
+        : txType == 'EXPENSE';
+  }
+
+  List<CategoryOption<String>> _categoryOptionsFor(
+    BuildContext context,
+    TransactionKind kind,
+    List<CategoryModel> backendCategories,
+  ) {
+    final options = <CategoryOption<String>>[
+      for (final c in categoriesForTransactionKind(kind))
+        CategoryOption<String>(
+          value: 'system:${categoryToApiName(c)}',
+          label: CategorySelector.labelFor(context, c),
+          icon: CategoryUtils.iconForCategory(c.name),
+        ),
+    ];
+
+    final seen = options.map((o) => o.value).toSet();
+    for (final category in backendCategories) {
+      if (!_categoryAppliesToKind(category, kind)) continue;
+
+      final mapped = categoryFromApiName(category.name);
+      final isKnownSystem = !category.isCustom && mapped != null;
+      if (isKnownSystem) {
+        seen.add('system:${categoryToApiName(mapped)}');
+        continue;
+      }
+
+      final name = category.name.trim();
+      if (name.isEmpty) continue;
+      final key = 'custom:$name';
+      if (seen.contains(key)) continue;
+      seen.add(key);
+      options.add(
+        CategoryOption<String>(
+          value: key,
+          label: CategoryUtils.labelEs(name),
+          icon: CategoryUtils.iconForCategory(
+            name,
+            iconKey: category.icon,
+            isCustom: category.isCustom,
+          ),
+          iconColor: CategoryUtils.iconColorForCategory(name),
+          bgColor: CategoryUtils.bgColorForCategory(name),
+          trailing: category.isCustom ? 'Personal' : null,
+        ),
+      );
+    }
+    return options;
+  }
+
+  void _selectCategoryByKey(NewTransactionController controller, String key) {
+    if (key.startsWith('custom:')) {
+      final name = key.substring('custom:'.length).trim();
+      if (name.isNotEmpty) controller.setCustomCategory(name);
+      return;
+    }
+
+    final apiName = key.startsWith('system:')
+        ? key.substring('system:'.length)
+        : key;
+    final category = categoryFromApiName(apiName);
+    controller.setCategory(category ?? TransactionCategory.otros);
   }
 
   Future<void> _showVoiceDraftSheet() async {
@@ -319,6 +406,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final budgetPeriod = (month: state.date.month, year: state.date.year);
     final budgetsAsync = ref.watch(budgetsForPeriodProvider(budgetPeriod));
     final accountsAsync = ref.watch(accountsProvider);
+    final categoriesAsync = ref.watch(_transactionCategoriesProvider);
 
     ref.listen<NewTransactionState>(newTransactionControllerProvider, (
       prev,
@@ -328,13 +416,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (next.saveTick != prevTick) {
         if (!context.mounted) return;
         final savedExtra = {
-          'amount': next.amount ?? 0.0,
+          'amount': prev?.amount ?? next.amount ?? 0.0,
           'categoryName': next.category != null
               ? categoryToApiName(next.category!)
               : 'Other',
           'date': next.date,
           'kind': next.kind,
         };
+        _amountController.clear();
+        _noteController.clear();
 
         if (next.completedChallengeNames.isNotEmpty) {
           // Show celebration dialog; navigate to saved screen after dismiss.
@@ -502,7 +592,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       firstDate: DateTime(2020),
                       lastDate: DateTime.now().add(const Duration(days: 365)),
                     );
-                    if (picked != null) controller.setDate(picked);
+                    if (picked != null) {
+                      controller.setDate(
+                        DateTime(
+                          picked.year,
+                          picked.month,
+                          picked.day,
+                          state.date.hour,
+                          state.date.minute,
+                          state.date.second,
+                          state.date.millisecond,
+                          state.date.microsecond,
+                        ),
+                      );
+                    }
                   },
                 ),
                 const SizedBox(height: 18),
@@ -580,20 +683,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  CategoryDropdownField<TransactionCategory>(
-                    value: state.category,
+                  CategoryDropdownField<String>(
+                    value: _selectedCategoryKey(state),
                     hintText: l10n.categorySelectHint,
                     sheetTitle: l10n.txCategoryLabel,
-                    onChanged: controller.setCategory,
-                    options: [
-                      for (final c in categoriesForTransactionKind(state.kind))
-                        CategoryOption<TransactionCategory>(
-                          value: c,
-                          label: CategorySelector.labelFor(context, c),
-                          icon: CategoryUtils.iconForCategory(c.name),
-                        ),
-                    ],
+                    onChanged: (key) => _selectCategoryByKey(controller, key),
+                    options: _categoryOptionsFor(
+                      context,
+                      state.kind,
+                      categoriesAsync.asData?.value ?? const <CategoryModel>[],
+                    ),
                   ),
+                  if (categoriesAsync.hasError) ...[
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () =>
+                          ref.invalidate(_transactionCategoriesProvider),
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: const Text('Reintentar categorias'),
+                    ),
+                  ],
                   const SizedBox(height: 10),
                   // AI categorization helper — sits next to the category
                   // field and is only triggered when the user asks for it.
@@ -947,6 +1056,19 @@ class _VoiceInputSheetState extends State<_VoiceInputSheet> {
   String? _localeId;
   String? _error;
 
+  String _voiceErrorMessage(String raw) {
+    final normalized = raw.toLowerCase();
+    if (normalized.contains('speech_timeout') ||
+        normalized.contains('no_match') ||
+        normalized.contains('timeout')) {
+      return 'No se detecto audio. Intentalo nuevamente.';
+    }
+    if (normalized.contains('network')) {
+      return 'No se pudo usar el reconocimiento de voz por conexion. Intentalo nuevamente.';
+    }
+    return context.l10n.txVoiceUnavailable;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -966,7 +1088,7 @@ class _VoiceInputSheetState extends State<_VoiceInputSheet> {
         onError: (error) {
           if (!mounted) return;
           setState(() {
-            _error = error.errorMsg;
+            _error = _voiceErrorMessage(error.errorMsg);
             _isListening = false;
           });
         },
