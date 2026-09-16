@@ -436,6 +436,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
             // Idempotency-Key so any retry (network blip, queue flush)
             // replays the cached response instead of inserting again.
             idempotencyKey: tx.id,
+            expectedUserId: tx.userId,
           );
           completedNames = result.completedChallenges;
 
@@ -471,6 +472,7 @@ class NewTransactionController extends Notifier<NewTransactionState> {
         final queue = ref.read(pendingTransactionQueueProvider);
         await queue.enqueue(
           PendingSyncEntry(
+            userId: tx.userId,
             txId: tx.id,
             kind: kind,
             amount: amount,

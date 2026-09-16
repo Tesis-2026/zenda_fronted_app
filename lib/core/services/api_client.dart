@@ -114,6 +114,7 @@ class ApiClient {
 
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body) as Map<String, dynamic>;
+        if (await getRefreshToken() != refreshToken) return false;
         await saveTokens(
           accessToken: body['accessToken'] as String,
           refreshToken: body['refreshToken'] as String,
@@ -136,6 +137,7 @@ class ApiClient {
     }
 
     // Refresh failed: clear tokens and notify listeners to redirect to login.
+    if (await getRefreshToken() != refreshToken) return false;
     await deleteTokens();
     _sessionExpiredController.add(null);
     return false;
@@ -145,8 +147,36 @@ class ApiClient {
 
   // ── Request helpers ──────────────────────────────────────────────
 
-  static Future<Map<String, String>> _authHeaders() async {
+  // Used only to bind local work to its owner; the server validates the JWT.
+  static String? _tokenUserId(String? token) {
+    try {
+      final payload =
+          jsonDecode(
+                utf8.decode(
+                  base64Url.decode(base64Url.normalize(token!.split('.')[1])),
+                ),
+              )
+              as Map<String, dynamic>;
+      return payload['sub'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<String?> currentUserId() async =>
+      _tokenUserId(await getToken());
+
+  static Future<Map<String, String>> _authHeaders({
+    String? expectedUserId,
+  }) async {
     final token = await getToken();
+    if (expectedUserId != null && _tokenUserId(token) != expectedUserId) {
+      throw const ApiException(
+        statusCode: 409,
+        message:
+            'La sesion cambio. Ingresa con la cuenta que registro el movimiento.',
+      );
+    }
     return {
       HttpHeaders.contentTypeHeader: 'application/json',
       if (token != null) HttpHeaders.authorizationHeader: 'Bearer $token',
@@ -201,10 +231,11 @@ class ApiClient {
     Map<String, dynamic> body, {
     bool authenticated = false,
     String? idempotencyKey,
+    String? expectedUserId,
   }) async {
     final url = '$_kBaseUrl$path';
     final headers = authenticated
-        ? await _authHeaders()
+        ? await _authHeaders(expectedUserId: expectedUserId)
         : {HttpHeaders.contentTypeHeader: 'application/json'};
     // Idempotency-Key (B28) lets the server dedupe automatic retries —
     // a mobile network glitch that succeeds on retry should NOT create
@@ -227,7 +258,7 @@ class ApiClient {
               .post(
                 Uri.parse(url),
                 headers: {
-                  ...await _authHeaders(),
+                  ...await _authHeaders(expectedUserId: expectedUserId),
                   'idempotency-key': ?idempotencyKey,
                 },
                 body: jsonEncode(body),

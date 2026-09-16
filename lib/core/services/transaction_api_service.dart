@@ -143,6 +143,7 @@ class TransactionApiService {
     /// network blip) replays the cached response instead of creating
     /// a duplicate row server-side.
     String? idempotencyKey,
+    String? expectedUserId,
   }) async {
     // Transfers are local-only; no backend call needed.
     if (kind == TransactionKind.transfer) {
@@ -194,6 +195,7 @@ class TransactionApiService {
       body,
       authenticated: true,
       idempotencyKey: idempotencyKey,
+      expectedUserId: expectedUserId,
     );
 
     final rawChallenges = json['newlyCompletedChallenges'];
