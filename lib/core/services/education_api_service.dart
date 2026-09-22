@@ -212,10 +212,7 @@ class SurveyOption {
       );
     }
     final str = json.toString();
-    return SurveyOption(
-      id: String.fromCharCode(65 + index),
-      text: str,
-    );
+    return SurveyOption(id: String.fromCharCode(65 + index), text: str);
   }
 }
 
@@ -553,12 +550,7 @@ class SurveysApiService {
   }
 
   Future<void> savePreProgress(Map<String, String> answers) async {
-    final answersList = answers.entries
-        .map((e) => {'questionId': e.key, 'selectedOption': e.value})
-        .toList();
-    await ApiClient.put('/surveys/pre/save-progress', {
-      'answers': answersList,
-    });
+    await ApiClient.put('/surveys/pre/save-progress', {'answers': answers});
   }
 
   Future<Survey> getPostSurvey() async {
@@ -567,11 +559,8 @@ class SurveysApiService {
   }
 
   Future<SurveyResult> submitPre(Map<String, String> answers) async {
-    final answersList = answers.entries
-        .map((e) => {'questionId': e.key, 'selectedOption': e.value})
-        .toList();
     final data = await ApiClient.post('/surveys/pre/response', {
-      'answers': answersList,
+      'answers': answers,
     }, authenticated: true);
     return SurveyResult.fromJson(data);
   }

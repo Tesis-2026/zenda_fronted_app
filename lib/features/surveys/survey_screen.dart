@@ -25,8 +25,9 @@ final _preSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
       .timeout(_surveyLoadTimeout);
 });
 
-final _preStatusProvider =
-    FutureProvider.autoDispose<FinancialLiteracyStatus>((ref) {
+final _preStatusProvider = FutureProvider.autoDispose<FinancialLiteracyStatus>((
+  ref,
+) {
   return ref
       .read(surveysServiceProvider)
       .getPreStatus()
@@ -47,7 +48,8 @@ const List<SurveyQuestion> _finlitFallbackQuestions = [
     id: 'Q1',
     order: 1,
     domain: 'PLANIFICACION',
-    text: '¿Cuál es la principal finalidad de elaborar un presupuesto personal?',
+    text:
+        '¿Cuál es la principal finalidad de elaborar un presupuesto personal?',
     options: [
       'Registrar únicamente las deudas.',
       'Planificar y controlar ingresos y gastos.',
@@ -65,7 +67,8 @@ const List<SurveyQuestion> _finlitFallbackQuestions = [
     id: 'Q2',
     order: 2,
     domain: 'AHORRO',
-    text: '¿Cuál es el principal objetivo de contar con un fondo de emergencia?',
+    text:
+        '¿Cuál es el principal objetivo de contar con un fondo de emergencia?',
     options: [
       'Financiar compras impulsivas.',
       'Tener dinero disponible para gastos imprevistos.',
@@ -101,10 +104,7 @@ const List<SurveyQuestion> _finlitFallbackQuestions = [
       ),
       SurveyOption(id: 'B', text: 'Entretenimiento.'),
       SurveyOption(id: 'C', text: 'Compras por promociones.'),
-      SurveyOption(
-        id: 'D',
-        text: 'Productos que desea aunque no necesite.',
-      ),
+      SurveyOption(id: 'D', text: 'Productos que desea aunque no necesite.'),
     ],
   ),
   SurveyQuestion(
@@ -131,12 +131,7 @@ const List<SurveyQuestion> _finlitFallbackQuestions = [
     domain: 'CONOCIMIENTO_FINANCIERO',
     text:
         'Si depositas S/ 100 en una cuenta que paga 10 % de interés anual y no retiras dinero, ¿cuánto tendrás aproximadamente después de un año?',
-    options: [
-      'S/ 100',
-      'S/ 105',
-      'S/ 110',
-      'S/ 120',
-    ],
+    options: ['S/ 100', 'S/ 105', 'S/ 110', 'S/ 120'],
     parsedOptions: [
       SurveyOption(id: 'A', text: 'S/ 100'),
       SurveyOption(id: 'B', text: 'S/ 105'),
@@ -182,7 +177,8 @@ const List<SurveyQuestion> _finlitFallbackQuestions = [
       SurveyOption(id: 'B', text: 'Pedir dinero prestado para invertir más.'),
       SurveyOption(
         id: 'C',
-        text: 'Distribuir el dinero entre diferentes alternativas de inversión.',
+        text:
+            'Distribuir el dinero entre diferentes alternativas de inversión.',
       ),
       SurveyOption(
         id: 'D',
@@ -233,10 +229,7 @@ const List<SurveyQuestion> _finlitFallbackQuestions = [
         id: 'C',
         text: 'El banco aumenta automáticamente sus ahorros.',
       ),
-      SurveyOption(
-        id: 'D',
-        text: 'No ocurre nada mientras pague algún monto.',
-      ),
+      SurveyOption(id: 'D', text: 'No ocurre nada mientras pague algún monto.'),
     ],
   ),
   SurveyQuestion(
@@ -325,7 +318,8 @@ const List<SurveyQuestion> _finlitFallbackQuestions = [
       ),
       SurveyOption(
         id: 'D',
-        text: 'Posponer indefinidamente el ahorro hasta tener mayores ingresos.',
+        text:
+            'Posponer indefinidamente el ahorro hasta tener mayores ingresos.',
       ),
     ],
   ),
@@ -360,6 +354,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
   bool _submitting = false;
   bool _localConsentGiven = false;
   bool _initializedStatus = false;
+  bool _resumePositioned = false;
   bool _completedSubmitted = false;
 
   @override
@@ -418,9 +413,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
 
   Widget _buildPreFlow() {
     if (_completedSubmitted) {
-      return _PreCompletedView(
-        onContinue: _navigateToNextScreen,
-      );
+      return _PreCompletedView(onContinue: _navigateToNextScreen);
     }
 
     final statusAsync = ref.watch(_preStatusProvider);
@@ -443,9 +436,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       },
       data: (status) {
         if (status.isCompleted) {
-          return _PreCompletedView(
-            onContinue: _navigateToNextScreen,
-          );
+          return _PreCompletedView(onContinue: _navigateToNextScreen);
         }
 
         if (!_initializedStatus) {
@@ -468,10 +459,8 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
             ),
             consentGiven: _localConsentGiven,
           ),
-          data: (survey) => _buildPreWithQuestions(
-            survey,
-            consentGiven: _localConsentGiven,
-          ),
+          data: (survey) =>
+              _buildPreWithQuestions(survey, consentGiven: _localConsentGiven),
         );
       },
     );
@@ -482,7 +471,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       return _InformedConsentView(
         onAccept: () async {
           try {
-            await ref.read(surveysServiceProvider).startPre(
+            await ref
+                .read(surveysServiceProvider)
+                .startPre(
                   consentGiven: true,
                   consentVersion: 'FINLIT_CONSENT_V1',
                 );
@@ -502,21 +493,25 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         ? survey.questions
         : _finlitFallbackQuestions;
 
-    // Position index at first unanswered question if not yet moved
-    if (_answers.isNotEmpty && _currentIndex == 0) {
-      for (var i = 0; i < questions.length; i++) {
-        if (!_answers.containsKey(questions[i].id)) {
-          _currentIndex = i;
-          break;
-        }
-      }
+    // Resume only once. Re-running this during build made "Anterior" jump
+    // forward again whenever question 1 already had an answer.
+    if (!_resumePositioned) {
+      _resumePositioned = true;
+      final firstUnanswered = questions.indexWhere(
+        (question) => !_answers.containsKey(question.id),
+      );
+      _currentIndex = firstUnanswered >= 0
+          ? firstUnanswered
+          : questions.length - 1;
     }
 
-    final currentQuestion = questions[_currentIndex.clamp(0, questions.length - 1)];
+    final safeIndex = _currentIndex.clamp(0, questions.length - 1);
+    if (_currentIndex != safeIndex) _currentIndex = safeIndex;
+    final currentQuestion = questions[safeIndex];
 
     return _PreSurveyQuestionnaire(
       questions: questions,
-      currentIndex: _currentIndex,
+      currentIndex: safeIndex,
       currentQuestion: currentQuestion,
       answers: _answers,
       submitting: _submitting,
@@ -525,30 +520,38 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           _answers[questionId] = optionId;
         });
         // Auto-save draft progress in background
-        ref.read(surveysServiceProvider).savePreProgress(_answers).catchError((_) {});
+        ref
+            .read(surveysServiceProvider)
+            .savePreProgress(_answers)
+            .catchError((_) {});
       },
       onPrevious: () {
         if (_currentIndex > 0) {
-          setState(() => _currentIndex--);
+          setState(() => _currentIndex -= 1);
         }
       },
       onNext: () {
         if (_currentIndex < questions.length - 1) {
-          setState(() => _currentIndex--);
+          setState(() => _currentIndex += 1);
         }
       },
       onSubmit: () => _submitPre(questions),
       onJumpToQuestion: (index) {
-        setState(() => _currentIndex = index);
+        if (index >= 0 && index < questions.length) {
+          setState(() => _currentIndex = index);
+        }
       },
     );
   }
 
   Future<void> _submitPre(List<SurveyQuestion> questions) async {
-    if (_answers.length != questions.length) {
+    final answeredQuestionIds = questions
+        .where((question) => _answers.containsKey(question.id))
+        .length;
+    if (answeredQuestionIds != questions.length) {
       showAppToast(
         context,
-        'Debes responder todas las preguntas (${_answers.length}/${questions.length}) antes de finalizar.',
+        'Debes responder todas las preguntas ($answeredQuestionIds/${questions.length}) antes de finalizar.',
         type: ToastType.warning,
       );
       return;
@@ -643,7 +646,11 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.school_rounded, size: 64, color: Color(0xFF10B981)),
+                const Icon(
+                  Icons.school_rounded,
+                  size: 64,
+                  color: Color(0xFF10B981),
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Post-Test de Educación Financiera',
@@ -712,9 +719,9 @@ class _InformedConsentViewState extends State<_InformedConsentView> {
             child: Text(
               'Consentimiento Informado',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colors.textPrimary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: colors.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -722,9 +729,9 @@ class _InformedConsentViewState extends State<_InformedConsentView> {
           Center(
             child: Text(
               'Investigación Académica · Proyecto Zenda',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colors.textMuted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colors.textMuted),
               textAlign: TextAlign.center,
             ),
           ),
@@ -892,7 +899,10 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
     final total = questions.length;
     final progress = (currentIndex + 1) / total;
     final selectedOptionId = answers[currentQuestion.id];
-    final allAnswered = answers.length == total;
+    final answeredCount = questions
+        .where((question) => answers.containsKey(question.id))
+        .length;
+    final allAnswered = answeredCount == total;
     final isLastQuestion = currentIndex == total - 1;
 
     // Use structured parsedOptions if available, otherwise build from options
@@ -978,14 +988,16 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                             color: isCurrent
                                 ? const Color(0xFF10B981)
                                 : isAnswered
-                                    ? const Color(0xFF10B981).withValues(alpha: 0.25)
-                                    : colors.fill,
+                                ? const Color(
+                                    0xFF10B981,
+                                  ).withValues(alpha: 0.25)
+                                : colors.fill,
                             border: Border.all(
                               color: isCurrent
                                   ? const Color(0xFF10B981)
                                   : isAnswered
-                                      ? const Color(0xFF10B981)
-                                      : colors.border,
+                                  ? const Color(0xFF10B981)
+                                  : colors.border,
                               width: 1.5,
                             ),
                           ),
@@ -1020,10 +1032,10 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                   Text(
                     currentQuestion.text,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colors.textPrimary,
-                          height: 1.35,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: colors.textPrimary,
+                      height: 1.35,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ...options.map((opt) {
@@ -1031,7 +1043,8 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: InkWell(
-                        onTap: () => onAnswerSelected(currentQuestion.id, opt.id),
+                        onTap: () =>
+                            onAnswerSelected(currentQuestion.id, opt.id),
                         borderRadius: BorderRadius.circular(14),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
@@ -1111,7 +1124,7 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      'Faltan responder ${total - answers.length} de $total preguntas',
+                      'Faltan responder ${total - answeredCount} de $total preguntas',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.orange,
@@ -1146,8 +1159,9 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF10B981),
                                 disabledBackgroundColor: colors.border,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -1160,8 +1174,8 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                                         strokeWidth: 2,
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : const Text(
@@ -1173,11 +1187,14 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                                     ),
                             )
                           : FilledButton(
-                              onPressed: selectedOptionId != null ? onNext : null,
+                              onPressed: selectedOptionId != null
+                                  ? onNext
+                                  : null,
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF10B981),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -1236,18 +1253,18 @@ class _PreCompletedView extends StatelessWidget {
             Text(
               'Evaluación inicial completada',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colors.textPrimary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: colors.textPrimary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Gracias por participar. Tus respuestas han sido registradas de forma segura y seudónima para la investigación académica.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colors.textMuted,
-                    height: 1.45,
-                  ),
+                color: colors.textMuted,
+                height: 1.45,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
@@ -1309,13 +1326,7 @@ class _PreCompletedView extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: colors.textMuted,
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 13, color: colors.textMuted)),
         Text(
           value,
           style: TextStyle(
