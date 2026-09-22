@@ -198,34 +198,79 @@ class FeedbackApiService {
 
 // ── Surveys ───────────────────────────────────────────────────────────────────
 
+class SurveyOption {
+  final String id;
+  final String text;
+
+  const SurveyOption({required this.id, required this.text});
+
+  factory SurveyOption.fromJson(dynamic json, [int index = 0]) {
+    if (json is Map<String, dynamic>) {
+      return SurveyOption(
+        id: json['id'] as String? ?? String.fromCharCode(65 + index),
+        text: json['text'] as String? ?? '',
+      );
+    }
+    final str = json.toString();
+    return SurveyOption(
+      id: String.fromCharCode(65 + index),
+      text: str,
+    );
+  }
+}
+
 class SurveyQuestion {
   final String id;
   final int order;
   final String text;
+  final String? domain;
   final List<String> options;
+  final List<SurveyOption> parsedOptions;
 
   const SurveyQuestion({
     required this.id,
     required this.order,
     required this.text,
+    this.domain,
     required this.options,
+    this.parsedOptions = const [],
   });
 
   factory SurveyQuestion.fromJson(Map<String, dynamic> json) {
     final rawOptions = json['options'];
-    List<String> options;
+    final List<String> optionsList = [];
+    final List<SurveyOption> parsed = [];
+
     if (rawOptions is List) {
-      options = rawOptions.cast<String>();
+      for (var i = 0; i < rawOptions.length; i++) {
+        final opt = rawOptions[i];
+        if (opt is Map<String, dynamic>) {
+          final id = opt['id'] as String? ?? String.fromCharCode(65 + i);
+          final text = opt['text'] as String? ?? '';
+          parsed.add(SurveyOption(id: id, text: text));
+          optionsList.add(text);
+        } else {
+          final str = opt.toString();
+          parsed.add(SurveyOption(id: String.fromCharCode(65 + i), text: str));
+          optionsList.add(str);
+        }
+      }
     } else if (rawOptions is Map) {
-      options = rawOptions.values.cast<String>().toList();
-    } else {
-      options = [];
+      for (final entry in rawOptions.entries) {
+        final key = entry.key.toString();
+        final val = entry.value.toString();
+        parsed.add(SurveyOption(id: key, text: val));
+        optionsList.add(val);
+      }
     }
+
     return SurveyQuestion(
-      id: json['id'] as String,
-      order: json['order'] as int,
-      text: json['text'] as String,
-      options: options,
+      id: (json['questionId'] ?? json['id']) as String? ?? '',
+      order: (json['order'] as num?)?.toInt() ?? 0,
+      text: (json['questionText'] ?? json['text']) as String? ?? '',
+      domain: json['domain'] as String?,
+      options: optionsList,
+      parsedOptions: parsed,
     );
   }
 }
@@ -233,18 +278,41 @@ class SurveyQuestion {
 class Survey {
   final String id;
   final String type;
+  final String? questionnaireVersion;
+  final String? consentText;
+  final String? consentVersion;
+  final int totalQuestions;
   final List<SurveyQuestion> questions;
 
-  const Survey({required this.id, required this.type, required this.questions});
+  const Survey({
+    required this.id,
+    required this.type,
+    required this.questions,
+    this.questionnaireVersion,
+    this.consentText,
+    this.consentVersion,
+    this.totalQuestions = 0,
+  });
 
   factory Survey.fromJson(Map<String, dynamic> json) {
+    final rawQuestions = json['questions'];
+    final List<SurveyQuestion> qList = [];
+    if (rawQuestions is List) {
+      for (final q in rawQuestions) {
+        if (q is Map<String, dynamic>) {
+          qList.add(SurveyQuestion.fromJson(q));
+        }
+      }
+    }
+
     return Survey(
-      id: json['id'] as String,
-      type: json['type'] as String,
-      questions: (json['questions'] as List<dynamic>)
-          .cast<Map<String, dynamic>>()
-          .map(SurveyQuestion.fromJson)
-          .toList(),
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? 'PRE',
+      questionnaireVersion: json['questionnaireVersion'] as String?,
+      consentText: json['consentText'] as String?,
+      consentVersion: json['consentVersion'] as String?,
+      totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? qList.length,
+      questions: qList,
     );
   }
 }
@@ -255,22 +323,90 @@ class SurveyResult {
   final double? improvement;
   final int? xpEarned;
   final String? badgeUnlocked;
+  final bool completed;
+  final String? message;
 
   const SurveyResult({
-    required this.score,
+    this.score = 0.0,
     this.level,
     this.improvement,
     this.xpEarned,
     this.badgeUnlocked,
+    this.completed = true,
+    this.message,
   });
 
   factory SurveyResult.fromJson(Map<String, dynamic> json) {
     return SurveyResult(
-      score: (json['score'] as num).toDouble(),
+      score: (json['score'] as num?)?.toDouble() ?? 0.0,
       level: json['level'] as String?,
       improvement: (json['improvement'] as num?)?.toDouble(),
       xpEarned: (json['xpEarned'] as num?)?.toInt(),
       badgeUnlocked: json['badgeUnlocked'] as String?,
+      completed:
+          json['completed'] as bool? ?? (json['success'] as bool? ?? true),
+      message: json['message'] as String?,
+    );
+  }
+}
+
+class FinancialLiteracyStatus {
+  final String assessmentType;
+  final String questionnaireVersion;
+  final String status;
+  final bool consentGiven;
+  final String? consentVersion;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
+  final Map<String, String> answeredQuestions;
+  final int totalAnswered;
+  final int totalQuestions;
+  final String consentText;
+
+  const FinancialLiteracyStatus({
+    required this.assessmentType,
+    required this.questionnaireVersion,
+    required this.status,
+    required this.consentGiven,
+    this.consentVersion,
+    this.startedAt,
+    this.completedAt,
+    this.answeredQuestions = const {},
+    this.totalAnswered = 0,
+    this.totalQuestions = 12,
+    this.consentText = '',
+  });
+
+  bool get isCompleted => status == 'COMPLETED';
+  bool get isInProgress => status == 'IN_PROGRESS';
+  bool get isNotStarted => status == 'NOT_STARTED';
+
+  factory FinancialLiteracyStatus.fromJson(Map<String, dynamic> json) {
+    final rawAnswers = json['answeredQuestions'];
+    final Map<String, String> answers = {};
+    if (rawAnswers is Map) {
+      for (final e in rawAnswers.entries) {
+        answers[e.key.toString()] = e.value.toString();
+      }
+    }
+
+    return FinancialLiteracyStatus(
+      assessmentType: json['assessmentType'] as String? ?? 'PRE',
+      questionnaireVersion:
+          json['questionnaireVersion'] as String? ?? 'FINLIT_PRE_V1',
+      status: json['status'] as String? ?? 'NOT_STARTED',
+      consentGiven: json['consentGiven'] as bool? ?? false,
+      consentVersion: json['consentVersion'] as String?,
+      startedAt: json['startedAt'] != null
+          ? DateTime.tryParse(json['startedAt'] as String)
+          : null,
+      completedAt: json['completedAt'] != null
+          ? DateTime.tryParse(json['completedAt'] as String)
+          : null,
+      answeredQuestions: answers,
+      totalAnswered: (json['totalAnswered'] as num?)?.toInt() ?? 0,
+      totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? 12,
+      consentText: json['consentText'] as String? ?? '',
     );
   }
 }
@@ -400,14 +536,42 @@ class SurveysApiService {
     return Survey.fromJson(data);
   }
 
+  Future<FinancialLiteracyStatus> getPreStatus() async {
+    final data = await ApiClient.get('/surveys/pre/status');
+    return FinancialLiteracyStatus.fromJson(data);
+  }
+
+  Future<Map<String, dynamic>> startPre({
+    required bool consentGiven,
+    String consentVersion = 'FINLIT_CONSENT_V1',
+  }) async {
+    final data = await ApiClient.post('/surveys/pre/start', {
+      'consentGiven': consentGiven,
+      'consentVersion': consentVersion,
+    }, authenticated: true);
+    return data;
+  }
+
+  Future<void> savePreProgress(Map<String, String> answers) async {
+    final answersList = answers.entries
+        .map((e) => {'questionId': e.key, 'selectedOption': e.value})
+        .toList();
+    await ApiClient.put('/surveys/pre/save-progress', {
+      'answers': answersList,
+    });
+  }
+
   Future<Survey> getPostSurvey() async {
     final data = await ApiClient.get('/surveys/post');
     return Survey.fromJson(data);
   }
 
   Future<SurveyResult> submitPre(Map<String, String> answers) async {
+    final answersList = answers.entries
+        .map((e) => {'questionId': e.key, 'selectedOption': e.value})
+        .toList();
     final data = await ApiClient.post('/surveys/pre/response', {
-      'answers': answers,
+      'answers': answersList,
     }, authenticated: true);
     return SurveyResult.fromJson(data);
   }

@@ -31,26 +31,22 @@ class PreSurveyNotifier extends AsyncNotifier<bool> {
       authNotifierProvider.select((state) => state.user?.id),
     );
     if (userId == null) return true;
-    if (await _SurveySkipStore.isSkipped(userId, 'pre')) return true;
 
     try {
       await PendingSurveyQueue.flushForUser(userId: userId);
-      final comparison = await SurveysApiService().getComparison();
-      return comparison.preScore != null;
+      final status = await SurveysApiService().getPreStatus();
+      return status.isCompleted;
     } catch (_) {
-      return true;
+      try {
+        final comparison = await SurveysApiService().getComparison();
+        return comparison.preScore != null;
+      } catch (_) {
+        return false;
+      }
     }
   }
 
   Future<void> markCompleted() async {
-    state = const AsyncData(true);
-  }
-
-  Future<void> skipForNow() async {
-    final userId = ref.read(authNotifierProvider).user?.id;
-    if (userId != null) {
-      await _SurveySkipStore.markSkipped(userId, 'pre');
-    }
     state = const AsyncData(true);
   }
 
