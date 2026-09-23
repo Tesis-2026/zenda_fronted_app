@@ -42,6 +42,21 @@ class StreakState {
       'bestDays': bestDays,
     };
   }
+
+  bool isActiveToday(DateTime now) {
+    final last = lastActiveDate;
+    return last != null && _isSameDay(last, now);
+  }
+
+  int get nextMilestone {
+    for (final milestone in const [3, 7, 14, 30, 60, 100]) {
+      if (currentDays < milestone) return milestone;
+    }
+    return ((currentDays ~/ 100) + 1) * 100;
+  }
+
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 class StreakRepository {
@@ -49,19 +64,39 @@ class StreakRepository {
 
   final LocalKvStore _store;
 
-  Future<StreakState> getStreak() async {
-    final json = await _store.readJsonMap(_store.streakKey);
+  Future<StreakState> getStreak(String userId, {DateTime? now}) async {
+    final key = _store.streakKeyForUser(userId);
+    final json = await _store.readJsonMap(key);
     if (json == null) return StreakState.initial();
-    return StreakState.fromJson(json);
+    final stored = StreakState.fromJson(json);
+    final last = stored.lastActiveDate;
+    if (last == null) return stored;
+
+    final today = _dateOnly(now ?? DateTime.now());
+    final lastDay = _dateOnly(last);
+    if (lastDay.isAfter(today) || today.difference(lastDay).inDays > 1) {
+      final expired = stored.copyWith(currentDays: 0);
+      await _store.writeJsonMap(key, expired.toJson());
+      return expired;
+    }
+    return stored;
   }
 
-  Future<void> saveStreak(StreakState state) async {
-    await _store.writeJsonMap(_store.streakKey, state.toJson());
+  Future<void> saveStreak(String userId, StreakState state) async {
+    await _store.writeJsonMap(_store.streakKeyForUser(userId), state.toJson());
   }
 
-  Future<StreakState> updateOnTransaction(DateTime txDate) async {
-    final existing = await getStreak();
-    final day = DateTime(txDate.year, txDate.month, txDate.day);
+  Future<StreakState> updateOnTransaction(
+    String userId,
+    DateTime txDate, {
+    DateTime? now,
+  }) async {
+    final today = _dateOnly(now ?? DateTime.now());
+    final day = _dateOnly(txDate);
+    final existing = await getStreak(userId, now: today);
+
+    // Future-dated entries never earn streak credit.
+    if (day.isAfter(today)) return existing;
 
     final last = existing.lastActiveDate;
     if (last == null) {
@@ -70,7 +105,7 @@ class StreakRepository {
         currentDays: 1,
         bestDays: 1,
       );
-      await saveStreak(next);
+      await saveStreak(userId, next);
       return next;
     }
 
@@ -79,6 +114,9 @@ class StreakRepository {
     if (_isSameDay(lastDay, day)) {
       return existing;
     }
+
+    // Adding an older transaction must not move the streak backwards.
+    if (day.isBefore(lastDay)) return existing;
 
     final yesterday = day.subtract(const Duration(days: 1));
     int nextCurrent;
@@ -96,9 +134,12 @@ class StreakRepository {
       currentDays: nextCurrent,
       bestDays: nextBest,
     );
-    await saveStreak(next);
+    await saveStreak(userId, next);
     return next;
   }
+
+  DateTime _dateOnly(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
 
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;

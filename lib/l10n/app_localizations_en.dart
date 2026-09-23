@@ -1569,7 +1569,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationTypeChallengeReminder => 'Challenge reminders';
 
   @override
-  String get notificationTypeDailyReminder => 'Daily log reminder';
+  String get notificationTypeDailyReminder => 'Hourly streak reminder';
 
   @override
   String get notificationTypeBadgeEarned => 'Badge earned';
@@ -2365,7 +2365,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationSubtypeDailyReminder =>
-      'Remind me to log transactions';
+      'Hourly from 8:00 to 21:00 until I log a transaction';
 
   @override
   String get notificationSubtypeBadgeEarned => 'New badge earned';

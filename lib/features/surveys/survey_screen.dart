@@ -586,7 +586,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           type: 'PRE',
           answers: _answers,
         );
-        await ref.read(preSurveyProvider.notifier).markCompleted();
+        await ref
+            .read(preSurveyProvider.notifier)
+            .markCompleted(confirmedByServer: false);
         if (mounted) {
           showAppToast(
             context,

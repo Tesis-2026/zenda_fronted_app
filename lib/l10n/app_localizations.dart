@@ -2939,7 +2939,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationTypeDailyReminder.
   ///
   /// In en, this message translates to:
-  /// **'Daily log reminder'**
+  /// **'Hourly streak reminder'**
   String get notificationTypeDailyReminder;
 
   /// No description provided for @notificationTypeBadgeEarned.
@@ -4347,7 +4347,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationSubtypeDailyReminder.
   ///
   /// In en, this message translates to:
-  /// **'Remind me to log transactions'**
+  /// **'Hourly from 8:00 to 21:00 until I log a transaction'**
   String get notificationSubtypeDailyReminder;
 
   /// No description provided for @notificationSubtypeBadgeEarned.

@@ -6,9 +6,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenda_fronted/core/services/education_api_service.dart';
+import 'package:zenda_fronted/core/services/pending_survey_queue.dart';
 import 'package:zenda_fronted/features/surveys/survey_screen.dart';
 import 'package:zenda_fronted/l10n/app_localizations.dart';
+import 'package:zenda_fronted/providers/pre_survey_provider.dart';
 
 class _SurveyApiFake extends SurveysApiService {
   _SurveyApiFake({required this.status, required this.survey});
@@ -223,6 +226,31 @@ void main() {
       expect(sentBodies[1]['answers'], {'Q1': 'B', 'Q2': 'A'});
       expect(sentBodies.every((body) => body['answers'] is Map), isTrue);
     });
+
+    test(
+      'completion and pending submission survive restart per user',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+
+        await PreSurveyCompletionStore.markConfirmed('user-a');
+        await PendingSurveyQueue.save(
+          userId: 'user-b',
+          type: 'PRE',
+          answers: const {'Q1': 'B'},
+        );
+
+        expect(await PreSurveyCompletionStore.isConfirmed('user-a'), isTrue);
+        expect(await PreSurveyCompletionStore.isConfirmed('user-b'), isFalse);
+        expect(
+          await PendingSurveyQueue.hasPending(userId: 'user-b', type: 'PRE'),
+          isTrue,
+        );
+        expect(
+          await PendingSurveyQueue.hasPending(userId: 'user-a', type: 'PRE'),
+          isFalse,
+        );
+      },
+    );
 
     testWidgets('Siguiente advances and Anterior returns without skipping', (
       tester,

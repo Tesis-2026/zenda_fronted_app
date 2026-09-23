@@ -120,7 +120,9 @@ final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>(
   (ref) async {
     final userId = ref.watch(authNotifierProvider.select((s) => s.user?.id));
     if (userId == null) return [];
-    final rows = await ref.watch(transactionsRepositoryProvider).getTransactions();
+    final rows = await ref
+        .watch(transactionsRepositoryProvider)
+        .getTransactions();
     return rows.where((row) => row.userId == userId).toList();
   },
 );
@@ -143,7 +145,11 @@ final accountReportProvider = FutureProvider.autoDispose
 final streakStateProvider = FutureProvider.autoDispose<StreakState>((
   ref,
 ) async {
-  return ref.watch(streakRepositoryProvider).getStreak();
+  final userId = ref.watch(
+    authNotifierProvider.select((state) => state.user?.id),
+  );
+  if (userId == null) return StreakState.initial();
+  return ref.watch(streakRepositoryProvider).getStreak(userId);
 });
 
 final todayExpenseProvider = Provider<double>((ref) {

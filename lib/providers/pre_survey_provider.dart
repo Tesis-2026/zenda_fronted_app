@@ -9,6 +9,21 @@ import '../features/auth/auth_controller.dart';
 // If the API is temporarily unavailable, providers return true so routing never
 // traps the user in a survey screen during connectivity issues.
 
+class PreSurveyCompletionStore {
+  static String _key(String userId) =>
+      'zenda.survey.pre.server_completed.$userId';
+
+  static Future<bool> isConfirmed(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_key(userId)) ?? false;
+  }
+
+  static Future<void> markConfirmed(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key(userId), true);
+  }
+}
+
 class _SurveySkipStore {
   static String _key(String userId, String surveyType) =>
       'zenda.survey.$surveyType.skipped.$userId';
@@ -32,21 +47,39 @@ class PreSurveyNotifier extends AsyncNotifier<bool> {
     );
     if (userId == null) return true;
 
+    final locallyConfirmed = await PreSurveyCompletionStore.isConfirmed(userId);
     try {
       await PendingSurveyQueue.flushForUser(userId: userId);
       final status = await SurveysApiService().getPreStatus();
-      return status.isCompleted;
+      if (status.isCompleted) {
+        await PreSurveyCompletionStore.markConfirmed(userId);
+        return true;
+      }
+      if (locallyConfirmed ||
+          await PendingSurveyQueue.hasPending(userId: userId, type: 'PRE')) {
+        return true;
+      }
+      return false;
     } catch (_) {
       try {
         final comparison = await SurveysApiService().getComparison();
-        return comparison.preScore != null;
+        if (comparison.preScore != null) {
+          await PreSurveyCompletionStore.markConfirmed(userId);
+          return true;
+        }
       } catch (_) {
-        return false;
+        // Fall through to the durable, user-scoped completion state.
       }
+      return locallyConfirmed ||
+          await PendingSurveyQueue.hasPending(userId: userId, type: 'PRE');
     }
   }
 
-  Future<void> markCompleted() async {
+  Future<void> markCompleted({bool confirmedByServer = true}) async {
+    final userId = ref.read(authNotifierProvider).user?.id;
+    if (confirmedByServer && userId != null) {
+      await PreSurveyCompletionStore.markConfirmed(userId);
+    }
     state = const AsyncData(true);
   }
 

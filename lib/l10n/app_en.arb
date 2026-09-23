@@ -691,7 +691,7 @@
   "notificationTypeAnomalyAlert": "Unusual spending alerts",
   "notificationTypePredictionReady": "Prediction ready",
   "notificationTypeChallengeReminder": "Challenge reminders",
-  "notificationTypeDailyReminder": "Daily log reminder",
+  "notificationTypeDailyReminder": "Hourly streak reminder",
   "notificationTypeBadgeEarned": "Badge earned",
 
   "consentTitle": "Your privacy matters",
@@ -1073,7 +1073,7 @@
   "notificationSubtypeAnomalyAlert": "Unusual spending patterns detected",
   "notificationSubtypePredictionReady": "Monthly prediction is ready",
   "notificationSubtypeChallengeReminder": "New challenges and badge earned",
-  "notificationSubtypeDailyReminder": "Remind me to log transactions",
+  "notificationSubtypeDailyReminder": "Hourly from 8:00 to 21:00 until I log a transaction",
   "notificationSubtypeBadgeEarned": "New badge earned",
 
   "surveySkipButton": "Skip",

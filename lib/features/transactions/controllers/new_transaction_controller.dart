@@ -490,8 +490,11 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       }
       if (kind != TransactionKind.transfer) await txRepo.addTransaction(tx);
 
-      // Update streak only on save.
-      await streakRepo.updateOnTransaction(state.date);
+      // Update the authenticated user's streak only on save.
+      final streakUserId = tx.userId ?? ref.read(authNotifierProvider).user?.id;
+      if (streakUserId != null) {
+        await streakRepo.updateOnTransaction(streakUserId, state.date);
+      }
       StudyTelemetryService.track(
         'transaction_created',
         metadata: {

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/models/account.dart';
 import '../../core/models/user.dart';
+import '../../core/services/streak_repository.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/zenda_theme_x.dart';
 import '../../core/widgets/app_bottom_nav.dart';
@@ -48,7 +49,9 @@ class _InicioSection extends ConsumerWidget {
       accountReportProvider((month: now.month, year: now.year)),
     );
 
-    final streak = ref.watch(streakProvider);
+    final streak = ref
+        .watch(streakStateProvider)
+        .maybeWhen(data: (value) => value, orElse: StreakState.initial);
     final advice = ref.watch(aiAdviceProvider(l10n));
 
     final income = monthSummaryAsync.when(
@@ -138,7 +141,7 @@ class _InicioSection extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            StreakCard(streakDays: streak),
+            StreakCard(streak: streak),
 
             const SizedBox(height: 16),
 

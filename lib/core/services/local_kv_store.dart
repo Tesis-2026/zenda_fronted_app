@@ -7,7 +7,7 @@ const _secureStorage = FlutterSecureStorage();
 class LocalKvStore {
   static const _kAccounts = 'zenda.accounts.v1';
   static const _kTransactions = 'zenda.transactions.v1';
-  static const _kStreak = 'zenda.streak.v1';
+  static const _kStreakPrefix = 'zenda.streak.v2';
 
   Future<List<Map<String, dynamic>>> readJsonList(String key) async {
     final raw = await _secureStorage.read(key: key);
@@ -42,5 +42,5 @@ class LocalKvStore {
   // Typed keys
   String get accountsKey => _kAccounts;
   String get transactionsKey => _kTransactions;
-  String get streakKey => _kStreak;
+  String streakKeyForUser(String userId) => '$_kStreakPrefix.$userId';
 }

@@ -1576,7 +1576,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notificationTypeChallengeReminder => 'Recordatorios de desafíos';
 
   @override
-  String get notificationTypeDailyReminder => 'Recordatorio diario';
+  String get notificationTypeDailyReminder => 'Recordatorio de racha cada hora';
 
   @override
   String get notificationTypeBadgeEarned => 'Insignia obtenida';
@@ -2378,7 +2378,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notificationSubtypeDailyReminder =>
-      'Recuérdame registrar transacciones';
+      'Cada hora, de 8:00 a 21:00, hasta registrar un movimiento';
 
   @override
   String get notificationSubtypeBadgeEarned => 'Nueva insignia ganada';

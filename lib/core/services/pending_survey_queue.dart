@@ -36,6 +36,15 @@ class PendingSurveyQueue {
     await prefs.remove(_key(userId, type));
   }
 
+  static Future<bool> hasPending({
+    required String userId,
+    required String type,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_key(userId, type));
+    return raw != null && raw.isNotEmpty;
+  }
+
   static Future<void> flushForUser({
     required String userId,
     SurveysApiService? service,

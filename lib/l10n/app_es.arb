@@ -691,7 +691,7 @@
   "notificationTypeAnomalyAlert": "Alertas de gasto inusual",
   "notificationTypePredictionReady": "Predicción lista",
   "notificationTypeChallengeReminder": "Recordatorios de desafíos",
-  "notificationTypeDailyReminder": "Recordatorio diario",
+  "notificationTypeDailyReminder": "Recordatorio de racha cada hora",
   "notificationTypeBadgeEarned": "Insignia obtenida",
 
   "consentTitle": "Tu privacidad importa",
@@ -1073,7 +1073,7 @@
   "notificationSubtypeAnomalyAlert": "Patrones de gasto inusual detectados",
   "notificationSubtypePredictionReady": "Predicción mensual lista",
   "notificationSubtypeChallengeReminder": "Nuevos desafíos e insignia ganada",
-  "notificationSubtypeDailyReminder": "Recuérdame registrar transacciones",
+  "notificationSubtypeDailyReminder": "Cada hora, de 8:00 a 21:00, hasta registrar un movimiento",
   "notificationSubtypeBadgeEarned": "Nueva insignia ganada",
 
   "surveySkipButton": "Omitir",
