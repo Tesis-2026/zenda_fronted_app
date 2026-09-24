@@ -569,7 +569,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardPostSurveyBannerBody.
   ///
   /// In en, this message translates to:
-  /// **'You\'ve been using Zenda for 30 days — complete the post-survey to measure your progress.'**
+  /// **'Complete the post-survey to measure your progress and financial growth.'**
   String get dashboardPostSurveyBannerBody;
 
   /// No description provided for @dashboardNavHome.

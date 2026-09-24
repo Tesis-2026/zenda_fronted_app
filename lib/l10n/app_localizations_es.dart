@@ -257,7 +257,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dashboardPostSurveyBannerBody =>
-      'Llevas 30 días usando Zenda — completa la encuesta final para medir tu progreso.';
+      'Ya puedes completar la evaluación final para medir tu progreso y evolución financiera.';
 
   @override
   String get dashboardNavHome => 'INICIO';

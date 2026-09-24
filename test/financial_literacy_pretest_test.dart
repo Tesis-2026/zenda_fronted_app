@@ -14,11 +14,19 @@ import 'package:zenda_fronted/l10n/app_localizations.dart';
 import 'package:zenda_fronted/providers/pre_survey_provider.dart';
 
 class _SurveyApiFake extends SurveysApiService {
-  _SurveyApiFake({required this.status, required this.survey});
+  _SurveyApiFake({
+    required this.status,
+    required this.survey,
+    this.postStatus,
+    this.postSurvey,
+  });
 
   final FinancialLiteracyStatus status;
   final Survey survey;
+  final FinancialLiteracyStatus? postStatus;
+  final Survey? postSurvey;
   final List<Map<String, String>> savedAnswers = [];
+  final List<Map<String, String>> savedPostAnswers = [];
 
   @override
   Future<FinancialLiteracyStatus> getPreStatus() async => status;
@@ -29,6 +37,18 @@ class _SurveyApiFake extends SurveysApiService {
   @override
   Future<void> savePreProgress(Map<String, String> answers) async {
     savedAnswers.add(Map.of(answers));
+  }
+
+  @override
+  Future<FinancialLiteracyStatus> getPostStatus() async =>
+      postStatus ?? status;
+
+  @override
+  Future<Survey> getPostSurvey() async => postSurvey ?? survey;
+
+  @override
+  Future<void> savePostProgress(Map<String, String> answers) async {
+    savedPostAnswers.add(Map.of(answers));
   }
 }
 
@@ -302,6 +322,102 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Pregunta 3 de 12'), findsOneWidget);
       expect(fake.savedAnswers.last['Q2'], 'A');
+    });
+
+    testWidgets('Post-Test flow renders and auto-saves progress', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fake = _SurveyApiFake(
+        status: const FinancialLiteracyStatus(
+          assessmentType: 'PRE',
+          questionnaireVersion: 'FINLIT_PRE_V1',
+          status: 'COMPLETED',
+          consentGiven: true,
+          totalAnswered: 12,
+          totalQuestions: 12,
+        ),
+        survey: _surveyWith12Questions(),
+        postStatus: const FinancialLiteracyStatus(
+          assessmentType: 'POST',
+          questionnaireVersion: 'FINLIT_PRE_V1',
+          status: 'IN_PROGRESS',
+          consentGiven: true,
+          answeredQuestions: {'Q1': 'A'},
+          totalAnswered: 1,
+          totalQuestions: 12,
+        ),
+        postSurvey: _surveyWith12Questions(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [surveysServiceProvider.overrideWithValue(fake)],
+          child: const MaterialApp(
+            locale: Locale('es'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: SurveyScreen(isPre: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pregunta 2 de 12'), findsOneWidget);
+      await tester.tap(find.text('Anterior'));
+      await tester.pumpAndSettle();
+      expect(find.text('Pregunta 1 de 12'), findsOneWidget);
+
+      await tester.tap(find.text('Opción B').first);
+      await tester.pumpAndSettle();
+      expect(fake.savedPostAnswers.last['Q1'], 'B');
+    });
+
+    testWidgets('Post-Test completed view displays post-test instrument summary', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fake = _SurveyApiFake(
+        status: const FinancialLiteracyStatus(
+          assessmentType: 'PRE',
+          questionnaireVersion: 'FINLIT_PRE_V1',
+          status: 'COMPLETED',
+          consentGiven: true,
+          totalAnswered: 12,
+          totalQuestions: 12,
+        ),
+        survey: _surveyWith12Questions(),
+        postStatus: const FinancialLiteracyStatus(
+          assessmentType: 'POST',
+          questionnaireVersion: 'FINLIT_PRE_V1',
+          status: 'COMPLETED',
+          consentGiven: true,
+          totalAnswered: 12,
+          totalQuestions: 12,
+        ),
+        postSurvey: _surveyWith12Questions(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [surveysServiceProvider.overrideWithValue(fake)],
+          child: const MaterialApp(
+            locale: Locale('es'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: SurveyScreen(isPre: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Evaluación final completada'), findsOneWidget);
+      expect(find.text('Post-test (FINLIT_PRE_V1)'), findsOneWidget);
+      expect(find.text('Volver al inicio'), findsOneWidget);
     });
   });
 }

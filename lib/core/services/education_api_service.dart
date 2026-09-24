@@ -558,6 +558,26 @@ class SurveysApiService {
     return Survey.fromJson(data);
   }
 
+  Future<FinancialLiteracyStatus> getPostStatus() async {
+    final data = await ApiClient.get('/surveys/post/status');
+    return FinancialLiteracyStatus.fromJson(data);
+  }
+
+  Future<Map<String, dynamic>> startPost({
+    required bool consentGiven,
+    String consentVersion = 'FINLIT_CONSENT_V1',
+  }) async {
+    final data = await ApiClient.post('/surveys/post/start', {
+      'consentGiven': consentGiven,
+      'consentVersion': consentVersion,
+    }, authenticated: true);
+    return data;
+  }
+
+  Future<void> savePostProgress(Map<String, String> answers) async {
+    await ApiClient.put('/surveys/post/save-progress', {'answers': answers});
+  }
+
   Future<SurveyResult> submitPre(Map<String, String> answers) async {
     final data = await ApiClient.post('/surveys/pre/response', {
       'answers': answers,

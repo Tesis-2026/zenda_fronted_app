@@ -41,6 +41,14 @@ final _postSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
       .timeout(_surveyLoadTimeout);
 });
 
+final _postStatusProvider =
+    FutureProvider.autoDispose<FinancialLiteracyStatus>((ref) {
+  return ref
+      .read(surveysServiceProvider)
+      .getPostStatus()
+      .timeout(_surveyLoadTimeout);
+});
+
 /// Fallback 12 questions bank for FINLIT_PRE_V1.
 /// Strictly contains questionId, questionText, domain, and options (without any correctAnswer).
 const List<SurveyQuestion> _finlitFallbackQuestions = [
@@ -407,7 +415,38 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         ),
       );
     } else {
-      context.go('/dashboard');
+      if (_completedSubmitted) {
+        context.go('/dashboard');
+        return;
+      }
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('¿Deseas salir?'),
+          content: const Text(
+            'Tus respuestas han sido guardadas automáticamente. Podrás continuar la evaluación final en cualquier momento desde el inicio o el menú.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                context.go('/dashboard');
+              },
+              child: const Text('Salir al inicio'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+              ),
+              child: const Text('Continuar evaluación'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -622,68 +661,222 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
     }
   }
 
-  // ── Post Flow (Legacy compatible) ──────────────────────────────────────────
+  // ── Post Flow ──────────────────────────────────────────────────────────────
 
   Widget _buildPostFlow() {
+    if (_completedSubmitted) {
+      return _PreCompletedView(
+        isPre: false,
+        onContinue: () => context.go('/dashboard'),
+      );
+    }
+
+    final statusAsync = ref.watch(_postStatusProvider);
     final surveyAsync = ref.watch(_postSurveyProvider);
-    return surveyAsync.when(
+
+    return statusAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('No se pudo cargar la evaluación.'),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => context.go('/dashboard'),
-              child: const Text('Volver al inicio'),
-            ),
-          ],
-        ),
-      ),
-      data: (survey) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.school_rounded,
-                  size: 64,
-                  color: Color(0xFF10B981),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Post-Test de Educación Financiera',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Esta evaluación se habilitará al término de la fase de intervención.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => context.go('/dashboard'),
-                  child: const Text('Ir al inicio'),
-                ),
-              ],
-            ),
+      error: (_, _) {
+        return _buildPostWithQuestions(
+          const Survey(
+            id: 'finlit-post-v1',
+            type: 'POST',
+            questionnaireVersion: 'FINLIT_PRE_V1',
+            totalQuestions: 12,
+            questions: _finlitFallbackQuestions,
           ),
+          consentGiven: _localConsentGiven,
+        );
+      },
+      data: (status) {
+        if (status.isCompleted) {
+          return _PreCompletedView(
+            isPre: false,
+            onContinue: () => context.go('/dashboard'),
+          );
+        }
+
+        if (!_initializedStatus) {
+          _initializedStatus = true;
+          _localConsentGiven = status.consentGiven;
+          if (status.answeredQuestions.isNotEmpty) {
+            _answers.addAll(status.answeredQuestions);
+          }
+        }
+
+        return surveyAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => _buildPostWithQuestions(
+            const Survey(
+              id: 'finlit-post-v1',
+              type: 'POST',
+              questionnaireVersion: 'FINLIT_PRE_V1',
+              totalQuestions: 12,
+              questions: _finlitFallbackQuestions,
+            ),
+            consentGiven: _localConsentGiven,
+          ),
+          data: (survey) =>
+              _buildPostWithQuestions(survey, consentGiven: _localConsentGiven),
         );
       },
     );
+  }
+
+  Widget _buildPostWithQuestions(Survey survey, {required bool consentGiven}) {
+    if (!consentGiven) {
+      return _InformedConsentView(
+        isPre: false,
+        onAccept: () async {
+          try {
+            await ref
+                .read(surveysServiceProvider)
+                .startPost(
+                  consentGiven: true,
+                  consentVersion: 'FINLIT_CONSENT_V1',
+                );
+          } catch (_) {
+            // Continues even if network error occurs
+          }
+          if (mounted) {
+            setState(() {
+              _localConsentGiven = true;
+            });
+          }
+        },
+      );
+    }
+
+    final questions = survey.questions.isNotEmpty
+        ? survey.questions
+        : _finlitFallbackQuestions;
+
+    if (!_resumePositioned) {
+      _resumePositioned = true;
+      final firstUnanswered = questions.indexWhere(
+        (question) => !_answers.containsKey(question.id),
+      );
+      _currentIndex = firstUnanswered >= 0
+          ? firstUnanswered
+          : questions.length - 1;
+    }
+
+    final safeIndex = _currentIndex.clamp(0, questions.length - 1);
+    if (_currentIndex != safeIndex) _currentIndex = safeIndex;
+    final currentQuestion = questions[safeIndex];
+
+    return _PreSurveyQuestionnaire(
+      isPre: false,
+      questions: questions,
+      currentIndex: safeIndex,
+      currentQuestion: currentQuestion,
+      answers: _answers,
+      submitting: _submitting,
+      onAnswerSelected: (questionId, optionId) {
+        setState(() {
+          _answers[questionId] = optionId;
+        });
+        // Auto-save draft progress in background
+        ref
+            .read(surveysServiceProvider)
+            .savePostProgress(_answers)
+            .catchError((_) {});
+      },
+      onPrevious: () {
+        if (_currentIndex > 0) {
+          setState(() => _currentIndex -= 1);
+        }
+      },
+      onNext: () {
+        if (_currentIndex < questions.length - 1) {
+          setState(() => _currentIndex += 1);
+        }
+      },
+      onSubmit: () => _submitPost(questions),
+      onJumpToQuestion: (index) {
+        if (index >= 0 && index < questions.length) {
+          setState(() => _currentIndex = index);
+        }
+      },
+    );
+  }
+
+  Future<void> _submitPost(List<SurveyQuestion> questions) async {
+    final answeredQuestionIds = questions
+        .where((question) => _answers.containsKey(question.id))
+        .length;
+    if (answeredQuestionIds != questions.length) {
+      showAppToast(
+        context,
+        'Debes responder todas las preguntas ($answeredQuestionIds/${questions.length}) antes de finalizar.',
+        type: ToastType.warning,
+      );
+      return;
+    }
+
+    setState(() => _submitting = true);
+    try {
+      await ref.read(surveysServiceProvider).submitPost(_answers);
+      await ref.read(postSurveyProvider.notifier).markCompleted();
+      if (mounted) {
+        setState(() {
+          _completedSubmitted = true;
+        });
+      }
+    } catch (e) {
+      if (e is ApiException && e.statusCode == 409) {
+        // Already completed
+        await ref.read(postSurveyProvider.notifier).markCompleted();
+        if (mounted) {
+          setState(() {
+            _completedSubmitted = true;
+          });
+        }
+        return;
+      }
+
+      // Offline resilience
+      final userId = ref.read(authNotifierProvider).user?.id;
+      if (userId != null && (e is! ApiException || e.statusCode >= 500)) {
+        await PendingSurveyQueue.save(
+          userId: userId,
+          type: 'POST',
+          answers: _answers,
+        );
+        await ref
+            .read(postSurveyProvider.notifier)
+            .markCompleted(confirmedByServer: false);
+        if (mounted) {
+          showAppToast(
+            context,
+            'Respuestas guardadas localmente. Se sincronizarán al conectarse.',
+            type: ToastType.info,
+          );
+          setState(() {
+            _completedSubmitted = true;
+          });
+        }
+        return;
+      }
+
+      final message = e is ApiException
+          ? 'Error al enviar: ${e.message}'
+          : 'No se pudo enviar la evaluación final. Intenta nuevamente.';
+      if (mounted) {
+        showAppToast(context, message, type: ToastType.error);
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 }
 
 // ── Informed Consent View ────────────────────────────────────────────────────
 
 class _InformedConsentView extends StatefulWidget {
-  const _InformedConsentView({required this.onAccept});
+  const _InformedConsentView({required this.onAccept, this.isPre = true});
   final VoidCallback onAccept;
+  final bool isPre;
 
   @override
   State<_InformedConsentView> createState() => _InformedConsentViewState();
@@ -719,7 +912,9 @@ class _InformedConsentViewState extends State<_InformedConsentView> {
           const SizedBox(height: 20),
           Center(
             child: Text(
-              'Consentimiento Informado',
+              widget.isPre
+                  ? 'Consentimiento Informado'
+                  : 'Evaluación Final',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colors.textPrimary,
@@ -730,7 +925,9 @@ class _InformedConsentViewState extends State<_InformedConsentView> {
           const SizedBox(height: 6),
           Center(
             child: Text(
-              'Investigación Académica · Proyecto Zenda',
+              widget.isPre
+                  ? 'Investigación Académica · Proyecto Zenda'
+                  : 'Medición de Progreso · Proyecto Zenda',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: colors.textMuted),
@@ -768,8 +965,12 @@ class _InformedConsentViewState extends State<_InformedConsentView> {
                 const SizedBox(height: 16),
                 _buildBulletPoint(
                   colors,
-                  'Carácter Indispensable',
-                  'Completar la evaluación inicial es indispensable para el desarrollo del estudio. Te pedimos responder con sinceridad.',
+                  widget.isPre
+                      ? 'Carácter Indispensable'
+                      : 'Medición de Progreso',
+                  widget.isPre
+                      ? 'Completar la evaluación inicial es indispensable para el desarrollo del estudio. Te pedimos responder con sinceridad.'
+                      : 'Completar la evaluación final permite medir tu progreso y evolución financiera. Te pedimos responder con sinceridad.',
                 ),
               ],
             ),
@@ -882,6 +1083,7 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
     required this.onNext,
     required this.onSubmit,
     required this.onJumpToQuestion,
+    this.isPre = true,
   });
 
   final List<SurveyQuestion> questions;
@@ -894,6 +1096,7 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onSubmit;
   final ValueChanged<int> onJumpToQuestion;
+  final bool isPre;
 
   @override
   Widget build(BuildContext context) {
@@ -1224,8 +1427,12 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
 // ── Completed View (Neutral Academic Confirmation) ───────────────────────────
 
 class _PreCompletedView extends StatelessWidget {
-  const _PreCompletedView({required this.onContinue});
+  const _PreCompletedView({
+    required this.onContinue,
+    this.isPre = true,
+  });
   final VoidCallback onContinue;
+  final bool isPre;
 
   @override
   Widget build(BuildContext context) {
@@ -1253,7 +1460,9 @@ class _PreCompletedView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Evaluación inicial completada',
+              isPre
+                  ? 'Evaluación inicial completada'
+                  : 'Evaluación final completada',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colors.textPrimary,
@@ -1283,7 +1492,9 @@ class _PreCompletedView extends StatelessWidget {
                   _buildSummaryRow(
                     colors,
                     'Instrumento:',
-                    'Pre-test (FINLIT_PRE_V1)',
+                    isPre
+                        ? 'Pre-test (FINLIT_PRE_V1)'
+                        : 'Post-test (FINLIT_PRE_V1)',
                   ),
                   const Divider(height: 20),
                   _buildSummaryRow(
@@ -1312,9 +1523,9 @@ class _PreCompletedView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
-                  'Continuar a Zenda',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                child: Text(
+                  isPre ? 'Continuar a Zenda' : 'Volver al inicio',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -1326,15 +1537,24 @@ class _PreCompletedView extends StatelessWidget {
 
   Widget _buildSummaryRow(ZendaColors colors, String label, String value) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(label, style: TextStyle(fontSize: 13, color: colors.textMuted)),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: colors.textPrimary,
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 13, color: colors.textMuted),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: colors.textPrimary,
+            ),
           ),
         ),
       ],

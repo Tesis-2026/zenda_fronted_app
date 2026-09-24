@@ -158,17 +158,9 @@ class _PostSurveyBanner extends ConsumerWidget {
 
   final User? user;
 
-  bool get _isDue {
-    final createdAtRaw = user?.createdAt;
-    if (createdAtRaw == null || createdAtRaw.isEmpty) return false;
-    final createdAt = DateTime.tryParse(createdAtRaw);
-    if (createdAt == null) return false;
-    return DateTime.now().difference(createdAt).inDays >= 30;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!_isDue) return const SizedBox.shrink();
+    if (user == null) return const SizedBox.shrink();
 
     final completedAsync = ref.watch(postSurveyProvider);
     final completed = completedAsync.asData?.value ?? true;
