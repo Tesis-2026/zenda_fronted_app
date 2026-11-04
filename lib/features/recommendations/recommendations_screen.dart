@@ -332,7 +332,7 @@ class _RecommendationCardState extends State<_RecommendationCard> {
         style: FilledButton.styleFrom(
           backgroundColor: color,
           foregroundColor: Colors.white,
-          textStyle: const TextStyle(fontSize: 13),
+          textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 13),
           padding: const EdgeInsets.symmetric(vertical: 10),
         ),
       );
@@ -348,7 +348,7 @@ class _RecommendationCardState extends State<_RecommendationCard> {
             ? const Color(0xFF6B7280)
             : const Color(0xFF9CA3AF),
         side: const BorderSide(color: Color(0xFFE5E7EB)),
-        textStyle: const TextStyle(fontSize: 13),
+        textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 13),
         padding: const EdgeInsets.symmetric(vertical: 10),
       ),
     );

@@ -1559,7 +1559,7 @@ abstract class AppLocalizations {
   /// No description provided for @catDeleteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Transactions linked to it will keep their data. This cannot be undone.'**
+  /// **'This cannot be undone. If the category has transactions, you will need to reassign them first.'**
   String get catDeleteMessage;
 
   /// No description provided for @catMgmtErrorLoad.
@@ -2156,6 +2156,24 @@ abstract class AppLocalizations {
   /// **'Congrats! You marked your goal as achieved.'**
   String get goalsDetailCompleteSuccess;
 
+  /// No description provided for @goalsCompleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark the goal as achieved?'**
+  String get goalsCompleteConfirmTitle;
+
+  /// No description provided for @goalsCompleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The goal will move to Completed goals with today’s date. What you saved stays the same.'**
+  String get goalsCompleteConfirmMessage;
+
+  /// No description provided for @goalsCompleteConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, mark as achieved'**
+  String get goalsCompleteConfirmAction;
+
   /// No description provided for @goalsDetailDelete.
   ///
   /// In en, this message translates to:
@@ -2261,7 +2279,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorAuthEmailTaken.
   ///
   /// In en, this message translates to:
-  /// **'This email is already registered.'**
+  /// **'This email is already registered. Already have an account? Sign in.'**
   String get errorAuthEmailTaken;
 
   /// No description provided for @errorAuthEmailNotVerified.
@@ -3873,7 +3891,7 @@ abstract class AppLocalizations {
   /// No description provided for @goalsDetailLeftToReach.
   ///
   /// In en, this message translates to:
-  /// **'S/ {amount} left to reach your goal!'**
+  /// **'{amount} left to reach your goal!'**
   String goalsDetailLeftToReach(String amount);
 
   /// No description provided for @goalsDetailAddContrib.
@@ -4529,6 +4547,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yesterday'**
   String get txListYesterday;
+
+  /// No description provided for @reportsExportNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data to generate the report for this period.'**
+  String get reportsExportNoData;
+
+  /// No description provided for @reportsCompareSelectMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the months you want to compare'**
+  String get reportsCompareSelectMonths;
+
+  /// No description provided for @reportsCompareMinMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least two months to build the comparison chart.'**
+  String get reportsCompareMinMonths;
+
+  /// No description provided for @budgetAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount must be greater than zero.'**
+  String get budgetAmountInvalid;
+
+  /// No description provided for @goalsNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for the goal.'**
+  String get goalsNameRequired;
+
+  /// No description provided for @goalsTargetInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The target amount must be greater than zero.'**
+  String get goalsTargetInvalid;
+
+  /// No description provided for @goalsDueDatePast.
+  ///
+  /// In en, this message translates to:
+  /// **'The deadline must be a future date.'**
+  String get goalsDueDatePast;
+
+  /// No description provided for @goalsContributeAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The contribution amount must be greater than zero.'**
+  String get goalsContributeAmountInvalid;
+
+  /// No description provided for @catMgmtDuplicateName.
+  ///
+  /// In en, this message translates to:
+  /// **'A category with that name already exists.'**
+  String get catMgmtDuplicateName;
+
+  /// No description provided for @catDeleteHasTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'This category has transactions. Reassign them to another category before deleting it.'**
+  String get catDeleteHasTransactions;
+
+  /// No description provided for @catNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for the category.'**
+  String get catNameRequired;
+
+  /// No description provided for @quizCheckAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Check answer'**
+  String get quizCheckAnswer;
+
+  /// No description provided for @profileSetupUniversityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your university to continue.'**
+  String get profileSetupUniversityRequired;
+
+  /// No description provided for @profileSetupIncomeTypeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your income source to continue.'**
+  String get profileSetupIncomeTypeRequired;
+
+  /// No description provided for @profileSetupSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get profileSetupSkip;
+
+  /// No description provided for @profilePreferencesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences saved.'**
+  String get profilePreferencesSaved;
+
+  /// No description provided for @profileSavePreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Save preferences'**
+  String get profileSavePreferences;
+
+  /// No description provided for @surveyAnswerRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer the question before continuing.'**
+  String get surveyAnswerRequired;
+
+  /// No description provided for @challengeAlreadyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have this challenge active.'**
+  String get challengeAlreadyActive;
+
+  /// No description provided for @challengeRetryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept again'**
+  String get challengeRetryButton;
+
+  /// No description provided for @susSurveyErrorOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Your answers were not sent; reconnect and try again.'**
+  String get susSurveyErrorOffline;
+
+  /// No description provided for @quizCorrectAnswerIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct answer: {answer}'**
+  String quizCorrectAnswerIs(String answer);
+
+  /// No description provided for @commonPreviousPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get commonPreviousPeriod;
+
+  /// No description provided for @commonNextPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get commonNextPeriod;
 }
 
 class _AppLocalizationsDelegate

@@ -31,6 +31,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _universityController = TextEditingController();
   final _incomeController = TextEditingController();
   IncomeType? _selectedIncomeType;
+
+  /// Step whose required field is highlighted after a failed "Siguiente".
+  int? _invalidPage;
   bool _saving = false;
 
   @override
@@ -42,23 +45,72 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     super.dispose();
   }
 
+  /// Message for the required field missing on [page], or null when the
+  /// step is complete. Every step is mandatory (CP060).
+  String? _missingFieldError(int page) {
+    final l10n = context.l10n;
+    switch (page) {
+      case 1:
+        return _universityController.text.trim().isEmpty
+            ? l10n.profileSetupUniversityRequired
+            : null;
+      case 2:
+        return _selectedIncomeType == null
+            ? l10n.profileSetupIncomeTypeRequired
+            : null;
+      case 3:
+        final income = double.tryParse(_incomeController.text.trim());
+        return income == null || income <= 0
+            ? l10n.profileSetupMonthlyIncomePositiveError
+            : null;
+      default:
+        return null;
+    }
+  }
+
   void _next() {
+    final error = _missingFieldError(_page);
+    if (error != null) {
+      setState(() => _invalidPage = _page);
+      showAppToast(context, error, type: ToastType.error);
+      return;
+    }
+    setState(() => _invalidPage = null);
     if (_page < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     } else {
-      final income = double.tryParse(_incomeController.text.trim());
-      if (income == null || income <= 0) {
+      _save();
+    }
+  }
+
+  /// Skips the guided setup for good (CP064). The flag is stored server-side
+  /// because the router forces this screen while `profileCompleted` is false;
+  /// the details can still be filled in later from Perfil.
+  Future<void> _skip() async {
+    setState(() => _saving = true);
+    try {
+      final updated = await ref
+          .read(profileUserServiceProvider)
+          .updateProfile(profileCompleted: true);
+      // Update in place (not invalidate) so the router redirect already sees
+      // profileCompleted == true when we navigate below.
+      ref.read(authNotifierProvider.notifier).updateCurrentUser(updated);
+      if (mounted) context.go('/dashboard');
+    } catch (_) {
+      // Stay on the setup: the router would bounce back here anyway while
+      // profileCompleted is still false.
+      if (mounted) {
         showAppToast(
           context,
-          context.l10n.profileSetupMonthlyIncomePositiveError,
+          context.l10n.profileSetupSaveError,
           type: ToastType.error,
         );
-        return;
       }
-      _save();
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -143,13 +195,38 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   _UniversityPage(
                     controller: _universityController,
                     l10n: l10n,
+                    errorText: _invalidPage == 1
+                        ? l10n.profileSetupUniversityRequired
+                        : null,
+                    onChanged: () {
+                      if (_invalidPage == 1) {
+                        setState(() => _invalidPage = null);
+                      }
+                    },
                   ),
                   _IncomeTypePage(
                     selected: _selectedIncomeType,
-                    onSelect: (t) => setState(() => _selectedIncomeType = t),
+                    onSelect: (t) => setState(() {
+                      _selectedIncomeType = t;
+                      if (_invalidPage == 2) _invalidPage = null;
+                    }),
                     l10n: l10n,
+                    errorText: _invalidPage == 2
+                        ? l10n.profileSetupIncomeTypeRequired
+                        : null,
                   ),
-                  _MonthlyIncomePage(controller: _incomeController, l10n: l10n),
+                  _MonthlyIncomePage(
+                    controller: _incomeController,
+                    l10n: l10n,
+                    errorText: _invalidPage == 3
+                        ? l10n.profileSetupMonthlyIncomePositiveError
+                        : null,
+                    onChanged: () {
+                      if (_invalidPage == 3) {
+                        setState(() => _invalidPage = null);
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -166,12 +243,22 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.profileSetupStep(_page + 1, 4),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colors.textMuted,
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.profileSetupStep(_page + 1, 4),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: _saving ? null : _skip,
+                child: Text(l10n.profileSetupSkip),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Row(
@@ -399,9 +486,16 @@ class _StepperButton extends StatelessWidget {
 }
 
 class _UniversityPage extends StatelessWidget {
-  const _UniversityPage({required this.controller, required this.l10n});
+  const _UniversityPage({
+    required this.controller,
+    required this.l10n,
+    required this.onChanged,
+    this.errorText,
+  });
   final TextEditingController controller;
   final AppLocalizations l10n;
+  final VoidCallback onChanged;
+  final String? errorText;
 
   static const _popular = [
     ('UPC', 'Universidad Peruana de Ciencias Aplicadas'),
@@ -426,8 +520,10 @@ class _UniversityPage extends StatelessWidget {
             controller: controller,
             textCapitalization: TextCapitalization.words,
             autofocus: true,
+            onChanged: (_) => onChanged(),
             decoration: InputDecoration(
               hintText: l10n.profileSetupUniversityHint,
+              errorText: errorText,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: colors.border),
@@ -500,7 +596,9 @@ class _IncomeTypePage extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     required this.l10n,
+    this.errorText,
   });
+  final String? errorText;
   final IncomeType? selected;
   final void Function(IncomeType) onSelect;
   final AppLocalizations l10n;
@@ -592,6 +690,18 @@ class _IncomeTypePage extends StatelessWidget {
               ),
             );
           }),
+          if (errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                errorText!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -599,7 +709,14 @@ class _IncomeTypePage extends StatelessWidget {
 }
 
 class _MonthlyIncomePage extends StatefulWidget {
-  const _MonthlyIncomePage({required this.controller, required this.l10n});
+  const _MonthlyIncomePage({
+    required this.controller,
+    required this.l10n,
+    required this.onChanged,
+    this.errorText,
+  });
+  final VoidCallback onChanged;
+  final String? errorText;
   final TextEditingController controller;
   final AppLocalizations l10n;
 
@@ -692,9 +809,11 @@ class _MonthlyIncomePageState extends State<_MonthlyIncomePage> {
                     ? value
                     : null;
               });
+              widget.onChanged();
             },
             decoration: InputDecoration(
               labelText: l10n.profileSetupMonthlyIncomeInputLabel,
+              errorText: widget.errorText,
               hintText: l10n.profileSetupMonthlyIncomeInputHint,
               prefixText: 'S/ ',
               filled: true,

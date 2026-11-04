@@ -1,6 +1,7 @@
 import '../../core/theme/zenda_theme_x.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -219,7 +220,7 @@ class _OverviewRow extends StatelessWidget {
           ),
         ),
         Text(
-          'S/ ${value.toStringAsFixed(0)}',
+          context.money(value, decimals: 0),
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,

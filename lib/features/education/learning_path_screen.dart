@@ -195,7 +195,7 @@ class _PathStepCard extends StatelessWidget {
 
   String get _statusLabel {
     if (step.isCompleted) return 'Completado';
-    if (step.isRead) return 'Leido';
+    if (step.isRead) return 'Leído';
     return step.isPersonalizedQuiz ? 'Quiz IA' : 'Pendiente';
   }
 

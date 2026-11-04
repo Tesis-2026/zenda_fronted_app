@@ -1,5 +1,9 @@
 import '../../core/theme/zenda_theme_x.dart';
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -67,7 +71,14 @@ class _SusScreenState extends ConsumerState<SusScreen> {
       );
       if (mounted) {
         final l10n = context.l10n;
-        final message = e.toString().contains('409')
+        // Offline is called out explicitly; nothing was sent (CP070).
+        final offline =
+            e is SocketException ||
+            e is TimeoutException ||
+            e is http.ClientException;
+        final message = offline
+            ? l10n.susSurveyErrorOffline
+            : e.toString().contains('409')
             ? l10n.susSurveyAlreadyDone
             : l10n.susSurveyErrorSubmit;
         showAppToast(context, message, type: ToastType.error);

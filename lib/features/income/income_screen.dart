@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -130,7 +131,7 @@ class _IncomeTotalCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'S/ ${total.toStringAsFixed(2)}',
+            context.money(total),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -199,7 +200,7 @@ class _IncomeEntryTile extends StatelessWidget {
             ),
           ),
           Text(
-            '+ S/ ${tx.amount.toStringAsFixed(2)}',
+            '+ ${context.money(tx.amount)}',
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               color: Color(0xFF059669),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -153,6 +154,18 @@ class _InicioSection extends ConsumerWidget {
   }
 }
 
+/// Days of use before the final (post-test) assessment is offered.
+const _postTestAfterDays = 30;
+
+/// Whether [createdAt] (the sign-up timestamp) is at least
+/// [_postTestAfterDays] days ago. Unknown sign-up dates keep the invitation
+/// visible so no pilot participant loses access to the final assessment.
+bool _pilotWindowElapsed(String? createdAt) {
+  final signedUp = createdAt == null ? null : DateTime.tryParse(createdAt);
+  if (signedUp == null) return true;
+  return DateTime.now().difference(signedUp).inDays >= _postTestAfterDays;
+}
+
 class _PostSurveyBanner extends ConsumerWidget {
   const _PostSurveyBanner({required this.user});
 
@@ -161,6 +174,9 @@ class _PostSurveyBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (user == null) return const SizedBox.shrink();
+    // The final assessment is offered once the student has used the app for
+    // the 30-day pilot window (CP067), and keeps reappearing until done (CP068).
+    if (!_pilotWindowElapsed(user!.createdAt)) return const SizedBox.shrink();
 
     final completedAsync = ref.watch(postSurveyProvider);
     final completed = completedAsync.asData?.value ?? true;
@@ -307,7 +323,7 @@ class _TotalMoneyCard extends StatelessWidget {
             )
           else
             Text(
-              hasError ? 'S/ --' : 'S/ ${total.toStringAsFixed(2)}',
+              hasError ? '${context.currencySymbol} --' : context.money(total),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 32,
@@ -325,7 +341,7 @@ class _TotalMoneyCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${l10n.dashboardAvailableLabel}: S/ ${available.toStringAsFixed(2)}   ·   ${l10n.dashboardSpentLabel}: S/ ${spent.toStringAsFixed(2)}',
+                    '${l10n.dashboardAvailableLabel}: ${context.money(available)}   ·   ${l10n.dashboardSpentLabel}: ${context.money(spent)}',
                     style: const TextStyle(
                       color: Color(0xFF9CA3AF),
                       fontSize: 12,
@@ -413,7 +429,7 @@ class _AccountReportCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Disponible S/ ${(data?.totalAssets ?? 0).toStringAsFixed(0)}',
+                    'Disponible ${context.money((data?.totalAssets ?? 0), decimals: 0)}',
                     style: const TextStyle(
                       color: Color(0xFF059669),
                       fontSize: 12,
@@ -425,7 +441,7 @@ class _AccountReportCard extends StatelessWidget {
               if ((data?.totalCreditDebt ?? 0) > 0) ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Deuda de tarjeta S/ ${data!.totalCreditDebt.toStringAsFixed(2)}',
+                  'Deuda de tarjeta ${context.money(data!.totalCreditDebt)}',
                   style: const TextStyle(
                     color: Color(0xFFDC2626),
                     fontSize: 12,
@@ -493,8 +509,8 @@ class _AccountMiniRow extends StatelessWidget {
         ),
         Text(
           isCredit
-              ? 'S/ ${amount.toStringAsFixed(0)} deuda'
-              : 'S/ ${amount.toStringAsFixed(0)}',
+              ? '${context.money(amount, decimals: 0)} deuda'
+              : context.money(amount, decimals: 0),
           style: TextStyle(
             color: color,
             fontWeight: FontWeight.w800,
@@ -551,7 +567,7 @@ class _SummaryCards extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'S/ ${income.toStringAsFixed(0)}',
+                      context.money(income, decimals: 0),
                       style: const TextStyle(
                         color: Color(0xFF065F46),
                         fontSize: 18,
@@ -599,7 +615,7 @@ class _SummaryCards extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'S/ ${expense.toStringAsFixed(0)}',
+                      context.money(expense, decimals: 0),
                       style: const TextStyle(
                         color: Color(0xFF7F1D1D),
                         fontSize: 18,
@@ -759,50 +775,66 @@ class _DashboardBell extends ConsumerWidget {
     final colors = context.colors;
     final unread = ref.watch(unreadNotificationsCountProvider);
 
-    return GestureDetector(
-      onTap: () => context.push('/notifications/inbox'),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colors.card,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colors.border),
+    return Semantics(
+      button: true,
+      label: unread > 0 ? 'Notificaciones, $unread sin leer' : 'Notificaciones',
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () {
+          // Alerts are created server-side after other actions; always show the
+          // latest inbox instead of the copy cached for the badge.
+          ref.invalidate(notificationsInboxProvider);
+          context.push('/notifications/inbox');
+        },
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: colors.card,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.border),
+              ),
+              child: Icon(
+                Icons.notifications_outlined,
+                size: 20,
+                color: colors.iconStrong,
+              ),
             ),
-            child: Icon(
-              Icons.notifications_outlined,
-              size: 20,
-              color: colors.iconStrong,
-            ),
-          ),
-          if (unread > 0)
-            Positioned(
-              right: -2,
-              top: -2,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: colors.card, width: 1.5),
-                ),
-                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                child: Text(
-                  unread > 9 ? '9+' : '$unread',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
+            if (unread > 0)
+              Positioned(
+                right: -2,
+                top: -2,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: colors.card, width: 1.5),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  child: Text(
+                    unread > 9 ? '9+' : '$unread',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

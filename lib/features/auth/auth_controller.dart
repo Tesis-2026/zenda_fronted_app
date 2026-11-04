@@ -32,6 +32,16 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> _checkAuthStatus() async {
+    try {
+      await _restoreSession();
+    } catch (_) {
+      // A failed restore (storage/biometrics/network) must leave the user on
+      // the login screen instead of a never-ending loading state.
+      state = const AuthState.unauthenticated();
+    }
+  }
+
+  Future<void> _restoreSession() async {
     final authService = ref.read(authServiceProvider);
     final biometricService = ref.read(biometricAuthServiceProvider);
     final biometricStatus = await biometricService.getStatus();

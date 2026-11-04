@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/config/app_config.dart';
+import 'core/services/money_format.dart';
 import 'core/services/study_analytics_service.dart';
 import 'core/services/study_telemetry_service.dart';
 import 'core/theme/app_theme.dart';
@@ -105,6 +106,10 @@ class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
       ),
       themeMode: ThemeMode.light,
       routerConfig: router,
+      builder: (context, child) => MoneyScope(
+        format: ref.watch(moneyFormatProvider),
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

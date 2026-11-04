@@ -789,7 +789,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get catDeleteMessage =>
-      'Transactions linked to it will keep their data. This cannot be undone.';
+      'This cannot be undone. If the category has transactions, you will need to reassign them first.';
 
   @override
   String get catMgmtErrorLoad => 'Could not load categories';
@@ -1143,6 +1143,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Congrats! You marked your goal as achieved.';
 
   @override
+  String get goalsCompleteConfirmTitle => 'Mark the goal as achieved?';
+
+  @override
+  String get goalsCompleteConfirmMessage =>
+      'The goal will move to Completed goals with today’s date. What you saved stays the same.';
+
+  @override
+  String get goalsCompleteConfirmAction => 'Yes, mark as achieved';
+
+  @override
   String get goalsDetailDelete => 'Delete goal';
 
   @override
@@ -1202,7 +1212,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorAuthInvalidCredentials => 'Incorrect email or password.';
 
   @override
-  String get errorAuthEmailTaken => 'This email is already registered.';
+  String get errorAuthEmailTaken =>
+      'This email is already registered. Already have an account? Sign in.';
 
   @override
   String get errorAuthEmailNotVerified =>
@@ -2114,7 +2125,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String goalsDetailLeftToReach(String amount) {
-    return 'S/ $amount left to reach your goal!';
+    return '$amount left to reach your goal!';
   }
 
   @override
@@ -2461,4 +2472,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txListYesterday => 'Yesterday';
+
+  @override
+  String get reportsExportNoData =>
+      'Not enough data to generate the report for this period.';
+
+  @override
+  String get reportsCompareSelectMonths =>
+      'Select the months you want to compare';
+
+  @override
+  String get reportsCompareMinMonths =>
+      'Select at least two months to build the comparison chart.';
+
+  @override
+  String get budgetAmountInvalid => 'The amount must be greater than zero.';
+
+  @override
+  String get goalsNameRequired => 'Enter a name for the goal.';
+
+  @override
+  String get goalsTargetInvalid =>
+      'The target amount must be greater than zero.';
+
+  @override
+  String get goalsDueDatePast => 'The deadline must be a future date.';
+
+  @override
+  String get goalsContributeAmountInvalid =>
+      'The contribution amount must be greater than zero.';
+
+  @override
+  String get catMgmtDuplicateName =>
+      'A category with that name already exists.';
+
+  @override
+  String get catDeleteHasTransactions =>
+      'This category has transactions. Reassign them to another category before deleting it.';
+
+  @override
+  String get catNameRequired => 'Enter a name for the category.';
+
+  @override
+  String get quizCheckAnswer => 'Check answer';
+
+  @override
+  String get profileSetupUniversityRequired =>
+      'Enter your university to continue.';
+
+  @override
+  String get profileSetupIncomeTypeRequired =>
+      'Select your income source to continue.';
+
+  @override
+  String get profileSetupSkip => 'Skip';
+
+  @override
+  String get profilePreferencesSaved => 'Preferences saved.';
+
+  @override
+  String get profileSavePreferences => 'Save preferences';
+
+  @override
+  String get surveyAnswerRequired => 'Answer the question before continuing.';
+
+  @override
+  String get challengeAlreadyActive =>
+      'You already have this challenge active.';
+
+  @override
+  String get challengeRetryButton => 'Accept again';
+
+  @override
+  String get susSurveyErrorOffline =>
+      'No internet connection. Your answers were not sent; reconnect and try again.';
+
+  @override
+  String quizCorrectAnswerIs(String answer) {
+    return 'Correct answer: $answer';
+  }
+
+  @override
+  String get commonPreviousPeriod => 'Previous period';
+
+  @override
+  String get commonNextPeriod => 'Next period';
 }

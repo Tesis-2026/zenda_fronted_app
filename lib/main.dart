@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -19,6 +20,9 @@ const bool _kDemoMode = AppConfig.isDemo;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // E2E builds (`--dart-define=E2E=true`) expose the semantics tree so the
+  // Playwright suite can find buttons/fields by their accessible names.
+  if (AppConfig.isE2E) SemanticsBinding.instance.ensureSemantics();
 
   // App is Spanish-only — make sure intl helpers (DateFormat, NumberFormat)
   // pick Spanish even when callers don't pass a locale explicitly.

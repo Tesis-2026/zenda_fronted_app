@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/transaction.dart';
 import '../../core/utils/category_utils.dart';
@@ -40,9 +41,9 @@ class TransactionSavedScreen extends StatelessWidget {
   String _formattedDate() =>
       '${date.day} de ${_months[date.month - 1]}, ${date.year}';
 
-  String _formattedAmount() {
-    final sign = kind == TransactionKind.income ? '+ S/' : '- S/';
-    return '$sign ${amount.toStringAsFixed(2)}';
+  String _formattedAmount(BuildContext context) {
+    final sign = kind == TransactionKind.income ? '+' : '-';
+    return '$sign ${context.money(amount)}';
   }
 
   Color _amountColor() =>
@@ -101,7 +102,7 @@ class TransactionSavedScreen extends StatelessWidget {
                   children: [
                     _SummaryRow(
                       label: l10n.txSavedLabelAmount,
-                      value: _formattedAmount(),
+                      value: _formattedAmount(context),
                       valueColor: _amountColor(),
                       fontWeight: FontWeight.w600,
                     ),
@@ -119,7 +120,7 @@ class TransactionSavedScreen extends StatelessWidget {
                       Divider(height: 1, color: Theme.of(context).dividerColor),
                       _SummaryRow(
                         label: l10n.txSavedLabelBudget,
-                        value: 'S/ ${budgetSpent!.toStringAsFixed(0)} / S/ ${budgetLimit!.toStringAsFixed(0)}',
+                        value: '${context.money(budgetSpent!, decimals: 0)} / ${context.money(budgetLimit!, decimals: 0)}',
                         valueColor: budgetSpent! >= budgetLimit!
                             ? const Color(0xFFEF4444)
                             : const Color(0xFF34D399),

@@ -191,35 +191,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       if (next.error != null) {
         if (next.error == AuthErrorCode.invalidCredentials) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(l10n.authAccountNotFound),
-              content: Text(l10n.authAccountNotFoundMessage),
-              actions: [
-                TextButton(
-                  onPressed: () => context.pop(),
-                  child: Text(l10n.commonCancel),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    context.pop();
-                    context.go('/onboarding?flow=register');
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(l10n.authSignUp),
-                ),
-              ],
-            ),
-          );
+          // The server answers the same 401 for an unknown email and a wrong
+          // password, so never claim the account does not exist. When it
+          // reports the attempts left, warn before the lockout (CP056).
+          final remaining = next.lockout?.attemptsRemaining;
+          final message = remaining != null && remaining > 0
+              ? '${l10n.errorAuthInvalidCredentials} '
+                    '${l10n.authAttemptsRemaining(remaining)}.'
+              : l10n.errorAuthInvalidCredentials;
+          showAppToast(context, message, type: ToastType.error);
         } else if (next.error == AuthErrorCode.accountLocked) {
           // B11: prefer the server-authoritative lockedUntil from the
           // 401 body (B14). Fall back to a 15-minute estimate only if

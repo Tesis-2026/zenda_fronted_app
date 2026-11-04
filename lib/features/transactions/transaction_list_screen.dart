@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/category.dart';
@@ -959,7 +960,7 @@ Future<void> _showAdvancedFiltersSheet(
                             child: AppTextField(
                               controller: minController,
                               labelText: l10n.txFilterMinAmount,
-                              prefixText: 'S/ ',
+                              prefixText: '${context.currencySymbol} ',
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
@@ -971,7 +972,7 @@ Future<void> _showAdvancedFiltersSheet(
                             child: AppTextField(
                               controller: maxController,
                               labelText: l10n.txFilterMaxAmount,
-                              prefixText: 'S/ ',
+                              prefixText: '${context.currencySymbol} ',
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
@@ -1035,8 +1036,13 @@ Future<void> _showAdvancedFiltersSheet(
       },
     );
   } finally {
-    minController.dispose();
-    maxController.dispose();
+    // The sheet future completes on pop, but its exit transition (~200 ms)
+    // still builds the fields; disposing right away hit "used after being
+    // disposed". Release them once the route is gone.
+    Future<void>.delayed(const Duration(milliseconds: 500), () {
+      minController.dispose();
+      maxController.dispose();
+    });
   }
 }
 
@@ -1177,7 +1183,7 @@ class _TransactionRow extends ConsumerWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '$amountSign S/ ${amount.toStringAsFixed(2)}',
+              '$amountSign ${context.money(amount)}',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,

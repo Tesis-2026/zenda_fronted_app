@@ -12,6 +12,7 @@ import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import 'education_screen.dart';
+import 'widgets/answer_feedback_panel.dart';
 import 'learning_path_screen.dart';
 import 'topic_detail_screen.dart';
 
@@ -40,6 +41,12 @@ class _QuizState {
   final QuizResult? result;
   final bool submitting;
 
+  /// Grading of the current answer while reviewing (CP051). Null when the
+  /// check could not reach the server; the review then shows only the
+  /// explanation.
+  final QuizFeedback? feedback;
+  final bool checking;
+
   const _QuizState({
     required this.questions,
     this.currentIndex = 0,
@@ -48,6 +55,8 @@ class _QuizState {
     this.phase = _QuizPhase.answering,
     this.result,
     this.submitting = false,
+    this.feedback,
+    this.checking = false,
   });
 
   QuizQuestion get current => questions[currentIndex];
@@ -60,7 +69,10 @@ class _QuizState {
     _QuizPhase? phase,
     QuizResult? result,
     bool? submitting,
+    QuizFeedback? feedback,
+    bool? checking,
     bool clearSelection = false,
+    bool clearFeedback = false,
   }) {
     return _QuizState(
       questions: questions,
@@ -72,6 +84,8 @@ class _QuizState {
       phase: phase ?? this.phase,
       result: result ?? this.result,
       submitting: submitting ?? this.submitting,
+      feedback: clearFeedback ? null : (feedback ?? this.feedback),
+      checking: checking ?? this.checking,
     );
   }
 }
@@ -199,26 +213,52 @@ class _QuizBodyState extends State<_QuizBody> {
   }
 
   Future<void> _confirmAnswer() async {
+    if (_state.phase == _QuizPhase.reviewing) {
+      await _advance();
+      return;
+    }
     final selected = _state.selectedOption;
-    if (selected == null) return;
+    if (selected == null || _state.checking) return;
     _timer?.cancel();
 
     final newAnswers = Map<String, String>.from(_state.answers)
       ..[_state.current.id] = selected;
+    setState(
+      () => _state = _state.copyWith(answers: newAnswers, checking: true),
+    );
 
-    if (_state.isLast) {
-      await _submit(newAnswers);
-    } else {
-      setState(() {
-        _state = _state.copyWith(
-          answers: newAnswers,
-          currentIndex: _state.currentIndex + 1,
-          phase: _QuizPhase.answering,
-          clearSelection: true,
-        );
-      });
-      _startTimer();
+    // Immediate right/wrong feedback before moving on (CP051).
+    QuizFeedback? feedback;
+    try {
+      feedback = await widget.service.checkAnswer(_state.current.id, selected);
+    } catch (_) {
+      feedback = null;
     }
+    if (!mounted) return;
+    setState(() {
+      _state = _state.copyWith(
+        phase: _QuizPhase.reviewing,
+        checking: false,
+        feedback: feedback,
+        clearFeedback: feedback == null,
+      );
+    });
+  }
+
+  Future<void> _advance() async {
+    if (_state.isLast) {
+      await _submit(_state.answers);
+      return;
+    }
+    setState(() {
+      _state = _state.copyWith(
+        currentIndex: _state.currentIndex + 1,
+        phase: _QuizPhase.answering,
+        clearSelection: true,
+        clearFeedback: true,
+      );
+    });
+    _startTimer();
   }
 
   Future<void> _submit(Map<String, String> answers) async {
@@ -426,44 +466,19 @@ class _QuestionView extends StatelessWidget {
         ),
         if (reviewing) ...[
           const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFECFDF5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFF34D399).withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: Color(0xFF34D399),
-                  size: 18,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    q.explanation ?? l10n.quizAnswerRecorded,
-                    style: const TextStyle(
-                      color: Color(0xFF065F46),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          AnswerFeedbackPanel(
+            feedback: state.feedback,
+            explanation: q.explanation,
           ),
         ],
         const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            onPressed: state.selectedOption != null && !state.submitting
+            onPressed:
+                state.selectedOption != null &&
+                    !state.submitting &&
+                    !state.checking
                 ? () => onConfirm()
                 : null,
             style: FilledButton.styleFrom(
@@ -472,7 +487,13 @@ class _QuestionView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
-            child: Text(state.isLast ? l10n.quizFinish : l10n.quizNext),
+            child: Text(
+              !reviewing
+                  ? l10n.quizCheckAnswer
+                  : state.isLast
+                  ? l10n.quizFinish
+                  : l10n.quizNext,
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -480,6 +501,7 @@ class _QuestionView extends StatelessWidget {
     );
   }
 }
+
 
 // ─────────────────────────────────────────────────────────────────
 // Option tile

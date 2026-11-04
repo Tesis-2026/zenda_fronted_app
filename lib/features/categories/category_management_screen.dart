@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/category.dart';
+import '../../core/services/api_client.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_form_sheet.dart';
@@ -40,9 +41,14 @@ class CategoryManagementScreen extends ConsumerWidget {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () => context.pop(),
-                      child: const Icon(
+                    // IconButton (not a bare GestureDetector) for a 48 px
+                    // tap target and the screen-reader label "Atrás".
+                    child: IconButton(
+                      onPressed: () => context.pop(),
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).backButtonTooltip,
+                      icon: const Icon(
                         Icons.arrow_back_ios_new_rounded,
                         size: 20,
                         color: Color(0xFF374151),
@@ -109,10 +115,13 @@ class CategoryManagementScreen extends ConsumerWidget {
           await ref.read(categoryApiServiceProvider).create(name);
           ref.invalidate(_categoriesProvider);
           return true;
-        } catch (_) {
+        } catch (e) {
           if (context.mounted) {
-            showAppToast(context, l10n.catMgmtErrorSave,
-                type: ToastType.error);
+            showAppToast(
+              context,
+              _isConflict(e) ? l10n.catMgmtDuplicateName : l10n.catMgmtErrorSave,
+              type: ToastType.error,
+            );
           }
           return false;
         }
@@ -311,10 +320,13 @@ class _CustomCategoryTile extends ConsumerWidget {
           await ref.read(categoryApiServiceProvider).rename(category.id, name);
           ref.invalidate(_categoriesProvider);
           return true;
-        } catch (_) {
+        } catch (e) {
           if (context.mounted) {
-            showAppToast(context, l10n.catMgmtErrorSave,
-                type: ToastType.error);
+            showAppToast(
+              context,
+              _isConflict(e) ? l10n.catMgmtDuplicateName : l10n.catMgmtErrorSave,
+              type: ToastType.error,
+            );
           }
           return false;
         }
@@ -333,12 +345,23 @@ class _CustomCategoryTile extends ConsumerWidget {
     try {
       await ref.read(categoryApiServiceProvider).delete(category.id);
       ref.invalidate(_categoriesProvider);
-    } catch (_) {
+    } catch (e) {
       if (context.mounted) {
-        showAppToast(context, context.l10n.catMgmtErrorSave, type: ToastType.error);
+        // 409 = the category still has transactions; they must be moved to
+        // another category before it can be deleted (CP082).
+        showAppToast(
+          context,
+          _isConflict(e)
+              ? context.l10n.catDeleteHasTransactions
+              : context.l10n.catMgmtErrorSave,
+          type: ToastType.error,
+        );
         ref.invalidate(_categoriesProvider);
       }
     }
   }
 }
+
+bool _isConflict(Object error) =>
+    error is ApiException && error.statusCode == 409;
 

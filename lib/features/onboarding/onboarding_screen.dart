@@ -137,7 +137,12 @@ class OnboardingScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       // Already have account link
                       TextButton(
-                        onPressed: () => context.go('/auth/login'),
+                        onPressed: () async {
+                          // Skipping the welcome counts as seen, so it is not
+                          // shown again on the next launch (CP064).
+                          await OnboardingPrefs.setOnboardingCompleted();
+                          if (context.mounted) context.go('/auth/login');
+                        },
                         child: Text(
                           l10n.onboardingHaveAccount,
                           style: const TextStyle(

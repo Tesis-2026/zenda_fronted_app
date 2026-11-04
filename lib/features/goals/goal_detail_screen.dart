@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +12,7 @@ import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/delete_confirm_sheet.dart';
+import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/field_label.dart';
 import '../../l10n/l10n_extension.dart';
 import 'goals_screen.dart';
@@ -87,6 +89,9 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
                       children: [
                         IconButton(
                           onPressed: () => context.pop(),
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).backButtonTooltip,
                           icon: const Icon(
                             Icons.arrow_back_ios_new_rounded,
                             color: Colors.white,
@@ -163,7 +168,14 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
       body: _ContributeBody(goal: _goal, controller: ctrl),
       onSubmit: () async {
         final amount = double.tryParse(ctrl.text.trim());
-        if (amount == null || amount <= 0) return false;
+        if (amount == null || amount <= 0) {
+          showAppToast(
+            context,
+            l10n.goalsContributeAmountInvalid,
+            type: ToastType.error,
+          );
+          return false;
+        }
         final updated = await ref
             .read(goalsServiceProvider)
             .contribute(_goal.id, amount: amount);
@@ -181,6 +193,15 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
 
   Future<void> _completeGoal(BuildContext context) async {
     final l10n = context.l10n;
+    final confirmed = await showConfirmSheet(
+      context,
+      title: l10n.goalsCompleteConfirmTitle,
+      message: l10n.goalsCompleteConfirmMessage,
+      confirmLabel: l10n.goalsCompleteConfirmAction,
+      tone: ConfirmTone.neutral,
+      icon: Icons.emoji_events_rounded,
+    );
+    if (!confirmed || !context.mounted) return;
     try {
       final updated = await ref.read(goalsServiceProvider).complete(_goal.id);
       if (!context.mounted) return;
@@ -262,7 +283,7 @@ class _ContributeBody extends StatelessWidget {
                   side: BorderSide(color: colors.primary),
                   foregroundColor: colors.primary,
                 ),
-                child: Text('S/ ${v.toStringAsFixed(0)}'),
+                child: Text(context.money(v, decimals: 0)),
               ),
             );
           }).toList(),
@@ -308,7 +329,7 @@ class _Body extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              'S/ ${goal.currentAmount.toStringAsFixed(0)}',
+              context.money(goal.currentAmount, decimals: 0),
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -323,7 +344,7 @@ class _Body extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              'S/ ${goal.targetAmount.toStringAsFixed(0)}',
+              context.money(goal.targetAmount, decimals: 0),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
@@ -337,15 +358,13 @@ class _Body extends StatelessWidget {
           color: const Color(0xFF34D399),
         ),
         const SizedBox(height: 8),
-        if (!reachedTarget && remaining > 0)
+        if (!reachedTarget && !markedComplete && remaining > 0)
           Text(
-            l10n.goalsDetailLeftToReach(remaining.toStringAsFixed(0)),
+            l10n.goalsDetailLeftToReach(context.money(remaining, decimals: 0)),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.outline,
             ),
           ),
-        // Reached the target but not yet marked → offer the explicit completion
-        // (sets completedAt server-side and awards the "Goal Achieved" badge).
         if (daysRemaining != null) ...[
           const SizedBox(height: 12),
           _DaysRemainingPanel(daysRemaining: daysRemaining),
@@ -374,10 +393,20 @@ class _Body extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
+                if (_completedOn(goal) case final date?) ...[
+                  const Spacer(),
+                  Text(
+                    l10n.goalCompletedOn(date),
+                    style: const TextStyle(
+                      color: Color(0xFF065F46),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ] else if (reachedTarget) ...[
+        ] else ...[
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
@@ -406,7 +435,7 @@ class _Body extends StatelessWidget {
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            if (!reachedTarget)
+            if (!reachedTarget && !markedComplete)
               TextButton(
                 onPressed: onContribute,
                 style: TextButton.styleFrom(
@@ -583,7 +612,7 @@ class _ContributionTile extends StatelessWidget {
             ),
           ),
           Text(
-            '+ S/ ${contribution.amount.toStringAsFixed(0)}',
+            '+ ${context.money(contribution.amount, decimals: 0)}',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: const Color(0xFF34D399),
               fontWeight: FontWeight.w600,
@@ -593,4 +622,10 @@ class _ContributionTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Completion date shown on an achieved goal, or null when unknown.
+String? _completedOn(SavingsGoal goal) {
+  final parsed = AppDateFormatter.tryParse(goal.completedAt);
+  return parsed == null ? null : AppDateFormatter.shortDate(parsed);
 }

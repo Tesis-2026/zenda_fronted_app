@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -60,8 +61,10 @@ class GoalsScreen extends ConsumerWidget {
         ),
       ),
       data: (goals) {
-        final active = goals.where((g) => g.progressPercent < 100).toList();
-        final completed = goals.where((g) => g.progressPercent >= 100).toList();
+        // A goal is done when it reached the target or the student marked it
+        // as achieved early (CP089).
+        final active = goals.where((g) => !g.isComplete).toList();
+        final completed = goals.where((g) => g.isComplete).toList();
 
         if (goals.isEmpty) {
           return _EmptyState(
@@ -177,16 +180,39 @@ class GoalsScreen extends ConsumerWidget {
         if (st == null) return false;
         final name = st.nameCtrl.text.trim();
         final target = double.tryParse(st.targetCtrl.text.trim());
-        if (name.isEmpty || target == null || target <= 0) return false;
-        await ref
-            .read(goalsServiceProvider)
-            .create(
-              name: name,
-              targetAmount: target,
-              dueDate: st.dueDate?.toIso8601String(),
+        if (name.isEmpty) {
+          showAppToast(context, l10n.goalsNameRequired, type: ToastType.error);
+          return false;
+        }
+        if (target == null || target <= 0) {
+          showAppToast(context, l10n.goalsTargetInvalid, type: ToastType.error);
+          return false;
+        }
+        final dueDate = st.dueDate;
+        if (dueDate != null && !_isFutureDay(dueDate)) {
+          showAppToast(context, l10n.goalsDueDatePast, type: ToastType.error);
+          return false;
+        }
+        try {
+          await ref
+              .read(goalsServiceProvider)
+              .create(
+                name: name,
+                targetAmount: target,
+                dueDate: dueDate?.toIso8601String(),
+              );
+          ref.invalidate(goalsListProvider);
+          return true;
+        } on Exception catch (_) {
+          if (context.mounted) {
+            showAppToast(
+              context,
+              l10n.commonUnknownError,
+              type: ToastType.error,
             );
-        ref.invalidate(goalsListProvider);
-        return true;
+          }
+          return false;
+        }
       },
     );
   }
@@ -271,7 +297,14 @@ class GoalsScreen extends ConsumerWidget {
       body: _ContributeGoalSheetBody(goal: goal, controller: ctrl),
       onSubmit: () async {
         final amount = double.tryParse(ctrl.text.trim());
-        if (amount == null || amount <= 0) return false;
+        if (amount == null || amount <= 0) {
+          showAppToast(
+            context,
+            l10n.goalsContributeAmountInvalid,
+            type: ToastType.error,
+          );
+          return false;
+        }
         try {
           await ref
               .read(goalsServiceProvider)
@@ -281,7 +314,7 @@ class GoalsScreen extends ConsumerWidget {
           if (context.mounted) {
             showAppToast(
               context,
-              'Se agregaron S/ ${amount.toStringAsFixed(2)} a ${goal.name}',
+              'Se agregaron ${context.money(amount)} a ${goal.name}',
               type: ToastType.success,
             );
           }
@@ -300,6 +333,14 @@ class GoalsScreen extends ConsumerWidget {
     );
     ctrl.dispose();
   }
+}
+
+/// True when [date] falls after today (calendar-day comparison), mirroring
+/// the backend "fecha límite futura" rule.
+bool _isFutureDay(DateTime date) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  return DateTime(date.year, date.month, date.day).isAfter(today);
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -449,7 +490,7 @@ class _GoalCard extends StatelessWidget {
     final l10n = context.l10n;
     final pct = goal.progressPercent.clamp(0.0, 100.0);
     final colors = context.colors;
-    final isComplete = pct >= 100;
+    final isComplete = goal.isComplete;
     final color = _progressColor(pct);
     final dueDateStr = _dueDateLabel(context);
     final daysRemaining = goal.daysRemaining();
@@ -552,14 +593,14 @@ class _GoalCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'S/ ${goal.currentAmount.toStringAsFixed(0)} ${l10n.txSaved.toLowerCase()}',
+                          '${context.money(goal.currentAmount, decimals: 0)} ${l10n.txSaved.toLowerCase()}',
                           style: TextStyle(
                             fontSize: 12,
                             color: colors.textMuted,
                           ),
                         ),
                         Text(
-                          'S/ ${goal.targetAmount.toStringAsFixed(0)} ${l10n.goalTargetSuffix}',
+                          '${context.money(goal.targetAmount, decimals: 0)} ${l10n.goalTargetSuffix}',
                           style: TextStyle(
                             fontSize: 12,
                             color: colors.textMuted,
@@ -569,7 +610,7 @@ class _GoalCard extends StatelessWidget {
                     ),
                     if (isComplete) ...[
                       const SizedBox(height: 6),
-                      _CompletedOnLabel(updatedAt: goal.updatedAt),
+                      _CompletedOnLabel(updatedAt: goal.completedAt ?? goal.updatedAt),
                     ] else if (onContribute != null) ...[
                       const SizedBox(height: 8),
                       SizedBox(
@@ -679,7 +720,9 @@ class _CreateGoalBodyState extends State<_CreateGoalBody> {
               context: context,
               initialDate:
                   dueDate ?? DateTime.now().add(const Duration(days: 30)),
-              firstDate: DateTime.now(),
+              // Past dates stay pickable so the submit validation can tell
+              // the user the deadline must be in the future (CP042).
+              firstDate: DateTime.now().subtract(const Duration(days: 3650)),
               lastDate: DateTime.now().add(const Duration(days: 3650)),
             );
             if (picked != null) setState(() => dueDate = picked);
@@ -816,7 +859,7 @@ class _ContributeGoalSheetBody extends StatelessWidget {
                   side: BorderSide(color: colors.primary),
                   foregroundColor: colors.primary,
                 ),
-                child: Text('S/ ${v.toStringAsFixed(0)}'),
+                child: Text(context.money(v, decimals: 0)),
               ),
             );
           }).toList(),

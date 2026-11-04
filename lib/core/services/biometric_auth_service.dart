@@ -68,7 +68,9 @@ class BiometricAuthService {
         availableBiometrics: available,
         email: email,
       );
-    } on LocalAuthException {
+    } catch (_) {
+      // Any probing failure (LocalAuthException, or no plugin implementation
+      // e.g. on web) means "unavailable"; it must never block session restore.
       return BiometricStatus(
         deviceSupported: false,
         hasEnrolledBiometrics: false,
@@ -100,10 +102,9 @@ class BiometricAuthService {
   }
 
   Future<void> enableForUser(String email) async {
-    await Future.wait([
-      _storage.write(key: _enabledKey, value: 'true'),
-      _storage.write(key: _emailKey, value: email),
-    ]);
+    // Sequential: concurrent secure-storage writes race on the web key.
+    await _storage.write(key: _enabledKey, value: 'true');
+    await _storage.write(key: _emailKey, value: email);
   }
 
   Future<void> disable() async {

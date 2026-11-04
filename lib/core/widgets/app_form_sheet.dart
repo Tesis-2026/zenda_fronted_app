@@ -16,6 +16,8 @@ import 'sheet_header.dart';
 /// `true` to close the sheet (success), `false` to keep it open (e.g. validation
 /// failed). Throwing also keeps it open and stops the spinner. The sheet result
 /// (`Future<bool?>`) is `true` when submitted successfully, `null` when dismissed.
+/// It resolves after the exit animation, so controllers owned by the caller can
+/// be disposed as soon as it returns.
 Future<bool?> showAppFormSheet(
   BuildContext context, {
   required String title,
@@ -26,8 +28,8 @@ Future<bool?> showAppFormSheet(
   String? secondaryLabel,
   VoidCallback? onSecondary,
   double maxHeightFactor = 0.92,
-}) {
-  return showModalBottomSheet<bool>(
+}) async {
+  final result = await showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -42,7 +44,15 @@ Future<bool?> showAppFormSheet(
       maxHeightFactor: maxHeightFactor,
     ),
   );
+  // The future completes on pop while the exit transition still builds the
+  // body. Callers dispose their TextEditingControllers right after awaiting,
+  // so only return once the sheet is gone ("used after being disposed").
+  await Future<void>.delayed(_kSheetExitDuration);
+  return result;
 }
+
+/// Bottom-sheet exit animation (200 ms) plus a frame of margin.
+const _kSheetExitDuration = Duration(milliseconds: 300);
 
 class AppFormSheet extends StatefulWidget {
   const AppFormSheet({

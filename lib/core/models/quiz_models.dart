@@ -96,9 +96,17 @@ class PersonalizedQuizResult {
   final List<PersonalizedQuizQuestion> questions;
   final int attemptsRemainingToday;
 
+  /// False when the backend generated generic questions for lack of history.
+  final bool personalized;
+
+  /// Explanation shown to the user when [personalized] is false.
+  final String? notice;
+
   const PersonalizedQuizResult({
     required this.questions,
     required this.attemptsRemainingToday,
+    this.personalized = true,
+    this.notice,
   });
 
   factory PersonalizedQuizResult.fromJson(Map<String, dynamic> json) =>
@@ -107,5 +115,7 @@ class PersonalizedQuizResult {
             .map((e) => PersonalizedQuizQuestion.fromJson(e as Map<String, dynamic>))
             .toList(),
         attemptsRemainingToday: json['attemptsRemainingToday'] as int? ?? 0,
+        personalized: json['personalized'] as bool? ?? true,
+        notice: json['notice'] as String?,
       );
 }

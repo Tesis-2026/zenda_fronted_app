@@ -11,7 +11,14 @@ class AppTheme {
     brightness: Brightness.light,
     primaryColor: primary,
     scaffoldBackgroundColor: background,
-    colorScheme: ColorScheme.fromSwatch().copyWith(primary: primary, secondary: secondary),
+    // fromSwatch leaves outline/outlineVariant near white; 16 secondary texts
+    // (e.g. the "transaction saved" body) rendered invisible on light cards.
+    colorScheme: ColorScheme.fromSwatch().copyWith(
+      primary: primary,
+      secondary: secondary,
+      outline: textSecondary,
+      outlineVariant: const Color(0xFFD1D5DB),
+    ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       foregroundColor: Color(0xFF1F2937),

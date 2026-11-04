@@ -6,6 +6,9 @@ import 'api_client.dart';
 abstract class QuizApiService {
   Future<List<QuizQuestion>> getQuiz(String topicId, String language);
   Future<QuizResult> submitQuiz(String topicId, Map<String, String> answers);
+
+  /// Grades one answer for immediate feedback; nothing is persisted.
+  Future<QuizFeedback> checkAnswer(String questionId, String answer);
 }
 
 class LiveQuizApiService extends QuizApiService {
@@ -29,6 +32,16 @@ class LiveQuizApiService extends QuizApiService {
       authenticated: true,
     );
     return QuizResult.fromJson(data);
+  }
+
+  @override
+  Future<QuizFeedback> checkAnswer(String questionId, String answer) async {
+    final data = await ApiClient.post(
+      '/education/quiz/check',
+      {'questionId': questionId, 'answer': answer},
+      authenticated: true,
+    );
+    return QuizFeedback.fromJson(data);
   }
 }
 

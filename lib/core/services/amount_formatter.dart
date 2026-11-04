@@ -13,23 +13,19 @@ import '../../providers/repositories_providers.dart';
 final amountFormatterProvider = Provider<AsyncValue<String Function(double)>>(
   (ref) {
     final format = ref.watch(numberFormatProvider);
-    return format.whenData((fmt) => (double amount) => _format(amount, fmt));
+    return format.whenData((fmt) => (double amount) => formatAmount(amount, fmt));
   },
 );
 
-String _format(double amount, String format) {
-  final fixed = amount.toStringAsFixed(2);
+/// Formats [amount] with thousands grouping per [format] ('dot' | 'comma').
+String formatAmount(double amount, String format, {int decimals = 2}) {
+  final fixed = amount.toStringAsFixed(decimals);
   final parts = fixed.split('.');
-  if (format == 'comma') {
-    final intPart = parts[0].replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+$)'),
-      (m) => '${m[1]}.',
-    );
-    return '$intPart,${parts[1]}';
-  }
+  final groupSeparator = format == 'comma' ? '.' : ',';
+  final decimalSeparator = format == 'comma' ? ',' : '.';
   final intPart = parts[0].replaceAllMapped(
     RegExp(r'(\d)(?=(\d{3})+$)'),
-    (m) => '${m[1]},',
+    (m) => '${m[1]}$groupSeparator',
   );
-  return '$intPart.${parts[1]}';
+  return parts.length > 1 ? '$intPart$decimalSeparator${parts[1]}' : intPart;
 }

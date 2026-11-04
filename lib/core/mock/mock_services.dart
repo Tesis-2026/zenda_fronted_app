@@ -393,6 +393,19 @@ class MockUserApiService extends UserApiService {
 
 class MockQuizApiService extends QuizApiService {
   @override
+  Future<QuizFeedback> checkAnswer(String questionId, String answer) async {
+    final entry = DemoData.quizData.values
+        .expand((entries) => entries)
+        .firstWhere((e) => e.id == questionId);
+    final correctAnswer = entry.options[entry.correctIndex];
+    return QuizFeedback(
+      questionId: questionId,
+      correct: answer == correctAnswer,
+      correctAnswer: correctAnswer,
+    );
+  }
+
+  @override
   Future<List<QuizQuestion>> getQuiz(String topicId, String language) async {
     await Future.delayed(const Duration(milliseconds: 400));
     final entries = DemoData.quizData[topicId] ?? DemoData.quizData['topic-1']!;

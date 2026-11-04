@@ -43,6 +43,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isBiometricSaving = false;
   String _currency = 'PEN';
 
+  // Unsaved preference picks. Applied only via "Guardar preferencias";
+  // leaving the screen discards them (CP062).
+  String? _pendingCurrency;
+  String? _pendingNumberFormat;
+
   late TextEditingController _nameController;
   late TextEditingController _ageController;
   late TextEditingController _universityController;
@@ -102,38 +107,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  Future<void> _saveCurrencyPreference(User user, String currency) async {
-    if (currency == user.currency || _isPreferenceSaving) return;
-    setState(() => _isPreferenceSaving = true);
-    try {
-      final updated = await ref
-          .read(profileUserServiceProvider)
-          .updateProfile(currency: currency);
-      ref.read(authNotifierProvider.notifier).updateCurrentUser(updated);
-      ref.invalidate(_profileProvider);
-      if (!mounted) return;
-      showAppToast(context, 'Moneda guardada.', type: ToastType.success);
-    } catch (_) {
-      if (!mounted) return;
-      showAppToast(
-        context,
-        context.l10n.profileErrorSave,
-        type: ToastType.error,
-      );
-    } finally {
-      if (mounted) setState(() => _isPreferenceSaving = false);
-    }
-  }
-
-  Future<void> _saveNumberFormatPreference(String format) async {
+  Future<void> _savePreferences(User user, String numberFormat) async {
     if (_isPreferenceSaving) return;
+    final currency = _pendingCurrency;
+    final format = _pendingNumberFormat;
     setState(() => _isPreferenceSaving = true);
     try {
-      await ref.read(numberFormatProvider.notifier).setFormat(format);
+      if (currency != null && currency != user.currency) {
+        final updated = await ref
+            .read(profileUserServiceProvider)
+            .updateProfile(currency: currency);
+        ref.read(authNotifierProvider.notifier).updateCurrentUser(updated);
+        ref.invalidate(_profileProvider);
+      }
+      if (format != null && format != numberFormat) {
+        await ref.read(numberFormatProvider.notifier).setFormat(format);
+      }
       if (!mounted) return;
+      setState(() {
+        _pendingCurrency = null;
+        _pendingNumberFormat = null;
+      });
       showAppToast(
         context,
-        context.l10n.profileNumberFormatSaved,
+        context.l10n.profilePreferencesSaved,
         type: ToastType.success,
       );
     } catch (_) {
@@ -543,6 +540,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isLoadingFormat =
         numberFormatAsync.isLoading && !numberFormatAsync.hasValue;
     final disabled = _isPreferenceSaving || isLoadingFormat;
+    final savedCurrency = user.currency.isEmpty ? 'PEN' : user.currency;
+    final selectedCurrency = _pendingCurrency ?? savedCurrency;
+    final selectedFormat = _pendingNumberFormat ?? numberFormat;
+    final hasChanges =
+        selectedCurrency != savedCurrency || selectedFormat != numberFormat;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,8 +556,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
-                key: ValueKey('currency-${user.currency}'),
-                initialValue: user.currency.isEmpty ? 'PEN' : user.currency,
+                key: ValueKey('currency-$savedCurrency'),
+                initialValue: selectedCurrency,
                 decoration: InputDecoration(
                   labelText: l10n.profileCurrency,
                   prefixIcon: const Icon(Icons.monetization_on_outlined),
@@ -577,14 +579,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ? null
                     : (value) {
                         if (value != null) {
-                          _saveCurrencyPreference(user, value);
+                          setState(() => _pendingCurrency = value);
                         }
                       },
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 key: ValueKey('number-format-$numberFormat'),
-                initialValue: numberFormat,
+                initialValue: selectedFormat,
                 decoration: InputDecoration(
                   labelText: l10n.profileNumberFormat,
                   prefixIcon: const Icon(Icons.pin_outlined),
@@ -605,10 +607,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onChanged: disabled
                     ? null
                     : (value) {
-                        if (value != null && value != numberFormat) {
-                          _saveNumberFormatPreference(value);
+                        if (value != null) {
+                          setState(() => _pendingNumberFormat = value);
                         }
                       },
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: hasChanges && !disabled
+                      ? () => _savePreferences(user, numberFormat)
+                      : null,
+                  child: Text(l10n.profileSavePreferences),
+                ),
               ),
               if (_isPreferenceSaving) ...[
                 const SizedBox(height: 12),

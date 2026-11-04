@@ -792,7 +792,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get catDeleteMessage =>
-      'Las transacciones vinculadas conservarán sus datos. Esta acción no se puede deshacer.';
+      'Esta acción no se puede deshacer. Si la categoría tiene transacciones, primero deberás reasignarlas.';
 
   @override
   String get catMgmtErrorLoad => 'No se pudieron cargar las categorías';
@@ -1147,6 +1147,16 @@ class AppLocalizationsEs extends AppLocalizations {
       '¡Felicidades! Marcaste tu meta como lograda.';
 
   @override
+  String get goalsCompleteConfirmTitle => '¿Marcar la meta como lograda?';
+
+  @override
+  String get goalsCompleteConfirmMessage =>
+      'La meta pasará a Metas completadas con la fecha de hoy. Lo que ya ahorraste se mantiene igual.';
+
+  @override
+  String get goalsCompleteConfirmAction => 'Sí, marcar como lograda';
+
+  @override
   String get goalsDetailDelete => 'Eliminar meta';
 
   @override
@@ -1206,7 +1216,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorAuthInvalidCredentials => 'Correo o contraseña incorrectos.';
 
   @override
-  String get errorAuthEmailTaken => 'Este correo ya está registrado.';
+  String get errorAuthEmailTaken =>
+      'Este correo ya está registrado. ¿Ya tienes cuenta? Inicia sesión.';
 
   @override
   String get errorAuthEmailNotVerified =>
@@ -2126,7 +2137,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String goalsDetailLeftToReach(String amount) {
-    return 'S/ $amount restante para alcanzar tu meta';
+    return '$amount restante para alcanzar tu meta';
   }
 
   @override
@@ -2474,4 +2485,87 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get txListYesterday => 'Ayer';
+
+  @override
+  String get reportsExportNoData =>
+      'No hay datos suficientes para generar el reporte de este periodo.';
+
+  @override
+  String get reportsCompareSelectMonths =>
+      'Selecciona los meses que quieres comparar';
+
+  @override
+  String get reportsCompareMinMonths =>
+      'Selecciona al menos dos meses para generar el gráfico comparativo.';
+
+  @override
+  String get budgetAmountInvalid => 'El monto debe ser mayor a cero.';
+
+  @override
+  String get goalsNameRequired => 'Ingresa un nombre para la meta.';
+
+  @override
+  String get goalsTargetInvalid => 'El monto objetivo debe ser mayor a cero.';
+
+  @override
+  String get goalsDueDatePast => 'La fecha límite debe ser una fecha futura.';
+
+  @override
+  String get goalsContributeAmountInvalid =>
+      'El monto del aporte debe ser mayor a cero.';
+
+  @override
+  String get catMgmtDuplicateName => 'Ya existe una categoría con ese nombre.';
+
+  @override
+  String get catDeleteHasTransactions =>
+      'Esta categoría tiene transacciones asociadas. Reasígnalas a otra categoría antes de eliminarla.';
+
+  @override
+  String get catNameRequired => 'Ingresa un nombre para la categoría.';
+
+  @override
+  String get quizCheckAnswer => 'Comprobar respuesta';
+
+  @override
+  String get profileSetupUniversityRequired =>
+      'Indica tu universidad para continuar.';
+
+  @override
+  String get profileSetupIncomeTypeRequired =>
+      'Selecciona tu fuente de ingresos para continuar.';
+
+  @override
+  String get profileSetupSkip => 'Omitir';
+
+  @override
+  String get profilePreferencesSaved => 'Preferencias guardadas.';
+
+  @override
+  String get profileSavePreferences => 'Guardar preferencias';
+
+  @override
+  String get surveyAnswerRequired =>
+      'Debes responder la pregunta antes de continuar.';
+
+  @override
+  String get challengeAlreadyActive => 'Ya tienes este reto activo.';
+
+  @override
+  String get challengeRetryButton => 'Aceptar de nuevo';
+
+  @override
+  String get susSurveyErrorOffline =>
+      'Sin conexión a internet. Tus respuestas no se enviaron; conéctate e inténtalo de nuevo.';
+
+  @override
+  String quizCorrectAnswerIs(String answer) {
+    return 'Respuesta correcta: $answer';
+  }
+
+  @override
+  String get commonPreviousPeriod => 'Periodo anterior';
+
+  @override
+  String get commonNextPeriod => 'Periodo siguiente';
 }

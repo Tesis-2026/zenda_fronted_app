@@ -54,10 +54,11 @@ class ApiClient {
     required String accessToken,
     required String refreshToken,
   }) async {
-    await Future.wait([
-      _storage.write(key: _kAccessTokenKey, value: accessToken),
-      _storage.write(key: _kRefreshTokenKey, value: refreshToken),
-    ]);
+    // Sequential on purpose: on web, concurrent first writes each generate an
+    // encryption key, one overwrites the other and decryption then fails
+    // (WebCrypto OperationError), so the session never saves.
+    await _storage.write(key: _kAccessTokenKey, value: accessToken);
+    await _storage.write(key: _kRefreshTokenKey, value: refreshToken);
   }
 
   static Future<void> saveToken(String token) =>

@@ -588,6 +588,29 @@ class _TopicCard extends StatelessWidget {
                         color: const Color(0xFF34D399),
                         height: 3,
                       ),
+                      // Read but quiz not passed yet: distinguish it from
+                      // topics the student has not opened (CP046).
+                      if (topic.isRead && !topic.isCompleted) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.visibility_outlined,
+                              size: 13,
+                              color: Color(0xFF6366F1),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              l10n.educationTopicRead,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF6366F1),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ],
                 ),

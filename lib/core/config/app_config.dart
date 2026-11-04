@@ -56,4 +56,7 @@ class AppConfig {
 
   /// When true, every API service is replaced by an in-memory mock (no backend).
   static const bool isDemo = bool.fromEnvironment('DEMO', defaultValue: false);
+
+  /// Set by the automated UI suite (tools/e2e-ui) to enable semantics.
+  static const bool isE2E = bool.fromEnvironment('E2E', defaultValue: false);
 }

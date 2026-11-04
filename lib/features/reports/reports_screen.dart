@@ -1,12 +1,11 @@
 import '../../core/theme/zenda_theme_x.dart';
-import 'dart:io';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+import '../../core/services/file_export.dart';
 import '../../core/models/summary_models.dart';
-import '../../core/services/amount_formatter.dart';
+import '../../core/services/api_client.dart';
 import '../../core/services/insights_api_service.dart';
 import '../../core/utils/category_utils.dart';
 import '../../core/widgets/app_card.dart';
@@ -90,20 +89,6 @@ const _monthNames = [
 
 /// Max months a PDF report can span (mirrors the backend cap in the report use case).
 const _kMaxReportMonths = 6;
-
-// Hardcoded demo data for May 2026 shown when the API is unavailable
-const _demoMaySummary = PeriodSummary(
-  totalIncome: 2000,
-  totalExpense: 1240,
-  netBalance: 760,
-  topCategories: [
-    TopCategoryItem(name: 'Comida', amount: 320),
-    TopCategoryItem(name: 'Transporte', amount: 210),
-    TopCategoryItem(name: 'Servicios', amount: 180),
-    TopCategoryItem(name: 'Entretenimiento', amount: 150),
-    TopCategoryItem(name: 'Salud', amount: 90),
-  ],
-);
 
 // ── Main Screen ────────────────────────────────────────────────────────────
 
@@ -286,23 +271,26 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
         return;
       }
 
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/${range.fileName}');
-      await file.writeAsBytes(bytes);
-
       if (!mounted) return;
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path, mimeType: 'application/pdf')],
-          subject: 'Reporte Zenda — ${range.label}',
-        ),
+      await exportFile(
+        bytes: bytes,
+        fileName: range.fileName,
+        mimeType: 'application/pdf',
+        subject: 'Reporte Zenda — ${range.label}',
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+      // The backend refuses to export a range without transactions (CP026).
+      final noData =
+          e is ApiException &&
+          e.statusCode == 400 &&
+          e.message.contains('No hay datos');
       showAppToast(
         context,
-        context.l10n.reportsExportPdfError,
-        type: ToastType.error,
+        noData
+            ? context.l10n.reportsExportNoData
+            : context.l10n.reportsExportPdfError,
+        type: noData ? ToastType.warning : ToastType.error,
       );
     } finally {
       if (mounted) setState(() => _exporting = false);
@@ -331,7 +319,9 @@ class _MonthTabState extends ConsumerState<_MonthTab> {
               child: summary.when(
                 data: (data) => _SummaryView(summary: data),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => _SummaryView(summary: _demoMaySummary),
+                // A failed load must never show placeholder figures.
+                error: (e, _) =>
+                    _ErrorView(message: context.l10n.reportsErrorLoad),
               ),
             ),
           ],
@@ -713,13 +703,34 @@ class _CompareTab extends ConsumerStatefulWidget {
   ConsumerState<_CompareTab> createState() => _CompareTabState();
 }
 
+/// Months offered for comparison (the backend's widest window).
+const _kComparableMonths = 6;
+
+/// Months pre-selected when the tab opens.
+const _kDefaultComparedMonths = 3;
+
 class _CompareTabState extends ConsumerState<_CompareTab> {
-  int _months = 3;
+  /// Months the user picked, keyed `year*12+month`. Null until the user
+  /// touches a chip — then the last [_kDefaultComparedMonths] apply.
+  Set<int>? _selectedKeys;
+
+  static int _keyOf(MonthComparisonEntry e) => e.year * 12 + e.month;
+
+  Set<int> _effectiveSelection(List<MonthComparisonEntry> data) =>
+      _selectedKeys ??
+      data.reversed.take(_kDefaultComparedMonths).map(_keyOf).toSet();
+
+  void _toggle(List<MonthComparisonEntry> data, MonthComparisonEntry entry) {
+    final next = {..._effectiveSelection(data)};
+    final key = _keyOf(entry);
+    if (!next.remove(key)) next.add(key);
+    setState(() => _selectedKeys = next);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final comparison = ref.watch(_comparisonProvider(_months));
+    final comparison = ref.watch(_comparisonProvider(_kComparableMonths));
     final progress = ref.watch(_progressProvider);
     return Column(
       children: [
@@ -728,23 +739,66 @@ class _CompareTabState extends ConsumerState<_CompareTab> {
           loading: () => const SizedBox.shrink(),
           error: (_, _) => const SizedBox.shrink(),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: SegmentedButton<int>(
-            segments: const [
-              ButtonSegment(value: 2, label: Text('2M')),
-              ButtonSegment(value: 3, label: Text('3M')),
-              ButtonSegment(value: 6, label: Text('6M')),
-            ],
-            selected: {_months},
-            onSelectionChanged: (s) => setState(() => _months = s.first),
-          ),
-        ),
         Expanded(
           child: comparison.when(
-            data: (data) => data.isEmpty
-                ? Center(child: Text(l10n.reportsNoComparisonData))
-                : _ComparisonChart(entries: data),
+            data: (data) {
+              if (data.isEmpty) {
+                return Center(child: Text(l10n.reportsNoComparisonData));
+              }
+              final selection = _effectiveSelection(data);
+              final selected = data
+                  .where((e) => selection.contains(_keyOf(e)))
+                  .toList();
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(
+                      l10n.reportsCompareSelectMonths,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    // Open at the newest months: they are the ones selected
+                    // by default, so the user sees the active chips first.
+                    reverse: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        for (final entry in data)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text('${entry.label} ${entry.year}'),
+                              selected: selection.contains(_keyOf(entry)),
+                              onSelected: (_) => _toggle(data, entry),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    // A comparison needs two months at least (CP022).
+                    child: selected.length < 2
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                l10n.reportsCompareMinMonths,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFFB45309),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          )
+                        : _ComparisonChart(entries: selected),
+                  ),
+                ],
+              );
+            },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => _ErrorView(message: context.l10n.reportsErrorLoad),
           ),
@@ -1029,6 +1083,15 @@ class _SummaryView extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         _IncomExpenseSummaryRow(summary: summary),
+        const SizedBox(height: 8),
+        // Net balance of the period (income − expenses), CP017.
+        _StatCard(
+          label: l10n.reportsBalance,
+          value: context.money(summary.netBalance),
+          color: summary.netBalance >= 0
+              ? const Color(0xFF60A5FA)
+              : const Color(0xFFF87171),
+        ),
         const SizedBox(height: 20),
         AppCard(
           child: Column(
@@ -1052,8 +1115,12 @@ class _SummaryView extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        _AiInsightsCard(summary: summary),
+        // Insights are derived from category data; an empty period keeps its
+        // empty state instead of showing placeholder figures (CP018/CP076).
+        if (summary.topCategories.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _AiInsightsCard(summary: summary),
+        ],
       ],
     );
   }
@@ -1068,8 +1135,6 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final fmtAsync = ref.watch(amountFormatterProvider);
-    final fmt = fmtAsync.asData?.value ?? (double v) => v.toStringAsFixed(2);
 
     return Row(
       children: [
@@ -1098,7 +1163,7 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'S/ ${fmt(summary.totalIncome)}',
+                  context.money(summary.totalIncome),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -1143,7 +1208,7 @@ class _IncomExpenseSummaryRow extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'S/ ${fmt(summary.totalExpense)}',
+                  context.money(summary.totalExpense),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -1216,31 +1281,9 @@ class _AiInsightsCard extends StatelessWidget {
               icon: Icons.circle,
               iconColor: const Color(0xFF34D399),
               text:
-                  'El gasto en ${summary.topCategories.first.name} está por encima de tu promedio.',
+                  'El gasto en ${CategoryUtils.labelEs(summary.topCategories.first.name)} está por encima de tu promedio.',
             ),
             const SizedBox(height: 8),
-          ] else ...[
-            // Hardcoded fallback insights when API returns no category data
-            const _InsightBullet(
-              icon: Icons.circle,
-              iconColor: Color(0xFF34D399),
-              text:
-                  'Ahorraste S/ 760 este mes — 38% de tus ingresos. ¡Supera el 20% recomendado!',
-            ),
-            const SizedBox(height: 8),
-            const _InsightBullet(
-              icon: Icons.circle,
-              iconColor: Color(0xFFF97316),
-              text:
-                  'El gasto en Comida superó el presupuesto por S/ 20 (120% usado). Considera planificar tus comidas.',
-            ),
-            const SizedBox(height: 8),
-            const _InsightBullet(
-              icon: Icons.circle,
-              iconColor: Color(0xFF60A5FA),
-              text:
-                  'Vas en camino a alcanzar tu meta de Fondo de Emergencia en ~14 meses al ritmo actual.',
-            ),
           ],
           if (summary.topCategories.isNotEmpty) ...[
             _InsightBullet(
@@ -1255,7 +1298,7 @@ class _AiInsightsCard extends StatelessWidget {
               icon: Icons.circle,
               iconColor: const Color(0xFFF97316),
               text:
-                  '${summary.topCategories[1].name} ${l10n.reportsAiInsightsExceeded}',
+                  '${CategoryUtils.labelEs(summary.topCategories[1].name)} ${l10n.reportsAiInsightsExceeded}',
             ),
           ],
         ],
@@ -1311,15 +1354,13 @@ class _TotalsRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final fmtAsync = ref.watch(amountFormatterProvider);
-    final fmt = fmtAsync.asData?.value ?? (double v) => v.toStringAsFixed(2);
 
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             label: l10n.reportsIncome,
-            value: 'S/ ${fmt(summary.totalIncome)}',
+            value: context.money(summary.totalIncome),
             color: const Color(0xFF34D399),
           ),
         ),
@@ -1327,7 +1368,7 @@ class _TotalsRow extends ConsumerWidget {
         Expanded(
           child: _StatCard(
             label: l10n.reportsExpense,
-            value: 'S/ ${fmt(summary.totalExpense)}',
+            value: context.money(summary.totalExpense),
             color: const Color(0xFFFC8181),
           ),
         ),
@@ -1335,7 +1376,7 @@ class _TotalsRow extends ConsumerWidget {
         Expanded(
           child: _StatCard(
             label: l10n.reportsBalance,
-            value: 'S/ ${fmt(summary.netBalance)}',
+            value: context.money(summary.netBalance),
             color: summary.netBalance >= 0
                 ? const Color(0xFF60A5FA)
                 : const Color(0xFFF87171),
@@ -1401,6 +1442,8 @@ class _CategoryBarChart extends StatelessWidget {
     final maxAmount = categories
         .map((c) => c.amount)
         .reduce((a, b) => a > b ? a : b);
+    // Share of the period total shown next to each amount (CP019/CP075).
+    final total = categories.fold<double>(0, (sum, c) => sum + c.amount);
 
     return Column(
       children: categories.asMap().entries.map((entry) {
@@ -1448,7 +1491,8 @@ class _CategoryBarChart extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'S/ ${item.amount.toStringAsFixed(2)}',
+                      '${context.money(item.amount)} · '
+                      '${total > 0 ? (item.amount / total * 100).round() : 0}%',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -1592,6 +1636,7 @@ class _EvolutionCard extends StatelessWidget {
     final l10n = context.l10n;
 
     final hasAnyData =
+        summary.incomeChangePercent != null ||
         summary.expensesChangePercent != null ||
         summary.savingsChangePercent != null ||
         summary.balanceChangePercent != null;
@@ -1620,6 +1665,15 @@ class _EvolutionCard extends StatelessWidget {
           else
             Column(
               children: [
+                if (summary.incomeChangePercent != null) ...[
+                  _EvolutionRow(
+                    label: l10n.reportsIncome,
+                    percent: summary.incomeChangePercent!,
+                    // income up = positive direction
+                    isPositive: summary.incomeChangePercent! >= 0,
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 if (summary.expensesChangePercent != null)
                   _EvolutionRow(
                     label: l10n.reportsEvolutionExpenses,
@@ -1672,7 +1726,7 @@ class _EvolutionRow extends StatelessWidget {
     final arrowIcon = percent >= 0
         ? Icons.arrow_upward_rounded
         : Icons.arrow_downward_rounded;
-    final sign = percent >= 0 ? '+' : '';
+    final sign = percent >= 0 ? '+' : '-';
 
     return Row(
       children: [
@@ -1770,7 +1824,7 @@ class _ComparisonChart extends StatelessWidget {
                       showTitles: true,
                       reservedSize: 52,
                       getTitlesWidget: (value, meta) => Text(
-                        'S/${value.toStringAsFixed(0)}',
+                        context.money(value, decimals: 0),
                         style: TextStyle(fontSize: 10, color: textColor),
                       ),
                     ),
@@ -1778,9 +1832,14 @@ class _ComparisonChart extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
+                      // One label per month point; without it fl_chart picks
+                      // fractional ticks and repeats month names.
+                      interval: 1,
                       getTitlesWidget: (value, meta) {
                         final idx = value.toInt();
-                        if (idx < 0 || idx >= entries.length) {
+                        if (value != idx.toDouble() ||
+                            idx < 0 ||
+                            idx >= entries.length) {
                           return const SizedBox.shrink();
                         }
                         return Padding(
@@ -2160,7 +2219,7 @@ class _CategoryDrillDownSheet extends ConsumerWidget {
                               )
                             : null,
                         trailing: Text(
-                          'S/ ${amount.toStringAsFixed(2)}',
+                          context.money(amount),
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,

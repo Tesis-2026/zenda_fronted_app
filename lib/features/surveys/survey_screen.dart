@@ -41,13 +41,14 @@ final _postSurveyProvider = FutureProvider.autoDispose<Survey>((ref) {
       .timeout(_surveyLoadTimeout);
 });
 
-final _postStatusProvider =
-    FutureProvider.autoDispose<FinancialLiteracyStatus>((ref) {
-  return ref
-      .read(surveysServiceProvider)
-      .getPostStatus()
-      .timeout(_surveyLoadTimeout);
-});
+final _postStatusProvider = FutureProvider.autoDispose<FinancialLiteracyStatus>(
+  (ref) {
+    return ref
+        .read(surveysServiceProvider)
+        .getPostStatus()
+        .timeout(_surveyLoadTimeout);
+  },
+);
 
 /// Fallback 12 questions bank for FINLIT_PRE_V1.
 /// Strictly contains questionId, questionText, domain, and options (without any correctAnswer).
@@ -912,9 +913,7 @@ class _InformedConsentViewState extends State<_InformedConsentView> {
           const SizedBox(height: 20),
           Center(
             child: Text(
-              widget.isPre
-                  ? 'Consentimiento Informado'
-                  : 'Evaluación Final',
+              widget.isPre ? 'Consentimiento Informado' : 'Evaluación Final',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colors.textPrimary,
@@ -1182,39 +1181,57 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                       final qId = questions[i].id;
                       final isAnswered = answers.containsKey(qId);
                       final isCurrent = i == currentIndex;
-                      return GestureDetector(
+                      // A question left behind unanswered (the student
+                      // jumped ahead) is highlighted as pending (CP094).
+                      final isPending = !isAnswered && i < currentIndex;
+                      final status = isPending
+                          ? ', pendiente'
+                          : isAnswered
+                          ? ', respondida'
+                          : '';
+                      return Semantics(
+                        button: true,
+                        label: 'Pregunta ${i + 1}$status',
                         onTap: () => onJumpToQuestion(i),
-                        child: Container(
-                          width: 22,
-                          height: 22,
-                          margin: const EdgeInsets.only(right: 6, top: 4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isCurrent
-                                ? const Color(0xFF10B981)
-                                : isAnswered
-                                ? const Color(
-                                    0xFF10B981,
-                                  ).withValues(alpha: 0.25)
-                                : colors.fill,
-                            border: Border.all(
+                        excludeSemantics: true,
+                        child: GestureDetector(
+                          onTap: () => onJumpToQuestion(i),
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            margin: const EdgeInsets.only(right: 6, top: 4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
                               color: isCurrent
                                   ? const Color(0xFF10B981)
                                   : isAnswered
-                                  ? const Color(0xFF10B981)
-                                  : colors.border,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${i + 1}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                                  ? const Color(
+                                      0xFF10B981,
+                                    ).withValues(alpha: 0.25)
+                                  : isPending
+                                  ? const Color(0xFFFEF3C7)
+                                  : colors.fill,
+                              border: Border.all(
                                 color: isCurrent
-                                    ? Colors.white
-                                    : colors.textPrimary,
+                                    ? const Color(0xFF10B981)
+                                    : isAnswered
+                                    ? const Color(0xFF10B981)
+                                    : isPending
+                                    ? const Color(0xFFF59E0B)
+                                    : colors.border,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${i + 1}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isCurrent
+                                      ? Colors.white
+                                      : colors.textPrimary,
+                                ),
                               ),
                             ),
                           ),
@@ -1358,9 +1375,9 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                       flex: 2,
                       child: isLastQuestion
                           ? FilledButton(
-                              onPressed: (allAnswered && !submitting)
-                                  ? onSubmit
-                                  : null,
+                              // Tappable even with pending questions so the
+                              // submit explains what is missing (CP094).
+                              onPressed: submitting ? null : onSubmit,
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF10B981),
                                 disabledBackgroundColor: colors.border,
@@ -1392,9 +1409,19 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
                                     ),
                             )
                           : FilledButton(
-                              onPressed: selectedOptionId != null
-                                  ? onNext
-                                  : null,
+                              // Always tappable so an unanswered question
+                              // explains why it cannot advance (CP066).
+                              onPressed: () {
+                                if (selectedOptionId == null) {
+                                  showAppToast(
+                                    context,
+                                    context.l10n.surveyAnswerRequired,
+                                    type: ToastType.warning,
+                                  );
+                                  return;
+                                }
+                                onNext();
+                              },
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF10B981),
                                 padding: const EdgeInsets.symmetric(
@@ -1427,10 +1454,7 @@ class _PreSurveyQuestionnaire extends StatelessWidget {
 // ── Completed View (Neutral Academic Confirmation) ───────────────────────────
 
 class _PreCompletedView extends StatelessWidget {
-  const _PreCompletedView({
-    required this.onContinue,
-    this.isPre = true,
-  });
+  const _PreCompletedView({required this.onContinue, this.isPre = true});
   final VoidCallback onContinue;
   final bool isPre;
 
@@ -1525,7 +1549,10 @@ class _PreCompletedView extends StatelessWidget {
                 ),
                 child: Text(
                   isPre ? 'Continuar a Zenda' : 'Volver al inicio',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

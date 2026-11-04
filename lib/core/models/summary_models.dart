@@ -4,7 +4,8 @@ class TopCategoryItem {
 
   const TopCategoryItem({required this.name, required this.amount});
 
-  factory TopCategoryItem.fromJson(Map<String, dynamic> json) => TopCategoryItem(
+  factory TopCategoryItem.fromJson(Map<String, dynamic> json) =>
+      TopCategoryItem(
         name: json['name'] as String,
         amount: (json['amount'] as num).toDouble(),
       );
@@ -21,7 +22,8 @@ class DailyBreakdownItem {
     required this.totalExpense,
   });
 
-  factory DailyBreakdownItem.fromJson(Map<String, dynamic> json) => DailyBreakdownItem(
+  factory DailyBreakdownItem.fromJson(Map<String, dynamic> json) =>
+      DailyBreakdownItem(
         date: json['date'] as String,
         totalIncome: (json['totalIncome'] as num).toDouble(),
         totalExpense: (json['totalExpense'] as num).toDouble(),
@@ -30,7 +32,11 @@ class DailyBreakdownItem {
   String get dayLabel {
     final parts = date.split('-');
     if (parts.length < 3) return date;
-    final weekday = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2])).weekday;
+    final weekday = DateTime(
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+      int.parse(parts[2]),
+    ).weekday;
     const labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     return labels[weekday - 1];
   }
@@ -49,7 +55,8 @@ class GoalProgressItem {
     required this.progressPercent,
   });
 
-  factory GoalProgressItem.fromJson(Map<String, dynamic> json) => GoalProgressItem(
+  factory GoalProgressItem.fromJson(Map<String, dynamic> json) =>
+      GoalProgressItem(
         name: json['name'] as String,
         currentAmount: (json['currentAmount'] as num).toDouble(),
         targetAmount: (json['targetAmount'] as num).toDouble(),
@@ -75,26 +82,26 @@ class PeriodSummary {
   });
 
   factory PeriodSummary.fromJson(Map<String, dynamic> json) => PeriodSummary(
-        totalIncome: (json['totalIncome'] as num).toDouble(),
-        totalExpense: (json['totalExpense'] as num).toDouble(),
-        netBalance: (json['netBalance'] as num).toDouble(),
-        topCategories: (json['topCategories'] as List<dynamic>)
-            .cast<Map<String, dynamic>>()
-            .map(TopCategoryItem.fromJson)
-            .toList(),
-        dailyBreakdown: json['dailyBreakdown'] == null
-            ? []
-            : (json['dailyBreakdown'] as List<dynamic>)
-                .cast<Map<String, dynamic>>()
-                .map(DailyBreakdownItem.fromJson)
-                .toList(),
-        goalsProgress: json['goalsProgress'] == null
-            ? []
-            : (json['goalsProgress'] as List<dynamic>)
-                .cast<Map<String, dynamic>>()
-                .map(GoalProgressItem.fromJson)
-                .toList(),
-      );
+    totalIncome: (json['totalIncome'] as num).toDouble(),
+    totalExpense: (json['totalExpense'] as num).toDouble(),
+    netBalance: (json['netBalance'] as num).toDouble(),
+    topCategories: (json['topCategories'] as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .map(TopCategoryItem.fromJson)
+        .toList(),
+    dailyBreakdown: json['dailyBreakdown'] == null
+        ? []
+        : (json['dailyBreakdown'] as List<dynamic>)
+              .cast<Map<String, dynamic>>()
+              .map(DailyBreakdownItem.fromJson)
+              .toList(),
+    goalsProgress: json['goalsProgress'] == null
+        ? []
+        : (json['goalsProgress'] as List<dynamic>)
+              .cast<Map<String, dynamic>>()
+              .map(GoalProgressItem.fromJson)
+              .toList(),
+  );
 }
 
 class ProgressSummary {
@@ -119,6 +126,14 @@ class ProgressSummary {
     this.savingsChangePercent,
     this.balanceChangePercent,
   });
+
+  /// Month-over-month income change; null when last month had no income.
+  double? get incomeChangePercent => previousIncome == 0
+      ? null
+      : double.parse(
+          (((currentIncome - previousIncome) / previousIncome) * 100)
+              .toStringAsFixed(2),
+        );
 
   factory ProgressSummary.fromJson(Map<String, dynamic> json) {
     final cur = json['currentMonth'] as Map<String, dynamic>;
@@ -159,7 +174,8 @@ class MonthComparisonEntry {
     required this.netBalance,
   });
 
-  factory MonthComparisonEntry.fromJson(Map<String, dynamic> json) => MonthComparisonEntry(
+  factory MonthComparisonEntry.fromJson(Map<String, dynamic> json) =>
+      MonthComparisonEntry(
         year: json['year'] as int,
         month: json['month'] as int,
         totalIncome: (json['totalIncome'] as num).toDouble(),
@@ -168,7 +184,20 @@ class MonthComparisonEntry {
       );
 
   String get label {
-    const names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const names = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
     return names[month - 1];
   }
 }

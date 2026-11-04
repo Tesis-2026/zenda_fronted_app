@@ -6,7 +6,10 @@ import 'notifications_inbox_providers.dart';
 
 /// AppBar action that opens the notifications inbox and shows an unread badge.
 class NotificationBellIcon extends ConsumerWidget {
-  const NotificationBellIcon({super.key, this.routePath = '/notifications/inbox'});
+  const NotificationBellIcon({
+    super.key,
+    this.routePath = '/notifications/inbox',
+  });
 
   final String routePath;
 
@@ -46,7 +49,12 @@ class NotificationBellIcon extends ConsumerWidget {
             ),
         ],
       ),
-      onPressed: () => context.push(routePath),
+      onPressed: () {
+        // Alerts are created server-side after other actions; always show the
+        // latest inbox instead of the copy cached for the badge.
+        ref.invalidate(notificationsInboxProvider);
+        context.push(routePath);
+      },
     );
   }
 }

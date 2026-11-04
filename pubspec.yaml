@@ -76,6 +76,7 @@ dependencies:
 
   # PDF sharing (export report)
   share_plus: ^12.0.2
+  web: ^1.1.1
   path_provider: ^2.1.4
 
   # Firebase Cloud Messaging — push notifications (Phase 11)

@@ -15,6 +15,7 @@ import '../../../providers/repositories_providers.dart';
 import '../../auth/auth_controller.dart';
 import '../../budget/budget_screen.dart';
 import '../../dashboard/dashboard_providers.dart';
+import '../../notifications/notifications_inbox_providers.dart';
 import '../../income/income_screen.dart';
 import '../../progress/progress_screen.dart';
 
@@ -525,6 +526,8 @@ class NewTransactionController extends Notifier<NewTransactionState> {
       );
       ref.invalidate(monthlyIncomeProvider);
       ref.invalidate(progressProvider);
+      // The backend may have queued alerts (anomaly, budget) for this record.
+      ref.invalidate(notificationsInboxProvider);
 
       state = state.copyWith(
         isSaving: false,

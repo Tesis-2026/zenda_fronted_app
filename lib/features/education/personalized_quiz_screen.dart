@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/quiz_models.dart';
+import '../../core/services/quiz_api_service.dart';
 import '../../core/utils/difficulty_utils.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/zenda_app_bar.dart';
 import '../../l10n/l10n_extension.dart';
 import 'education_screen.dart';
+import 'widgets/answer_feedback_panel.dart';
 
 // ─────────────────────────────────────────────────────────────────
 // Provider
@@ -113,6 +115,8 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
   final Map<String, String> _answers = {};
   _Phase _phase = _Phase.answering;
   bool _submitting = false;
+  bool _checking = false;
+  QuizFeedback? _feedback;
   Map<String, dynamic>? _submitResult;
 
   PersonalizedQuizQuestion get _current => widget.result.questions[_index];
@@ -123,11 +127,27 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
     setState(() => _selected = option);
   }
 
-  void _confirmAnswer() {
+  Future<void> _confirmAnswer() async {
     final sel = _selected;
-    if (sel == null) return;
+    if (sel == null || _checking) return;
     _answers[_current.id] = sel;
-    setState(() => _phase = _Phase.reviewing);
+    setState(() => _checking = true);
+
+    // Immediate right/wrong feedback before moving on (CP051).
+    QuizFeedback? feedback;
+    try {
+      feedback = await ref
+          .read(quizServiceProvider)
+          .checkAnswer(_current.id, sel);
+    } catch (_) {
+      feedback = null;
+    }
+    if (!mounted) return;
+    setState(() {
+      _feedback = feedback;
+      _checking = false;
+      _phase = _Phase.reviewing;
+    });
   }
 
   Future<void> _next() async {
@@ -137,6 +157,7 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
       setState(() {
         _index++;
         _selected = null;
+        _feedback = null;
         _phase = _Phase.answering;
       });
     }
@@ -255,9 +276,26 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
 
     final q = _current;
     final reviewing = _phase == _Phase.reviewing;
+    final notice = widget.result.notice;
 
     return Column(
       children: [
+        // Generic questions for users without enough history (CP098).
+        if (!widget.result.personalized && notice != null)
+          Container(
+            key: const ValueKey('generic-quiz-notice'),
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF6FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              notice,
+              style: const TextStyle(color: Color(0xFF1E40AF), fontSize: 13),
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
           child: Column(
@@ -322,6 +360,10 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
                     onTap: reviewing ? null : () => _selectOption(entry.value),
                   ),
                 ),
+                if (reviewing) ...[
+                  const SizedBox(height: 4),
+                  AnswerFeedbackPanel(feedback: _feedback),
+                ],
                 const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,
@@ -331,8 +373,10 @@ class _PersonalizedQuizBodyState extends ConsumerState<_PersonalizedQuizBody> {
                           child: Text(_isLast ? l10n.quizFinish : l10n.quizNext),
                         )
                       : FilledButton(
-                          onPressed: _selected != null ? _confirmAnswer : null,
-                          child: Text(l10n.quizSubmit),
+                          onPressed: _selected != null && !_checking
+                              ? _confirmAnswer
+                              : null,
+                          child: Text(l10n.quizCheckAnswer),
                         ),
                 ),
                 const SizedBox(height: 16),

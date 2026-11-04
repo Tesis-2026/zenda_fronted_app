@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -260,7 +261,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         final st = key.currentState;
         if (st == null) return false;
         final amount = double.tryParse(st.amountController.text.trim());
-        if (amount == null || amount <= 0) return false;
+        if (amount == null || amount <= 0) {
+          showAppToast(context, l10n.budgetAmountInvalid, type: ToastType.error);
+          return false;
+        }
         try {
           final nm = st.nameController.text.trim();
           await ref
@@ -306,7 +310,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         final st = key.currentState;
         if (st == null) return false;
         final amount = double.tryParse(st.controller.text.trim());
-        if (amount == null || amount <= 0) return false;
+        if (amount == null || amount <= 0) {
+          showAppToast(context, l10n.budgetAmountInvalid, type: ToastType.error);
+          return false;
+        }
         final nm = st.nameController.text.trim();
         await ref
             .read(budgetServiceProvider)
@@ -746,7 +753,7 @@ class _BucketCell extends StatelessWidget {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              'S/ ${spent.toStringAsFixed(0)}',
+              context.money(spent, decimals: 0),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -756,7 +763,7 @@ class _BucketCell extends StatelessWidget {
           ),
           if (limit > 0)
             Text(
-              'de S/ ${limit.toStringAsFixed(0)}',
+              'de ${context.money(limit, decimals: 0)}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 11, color: AppColors.textSubtle),
@@ -926,7 +933,7 @@ class _BudgetCard extends StatelessWidget {
               ],
               Expanded(
                 child: Text(
-                  'S/ ${budget.currentSpent.toStringAsFixed(0)} de S/ ${potTotal.toStringAsFixed(0)}',
+                  '${context.money(budget.currentSpent, decimals: 0)} de ${context.money(potTotal, decimals: 0)}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

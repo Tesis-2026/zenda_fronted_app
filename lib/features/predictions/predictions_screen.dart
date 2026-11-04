@@ -1,8 +1,10 @@
 import '../../core/theme/zenda_theme_x.dart';
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/utils/category_utils.dart';
 import '../../core/services/predictions_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/zenda_app_bar.dart';
@@ -12,10 +14,11 @@ final predictionsServiceProvider = Provider<PredictionsApiService>(
   (_) => PredictionsApiService(),
 );
 
-final _expensePredictionProvider =
-    FutureProvider.autoDispose<PredictionResult>((ref) {
-  return ref.read(predictionsServiceProvider).getExpensePrediction();
-});
+final _expensePredictionProvider = FutureProvider.autoDispose<PredictionResult>(
+  (ref) {
+    return ref.read(predictionsServiceProvider).getExpensePrediction();
+  },
+);
 
 class PredictionsScreen extends ConsumerStatefulWidget {
   const PredictionsScreen({super.key});
@@ -94,23 +97,19 @@ class _MonthNavigator extends StatelessWidget {
         IconButton(
           onPressed: onPrevious,
           icon: const Icon(Icons.chevron_left, size: 22),
-          style: IconButton.styleFrom(
-            foregroundColor: const Color(0xFF1F2937),
-          ),
+          style: IconButton.styleFrom(foregroundColor: const Color(0xFF1F2937)),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF1F2937),
-              ),
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1F2937),
+          ),
         ),
         IconButton(
           onPressed: onNext,
           icon: const Icon(Icons.chevron_right, size: 22),
-          style: IconButton.styleFrom(
-            foregroundColor: const Color(0xFF1F2937),
-          ),
+          style: IconButton.styleFrom(foregroundColor: const Color(0xFF1F2937)),
         ),
       ],
     );
@@ -137,8 +136,9 @@ class _ExpenseForecastCard extends StatelessWidget {
       children: [
         // ── Projected Balance card ──────────────────────────────────────
         Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -147,26 +147,27 @@ class _ExpenseForecastCard extends StatelessWidget {
                 Text(
                   l10n.predictionsProjectedBalance,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF6B7280),
-                      ),
+                    color: const Color(0xFF6B7280),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'S/ ${projectedBalance.toStringAsFixed(2)}',
+                  context.money(projectedBalance),
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: const Color(0xFF1F2937),
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: const Color(0xFF1F2937),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color:
-                            const Color(0xFF34D399).withValues(alpha: 0.15),
+                        color: const Color(0xFF34D399).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -182,8 +183,8 @@ class _ExpenseForecastCard extends StatelessWidget {
                     Text(
                       l10n.predictionsBasedOnMonths,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF6B7280),
-                          ),
+                        color: const Color(0xFF6B7280),
+                      ),
                     ),
                   ],
                 ),
@@ -194,8 +195,9 @@ class _ExpenseForecastCard extends StatelessWidget {
         const SizedBox(height: 16),
         // ── Expense Forecast card ────────────────────────────────────────
         Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -204,9 +206,9 @@ class _ExpenseForecastCard extends StatelessWidget {
                 Text(
                   l10n.predictionsExpenseTitle,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1F2937),
-                      ),
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1F2937),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -214,12 +216,12 @@ class _ExpenseForecastCard extends StatelessWidget {
                     Text(
                       l10n.predictionsProjectedExpenses,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF6B7280),
-                          ),
+                        color: const Color(0xFF6B7280),
+                      ),
                     ),
                     const Spacer(),
                     Text(
-                      'S/ ${result.predictedTotal.toStringAsFixed(0)}',
+                      context.money(result.predictedTotal, decimals: 0),
                       style: const TextStyle(
                         color: Color(0xFFEF4444),
                         fontWeight: FontWeight.w700,
@@ -238,8 +240,11 @@ class _ExpenseForecastCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.arrow_upward,
-                        size: 13, color: Color(0xFFEF4444)),
+                    const Icon(
+                      Icons.arrow_upward,
+                      size: 13,
+                      color: Color(0xFFEF4444),
+                    ),
                     const SizedBox(width: 2),
                     Text(
                       result.vsLastMonthLabel ?? l10n.predictionsVsLastMonth,
@@ -259,7 +264,8 @@ class _ExpenseForecastCard extends StatelessWidget {
           const SizedBox(height: 16),
           Card(
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -268,9 +274,9 @@ class _ExpenseForecastCard extends StatelessWidget {
                   Text(
                     l10n.predictionsTopCategories,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1F2937),
-                        ),
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1F2937),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   ...categories.map(
@@ -289,18 +295,14 @@ class _ExpenseForecastCard extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              cat.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              CategoryUtils.labelEs(cat.name),
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: const Color(0xFF1F2937)),
                             ),
                           ),
                           Text(
-                            'S/ ${cat.amount.toStringAsFixed(0)}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            context.money(cat.amount, decimals: 0),
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1F2937),
@@ -325,7 +327,8 @@ class _ExpenseForecastCard extends StatelessWidget {
               color: const Color(0xFF34D399).withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                  color: const Color(0xFF34D399).withValues(alpha: 0.35)),
+                color: const Color(0xFF34D399).withValues(alpha: 0.35),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,9 +348,7 @@ class _ExpenseForecastCard extends StatelessWidget {
                     children: [
                       Text(
                         'Análisis IA de Zenda',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
+                        style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
                               color: const Color(0xFF10B981),
                               fontWeight: FontWeight.w700,
@@ -357,9 +358,9 @@ class _ExpenseForecastCard extends StatelessWidget {
                       Text(
                         result.narrative!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: const Color(0xFF065F46),
-                              height: 1.5,
-                            ),
+                          color: const Color(0xFF065F46),
+                          height: 1.5,
+                        ),
                       ),
                     ],
                   ),
@@ -394,8 +395,8 @@ class _LowConfidenceCard extends StatelessWidget {
               child: Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -469,8 +470,8 @@ class _DisclaimerCard extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],

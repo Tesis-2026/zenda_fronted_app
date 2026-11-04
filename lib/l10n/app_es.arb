@@ -298,7 +298,7 @@
   "catMgmtDeleteConfirm": "¿Eliminar esta categoría? Las transacciones que la usen conservarán sus datos.",
   "catMgmtDeleteAction": "Eliminar",
   "catDeleteTitle": "¿Eliminar categoría?",
-  "catDeleteMessage": "Las transacciones vinculadas conservarán sus datos. Esta acción no se puede deshacer.",
+  "catDeleteMessage": "Esta acción no se puede deshacer. Si la categoría tiene transacciones, primero deberás reasignarlas.",
   "catMgmtErrorLoad": "No se pudieron cargar las categorías",
   "catMgmtErrorSave": "No se pudo guardar. Intenta de nuevo.",
   "catMgmtAddButton": "+ Agregar",
@@ -489,6 +489,9 @@
   "goalsDetailMarkComplete": "Marcar como lograda",
   "goalsDetailCompletedLabel": "¡Meta lograda!",
   "goalsDetailCompleteSuccess": "¡Felicidades! Marcaste tu meta como lograda.",
+  "goalsCompleteConfirmTitle": "¿Marcar la meta como lograda?",
+  "goalsCompleteConfirmMessage": "La meta pasará a Metas completadas con la fecha de hoy. Lo que ya ahorraste se mantiene igual.",
+  "goalsCompleteConfirmAction": "Sí, marcar como lograda",
   "goalsDetailDelete": "Eliminar meta",
   "goalCompletedOn": "Completado el {date}",
   "@goalCompletedOn": {
@@ -526,7 +529,7 @@
   "profileNumberFormatSaved": "Formato de número guardado.",
 
   "errorAuthInvalidCredentials": "Correo o contraseña incorrectos.",
-  "errorAuthEmailTaken": "Este correo ya está registrado.",
+  "errorAuthEmailTaken": "Este correo ya está registrado. ¿Ya tienes cuenta? Inicia sesión.",
   "errorAuthEmailNotVerified": "Tu cuenta aún no está verificada. Revisa tu correo e ingresa el código enviado.",
   "errorAuthTokenExpired": "El enlace es inválido o ha expirado.",
   "errorAuthBadRequest": "Revisa tus datos e inténtalo de nuevo.",
@@ -966,7 +969,7 @@
   "authPasswordStrengthFair": "Regular",
   "authPasswordStrengthStrong": "Fuerte",
 
-  "goalsDetailLeftToReach": "S/ {amount} restante para alcanzar tu meta",
+  "goalsDetailLeftToReach": "{amount} restante para alcanzar tu meta",
   "@goalsDetailLeftToReach": {
     "placeholders": {
       "amount": { "type": "String" }
@@ -1107,5 +1110,30 @@
   "aiChatOnline": "En línea",
 
   "txListToday": "Hoy",
-  "txListYesterday": "Ayer"
+  "txListYesterday": "Ayer",
+  "reportsExportNoData": "No hay datos suficientes para generar el reporte de este periodo.",
+  "reportsCompareSelectMonths": "Selecciona los meses que quieres comparar",
+  "reportsCompareMinMonths": "Selecciona al menos dos meses para generar el gráfico comparativo.",
+  "budgetAmountInvalid": "El monto debe ser mayor a cero.",
+  "goalsNameRequired": "Ingresa un nombre para la meta.",
+  "goalsTargetInvalid": "El monto objetivo debe ser mayor a cero.",
+  "goalsDueDatePast": "La fecha límite debe ser una fecha futura.",
+  "goalsContributeAmountInvalid": "El monto del aporte debe ser mayor a cero.",
+  "catMgmtDuplicateName": "Ya existe una categoría con ese nombre.",
+  "catDeleteHasTransactions": "Esta categoría tiene transacciones asociadas. Reasígnalas a otra categoría antes de eliminarla.",
+  "catNameRequired": "Ingresa un nombre para la categoría.",
+  "quizCheckAnswer": "Comprobar respuesta",
+  "profileSetupUniversityRequired": "Indica tu universidad para continuar.",
+  "profileSetupIncomeTypeRequired": "Selecciona tu fuente de ingresos para continuar.",
+  "profileSetupSkip": "Omitir",
+  "profilePreferencesSaved": "Preferencias guardadas.",
+  "profileSavePreferences": "Guardar preferencias",
+  "surveyAnswerRequired": "Debes responder la pregunta antes de continuar.",
+  "challengeAlreadyActive": "Ya tienes este reto activo.",
+  "challengeRetryButton": "Aceptar de nuevo",
+  "susSurveyErrorOffline": "Sin conexión a internet. Tus respuestas no se enviaron; conéctate e inténtalo de nuevo.",
+  "quizCorrectAnswerIs": "Respuesta correcta: {answer}",
+  "@quizCorrectAnswerIs": {"placeholders":{"answer":{"type":"String"}}},
+  "commonPreviousPeriod": "Periodo anterior",
+  "commonNextPeriod": "Periodo siguiente"
 }

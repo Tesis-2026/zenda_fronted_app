@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'api_client.dart';
 import 'pending_transaction_queue.dart';
+import 'study_telemetry_service.dart';
 import 'transaction_api_service.dart';
 
 /// Maximum automatic attempts per session. Failed entries remain recoverable.
@@ -59,6 +60,8 @@ class SyncService {
   Future<void> _flush() async {
     final userId = await ApiClient.currentUserId();
     if (userId == null) return;
+    // Analytics events that failed while offline ride the same sync (CP074).
+    unawaited(StudyTelemetryService.flushPending());
     final pending = await _queue.getAll();
     if (pending.isEmpty) return;
 

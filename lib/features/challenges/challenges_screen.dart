@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/services/api_client.dart';
 import '../../core/services/education_api_service.dart';
 import '../../core/widgets/app_progress_bar.dart';
 import '../../core/widgets/app_toast.dart';
@@ -80,9 +81,27 @@ class ChallengesScreen extends ConsumerWidget {
                 return _ChallengeCard(
                   challenge: challenge,
                   onAccept: () async {
-                    await ref
-                        .read(challengesServiceProvider)
-                        .accept(challenge.id);
+                    try {
+                      await ref
+                          .read(challengesServiceProvider)
+                          .accept(challenge.id);
+                    } catch (e) {
+                      if (context.mounted) {
+                        // 409 = this challenge is already active (CP048).
+                        final alreadyActive =
+                            e is ApiException && e.statusCode == 409;
+                        showAppToast(
+                          context,
+                          alreadyActive
+                              ? l10n.challengeAlreadyActive
+                              : l10n.commonUnknownError,
+                          type: alreadyActive
+                              ? ToastType.warning
+                              : ToastType.error,
+                        );
+                      }
+                      return;
+                    }
                     ref.invalidate(_challengesProvider);
                     if (context.mounted) {
                       showAppToast(
@@ -408,8 +427,9 @@ class _ChallengeCard extends StatelessWidget {
                 ],
               ),
             ],
-            // Action buttons
-            if (challenge.status == 'AVAILABLE') ...[
+            // Action buttons. EXPIRED challenges can be taken again (CP092).
+            if (challenge.status == 'AVAILABLE' ||
+                challenge.status == 'EXPIRED') ...[
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
@@ -418,22 +438,36 @@ class _ChallengeCard extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF34D399),
                   ),
-                  child: Text(l10n.challengesAcceptButton),
+                  child: Text(
+                    challenge.status == 'EXPIRED'
+                        ? l10n.challengeRetryButton
+                        : l10n.challengesAcceptButton,
+                  ),
                 ),
               ),
             ],
             if (isActive) ...[
               const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.icon(
-                  onPressed: onComplete,
-                  icon: const Icon(Icons.check, size: 18),
-                  label: Text(l10n.challengesCompleteButton),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  // Accepting again is refused by the backend with a clear
+                  // "already active" message (CP048).
+                  OutlinedButton(
+                    onPressed: onAccept,
+                    child: Text(l10n.challengesAcceptButton),
                   ),
-                ),
+                  FilledButton.icon(
+                    onPressed: onComplete,
+                    icon: const Icon(Icons.check, size: 18),
+                    label: Text(l10n.challengesCompleteButton),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF10B981),
+                    ),
+                  ),
+                ],
               ),
             ],
           ],

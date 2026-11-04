@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/money_format.dart';
 
 import '../theme/app_colors.dart';
 
@@ -56,7 +57,7 @@ class AmountInputField extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        prefixText: 'S/ ',
+        prefixText: '${context.currencySymbol} ',
         prefixStyle: const TextStyle(
           color: AppColors.primary,
           fontSize: 18,

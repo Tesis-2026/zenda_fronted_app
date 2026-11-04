@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n_extension.dart';
+
 class MonthNavigator extends StatelessWidget {
   const MonthNavigator({
     super.key,
@@ -19,6 +21,7 @@ class MonthNavigator extends StatelessWidget {
     return Row(
       children: [
         IconButton(
+          tooltip: context.l10n.commonPreviousPeriod,
           onPressed: onPrev,
           icon: const Icon(Icons.chevron_left_rounded, size: 20),
           padding: EdgeInsets.zero,
@@ -42,6 +45,7 @@ class MonthNavigator extends StatelessWidget {
           ),
         ),
         IconButton(
+          tooltip: context.l10n.commonNextPeriod,
           onPressed: onNext,
           icon: const Icon(Icons.chevron_right_rounded, size: 20),
           padding: EdgeInsets.zero,

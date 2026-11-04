@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/money_format.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,6 +19,7 @@ import '../../providers/repositories_providers.dart';
 import '../../core/widgets/amount_input_field.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../core/widgets/app_date_field.dart';
+import '../../core/widgets/app_form_sheet.dart';
 import '../../core/widgets/app_primary_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/app_toast.dart';
@@ -62,9 +64,19 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   bool _isScanningReceipt = false;
   bool _isParsingVoice = false;
 
+  /// Captured while mounted: `ref` is unusable inside [dispose] (Riverpod
+  /// throws), yet the draft must still be reset when the form closes.
+  ProviderContainer? _container;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _container = ProviderScope.containerOf(context, listen: false);
+  }
+
   @override
   void dispose() {
-    ref.invalidate(newTransactionControllerProvider);
+    _container?.invalidate(newTransactionControllerProvider);
     _amountController.dispose();
     _amountFocusNode.dispose();
     _noteController.dispose();
@@ -172,6 +184,53 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
     }
     return options;
+  }
+
+  /// Creates a custom category without leaving the form and selects it.
+  /// A duplicate name is rejected by the backend with 409 (CP010).
+  Future<void> _showCreateCategorySheet(
+    NewTransactionController controller,
+  ) async {
+    final l10n = context.l10n;
+    final nameController = TextEditingController();
+    await showAppFormSheet(
+      context,
+      title: l10n.catMgmtAddTitle,
+      primaryLabel: l10n.catSaveButton,
+      body: AppTextField(
+        controller: nameController,
+        hintText: l10n.catMgmtAddHint,
+        autofocus: true,
+        maxLength: 40,
+        textCapitalization: TextCapitalization.sentences,
+      ),
+      onSubmit: () async {
+        final name = nameController.text.trim();
+        if (name.isEmpty) {
+          showAppToast(context, l10n.catNameRequired, type: ToastType.error);
+          return false;
+        }
+        try {
+          final created = await ref
+              .read(categoryApiServiceProvider)
+              .create(name);
+          ref.invalidate(_transactionCategoriesProvider);
+          controller.setCustomCategory(created.name);
+          return true;
+        } catch (e) {
+          if (mounted) {
+            final duplicate = e is ApiException && e.statusCode == 409;
+            showAppToast(
+              context,
+              duplicate ? l10n.catMgmtDuplicateName : l10n.catMgmtErrorSave,
+              type: ToastType.error,
+            );
+          }
+          return false;
+        }
+      },
+    );
+    nameController.dispose();
   }
 
   void _selectCategoryByKey(NewTransactionController controller, String key) {
@@ -391,8 +450,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           label: account.name,
           icon: accountTypeIcon(account.type),
           trailing: account.type == AccountType.creditCard
-              ? 'Deuda S/ ${account.debt.toStringAsFixed(0)}'
-              : 'S/ ${account.currentBalance.toStringAsFixed(0)}',
+              ? 'Deuda ${context.money(account.debt, decimals: 0)}'
+              : context.money(account.currentBalance, decimals: 0),
         ),
     ];
   }
@@ -694,6 +753,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       categoriesAsync.asData?.value ?? const <CategoryModel>[],
                     ),
                   ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () => _showCreateCategorySheet(controller),
+                      icon: const Icon(Icons.add_rounded, size: 18),
+                      label: Text(l10n.catMgmtAddTitle),
+                    ),
+                  ),
                   if (categoriesAsync.hasError) ...[
                     const SizedBox(height: 8),
                     TextButton.icon(
@@ -789,7 +856,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   b.categoryName,
                                 ),
                                 trailing:
-                                    'S/ ${b.available.toStringAsFixed(0)}',
+                                    context.money(b.available, decimals: 0),
                               ),
                           ],
                         );
@@ -987,7 +1054,7 @@ class _VoiceDraftButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         side: BorderSide(color: _accent.withValues(alpha: 0.35)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -1033,7 +1100,7 @@ class _ReceiptScanButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         side: BorderSide(color: _accent.withValues(alpha: 0.35)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -1318,9 +1385,7 @@ class _VoiceInputSheetState extends State<_VoiceInputSheet> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                          ),
+                          textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
                         ),
                       ),
                     ),
@@ -1334,9 +1399,7 @@ class _VoiceInputSheetState extends State<_VoiceInputSheet> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                          ),
+                          textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
                         ),
                         child: Text(l10n.txVoiceUse),
                       ),
@@ -1766,7 +1829,7 @@ class _NoBudgetsHint extends StatelessWidget {
                   minimumSize: const Size(0, 44),
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   side: const BorderSide(color: Color(0xFFD1D5DB)),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                  textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
               FilledButton.icon(
@@ -1781,7 +1844,7 @@ class _NoBudgetsHint extends StatelessWidget {
                   foregroundColor: Colors.white,
                   minimumSize: const Size(0, 44),
                   padding: const EdgeInsets.symmetric(horizontal: 14),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                  textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
             ],
@@ -1842,7 +1905,7 @@ class _BudgetLoadError extends StatelessWidget {
               minimumSize: const Size(0, 44),
               padding: const EdgeInsets.symmetric(horizontal: 14),
               side: const BorderSide(color: Color(0xFFFCA5A5)),
-              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+              textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ],
